@@ -1,0 +1,102 @@
+{
+  "artists": [
+    {
+      "id": "7wU1naftD3lNq7rNsiDvOR",
+      "name": "Tebra",
+      "genres": ["electronic", "ambient"],
+      "popularity": 60,
+      "followers": { "total": 12000 },
+      "images": [
+        { "url": "https://i.scdn.co/image/ab6761610000e5ebc1b1e1e1e1e1e1e1e1e1e1e1", "height": 640, "width": 640 }
+      ],
+      "external_urls": { "spotify": "https://open.spotify.com/artist/7wU1naftD3lNq7rNsiDvOR" },
+      "href": "https://api.spotify.com/v1/artists/7wU1naftD3lNq7rNsiDvOR",
+      "type": "artist",
+      "uri": "spotify:artist:7wU1naftD3lNq7rNsiDvOR"
+    },
+    {
+      "id": "2S9EJm8U2xlkwphPqUkDW4",
+      "name": "Artist 2",
+      "genres": ["genre1", "genre2"],
+      "popularity": 55,
+      "followers": { "total": 8000 },
+      "images": [
+        { "url": "https://i.scdn.co/image/ab6761610000e5ebc2b2b2b2b2b2b2b2b2b2b2b2", "height": 640, "width": 640 }
+      ],
+      "external_urls": { "spotify": "https://open.spotify.com/artist/2S9EJm8U2xlkwphPqUkDW4" },
+      "href": "https://api.spotify.com/v1/artists/2S9EJm8U2xlkwphPqUkDW4",
+      "type": "artist",
+      "uri": "spotify:artist:2S9EJm8U2xlkwphPqUkDW4"
+    },
+    {
+      "id": "6MzHMxgYcbj6ue5w9pbNp9",
+      "name": "Artist 3",
+      "genres": ["genre1", "genre2"],
+      "popularity": 50,
+      "followers": { "total": 6000 },
+      "images": [
+        { "url": "https://i.scdn.co/image/ab6761610000e5ebc3c3c3c3c3c3c3c3c3c3c3c3", "height": 640, "width": 640 }
+      ],
+      "external_urls": { "spotify": "https://open.spotify.com/artist/6MzHMxgYcbj6ue5w9pbNp9" },
+      "href": "https://api.spotify.com/v1/artists/6MzHMxgYcbj6ue5w9pbNp9",
+      "type": "artist",
+      "uri": "spotify:artist:6MzHMxgYcbj6ue5w9pbNp9"
+    },
+    {
+      "id": "4xf4u86Lsh1D8rIJxeuV7b",
+      "name": "Artist 4",
+      "genres": ["genre1", "genre2"],
+      "popularity": 45,
+      "followers": { "total": 4000 },
+      "images": [
+        { "url": "https://i.scdn.co/image/ab6761610000e5ebc4c4c4c4c4c4c4c4c4c4c4c4", "height": 640, "width": 640 }
+      ],
+      "external_urls": { "spotify": "https://open.spotify.com/artist/4xf4u86Lsh1D8rIJxeuV7b" },
+      "href": "https://api.spotify.com/v1/artists/4xf4u86Lsh1D8rIJxeuV7b",
+      "type": "artist",
+      "uri": "spotify:artist:4xf4u86Lsh1D8rIJxeuV7b"
+    },
+    {
+      "id": "4nuR5cGAyxV1jlRROlerJt",
+      "name": "Artist 5",
+      "genres": ["genre1", "genre2"],
+      "popularity": 40,
+      "followers": { "total": 2000 },
+      "images": [
+        { "url": "https://i.scdn.co/image/ab6761610000e5ebc5c5c5c5c5c5c5c5c5c5c5c5", "height": 640, "width": 640 }
+      ],
+      "external_urls": { "spotify": "https://open.spotify.com/artist/4nuR5cGAyxV1jlRROlerJt" },
+      "href": "https://api.spotify.com/v1/artists/4nuR5cGAyxV1jlRROlerJt",
+      "type": "artist",
+      "uri": "spotify:artist:4nuR5cGAyxV1jlRROlerJt"
+    },
+    {
+      "id": "3kI19T2Y7mzINNIOGHTg5P",
+      "name": "Tebra",
+      "genres": ["electronic", "ambient"],
+      "popularity": 60,
+      "followers": { "total": 12000 },
+      "images": [
+        { "url": "https://i.scdn.co/image/ab6761610000e5ebc6c6c6c6c6c6c6c6c6c6c6c6", "height": 640, "width": 640 }
+      ],
+      "external_urls": { "spotify": "https://open.spotify.com/artist/3kI19T2Y7mzINNIOGHTg5P" },
+      "href": "https://api.spotify.com/v1/artists/3kI19T2Y7mzINNIOGHTg5P",
+      "type": "artist",
+      "uri": "spotify:artist:3kI19T2Y7mzINNIOGHTg5P"
+    },
+    {
+      "id": "7o5gxy3lEGcP62TNIppa7w",
+      "name": "LEFTI",
+      "genres": ["electronic", "house", "techno"],
+      "popularity": 85,
+      "followers": { "total": 50000 },
+      "images": [
+        { "url": "https://i.scdn.co/image/ab6761610000e5ebc1b1e1e1e1e1e1e1e1e1e1e1", "height": 640, "width": 640 }
+      ],
+      "external_urls": { "spotify": "https://open.spotify.com/artist/7o5gxy3lEGcP62TNIppa7w" },
+      "href": "https://api.spotify.com/v1/artists/7o5gxy3lEGcP62TNIppa7w",
+      "type": "artist",
+      "uri": "spotify:artist:7o5gxy3lEGcP62TNIppa7w"
+    }
+  ]
+}
