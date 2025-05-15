@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
-import { DEMO_MODE, DEMO_CONFIG } from "@/lib/config"
+import { DEMO_MODE, DEMO_CONFIG } from '@/shared/utils/config'
 import demoArtists from "@/data/demo-artists.json"
 // import { getMockArtistAnalysis, getMockArtists } from '@/lib/api/mock-data';
 
@@ -161,3 +161,4 @@ export const useArtistAnalysis = () => {
     isDemoMode: DEMO_MODE,
   }
 }
+

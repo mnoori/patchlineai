@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 import { useArtistAnalysis } from "@/hooks/use-artist-analysis"
 import { motion, AnimatePresence } from "framer-motion"
-import { DEMO_CONFIG } from "@/lib/config"
+import { DEMO_CONFIG } from '@/shared/utils/config'
 
 export default function DashboardPreview() {
   const [activeTab, setActiveTab] = useState("discover")
@@ -668,3 +668,4 @@ export default function DashboardPreview() {
     </motion.div>
   )
 }
+

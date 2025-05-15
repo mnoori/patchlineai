@@ -1,30 +1,55 @@
-# patchlinemain
+# PatchLine AI
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+A Next.js application for PatchLine AI.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/mehdinoori7-gmailcoms-projects/v0-patchlinemain)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/XTP1958aiAE)
+## Project Structure
 
-## Overview
+The project follows a clean and organized structure:
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+```
+/project-root (Next.js app)
+  /app                  # Next.js app router pages
+  /components           # React components
+  /public               # Static assets
+  /backend              # Backend code
+  /shared               # Shared code
+    /types              # TypeScript interfaces
+    /utils              # Utility functions
+  /docs                 # Documentation
+```
 
-## Deployment
+## Directory Explanations
 
-Your project is live at:
+- **/app**: Contains Next.js app router pages and layouts
+- **/components**: React components used throughout the application
+- **/public**: Static assets like images, fonts, etc.
+- **/backend**: Backend-specific code and API routes
+- **/shared**: Code shared between frontend and backend
+  - **/types**: TypeScript type definitions
+  - **/utils**: Utility functions
+- **/docs**: Project documentation
 
-**[https://vercel.com/mehdinoori7-gmailcoms-projects/v0-patchlinemain](https://vercel.com/mehdinoori7-gmailcoms-projects/v0-patchlinemain)**
+## Getting Started
 
-## Build your app
+1. Install dependencies:
+```bash
+npm install
+# or
+pnpm install
+```
 
-Continue building your app on:
+2. Run the development server:
+```bash
+npm run dev
+# or
+pnpm dev
+```
 
-**[https://v0.dev/chat/projects/XTP1958aiAE](https://v0.dev/chat/projects/XTP1958aiAE)**
+3. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-## How It Works
+## Development
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+- Make sure to follow the established directory structure
+- Keep components in the `/components` directory
+- Place shared code in the `/shared` directory
+- Document any significant changes in the `/docs` directory
