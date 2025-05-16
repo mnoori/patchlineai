@@ -12,11 +12,12 @@ const Navigation = () => {
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
 
-  // Only keep Patchline, Team and Pitch Deck nav items
+  // Updated navigation items based on the specification
   const navItems = [
-    { name: "Patchline", href: "/patchline" },
     { name: "Team", href: "/team" },
     { name: "Pitch Deck", href: "/pitch-deck" },
+    { name: "Login", href: "/login" },
+    { name: "Contact", href: "/contact" },
   ]
 
   // Check for scroll for the header background effect
@@ -44,7 +45,7 @@ const Navigation = () => {
         }`}
       >
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <Link href="/patchline" className="flex items-center">
+          <Link href="/" className="flex items-center">
             <div className="text-neon-cyan font-heading text-2xl font-bold">Patchline</div>
           </Link>
 
@@ -75,7 +76,7 @@ const Navigation = () => {
             className="fixed inset-0 bg-eclipse/95 z-50 flex flex-col"
           >
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-              <Link href="/patchline" className="flex items-center">
+              <Link href="/" className="flex items-center">
                 <div className="text-neon-cyan font-heading text-2xl font-bold">Patchline</div>
               </Link>
               <Button variant="ghost" size="icon" className="text-light" onClick={() => setIsOpen(false)}>
