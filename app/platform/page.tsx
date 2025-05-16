@@ -2,8 +2,16 @@
 
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function PlatformPage() {
+  const router = useRouter()
+  
+  const handleLogout = () => {
+    // In a real app, we would clear authentication tokens here
+    router.push("/login")
+  }
+  
   return (
     <div className="min-h-screen">
       <div className="absolute inset-0 noise-bg">
@@ -42,7 +50,11 @@ export default function PlatformPage() {
               </Link>
             </nav>
             
-            <Button variant="ghost" className="text-light/80 hover:text-neon-cyan text-sm">
+            <Button 
+              variant="ghost" 
+              className="text-light/80 hover:text-neon-cyan text-sm"
+              onClick={handleLogout}
+            >
               Logout
             </Button>
           </div>

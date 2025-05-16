@@ -11,13 +11,22 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
+  const [error, setError] = useState("")
   const router = useRouter()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app, this would validate credentials with a backend
-    // For now, just redirect to the platform page
-    router.push("/platform")
+    setError("")
+    
+    // Check for dummy credentials
+    if ((email === "mehdi@patchline.ai" && password === "1234") || 
+        (email && password)) { // For demo purposes, allow any credentials
+      // Successful login
+      router.push("/platform")
+    } else {
+      // Show error for empty fields
+      setError("Please enter both email and password")
+    }
   }
 
   return (
@@ -50,7 +59,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="youremail@example.com"
+              placeholder="mehdi@patchline.ai"
               required
               className="bg-eclipse/50 border-light/10 focus:border-neon-cyan"
             />
@@ -65,11 +74,15 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="••••"
               required
               className="bg-eclipse/50 border-light/10 focus:border-neon-cyan"
             />
           </div>
+          
+          {error && (
+            <div className="text-neon-magenta text-sm">{error}</div>
+          )}
           
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -103,6 +116,14 @@ export default function LoginPage() {
             <Link href="/signup" className="text-neon-cyan hover:text-neon-cyan/80">
               Sign up
             </Link>
+          </p>
+        </div>
+        
+        <div className="mt-4 p-3 bg-eclipse/50 rounded-md border border-light/10">
+          <p className="text-xs text-light/60 text-center">
+            <span className="text-neon-cyan font-medium">Demo credentials:</span><br />
+            Email: mehdi@patchline.ai<br />
+            Password: 1234
           </p>
         </div>
       </div>
