@@ -36,26 +36,31 @@ const Hero = () => {
       >
         <motion.h1
           className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
-          data-text="Code the Senses. Craft the Future."
+          data-text="Patchline: Orchestrate your Music Business with AI Agents"
         >
-          <span className="glitch-text inline-block" data-text="Code">
-            Code
+          <span className="glitch-text inline-block" data-text="Patchline:">
+            Patchline:
           </span>{" "}
-          <span className="glitch-text inline-block" data-text="the">
-            the
+          <span className="glitch-text inline-block" data-text="Orchestrate">
+            Orchestrate
           </span>{" "}
-          <span className="glitch-text inline-block" data-text="Senses.">
-            Senses.
-          </span>
-          <br />
-          <span className="glitch-text inline-block" data-text="Craft">
-            Craft
+          <span className="glitch-text inline-block" data-text="your">
+            your
           </span>{" "}
-          <span className="glitch-text inline-block" data-text="the">
-            the
+          <span className="glitch-text inline-block" data-text="Music">
+            Music
           </span>{" "}
-          <span className="glitch-text inline-block" data-text="Future.">
-            Future.
+          <span className="glitch-text inline-block" data-text="Business">
+            Business
+          </span>{" "}
+          <span className="glitch-text inline-block" data-text="with">
+            with
+          </span>{" "}
+          <span className="glitch-text inline-block" data-text="AI">
+            AI
+          </span>{" "}
+          <span className="glitch-text inline-block" data-text="Agents">
+            Agents
           </span>
         </motion.h1>
 
@@ -93,7 +98,7 @@ const Hero = () => {
               width="100%"
               height="100%"
               src="https://www.youtube.com/embed/videoseries?list=PLNYkxOF6rcIBzsbjZKyOdnHTiGIcjiUbC&autoplay=1"
-              title="Algoryx Reel"
+              title="Patchline Reel"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="rounded-lg"

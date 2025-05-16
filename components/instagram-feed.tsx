@@ -28,11 +28,10 @@ const INSTAGRAM_POSTS = [
   },
 ]
 
-const InstagramFeed = () => {
+export default function InstagramFeed() {
   return (
-    <section className="py-24 relative">
+    <section id="social" className="py-20 relative">
       <div className="absolute inset-0 noise-bg opacity-30"></div>
-
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -43,13 +42,13 @@ const InstagramFeed = () => {
         >
           <div className="flex items-center justify-center gap-2 mb-4">
             <Instagram className="h-6 w-6 text-neon-magenta" />
-            <h2 className="text-3xl font-bold glitch-text" data-text="@algoryxmusic">
-              @algoryxmusic
+            <h2 className="text-3xl font-bold glitch-text" data-text="@patchlineai">
+              @patchlineai
             </h2>
           </div>
           <p className="text-light/80 max-w-2xl mx-auto">
-            Follow our journey through the digital wilderness. Behind-the-scenes glimpses of our creative process,
-            experiments, and performances.
+            Follow our journey as we build the future of music business with AI. Get behind-the-scenes glimpses of our
+            platform development, industry insights, and success stories.
           </p>
         </motion.div>
 
@@ -119,7 +118,7 @@ const InstagramFeed = () => {
 
         <div className="text-center mt-8">
           <a
-            href="https://instagram.com/algoryxmusic"
+            href="https://instagram.com/patchlineai"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center text-neon-magenta hover:text-neon-magenta/80 transition-colors"
@@ -138,5 +137,3 @@ const InstagramFeed = () => {
     </section>
   )
 }
-
-export default InstagramFeed

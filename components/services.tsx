@@ -1,26 +1,44 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Lightbulb, Code, Presentation } from "lucide-react"
+import { Search, FileText, Music, LinkIcon, BarChart, Heart } from "lucide-react"
 
 const services = [
   {
-    icon: <Lightbulb className="h-10 w-10 text-neon-cyan" />,
-    title: "Immersive Performance",
+    icon: <Search className="h-10 w-10 text-neon-cyan" />,
+    title: "A&R Discovery",
     description:
-      "Custom audiovisual experiences for events, exhibitions, and installations. We blend generative art with spatial audio to create unforgettable sensory journeys.",
+      "Our AI-powered A&R agent analyzes 100,000+ tracks daily to identify promising artists and tracks that match your label's sound.",
   },
   {
-    icon: <Code className="h-10 w-10 text-neon-magenta" />,
-    title: "Creative AI R&D",
+    icon: <FileText className="h-10 w-10 text-neon-magenta" />,
+    title: "Legal Automation",
     description:
-      "Bespoke AI systems for creative applications. From generative music to interactive visuals, we develop custom solutions that push the boundaries of machine creativity.",
+      "Automated contract review, rights management, and licensing with our specialized legal agent that ensures compliance and efficiency.",
   },
   {
-    icon: <Presentation className="h-10 w-10 text-neon-green" />,
-    title: "Advisory Workshops",
+    icon: <Music className="h-10 w-10 text-neon-green" />,
+    title: "Catalog Management",
     description:
-      "Expert guidance on implementing AI in creative workflows. Our workshops help teams understand and leverage the potential of machine learning for innovation.",
+      "Intelligent catalog organization with automated metadata management, rights tracking, and opportunity matching across platforms.",
+  },
+  {
+    icon: <LinkIcon className="h-10 w-10 text-neon-cyan" />,
+    title: "Sync Licensing",
+    description:
+      "Automated matching of your catalog to sync licensing opportunities across film, TV, advertising, and gaming.",
+  },
+  {
+    icon: <BarChart className="h-10 w-10 text-neon-magenta" />,
+    title: "Analytics & Insights",
+    description:
+      "Real-time data visualization and predictive analytics to track emerging genres, production techniques, and audience preferences.",
+  },
+  {
+    icon: <Heart className="h-10 w-10 text-neon-green" />,
+    title: "Fan Engagement",
+    description:
+      "AI-powered fan communication, social media strategy, and marketing campaign optimization based on audience data.",
   },
 ]
 

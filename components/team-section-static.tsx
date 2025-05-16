@@ -40,7 +40,7 @@ export function TeamSectionStatic() {
                   </svg>
                 </a>
                 <a
-                  href="https://www.instagram.com/algoryxmusic/"
+                  href="https://www.instagram.com/patchlineai/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-full bg-eclipse/50 hover:bg-neon-cyan/20 border border-light/10 hover:border-neon-cyan transition-all"
@@ -63,7 +63,7 @@ export function TeamSectionStatic() {
                   </svg>
                 </a>
                 <a
-                  href="https://soundcloud.com/algoryx"
+                  href="https://soundcloud.com/patchlineai"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-full bg-eclipse/50 hover:bg-neon-cyan/20 border border-light/10 hover:border-neon-cyan transition-all"
@@ -100,13 +100,13 @@ export function TeamSectionStatic() {
                 </p>
 
                 <p>
-                  But he's also a trained music producer and DJ (ALGORYX). Formally educated at Point Blank, Sound
+                  But he's also a trained music producer and DJ. Formally educated at Point Blank, Sound
                   Collective, and Cosmic Academy, and deeply embedded in the creative scene. That dual fluency gives him
                   a unique edge: he's lived the pain points Patchline solves.
                 </p>
 
                 <p>
-                  Before founding Patchline, Mehdi led the Algoryx Art & Tech Lab, where he prototyped AI-native tools
+                  Before founding Patchline, Mehdi led an AI-focused creative tech lab, where he prototyped AI-native tools
                   for creative workflows. Now, he's applying that experience to reimagine how music teams work: with
                   agentic infrastructure that blends deep technical rigor with human-centered design.
                 </p>

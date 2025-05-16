@@ -8,11 +8,45 @@ export default function Logo() {
     <Link href="/" className="flex items-center group">
       <div className="text-neon-cyan font-heading relative">
         <svg width="140" height="30" viewBox="0 0 140 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Stylized ALGORYX text with modified A (no horizontal) and flipped R */}
-          {/* Modified A - like a flipped V */}
+          {/* P */}
           <path
-            d="M12 4L6 25H18L15 15H9L12 4Z"
-            fill="none"
+            d="M12 4H6V25H12C16 25 19 22 19 18C19 14 16 11 12 11H6M12 4V11"
+            stroke="#00EAFF"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* A */}
+          <path
+            d="M25 25L31 4H37L43 25H38L36 19H32L30 25H25ZM34 15H34.5L35.5 11L36.5 15H34Z"
+            stroke="#00EAFF"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* T */}
+          <path
+            d="M45 4H55M50 4V25"
+            stroke="#00EAFF"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* C */}
+          <path
+            d="M57 18C57 14 60 11 64 11C68 11 71 14 71 18C71 22 68 25 64 25C60 25 57 22 57 18Z"
+            stroke="#00EAFF"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* H */}
+          <path
+            d="M75 4V25M75 14H82M82 4V25"
             stroke="#00EAFF"
             strokeWidth="2"
             strokeLinecap="round"
@@ -20,47 +54,35 @@ export default function Logo() {
           />
 
           {/* L */}
-          <path d="M25 5V25H32" stroke="#00EAFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-
-          {/* G */}
           <path
-            d="M45 5C41 5 38 8 38 12.5C38 17 41 20 45 20C49 20 52 17 52 12.5V10H45M38 25V20"
+            d="M84 4V25H91"
             stroke="#00EAFF"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
 
-          {/* O */}
+          {/* I */}
           <path
-            d="M65 5C61 5 58 8 58 12.5C58 17 61 20 65 20C69 20 72 17 72 12.5C72 8 69 5 65 5Z"
+            d="M93 4H100M93 25H100M96.5 4V25"
             stroke="#00EAFF"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
 
-          {/* Flipped R */}
+          {/* N */}
           <path
-            d="M85 5H78V25M78 15H85C87 15 89 13.5 89 11C89 8.5 87 7 85 7H78M85 15L92 25"
+            d="M102 25L108 4H114L120 25H115L113 19H109L107 25H102ZM110 15H110.5L111.5 11L112.5 15H110Z"
             stroke="#00EAFF"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
 
-          {/* Y */}
+          {/* E */}
           <path
-            d="M98 5L105 15L112 5M105 15V25"
-            stroke="#00EAFF"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-
-          {/* X */}
-          <path
-            d="M116 5L130 25M116 25L130 5"
+            d="M122 4H132M122 4V25H132M122 14H130"
             stroke="#00EAFF"
             strokeWidth="2"
             strokeLinecap="round"
@@ -77,10 +99,10 @@ export default function Logo() {
       </div>
       <div className="border-[1px] border-neon-cyan/20 flex flex-col justify-center items-center px-2 py-1 ml-2 bg-neon-cyan/5 rounded-sm">
         <span className="text-neon-cyan font-heading text-[0.5rem] leading-tight tracking-wider font-medium">
-          ART &
+          MUSIC
         </span>
-        <span className="text-neon-cyan font-heading text-[0.5rem] leading-tight tracking-wider font-medium">TECH</span>
-        <span className="text-neon-cyan font-heading text-[0.5rem] leading-tight tracking-wider font-medium">LAB</span>
+        <span className="text-neon-cyan font-heading text-[0.5rem] leading-tight tracking-wider font-medium">AI</span>
+        <span className="text-neon-cyan font-heading text-[0.5rem] leading-tight tracking-wider font-medium">OS</span>
       </div>
     </Link>
   )

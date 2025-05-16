@@ -414,7 +414,7 @@ const slides = [
                   For over a decade, built ML/AI/GenAI/Agentic applications and solutions for Fortune 500 companies
                   across all industries
                 </li>
-                <li>DJ Algoryx: first-hand creator & performer, DJ and VJ simultaneously with AI generated visuals</li>
+                <li>DJ & VJ: first-hand creator & performer, DJ and VJ simultaneously with AI generated visuals</li>
               </ul>
             </div>
           </div>
@@ -518,7 +518,7 @@ const slides = [
           </p>
         </div>
         <div className="text-center mt-3 md:mt-4 space-y-1 md:space-y-2">
-          <p className="text-base md:text-lg font-bold">Join the pilot: algoryxlab.ai/patchline</p>
+          <p className="text-base md:text-lg font-bold">Join the pilot: patchline.ai/pilot</p>
           <p className="text-xs md:text-sm text-light/90">Looking for: Labels, schools, artists, early partners</p>
           <p className="text-xs md:text-sm text-light/90">Contact: Mehdi Noori — mehdi.noori7@gmail.com</p>
           <p className="text-base md:text-lg font-bold text-neon-cyan mt-2 md:mt-3">
