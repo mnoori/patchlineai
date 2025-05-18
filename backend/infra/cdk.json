@@ -1,0 +1,7 @@
+{
+  "app": "node -r ts-node/register bin/patchline-infra.ts",
+  "context": {
+    "@aws-cdk/aws-apigateway:usagePlanKeyOrderInsensitiveId": true,
+    "@aws-cdk/aws-ecr-assets:dockerIgnoreSupport": true
+  }
+} 
