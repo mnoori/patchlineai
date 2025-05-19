@@ -1,23 +1,15 @@
 {
-  "dev": {
+  "master": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-patchlinerepo-dev-3c766-authRole",
-      "UnauthRoleArn": "arn:aws:iam::366218382497:role/amplify-patchlinerepo-dev-3c766-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::366218382497:role/amplify-patchlinerepo-dev-3c766-authRole",
+      "AuthRoleName": "amplify-patchlineai-master-136b1-authRole",
+      "UnauthRoleArn": "arn:aws:iam::366218382497:role/amplify-patchlineai-master-136b1-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::366218382497:role/amplify-patchlineai-master-136b1-authRole",
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-patchlinerepo-dev-3c766-deployment",
-      "UnauthRoleName": "amplify-patchlinerepo-dev-3c766-unauthRole",
-      "StackName": "amplify-patchlinerepo-dev-3c766",
-      "StackId": "arn:aws:cloudformation:us-east-1:366218382497:stack/amplify-patchlinerepo-dev-3c766/197cef80-3433-11f0-bce7-12517dae9439",
-      "AmplifyAppId": "d17pfeqj62quq3"
-    },
-    "categories": {
-      "hosting": {
-        "amplifyhosting": {
-          "appId": "d17pfeqj62quq3",
-          "type": "manual"
-        }
-      }
+      "DeploymentBucketName": "amplify-patchlineai-master-136b1-deployment",
+      "UnauthRoleName": "amplify-patchlineai-master-136b1-unauthRole",
+      "StackName": "amplify-patchlineai-master-136b1",
+      "StackId": "arn:aws:cloudformation:us-east-1:366218382497:stack/amplify-patchlineai-master-136b1/42287510-3449-11f0-b99a-123da77de763",
+      "AmplifyAppId": "d3n94u5wy5gs1m"
     }
   }
 }
