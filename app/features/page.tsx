@@ -133,13 +133,13 @@ export default function FeaturesPage() {
       <Navbar />
       <main className="flex-1 pt-16">
         {/* Hero Section */}
-        <section className="py-20 neural-network">
+        <section className="py-12 neural-network">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 font-heading">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading">
                 AI Agents for Every <span className="gradient-text">Music Workflow</span>
               </h1>
-              <p className="text-xl text-muted-foreground mb-8">
+              <p className="text-xl text-muted-foreground mb-6">
                 Our suite of specialized AI agents handles the tedious tasks so you can focus on what matters most -
                 creating and promoting great music.
               </p>
@@ -148,21 +148,21 @@ export default function FeaturesPage() {
         </section>
 
         {/* Agents Section */}
-        <section className="py-10">
+        <section className="py-8">
           <div className="container">
-            <div className="space-y-32">
+            <div className="space-y-20">
               {agents.map((agent, index) => (
                 <div key={index} className="relative">
                   <div className="grid md:grid-cols-2 gap-8 items-center">
-                    <div className={`space-y-6 ${index % 2 === 1 ? "md:order-2" : ""}`}>
+                    <div className={`space-y-4 ${index % 2 === 1 ? "md:order-2" : ""}`}>
                       <div className="flex items-center space-x-3">
                         {agent.icon}
                         <h2 className="text-2xl md:text-3xl font-bold font-heading">{agent.name}</h2>
                       </div>
                       <p className="text-lg text-muted-foreground">{agent.description}</p>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <h3 className="text-lg font-medium font-heading">Key Capabilities:</h3>
-                        <ul className="space-y-2">
+                        <ul className="space-y-1">
                           {agent.capabilities.map((capability, i) => (
                             <li key={i} className="flex items-start">
                               <Check className="h-5 w-5 text-cosmic-teal mr-2 mt-0.5 shrink-0" />
@@ -171,7 +171,7 @@ export default function FeaturesPage() {
                           ))}
                         </ul>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <h3 className="text-lg font-medium font-heading">Use Case:</h3>
                         <p>{agent.useCase}</p>
                       </div>
@@ -194,7 +194,7 @@ export default function FeaturesPage() {
                     </div>
                   </div>
 
-                  <div className="mt-8">
+                  <div className="mt-4">
                     <Accordion type="single" collapsible className="w-full">
                       <AccordionItem value="how-it-works" className="border-cosmic-teal/30">
                         <AccordionTrigger className="text-lg font-heading text-cosmic-teal hover:text-cosmic-teal/90">
@@ -202,7 +202,7 @@ export default function FeaturesPage() {
                         </AccordionTrigger>
                         <AccordionContent>
                           <div className="pl-4 border-l-2 border-cosmic-teal/30 mt-2">
-                            <ol className="space-y-3">
+                            <ol className="space-y-2">
                               {agent.howItWorks.map((step, i) => (
                                 <li key={i} className="flex items-start">
                                   <span className="font-medium text-cosmic-teal mr-2">{i + 1}.</span>
@@ -222,10 +222,10 @@ export default function FeaturesPage() {
         </section>
 
         {/* Coming Soon Section */}
-        <section className="py-20 bg-cosmic-space/50">
+        <section className="py-12 bg-cosmic-space/50">
           <div className="container">
-            <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 font-heading">The Agent Ecosystem is Growing</h2>
+            <div className="max-w-3xl mx-auto text-center mb-8">
+              <h2 className="text-3xl font-bold mb-3 font-heading">The Agent Ecosystem is Growing</h2>
               <p className="text-lg text-muted-foreground">
                 We're constantly developing new agents to address more music industry workflows.
               </p>
@@ -234,11 +234,11 @@ export default function FeaturesPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {comingSoonAgents.map((agent, index) => (
                 <div key={index} className="glass-effect rounded-xl p-6 text-center">
-                  <div className="mx-auto mb-4 rounded-full bg-cosmic-pink/10 p-3 w-16 h-16 flex items-center justify-center">
+                  <div className="mx-auto mb-3 rounded-full bg-cosmic-pink/10 p-3 w-16 h-16 flex items-center justify-center">
                     {agent.icon}
                   </div>
                   <h3 className="text-xl font-bold mb-2 font-heading">{agent.name}</h3>
-                  <p className="text-muted-foreground mb-4">{agent.description}</p>
+                  <p className="text-muted-foreground mb-3">{agent.description}</p>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cosmic-pink/20 text-cosmic-pink">
                     Coming Soon
                   </span>
@@ -249,16 +249,16 @@ export default function FeaturesPage() {
         </section>
 
         {/* Technical Architecture */}
-        <section className="py-20">
+        <section className="py-12">
           <div className="container">
-            <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 font-heading">Built for the Real World</h2>
+            <div className="max-w-3xl mx-auto text-center mb-8">
+              <h2 className="text-3xl font-bold mb-3 font-heading">Built for the Real World</h2>
               <p className="text-lg text-muted-foreground">
                 Enterprise-grade infrastructure designed for music industry workflows.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
               {[
                 {
                   icon: <Cloud className="h-8 w-8 text-cosmic-teal" />,
@@ -281,8 +281,8 @@ export default function FeaturesPage() {
                   description: "Transparent agent operations with complete audit trails.",
                 },
               ].map((item, index) => (
-                <div key={index} className="text-center p-6">
-                  <div className="mx-auto mb-4 rounded-full bg-cosmic-teal/10 p-3 w-16 h-16 flex items-center justify-center">
+                <div key={index} className="text-center p-5">
+                  <div className="mx-auto mb-3 rounded-full bg-cosmic-teal/10 p-3 w-16 h-16 flex items-center justify-center">
                     {item.icon}
                   </div>
                   <h3 className="text-xl font-bold mb-2 font-heading">{item.title}</h3>
@@ -294,13 +294,13 @@ export default function FeaturesPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-cosmic-space/50">
+        <section className="py-12 bg-cosmic-space/50">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 font-heading">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 font-heading">
                 Ready to transform your music business?
               </h2>
-              <p className="text-xl text-muted-foreground mb-8">
+              <p className="text-xl text-muted-foreground mb-6">
                 Join labels, artists, and music schools already using Patchline AI to work smarter.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

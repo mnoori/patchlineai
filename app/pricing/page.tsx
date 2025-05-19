@@ -82,13 +82,13 @@ export default function PricingPage() {
       <Navbar />
       <main className="flex-1 pt-16">
         {/* Hero Section */}
-        <section className="py-20 neural-network">
+        <section className="py-12 neural-network">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 font-heading">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading">
                 Fair Pricing for <span className="gradient-text">All Music Professionals</span>
               </h1>
-              <p className="text-xl text-muted-foreground mb-8">
+              <p className="text-xl text-muted-foreground mb-6">
                 We believe AI tools should be accessible to independent creators, not just major labels. Our pricing
                 reflects that commitment.
               </p>
@@ -97,13 +97,13 @@ export default function PricingPage() {
         </section>
 
         {/* Pricing Plans */}
-        <section className="py-10">
+        <section className="py-8">
           <div className="container">
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-6">
               {plans.map((plan, index) => (
                 <div
                   key={index}
-                  className={`glass-effect rounded-xl p-8 relative ${
+                  className={`glass-effect rounded-xl p-6 relative ${
                     plan.popular
                       ? "border-cosmic-teal/50 ring-1 ring-cosmic-teal/50"
                       : "border-border hover:border-cosmic-teal/30"
@@ -114,7 +114,7 @@ export default function PricingPage() {
                       Most Popular
                     </div>
                   )}
-                  <div className="mb-6">
+                  <div className="mb-4">
                     <h2 className="text-2xl font-bold mb-2 font-heading">{plan.name}</h2>
                     <div className="flex items-baseline mb-2">
                       <span className="text-4xl font-bold">{plan.price}</span>
@@ -122,7 +122,7 @@ export default function PricingPage() {
                     </div>
                     <p className="text-muted-foreground">{plan.description}</p>
                   </div>
-                  <ul className="space-y-3 mb-8">
+                  <ul className="space-y-2 mb-6">
                     {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start">
                         <Check className="h-5 w-5 text-cosmic-teal mr-2 mt-0.5 shrink-0" />
@@ -147,24 +147,24 @@ export default function PricingPage() {
         </section>
 
         {/* Add-ons */}
-        <section className="py-16">
+        <section className="py-10">
           <div className="container">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center font-heading">Optional Add-ons</h2>
-              <div className="grid md:grid-cols-3 gap-6">
+              <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center font-heading">Optional Add-ons</h2>
+              <div className="grid md:grid-cols-3 gap-5">
                 {addOns.map((addon, index) => (
                   <div
                     key={index}
-                    className="glass-effect rounded-xl p-6 relative hover:border-cosmic-teal/30 transition-all duration-300"
+                    className="glass-effect rounded-xl p-5 relative hover:border-cosmic-teal/30 transition-all duration-300"
                   >
                     {addon.comingSoon && (
                       <div className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-muted px-2 py-1 rounded-full text-xs font-medium">
                         Coming Soon
                       </div>
                     )}
-                    <h3 className="text-xl font-bold mb-2 font-heading">{addon.name}</h3>
-                    <p className="text-cosmic-teal font-medium mb-2">{addon.price}</p>
-                    <p className="text-muted-foreground text-sm mb-4">{addon.description}</p>
+                    <h3 className="text-xl font-bold mb-1 font-heading">{addon.name}</h3>
+                    <p className="text-cosmic-teal font-medium mb-1">{addon.price}</p>
+                    <p className="text-muted-foreground text-sm mb-3">{addon.description}</p>
                     <Button
                       variant="outline"
                       size="sm"
@@ -181,17 +181,17 @@ export default function PricingPage() {
         </section>
 
         {/* Enterprise Section */}
-        <section className="py-16 bg-cosmic-space/50">
+        <section className="py-10 bg-cosmic-space/50">
           <div className="container">
             <div className="max-w-3xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4 font-heading">Enterprise Solutions</h2>
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold mb-3 font-heading">Enterprise Solutions</h2>
                 <p className="text-lg text-muted-foreground">
                   For larger labels, distributors, and educational institutions, we offer custom solutions including:
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-12">
+              <div className="grid md:grid-cols-2 gap-4 mb-8">
                 {[
                   "Private deployment options",
                   "Custom agent development",
@@ -218,58 +218,12 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* FAQ */}
-        <section className="py-16">
-          <div className="container">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center font-heading">
-                Frequently Asked Questions
-              </h2>
-              <div className="space-y-6">
-                {[
-                  {
-                    question: "Can I switch plans later?",
-                    answer:
-                      "Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle.",
-                  },
-                  {
-                    question: "Is there a free trial?",
-                    answer: "Yes, all paid plans come with a 14-day free trial. No credit card required to start.",
-                  },
-                  {
-                    question: "What payment methods do you accept?",
-                    answer: "We accept all major credit cards, PayPal, and invoicing for annual enterprise plans.",
-                  },
-                  {
-                    question: "Can I cancel anytime?",
-                    answer:
-                      "Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your current billing period.",
-                  },
-                  {
-                    question: "Do you offer discounts for music schools?",
-                    answer:
-                      "Yes, we offer special educational pricing for music schools and educational institutions. Contact our sales team for details.",
-                  },
-                ].map((faq, index) => (
-                  <div
-                    key={index}
-                    className="glass-effect rounded-xl p-6 hover:border-cosmic-teal/30 transition-all duration-300"
-                  >
-                    <h3 className="text-lg font-bold mb-2 font-heading">{faq.question}</h3>
-                    <p className="text-muted-foreground">{faq.answer}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
-        <section className="py-20 bg-cosmic-space/50">
+        <section className="py-12 bg-cosmic-space/50">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 font-heading">Ready to get started?</h2>
-              <p className="text-xl text-muted-foreground mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 font-heading">Ready to get started?</h2>
+              <p className="text-xl text-muted-foreground mb-6">
                 Join the music professionals already using Patchline AI.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

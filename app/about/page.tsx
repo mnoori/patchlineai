@@ -34,14 +34,14 @@ export default function AboutPage() {
       <Navbar />
       <main className="flex-1 pt-16">
         {/* Hero Section */}
-        <section className="py-20 neural-network">
+        <section className="py-12 neural-network">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 font-heading">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading">
                 Less Admin. More Music with the <span className="gradient-text">Agentic AI Backbone</span> for the Music
                 Industry.
               </h1>
-              <p className="text-xl text-muted-foreground mb-8">
+              <p className="text-xl text-muted-foreground mb-6">
                 Automating the busywork so artists and labels can move faster, smarter, and with more creative freedom.
               </p>
             </div>
@@ -49,10 +49,10 @@ export default function AboutPage() {
         </section>
 
         {/* Founder Section */}
-        <section className="py-16 bg-cosmic-space/50">
+        <section className="py-10 bg-cosmic-space/50">
           <div className="container">
-            <h2 className="text-3xl font-bold mb-6 font-heading text-center">Meet Our Founder</h2>
-            <div className="flex flex-col md:flex-row gap-8 max-w-5xl mx-auto">
+            <h2 className="text-3xl font-bold mb-5 font-heading text-center">Meet Our Founder</h2>
+            <div className="flex flex-col md:flex-row gap-6 max-w-5xl mx-auto">
               <div className="md:w-1/3 flex flex-col items-center">
                 <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-cosmic-teal">
                   <Image
@@ -63,7 +63,7 @@ export default function AboutPage() {
                     className="object-cover w-full h-full"
                   />
                 </div>
-                <div className="flex justify-center mt-4 space-x-4">
+                <div className="flex justify-center mt-3 space-x-4">
                   <Link
                     href="https://www.linkedin.com/in/mehdi-noori/"
                     target="_blank"
@@ -83,7 +83,7 @@ export default function AboutPage() {
                 </div>
               </div>
               <div className="md:w-2/3">
-                <div className="space-y-4 text-base">
+                <div className="space-y-3 text-base">
                   <p>
                     Dr. Mehdi Noori is a rare hybrid of AI scientist and music industry insider. With a Ph.D. in
                     engineering, a postdoc at MIT, and 15+ years leading AI innovation at firms like AWS and Nielsen,
@@ -106,11 +106,11 @@ export default function AboutPage() {
         </section>
 
         {/* Our Story Section */}
-        <section className="py-16">
+        <section className="py-10">
           <div className="container">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold mb-6 font-heading text-center">Our Story</h2>
-              <div className="space-y-4 text-base">
+              <h2 className="text-3xl font-bold mb-4 font-heading text-center">Our Story</h2>
+              <div className="space-y-3 text-base">
                 <p>
                   Patchline AI was born from a simple observation: music professionals spend too much time on repetitive
                   tasks and not enough time on creative work.
@@ -136,21 +136,21 @@ export default function AboutPage() {
         </section>
 
         {/* Values Section */}
-        <section className="py-16 bg-cosmic-space/50">
+        <section className="py-10 bg-cosmic-space/50">
           <div className="container">
-            <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold mb-6 font-heading">Our Principles</h2>
+            <div className="max-w-3xl mx-auto text-center mb-8">
+              <h2 className="text-3xl font-bold mb-3 font-heading">Our Principles</h2>
               <p className="text-lg text-muted-foreground">
                 These core principles guide everything we do at Patchline AI.
               </p>
             </div>
-            <div className="grid gap-6 max-w-4xl mx-auto">
+            <div className="grid gap-4 max-w-4xl mx-auto">
               {values.map((value, index) => (
                 <div
                   key={index}
-                  className="glass-effect rounded-xl p-6 hover:border-cosmic-teal/30 transition-all duration-300"
+                  className="glass-effect rounded-xl p-5 hover:border-cosmic-teal/30 transition-all duration-300"
                 >
-                  <h3 className="text-xl font-bold mb-3 font-heading">{value.title}</h3>
+                  <h3 className="text-xl font-bold mb-2 font-heading">{value.title}</h3>
                   <p className="text-muted-foreground">{value.description}</p>
                 </div>
               ))}
@@ -159,11 +159,11 @@ export default function AboutPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-cosmic-space/50">
+        <section className="py-12 bg-cosmic-space/50">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 font-heading">Join us on our mission</h2>
-              <p className="text-xl text-muted-foreground mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 font-heading">Join us on our mission</h2>
+              <p className="text-xl text-muted-foreground mb-6">
                 We're building the future of the music business. Let's work together.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

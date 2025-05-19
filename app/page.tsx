@@ -178,9 +178,8 @@ export default function Home() {
           <div className="container">
             <div className="max-w-4xl mx-auto">
               <div className="glass-effect rounded-xl p-8 text-center shimmer-bg">
-                <p className="text-xl md:text-2xl italic mb-6">
-                  "We're building the future where AI handles the business, so artists and labels can focus on the
-                  music."
+                <p className="text-lg md:text-xl italic mb-6">
+                  "In today's music industry, time spent on admin is time lost on discovering, developing, and amplifying talent. We're giving that time back to labels and everyone who makes this industry thrive."
                 </p>
                 <footer className="text-muted-foreground">
                   <p className="font-medium">— Founder & CEO</p>
