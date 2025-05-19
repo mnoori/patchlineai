@@ -22,9 +22,9 @@ export const metadata: Metadata = {
     "Patchline connects your data, simplifies your workflows, and gives music professionals time back to create.",
   generator: 'v0.dev',
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
   }
 }
 

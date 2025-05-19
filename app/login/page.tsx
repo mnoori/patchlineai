@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { signIn, signUp, confirmSignUp, getCurrentUser } from "aws-amplify/auth"
+import { signIn, signUp, confirmSignUp, getCurrentUser, resetPassword, confirmResetPassword } from "aws-amplify/auth"
 import { Amplify } from "aws-amplify"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,6 +27,13 @@ export default function LoginPage() {
   // For the Sign Up tab
   const [signUpEmail, setSignUpEmail] = useState("")
   const [signUpPassword, setSignUpPassword] = useState("")
+
+  // For Password Reset
+  const [showPasswordReset, setShowPasswordReset] = useState(false)
+  const [resetPasswordEmail, setResetPasswordEmail] = useState("")
+  const [resetCode, setResetCode] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [showResetConfirmation, setShowResetConfirmation] = useState(false)
 
   // If already authenticated, redirect to dashboard
   useEffect(() => {
@@ -152,6 +159,49 @@ export default function LoginPage() {
     }
   }
 
+  // Handle password reset request
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      await resetPassword({ username: resetPasswordEmail.trim().toLowerCase() })
+      setShowResetConfirmation(true)
+      toast.success("Password reset code sent to your email.")
+    } catch (error) {
+      const err: any = error
+      let message = err?.message || "Failed to request password reset. Please try again."
+      toast.error(message)
+      console.error("Password reset error:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handle confirmation of password reset
+  const handleConfirmResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      await confirmResetPassword({
+        username: resetPasswordEmail.trim().toLowerCase(),
+        confirmationCode: resetCode,
+        newPassword
+      })
+      toast.success("Password reset successfully! Please sign in with your new password.")
+      setShowPasswordReset(false)
+      setShowResetConfirmation(false)
+      setResetPasswordEmail("")
+      setResetCode("")
+      setNewPassword("")
+    } catch (error) {
+      const err: any = error
+      let message = err?.message || "Failed to reset password. Please try again."
+      toast.error(message)
+      console.error("Confirm password reset error:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   if (showConfirmation) {
     return (
@@ -204,6 +254,119 @@ export default function LoginPage() {
     )
   }
 
+  if (showPasswordReset) {
+    if (showResetConfirmation) {
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center p-4 neural-network">
+          <div className="w-full max-w-md space-y-8">
+            <div className="flex flex-col items-center text-center">
+              <Link href="/" className="mb-8">
+                <Logo className="h-10 w-auto" />
+              </Link>
+              <h1 className="text-3xl font-bold mb-2 font-heading">Reset Your Password</h1>
+              <p className="text-muted-foreground">
+                Enter the code sent to {resetPasswordEmail} and your new password.
+              </p>
+            </div>
+            <div className="glass-effect rounded-xl p-8">
+              <form onSubmit={handleConfirmResetPassword} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="resetCode">Reset Code</Label>
+                  <Input
+                    id="resetCode"
+                    type="text"
+                    placeholder="Enter code from email"
+                    required
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground pt-1">
+                    Must be ≥8 characters, include uppercase, lowercase, and a number.
+                  </p>
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Resetting..." : "Reset Password"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="w-full text-cosmic-teal"
+                  onClick={() => {
+                    setShowPasswordReset(false)
+                    setShowResetConfirmation(false)
+                  }}
+                >
+                  Back to Sign In
+                </Button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 neural-network">
+        <div className="w-full max-w-md space-y-8">
+          <div className="flex flex-col items-center text-center">
+            <Link href="/" className="mb-8">
+              <Logo className="h-10 w-auto" />
+            </Link>
+            <h1 className="text-3xl font-bold mb-2 font-heading">Reset Your Password</h1>
+            <p className="text-muted-foreground">
+              Enter your email address to receive a password reset code.
+            </p>
+          </div>
+          <div className="glass-effect rounded-xl p-8">
+            <form onSubmit={handleResetPassword} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="resetPasswordEmail">Email</Label>
+                <Input
+                  id="resetPasswordEmail"
+                  type="email"
+                  placeholder="name@example.com"
+                  required
+                  value={resetPasswordEmail}
+                  onChange={(e) => setResetPasswordEmail(e.target.value)}
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                disabled={isLoading}
+              >
+                {isLoading ? "Sending..." : "Send Reset Code"}
+              </Button>
+              <Button
+                type="button"
+                variant="link"
+                className="w-full text-cosmic-teal"
+                onClick={() => setShowPasswordReset(false)}
+              >
+                Back to Sign In
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 neural-network">
       <div className="w-full max-w-md space-y-8">
@@ -239,9 +402,16 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
-                    <Link href="#" className="text-sm text-cosmic-teal hover:underline">
+                    <Button 
+                      variant="link"
+                      className="text-sm text-cosmic-teal hover:underline p-0 h-auto"
+                      onClick={() => {
+                        setShowPasswordReset(true)
+                        setResetPasswordEmail(email)
+                      }}
+                    >
                       Forgot password?
-                    </Link>
+                    </Button>
                   </div>
                   <Input
                     id="password"
