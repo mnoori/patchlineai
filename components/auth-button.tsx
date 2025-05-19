@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, Settings, User } from "lucide-react"
+import { signOut } from "aws-amplify/auth"
 
 export function AuthButton() {
   // In a real app, this would be determined by your auth system
@@ -26,8 +27,8 @@ export function AuthButton() {
   }, [])
 
   // For demo purposes, let's add a function to toggle login state
-  const handleLogout = () => {
-    localStorage.removeItem("patchline-auth-token")
+  const handleLogout = async () => {
+    await signOut()
     setIsLoggedIn(false)
     window.location.href = "/"
   }

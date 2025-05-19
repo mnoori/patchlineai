@@ -144,7 +144,7 @@ export function SidebarWithChat() {
       )}
     >
       {/* Navigation */}
-      <div className={cn("flex-1 overflow-y-auto py-4", showChat ? "max-h-[calc(100%-350px)]" : "")}>
+      <div className={cn("flex-1 overflow-y-auto py-4", showChat ? "max-h-[calc(100%-380px)]" : "")}>
         <nav className="space-y-1 px-2">
           {sidebarItems.map((item) => {
             const isActive = item.href
@@ -215,27 +215,44 @@ export function SidebarWithChat() {
         </nav>
       </div>
 
-      {/* Chat toggle button */}
-      <div className="p-2 border-t border-border">
+      {/* Patchy button - make it sticky and more high-tech looking */}
+      <div className="sticky bottom-0 p-2 border-t border-border bg-background/95 backdrop-blur-sm">
         <button
           onClick={toggleChat}
           className={cn(
-            "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
+            "flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-all duration-300",
             showChat
-              ? "bg-cosmic-teal/10 text-cosmic-teal"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              ? "bg-gradient-to-r from-cosmic-teal/20 to-cosmic-pink/10 text-cosmic-teal border border-cosmic-teal/30 shadow-[0_0_8px_rgba(0,240,255,0.2)]"
+              : "text-muted-foreground hover:bg-cosmic-space/70 hover:text-foreground relative chat-button-pulse border border-transparent"
           )}
         >
           <div className="flex items-center">
-            <TRSCableLogo className="h-5 w-5 text-cosmic-teal mr-2" />
-            <span>Patchy</span>
+            <div className={cn(
+              "relative flex items-center justify-center w-6 h-6 mr-3 rounded-full",
+              showChat ? "bg-cosmic-teal/10" : "bg-transparent"
+            )}>
+              <TRSCableLogo className={cn(
+                "h-5 w-5 transition-all duration-300", 
+                showChat ? "text-cosmic-teal" : "text-cosmic-teal/80"
+              )} />
+              {!showChat && <span className="absolute -top-1 -right-1 w-2 h-2 bg-cosmic-teal rounded-full animate-ping"></span>}
+            </div>
+            <span className={cn(
+              "font-semibold tracking-wide",
+              showChat ? "" : "text-cosmic-teal/80"
+            )}>Patchy</span>
           </div>
+          {!showChat && (
+            <div className="flex items-center text-[10px] text-muted-foreground">
+              <span>AI Assistant</span>
+            </div>
+          )}
         </button>
       </div>
 
       {/* Chat interface */}
       {showChat && (
-        <div className={cn("transition-all duration-300", isChatExpanded ? "h-[500px]" : "h-[350px]")}>
+        <div className={cn("transition-all duration-300 shadow-lg", isChatExpanded ? "h-[520px]" : "h-[380px]")}>
           <ChatInterface />
         </div>
       )}

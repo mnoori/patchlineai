@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
-import { Send, Zap, MessageSquare, X } from "lucide-react"
+import { Send, Zap, MessageSquare, X, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type Message = {
@@ -116,15 +116,17 @@ export function ChatInterface() {
           </button>
         </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            if (isExpanded) toggleExpansion()
-          }}
-          className="p-1 rounded-md hover:bg-muted transition-colors"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        {isExpanded && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              toggleExpansion()
+            }}
+            className="p-1 rounded-md hover:bg-muted transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Messages */}
@@ -178,6 +180,13 @@ export function ChatInterface() {
           >
             <Send className="h-4 w-4" />
           </button>
+        </div>
+        
+        {/* Add disclaimer text */}
+        <div className="mt-2 text-center">
+          <p className="text-[10px] text-muted-foreground whitespace-nowrap">
+            Patchy may make mistake, plz use with discretion.
+          </p>
         </div>
       </form>
     </div>

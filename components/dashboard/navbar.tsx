@@ -16,15 +16,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Bell, Menu, Search, Settings, LogOut, HelpCircle, X } from "lucide-react"
 import { Logo } from "@/components/logo"
 import { cn } from "@/lib/utils"
+import { signOut } from "aws-amplify/auth"
 
 export function DashboardNavbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const handleLogout = () => {
-    // Remove auth token and redirect to home
-    localStorage.removeItem("patchline-auth-token")
+  const handleLogout = async () => {
+    await signOut()
     window.location.href = "/"
   }
 

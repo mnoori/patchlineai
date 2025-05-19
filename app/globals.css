@@ -114,11 +114,11 @@
 
 /* Chat expansion styles */
 .chat-collapsed {
-  height: 350px !important;
+  height: 380px !important;
 }
 
 .chat-expanded {
-  height: 500px !important;
+  height: 520px !important;
 }
 
 /* Adjust main content when chat is expanded */
@@ -132,6 +132,32 @@
 
 .chat-expanded-shift {
   margin-left: 20rem !important;
+}
+
+/* Add a subtle pulse animation to draw attention to the chat button */
+@keyframes subtle-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.2); }
+  50% { box-shadow: 0 0 0 6px rgba(0, 240, 255, 0.15), 0 0 15px rgba(0, 240, 255, 0.15); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.05); }
+}
+
+.chat-button-pulse {
+  animation: subtle-pulse 8s infinite;
+  position: relative;
+}
+
+.chat-button-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    45deg, 
+    rgba(0, 240, 255, 0.02) 0%, 
+    rgba(255, 42, 109, 0.02) 100%
+  );
+  opacity: 0.7;
 }
 
 /* Chat interface styles */
