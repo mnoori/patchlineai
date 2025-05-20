@@ -56,6 +56,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields: platform, url" }, { status: 400 })
     }
 
+    // Check if this URL is already added for this user
+    // Note: 'url' is a reserved keyword in DynamoDB, so we need to use expression attributes
+    const existingEmbedsResult = await ddbClient.send(
+      new QueryCommand({
+        TableName: EMBEDS_TABLE,
+        KeyConditionExpression: "userId = :userId",
+        FilterExpression: "#embedUrl = :embedUrl",
+        ExpressionAttributeNames: {
+          "#embedUrl": "url"
+        },
+        ExpressionAttributeValues: marshall({
+          ":userId": userId,
+          ":embedUrl": url
+        })
+      })
+    );
+
+    // If we already have this URL, return the existing embed instead of creating a duplicate
+    if (existingEmbedsResult.Items && existingEmbedsResult.Items.length > 0) {
+      const existingEmbed = unmarshall(existingEmbedsResult.Items[0]);
+      return NextResponse.json({ 
+        success: true, 
+        embedId: existingEmbed.embedId,
+        embed: existingEmbed,
+        alreadyExists: true
+      });
+    }
+
     const embedId = uuidv4()
     const timestamp = new Date().toISOString()
 

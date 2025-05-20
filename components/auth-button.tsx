@@ -14,17 +14,41 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, Settings, User } from "lucide-react"
 import { signOut } from "aws-amplify/auth"
+import { useCurrentUser } from "@/hooks/use-current-user"
 
 export function AuthButton() {
   // In a real app, this would be determined by your auth system
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userData, setUserData] = useState({ fullName: "", email: "" })
+  const { userId } = useCurrentUser()
 
   // Simulate checking auth status
   useEffect(() => {
     // Check if user is logged in (e.g. by checking for a token in localStorage)
     const hasToken = localStorage.getItem("patchline-auth-token")
     setIsLoggedIn(!!hasToken)
-  }, [])
+    
+    // If logged in, fetch user data
+    if (hasToken && userId) {
+      fetchUserData(userId);
+    }
+  }, [userId])
+  
+  // Fetch user data from the API
+  const fetchUserData = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/user?userId=${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setUserData({
+          fullName: data.fullName || "Music Producer",
+          email: data.email || "user@patchline.com"
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch user data", error);
+    }
+  };
 
   // For demo purposes, let's add a function to toggle login state
   const handleLogout = async () => {
@@ -40,15 +64,15 @@ export function AuthButton() {
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
               <AvatarImage src="/placeholder.svg?height=32&width=32&query=avatar" alt="User" />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarFallback>{userData.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">John Doe</p>
-              <p className="text-xs leading-none text-muted-foreground">john.doe@example.com</p>
+              <p className="text-sm font-medium leading-none">{userData.fullName}</p>
+              <p className="text-xs leading-none text-muted-foreground">{userData.email}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />

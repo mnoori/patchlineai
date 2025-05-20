@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,8 +25,31 @@ import {
   Bell,
   Store,
 } from "lucide-react"
+import { useCurrentUser } from "@/hooks/use-current-user"
+
+// Add DollarSign component before DashboardPage
+function DollarSign(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="12" x2="12" y1="2" y2="22"></line>
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+    </svg>
+  )
+}
 
 export default function DashboardPage() {
+  const { userId } = useCurrentUser()
   const [showCollaborateCard, setShowCollaborateCard] = useState(true)
   const [showNotification, setShowNotification] = useState(true)
   const [agentAlerts, setAgentAlerts] = useState([
@@ -80,7 +103,28 @@ export default function DashboardPage() {
     },
   ]
 
-  const removeAlert = (id) => {
+  const [connectedPlatforms, setConnectedPlatforms] = useState(0)
+
+  useEffect(() => {
+    async function fetchPlatforms() {
+      if (!userId) return
+      try {
+        const res = await fetch(`/api/platforms?userId=${userId}`)
+        if (res.ok) {
+          const data = await res.json()
+          // Count number of connected platforms
+          const count = Object.values(data.platforms || {}).filter(Boolean).length
+          setConnectedPlatforms(count)
+        }
+      } catch (error) {
+        console.error("Failed to fetch platforms:", error)
+      }
+    }
+    
+    fetchPlatforms()
+  }, [userId])
+
+  const removeAlert = (id: number) => {
     setAgentAlerts(agentAlerts.filter((alert) => alert.id !== id))
   }
 
@@ -512,27 +556,14 @@ export default function DashboardPage() {
           </Button>
         </CardContent>
       </Card>
-    </div>
-  )
-}
 
-// Dollar sign icon component
-function DollarSign(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="12" x2="12" y1="2" y2="22"></line>
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-    </svg>
+      {/* Replace hardcoded "2 Connected" with dynamic count */}
+      <div className="flex items-center gap-2 rounded-full bg-black/20 px-3 py-1.5 text-sm">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cosmic-teal text-black font-medium">
+          {connectedPlatforms}
+        </span>
+        Connected
+      </div>
+    </div>
   )
 }

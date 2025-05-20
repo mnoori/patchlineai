@@ -26,6 +26,7 @@ export default function InsightsPage() {
   const { userId } = useCurrentUser()
   const [showShareCard, setShowShareCard] = useState(true)
   const [embeds, setEmbeds] = useState<any[]>([])
+  const [connectedPlatforms, setConnectedPlatforms] = useState(0)
 
   useEffect(() => {
     async function loadEmbeds() {
@@ -41,6 +42,25 @@ export default function InsightsPage() {
       }
     }
     loadEmbeds()
+  }, [userId])
+
+  useEffect(() => {
+    async function fetchPlatforms() {
+      if (!userId) return
+      try {
+        const res = await fetch(`/api/platforms?userId=${userId}`)
+        if (res.ok) {
+          const data = await res.json()
+          // Count number of connected platforms
+          const count = Object.values(data.platforms || {}).filter(Boolean).length
+          setConnectedPlatforms(count)
+        }
+      } catch (error) {
+        console.error("Failed to fetch platforms:", error)
+      }
+    }
+    
+    fetchPlatforms()
   }, [userId])
 
   // Dummy data for visualizations
@@ -145,13 +165,30 @@ export default function InsightsPage() {
       {/* Embeds Card */}
       {embeds.length > 0 && (
         <Card className="glass-effect">
-          <CardHeader>
-            <CardTitle>SoundCloud Embeds</CardTitle>
-            <CardDescription>Your latest SoundCloud tracks & playlists</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>SoundCloud Embeds</CardTitle>
+              <CardDescription>Your latest SoundCloud tracks & playlists</CardDescription>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowShareCard(false)} // Just reusing this state handler
+              className="text-xs"
+            >
+              <span className="bg-cosmic-teal text-white rounded-full h-5 w-5 inline-flex items-center justify-center mr-1">
+                {connectedPlatforms}
+              </span>
+              Connected
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {embeds.map((embed) => (
+              {/* Get unique embeds by URL to avoid duplication */}
+              {Array.from(
+                new Map(embeds.map(embed => [embed.url, embed]))
+                .values()
+              ).map((embed) => (
                 <div key={embed.embedId} dangerouslySetInnerHTML={{ __html: embed.html }} />
               ))}
             </div>

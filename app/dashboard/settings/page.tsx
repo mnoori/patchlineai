@@ -28,6 +28,7 @@ import {
   Disc,
   Instagram,
   Music,
+  XCircle,
 } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 
@@ -51,6 +52,9 @@ export default function SettingsPage() {
 
   const [isDirty, setIsDirty] = useState(false)
 
+  const [platforms, setPlatforms] = useState<any>({})
+  const [loadingPlatforms, setLoadingPlatforms] = useState(false)
+
   useEffect(() => {
     async function loadUser() {
       if (!userId) return
@@ -69,6 +73,25 @@ export default function SettingsPage() {
       }
     }
     loadUser()
+  }, [userId])
+
+  useEffect(() => {
+    async function loadPlatforms() {
+      if (!userId) return
+      setLoadingPlatforms(true)
+      try {
+        const res = await fetch(`/api/platforms?userId=${userId}`)
+        if (res.ok) {
+          const data = await res.json()
+          setPlatforms(data.platforms || {})
+        }
+      } catch (e) {
+        console.error("Failed to fetch platforms", e)
+      } finally {
+        setLoadingPlatforms(false)
+      }
+    }
+    loadPlatforms()
   }, [userId])
 
   async function handleProfileSave() {
@@ -96,6 +119,25 @@ export default function SettingsPage() {
   }
 
   const markDirty = () => setIsDirty(true)
+
+  async function handlePlatformConnect(platform: string, connect: boolean) {
+    if (!userId) return
+    setLoadingPlatforms(true)
+    try {
+      const res = await fetch("/api/platforms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, platform, connected: connect })
+      })
+      if (res.ok) {
+        setPlatforms((prev: any) => ({ ...prev, [platform]: connect }))
+      }
+    } catch (e) {
+      console.error("Failed to update platform connection", e)
+    } finally {
+      setLoadingPlatforms(false)
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -216,6 +258,66 @@ export default function SettingsPage() {
 
           <Card className="glass-effect">
             <CardHeader>
+              <CardTitle>Connected Platforms</CardTitle>
+              <CardDescription>Manage your connected music platforms</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                {[
+                  { key: "spotify", name: "Spotify", color: "bg-green-500" },
+                  { key: "applemusic", name: "Apple Music", color: "bg-red-500" },
+                  { key: "distrokid", name: "DistroKid", color: "bg-blue-500" },
+                  { key: "instagram", name: "Instagram", color: "bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-500" },
+                  { key: "soundcloud", name: "SoundCloud", color: "bg-orange-500" },
+                ]
+                // Sort the platforms so connected ones appear at the top
+                .sort((a, b) => {
+                  const aConnected = platforms[a.key] || false;
+                  const bConnected = platforms[b.key] || false;
+                  if (aConnected && !bConnected) return -1;
+                  if (!aConnected && bConnected) return 1;
+                  return 0;
+                })
+                .map((p) => (
+                  <div key={p.key} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center ${p.color}`}>
+                        <Music2 className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{p.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {platforms[p.key] ? (
+                            <span className="inline-flex items-center gap-1 text-cosmic-teal font-semibold"><CheckCircle2 className="h-4 w-4" /> Connected</span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-muted-foreground"><XCircle className="h-4 w-4" /> Not connected</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    {platforms[p.key] ? (
+                      <Button variant="outline" size="sm" disabled={loadingPlatforms} onClick={() => handlePlatformConnect(p.key, false)}>
+                        Disconnect
+                      </Button>
+                    ) : (
+                      <Button variant="outline" size="sm" className="gap-1" disabled={loadingPlatforms} onClick={() => handlePlatformConnect(p.key, true)}>
+                        <Plus className="h-4 w-4" /> Connect
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end">
+                <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black gap-1">
+                  <Save className="h-4 w-4" /> Save Changes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardHeader>
               <CardTitle>Appearance</CardTitle>
               <CardDescription>Customize your interface preferences</CardDescription>
             </CardHeader>
@@ -260,107 +362,6 @@ export default function SettingsPage() {
               <div className="flex justify-end">
                 <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black gap-1">
                   <Save className="h-4 w-4" /> Save Preferences
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-effect">
-            <CardHeader>
-              <CardTitle>Connected Platforms</CardTitle>
-              <CardDescription>Manage your connected music platforms</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center">
-                      <Music2 className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Spotify</p>
-                      <p className="text-sm text-muted-foreground">Connected on May 10, 2025</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Disconnect
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-red-500 flex items-center justify-center">
-                      <Music2 className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Apple Music</p>
-                      <p className="text-sm text-muted-foreground">Connected on May 12, 2025</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Disconnect
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
-                      <Music2 className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium">DistroKid</p>
-                      <p className="text-sm text-muted-foreground">Connected on May 8, 2025</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Disconnect
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center">
-                      <Instagram className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Instagram</p>
-                      <p className="text-sm text-muted-foreground">Not connected</p>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-1"
-                    onClick={() => setConnectModalPlatform("instagram")}
-                  >
-                    <Plus className="h-4 w-4" /> Connect
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
-                      <Music className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium">SoundCloud</p>
-                      <p className="text-sm text-muted-foreground">Not connected</p>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-1"
-                    onClick={() => setConnectModalPlatform("soundcloud")}
-                  >
-                    <Plus className="h-4 w-4" /> Connect
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black gap-1">
-                  <Save className="h-4 w-4" /> Save Changes
                 </Button>
               </div>
             </CardContent>

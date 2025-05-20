@@ -9,9 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Instagram, Music, Loader2 } from "lucide-react"
+import { Instagram, Music, Loader2, AlertCircle, CheckCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useCurrentUser } from "@/hooks/use-current-user"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface PlatformConnectModalProps {
   platform: "instagram" | "soundcloud"
@@ -23,9 +24,12 @@ export function PlatformConnectModal({ platform, isOpen, onClose }: PlatformConn
   const { userId } = useCurrentUser()
   const [isConnecting, setIsConnecting] = useState(false)
   const [soundcloudUrl, setSoundcloudUrl] = useState("")
+  const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error" | "info"; message: string } | null>(null)
 
   const handleConnect = async () => {
     setIsConnecting(true)
+    setStatusMessage(null)
+    
     try {
       if (platform === "instagram") {
         // Start Instagram OAuth flow
@@ -51,7 +55,7 @@ export function PlatformConnectModal({ platform, isOpen, onClose }: PlatformConn
         }
 
         // Save embed to backend
-        await fetch("/api/embed", {
+        const embedResponse = await fetch("/api/embed", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -62,12 +66,35 @@ export function PlatformConnectModal({ platform, isOpen, onClose }: PlatformConn
             title: data.title,
           }),
         })
+        
+        const embedData = await embedResponse.json()
+        
+        if (embedData.alreadyExists) {
+          setStatusMessage({
+            type: "info",
+            message: "This SoundCloud URL has already been added to your profile."
+          })
+          setIsConnecting(false)
+          return
+        }
+        
         console.log("SoundCloud embed saved")
-
-        onClose()
+        setStatusMessage({
+          type: "success",
+          message: "SoundCloud content successfully added!"
+        })
+        
+        // Auto-close after success
+        setTimeout(() => {
+          onClose()
+        }, 2000)
       }
     } catch (error) {
       console.error("Failed to connect platform:", error)
+      setStatusMessage({
+        type: "error",
+        message: error instanceof Error ? error.message : "Failed to connect platform"
+      })
       setIsConnecting(false)
     }
   }
@@ -102,6 +129,14 @@ export function PlatformConnectModal({ platform, isOpen, onClose }: PlatformConn
           <DialogDescription>{config.description}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
+          {statusMessage && (
+            <Alert variant={statusMessage.type === "error" ? "destructive" : "default"}>
+              {statusMessage.type === "error" && <AlertCircle className="h-4 w-4" />}
+              {statusMessage.type === "success" && <CheckCircle className="h-4 w-4" />}
+              <AlertDescription>{statusMessage.message}</AlertDescription>
+            </Alert>
+          )}
+          
           {platform === "instagram" ? (
             <div className="text-sm text-muted-foreground">
               By connecting your Instagram account, you agree to share your public profile information and
