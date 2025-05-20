@@ -49,7 +49,10 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
   const result = await docClient.send(
     new ScanCommand({
       TableName: BLOG_POSTS_TABLE,
-      FilterExpression: "slug = :slug",
+      FilterExpression: "#slugAttr = :slug",
+      ExpressionAttributeNames: {
+        "#slugAttr": "slug",
+      },
       ExpressionAttributeValues: {
         ":slug": slug,
       },
@@ -64,7 +67,10 @@ export async function listBlogPosts(limit = 10): Promise<BlogPost[]> {
   const result = await docClient.send(
     new ScanCommand({
       TableName: BLOG_POSTS_TABLE,
-      FilterExpression: "status = :status",
+      FilterExpression: "#blogStatus = :status",
+      ExpressionAttributeNames: {
+        "#blogStatus": "status"
+      },
       ExpressionAttributeValues: {
         ":status": "published",
       },
