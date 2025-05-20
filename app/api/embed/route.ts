@@ -3,6 +3,7 @@ import { DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand } from "@a
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb"
 import { v4 as uuidv4 } from "uuid"
 import { EMBEDS_TABLE } from "@/lib/aws-config"
+import { createExpressionAttributeNames, isReservedKeyword } from "@/lib/dynamodb-utils"
 
 const REGION = process.env.AWS_REGION || "us-east-1"
 const ddbClient = new DynamoDBClient({ region: REGION })
@@ -84,14 +85,14 @@ export async function POST(req: Request) {
         new QueryCommand({
           TableName: EMBEDS_TABLE,
           KeyConditionExpression: "userId = :userId",
-          FilterExpression: "#embedUrl = :embedUrl", // Use ExpressionAttributeNames for reserved keyword
+          FilterExpression: "#u = :uval",
           ExpressionAttributeNames: {
-            "#embedUrl": "url" // Map #embedUrl to the actual 'url' attribute
+            "#u": "url"
           },
-          ExpressionAttributeValues: marshall({
-            ":userId": userId,
-            ":embedUrl": url
-          })
+          ExpressionAttributeValues: {
+            ":userId": { S: userId },
+            ":uval": { S: url }
+          }
         })
       );
 
