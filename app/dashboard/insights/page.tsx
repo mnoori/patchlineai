@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -20,9 +20,28 @@ import {
   Share2,
   X,
 } from "lucide-react"
+import { useCurrentUser } from "@/hooks/use-current-user"
 
 export default function InsightsPage() {
+  const { userId } = useCurrentUser()
   const [showShareCard, setShowShareCard] = useState(true)
+  const [embeds, setEmbeds] = useState<any[]>([])
+
+  useEffect(() => {
+    async function loadEmbeds() {
+      if (!userId) return
+      try {
+        const res = await fetch(`/api/embed?userId=${userId}`)
+        if (res.ok) {
+          const data = await res.json()
+          setEmbeds(data.embeds)
+        }
+      } catch (e) {
+        console.error("Failed to fetch embeds", e)
+      }
+    }
+    loadEmbeds()
+  }, [userId])
 
   // Dummy data for visualizations
   const monthlyRevenue = [
@@ -118,6 +137,23 @@ export default function InsightsPage() {
                 </Button>
                 <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">Export Report</Button>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Embeds Card */}
+      {embeds.length > 0 && (
+        <Card className="glass-effect">
+          <CardHeader>
+            <CardTitle>SoundCloud Embeds</CardTitle>
+            <CardDescription>Your latest SoundCloud tracks & playlists</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {embeds.map((embed) => (
+                <div key={embed.embedId} dangerouslySetInnerHTML={{ __html: embed.html }} />
+              ))}
             </div>
           </CardContent>
         </Card>

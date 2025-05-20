@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { PlatformConnectModal } from "@/components/platform-connect-modal"
 import {
   User,
   Mail,
@@ -25,9 +26,14 @@ import {
   Plus,
   CheckCircle2,
   Disc,
+  Instagram,
+  Music,
 } from "lucide-react"
+import { useCurrentUser } from "@/hooks/use-current-user"
 
 export default function SettingsPage() {
+  const { userId } = useCurrentUser()
+
   const [darkMode, setDarkMode] = useState(true)
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [pushNotifications, setPushNotifications] = useState(true)
@@ -35,6 +41,61 @@ export default function SettingsPage() {
   const [releaseReminders, setReleaseReminders] = useState(true)
   const [contractAlerts, setContractAlerts] = useState(true)
   const [twoFactorAuth, setTwoFactorAuth] = useState(false)
+  const [connectModalPlatform, setConnectModalPlatform] = useState<"instagram" | "soundcloud" | null>(null)
+
+  const [fullName, setFullName] = useState("")
+  const [email, setEmail] = useState("")
+  const [company, setCompany] = useState("")
+  const [website, setWebsite] = useState("")
+  const [bio, setBio] = useState("")
+
+  const [isDirty, setIsDirty] = useState(false)
+
+  useEffect(() => {
+    async function loadUser() {
+      if (!userId) return
+      try {
+        const res = await fetch(`/api/user?userId=${userId}`)
+        if (res.ok) {
+          const data = await res.json()
+          setFullName(data.fullName || "")
+          setEmail(data.email || "")
+          setCompany(data.company || "")
+          setWebsite(data.website || "")
+          setBio(data.bio || "")
+        }
+      } catch (e) {
+        console.error("Failed to fetch user", e)
+      }
+    }
+    loadUser()
+  }, [userId])
+
+  async function handleProfileSave() {
+    try {
+      const res = await fetch("/api/user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          fullName,
+          email,
+          company,
+          website,
+          bio,
+        }),
+      })
+      if (!res.ok) {
+        console.error("Save failed")
+      } else {
+        setIsDirty(false)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const markDirty = () => setIsDirty(true)
 
   return (
     <div className="space-y-8">
@@ -82,7 +143,7 @@ export default function SettingsPage() {
                       <Label htmlFor="name">Full Name</Label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="name" placeholder="John Doe" className="pl-10" defaultValue="John Doe" />
+                        <Input id="name" placeholder="John Doe" className="pl-10" value={fullName} onChange={(e) => { setFullName(e.target.value); markDirty() }} />
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -94,7 +155,8 @@ export default function SettingsPage() {
                           type="email"
                           placeholder="john.doe@example.com"
                           className="pl-10"
-                          defaultValue="john.doe@example.com"
+                          value={email}
+                          onChange={(e) => { setEmail(e.target.value); markDirty() }}
                         />
                       </div>
                     </div>
@@ -106,7 +168,8 @@ export default function SettingsPage() {
                           id="company"
                           placeholder="Your company or artist name"
                           className="pl-10"
-                          defaultValue="Luna Echo"
+                          value={company}
+                          onChange={(e) => { setCompany(e.target.value); markDirty() }}
                         />
                       </div>
                     </div>
@@ -118,7 +181,8 @@ export default function SettingsPage() {
                           id="website"
                           placeholder="https://example.com"
                           className="pl-10"
-                          defaultValue="https://lunaecho.com"
+                          value={website}
+                          onChange={(e) => { setWebsite(e.target.value); markDirty() }}
                         />
                       </div>
                     </div>
@@ -130,14 +194,20 @@ export default function SettingsPage() {
                       id="bio"
                       placeholder="Tell us about yourself or your company"
                       rows={4}
-                      defaultValue="Independent electronic music producer and DJ based in San Francisco. Creating atmospheric soundscapes and driving beats since 2018."
+                      value={bio}
+                      onChange={(e) => { setBio(e.target.value); markDirty() }}
                     />
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black gap-1">
+                <Button 
+                  className="gap-1" 
+                  variant={isDirty ? undefined : "outline"}
+                  disabled={!isDirty}
+                  onClick={handleProfileSave}
+                >
                   <Save className="h-4 w-4" /> Save Changes
                 </Button>
               </div>
@@ -246,11 +316,51 @@ export default function SettingsPage() {
                     Disconnect
                   </Button>
                 </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center">
+                      <Instagram className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Instagram</p>
+                      <p className="text-sm text-muted-foreground">Not connected</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-1"
+                    onClick={() => setConnectModalPlatform("instagram")}
+                  >
+                    <Plus className="h-4 w-4" /> Connect
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
+                      <Music className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium">SoundCloud</p>
+                      <p className="text-sm text-muted-foreground">Not connected</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-1"
+                    onClick={() => setConnectModalPlatform("soundcloud")}
+                  >
+                    <Plus className="h-4 w-4" /> Connect
+                  </Button>
+                </div>
               </div>
 
               <div className="flex justify-end">
-                <Button variant="outline" className="gap-1">
-                  <Plus className="h-4 w-4" /> Connect Platform
+                <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black gap-1">
+                  <Save className="h-4 w-4" /> Save Changes
                 </Button>
               </div>
             </CardContent>
@@ -624,6 +734,14 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {connectModalPlatform && (
+        <PlatformConnectModal
+          platform={connectModalPlatform}
+          isOpen
+          onClose={() => setConnectModalPlatform(null)}
+        />
+      )}
     </div>
   )
 }

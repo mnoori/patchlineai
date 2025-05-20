@@ -1,0 +1,12 @@
+{
+  "storage": {
+    "embeds": {
+      "providerPlugin": "awscloudformation",
+      "service": "DynamoDB"
+    },
+    "users": {
+      "providerPlugin": "awscloudformation",
+      "service": "DynamoDB"
+    }
+  }
+}
