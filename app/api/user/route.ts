@@ -23,7 +23,32 @@ export async function GET(req: Request) {
     )
 
     if (!result.Item) {
-      return NextResponse.json({}, { status: 200 })
+      // Create a default user record so the UI has something to display
+      const defaultUser = {
+        userId,
+        fullName: "",
+        email: "",
+        company: "",
+        website: "",
+        bio: "",
+        platforms: {
+          soundcloud: true, // default connected
+          spotify: false,
+          applemusic: false,
+          distrokid: false,
+          instagram: false,
+        },
+        updatedAt: new Date().toISOString(),
+      }
+
+      await ddbClient.send(
+        new PutItemCommand({
+          TableName: USERS_TABLE,
+          Item: marshall(defaultUser),
+        })
+      )
+
+      return NextResponse.json(defaultUser)
     }
 
     return NextResponse.json(unmarshall(result.Item))
