@@ -28,62 +28,34 @@
    - `/api/content` for content generation (GET, POST)
 5. **Platform Connection**
    - `PlatformConnectModal` component for connecting external platforms
-   - Currently supports SoundCloud embedding via oEmbed
+   - Instagram OAuth flow (scaffolded)
+   - SoundCloud embedding via oEmbed
+6. **Local repo** sits at `C:\Users\mehdi\code\patchlinerepo`  
+   (all CLI commands below assume that as the CWD)
 
 ---
 
-## 📝 Content Creation Feature
+## 🟢 Completed Tasks
 
-### Overview
-We've implemented an agentic content creation workflow that:
-- Enables users to generate blog posts from a simple topic prompt
-- Supports customization of tone, length, and target audience
-- Provides a live preview with markdown support
-- Integrates with the blog system for direct publishing
+| Task | Status | Details |
+|------|--------|---------|
+| **Add DynamoDB storage** | ✅ DONE | Tables created and deployed: Users, Embeds, BlogPosts, ContentDrafts |
+| **Install AWS SDK packages** | ✅ DONE | Added required dependencies for DynamoDB operations |
+| **Create API Routes** | ✅ DONE | Created user, embed, blog, and content routes |
+| **Restore Platform Connect UI** | ✅ DONE | Implemented platform integration components |
+| **Implement Content Creation** | ✅ DONE | Built content creator workflow with preview and publishing |
 
-### Components & Files
-1. **Data Models** (`lib/blog-types.ts`)
-   - `BlogPost`: Full blog post data model
-   - `ContentPrompt`: User input for content generation
-   - `ContentDraft`: Generated content with metadata
+---
 
-2. **Data Access** (`lib/blog-db.ts`)
-   - DynamoDB integration for blog posts and content drafts
-   - Functions for CRUD operations on both models
+## 🚧 Immediate TODOs
 
-3. **API Routes**
-   - `/api/blog`: For managing blog posts
-   - `/api/content`: For content generation and draft management
-
-4. **UI Components**
-   - `ContentCreatorForm`: Form for content generation inputs
-   - `ContentPreview`: Preview and publish interface for generated content
-   
-5. **Dashboard Integration**
-   - `/dashboard/content`: Main content creator page
-   - Added to sidebar navigation
-
-### Workflow
-1. User provides a topic and optional parameters
-2. System creates a draft record and begins generation
-3. Client polls for completion
-4. User reviews, with options to copy, edit, or publish
-5. On publish, content is saved as a blog post
-
-### Next Steps
-1. **Integration with LLM Service**
-   - Replace mock content generation with real LLM API
-   - Support more advanced prompting with examples
-
-2. **Enhanced Publishing Flow**
-   - Image generation for blog post headers
-   - SEO metadata management
-   - Scheduled publishing
-
-3. **Content Management**
-   - Draft saving and resuming
-   - Content version history
-   - Editorial review workflow
+| Priority | Task | Notes |
+|----------|------|-------|
+| P0 | **Bind Settings page to API** | Connect user profile form to `/api/user` endpoint |
+| P0 | **Bind Insights page to API** | Display embeds from `/api/embed` endpoint |
+| P0 | **Implement Bedrock Integration** | Replace mock content generation with AWS Bedrock/Claude |
+| P1 | **Add error handling** | Improve error handling and feedback in API routes |
+| P1 | **Add user authentication** | Require authentication for API access |
 
 ---
 
@@ -116,4 +88,11 @@ We've implemented an agentic content creation workflow that:
 - [AWS Amplify Documentation](https://docs.amplify.aws)
 - [DynamoDB Developer Guide](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html)
 - [Next.js API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
-- [React Markdown](https://github.com/remarkjs/react-markdown) 
+- [React Markdown](https://github.com/remarkjs/react-markdown)
+- [AWS SDK for JavaScript v3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/)
+- [Amplify Gen 1 Storage (DynamoDB)](https://docs.amplify.aws/gen1/javascript/build-a-backend/storage/set-up-storage/)
+- [AWS Bedrock Documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html)
+
+---
+
+*Keep this file updated whenever backend infrastructure, auth rules, or critical workflows change.*
