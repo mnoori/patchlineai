@@ -18,6 +18,7 @@ import {
   ChevronDown,
   HelpCircle,
   Store,
+  Edit3,
 } from "lucide-react"
 import { ChatInterface } from "../chat/chat-interface"
 import { TRSCableLogo } from "../icons/trs-cable-logo"
@@ -37,6 +38,11 @@ const sidebarItems = [
     title: "Releases",
     href: "/dashboard/releases",
     icon: <Calendar className="h-5 w-5" />,
+  },
+  {
+    title: "Content",
+    href: "/dashboard/content",
+    icon: <Edit3 className="h-5 w-5" />,
   },
   {
     title: "Agents",
