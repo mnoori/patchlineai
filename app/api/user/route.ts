@@ -10,19 +10,24 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const userId = searchParams.get("userId")
 
+  console.log(`[API /user GET] Received request for userId: ${userId}, using table: ${USERS_TABLE}`)
+
   if (!userId) {
+    console.log("[API /user GET] Missing userId parameter")
     return NextResponse.json({ error: "Missing userId" }, { status: 400 })
   }
 
   try {
+    console.log(`[API /user GET] Attempting to get item from table: ${USERS_TABLE} for userId: ${userId}`)
     const result = await ddbClient.send(
       new GetItemCommand({
-        TableName: USERS_TABLE,
+        TableName: USERS_TABLE, // Use environment variable via aws-config.ts
         Key: marshall({ userId })
       })
     )
 
     if (!result.Item) {
+      console.log(`[API /user GET] User not found for userId: ${userId}. Creating default user.`)
       // Create a default user record so the UI has something to display
       const defaultUser = {
         userId,
@@ -41,21 +46,35 @@ export async function GET(req: Request) {
         updatedAt: new Date().toISOString(),
       }
 
+      console.log(`[API /user GET] Saving default user to table: ${USERS_TABLE}`, defaultUser)
       await ddbClient.send(
         new PutItemCommand({
-          TableName: USERS_TABLE,
+          TableName: USERS_TABLE, // Use environment variable
           Item: marshall(defaultUser),
         })
       )
 
+      console.log(`[API /user GET] Successfully created default user: ${userId}`)
       return NextResponse.json(defaultUser)
     }
 
-    return NextResponse.json(unmarshall(result.Item))
-  } catch (error) {
-    console.error("Error fetching user data:", error)
+    const userData = unmarshall(result.Item)
+    console.log(`[API /user GET] Successfully fetched user: ${userId}`, userData)
+    return NextResponse.json(userData)
+  } catch (error: any) {
+    console.error(`[API /user GET] Error fetching user data for ${userId}:`, error)
+    console.error(`[API /user GET] Error details: ${error.message}`)
+    console.error(`[API /user GET] Error type: ${error.__type}`)
+    console.error(`[API /user GET] Table being accessed: ${USERS_TABLE}`)
+    
+    // Return a more informative error for debugging
     return NextResponse.json(
-      { error: "Failed to fetch user data" },
+      { 
+        error: "Failed to fetch user data",
+        details: error.message,
+        errorType: error.__type,
+        tableAccessed: USERS_TABLE
+      },
       { status: 500 }
     )
   }
@@ -66,26 +85,43 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { userId, ...userData } = body
 
+    console.log(`[API /user POST] Received request for userId: ${userId}, using table: ${USERS_TABLE}`)
+    console.log(`[API /user POST] User data to save:`, userData)
+    
     if (!userId) {
+      console.log("[API /user POST] Missing userId parameter")
       return NextResponse.json({ error: "Missing userId" }, { status: 400 })
     }
 
+    const item = {
+      userId,
+      ...userData,
+      updatedAt: new Date().toISOString()
+    }
+    
+    console.log(`[API /user POST] Saving user data to table: ${USERS_TABLE}`, item)
     await ddbClient.send(
       new PutItemCommand({
-        TableName: USERS_TABLE,
-        Item: marshall({
-          userId,
-          ...userData,
-          updatedAt: new Date().toISOString()
-        })
+        TableName: USERS_TABLE, // Use environment variable
+        Item: marshall(item)
       })
     )
 
+    console.log(`[API /user POST] Successfully saved user data for: ${userId}`)
     return NextResponse.json({ success: true, userId })
-  } catch (error) {
-    console.error("Error upserting user:", error)
+  } catch (error: any) {
+    console.error(`[API /user POST] Error upserting user:`, error)
+    console.error(`[API /user POST] Error details: ${error.message}`)
+    console.error(`[API /user POST] Error type: ${error.__type}`)
+    console.error(`[API /user POST] Table being accessed: ${USERS_TABLE}`)
+    
     return NextResponse.json(
-      { error: "Failed to upsert user data" },
+      { 
+        error: "Failed to upsert user data",
+        details: error.message,
+        errorType: error.__type,
+        tableAccessed: USERS_TABLE
+      },
       { status: 500 }
     )
   }
