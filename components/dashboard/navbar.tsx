@@ -17,11 +17,38 @@ import { Bell, Menu, Search, Settings, LogOut, HelpCircle, X } from "lucide-reac
 import { Logo } from "@/components/logo"
 import { cn } from "@/lib/utils"
 import { signOut } from "aws-amplify/auth"
+import { useCurrentUser } from "@/hooks/use-current-user"
+
+interface UserInfo {
+  fullName: string
+  email: string
+}
 
 export function DashboardNavbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const [userInfo, setUserInfo] = useState<UserInfo>({ fullName: "", email: "" })
+  const { userId } = useCurrentUser()
+
+  // Fetch user profile once we have a userId
+  useEffect(() => {
+    if (!userId) return
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/user?userId=${userId}`)
+        if (res.ok) {
+          const data = await res.json()
+          setUserInfo({
+            fullName: data.fullName || "Music Professional",
+            email: data.email || "user@patchline.com",
+          })
+        }
+      } catch (err) {
+        console.error("Failed to load user info", err)
+      }
+    })()
+  }, [userId])
 
   const handleLogout = async () => {
     await signOut()
@@ -107,15 +134,21 @@ export function DashboardNavbar() {
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/music-label-owner-avatar.png" alt="User" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarFallback>
+                    {userInfo.fullName
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase() || "U"}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">John Doe</p>
-                  <p className="text-xs leading-none text-muted-foreground">john.doe@example.com</p>
+                  <p className="text-sm font-medium leading-none">{userInfo.fullName}</p>
+                  <p className="text-xs leading-none text-muted-foreground">{userInfo.email}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
