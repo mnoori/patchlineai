@@ -8,6 +8,23 @@
  * 3. Hardcoded default values with staging suffix
  */
 
+/**
+ * DynamoDB AWS Credential Configuration Pattern
+ * 
+ * IMPORTANT: For AWS SDK v3 in Amplify SSR environments, always explicitly provide credentials:
+ * 
+ * const client = new DynamoDBClient({
+ *   region: process.env.AWS_REGION || "us-east-1",
+ *   credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
+ *     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+ *     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+ *     ...(process.env.AWS_SESSION_TOKEN && { sessionToken: process.env.AWS_SESSION_TOKEN })
+ *   } : undefined
+ * });
+ * 
+ * Relying on the default credential provider chain often fails in Amplify SSR environments.
+ */
+
 // AWS Region configuration
 // Allow REGION_AWS (used in Amplify where variables cannot start with AWS_) as an alternative.
 const resolvedRegion = process.env.AWS_REGION || process.env.REGION_AWS || process.env.NEXT_PUBLIC_AWS_REGION || "us-east-1";
