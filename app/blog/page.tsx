@@ -1,14 +1,15 @@
-import { Input } from "@/components/ui/input"
-import Link from "next/link"
-import Image from "next/image"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
-import { Button } from "@/components/ui/button"
-import { Calendar, ArrowRight } from "lucide-react"
-import { listBlogPosts } from "@/lib/blog-db"
-import { BlogPost } from "@/lib/blog-types"
+import { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { listBlogPosts } from "@/lib/blog-db";
+import { BlogPost } from "@/lib/blog-types";
+import { unstable_noStore } from "next/cache";
 
-// Define a type for placeholder posts that's compatible with BlogPost
+// Types for placeholder content
 interface PlaceholderPost {
   title: string;
   excerpt: string;
@@ -18,7 +19,17 @@ interface PlaceholderPost {
   slug: string;
 }
 
+// Type for either real post or placeholder
+type AnyPost = BlogPost | PlaceholderPost;
+
+export const metadata: Metadata = {
+  title: "Blog | Patchline Music",
+};
+
 export default async function BlogPage() {
+  // Disable cache to always get fresh data
+  unstable_noStore();
+  
   // Fetch blog posts from the API
   const blogPosts = await listBlogPosts(20); // Fetch up to 20 posts
   
@@ -60,9 +71,37 @@ export default async function BlogPage() {
     },
   ];
   
+  console.log("Blog posts from DB:", blogPosts.map(p => p.slug));
+  
+  // Ensure we always have the newest post as the featured post
+  const sortedPosts = [...blogPosts].sort((a, b) => {
+    const dateA = new Date(a.publishedDate || 0);
+    const dateB = new Date(b.publishedDate || 0);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  // Handle posts with or without timestamp suffixes in slugs
+  const processedPosts: BlogPost[] = [];
+  const seenSlugs = new Set<string>();
+  
+  for (const post of sortedPosts) {
+    // Extract the base slug without timestamp
+    const baseSlug = post.slug.replace(/-\d{6}$/, "");
+    
+    // Only add if we haven't seen this base slug before and post has an image
+    if (!seenSlugs.has(baseSlug) && post.heroImage) {
+      seenSlugs.add(baseSlug);
+      processedPosts.push(post);
+    }
+  }
+
   // Use real posts or placeholders
-  const featuredPost = blogPosts.length > 0 ? blogPosts[0] : featuredPostPlaceholder;
-  const remainingPosts = blogPosts.length > 1 ? blogPosts.slice(1) : placeholderPosts;
+  const featuredPost: AnyPost = processedPosts.length > 0 ? processedPosts[0] : featuredPostPlaceholder;
+
+  // Remaining posts after the featured one
+  const remainingPosts: AnyPost[] = processedPosts.length > 1 
+    ? processedPosts.slice(1) 
+    : placeholderPosts;
       
   // Format date helper
   const formatDate = (dateString?: string) => {
@@ -76,7 +115,7 @@ export default async function BlogPage() {
   };
   
   // Helper to get post excerpt
-  const getExcerpt = (post: BlogPost | PlaceholderPost) => {
+  const getExcerpt = (post: AnyPost) => {
     if ('excerpt' in post) {
       return post.excerpt;
     }
@@ -84,7 +123,7 @@ export default async function BlogPage() {
   };
   
   // Helper to get post image
-  const getImage = (post: BlogPost | PlaceholderPost) => {
+  const getImage = (post: AnyPost) => {
     if ('image' in post) {
       return post.image;
     }
@@ -92,13 +131,16 @@ export default async function BlogPage() {
   };
   
   // Helper to get post date
-  const getDate = (post: BlogPost | PlaceholderPost) => {
+  const getDate = (post: AnyPost) => {
     if ('date' in post) {
       return post.date;
     }
     return formatDate(post.publishedDate);
   };
 
+  // Helper to get post slug (all posts have a slug property)
+  const getSlug = (post: AnyPost) => post.slug;
+  
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -139,7 +181,7 @@ export default async function BlogPage() {
                       {getExcerpt(featuredPost)}
                     </p>
                     <Button asChild className="w-fit bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
-                      <Link href={`/blog/${featuredPost.slug}`}>
+                      <Link href={`/blog/${getSlug(featuredPost)}`}>
                         Read Article <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
@@ -151,7 +193,7 @@ export default async function BlogPage() {
             {/* Recent Posts */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {remainingPosts.map((post, index) => (
-                <div key={('id' in post ? post.id : index)} className="glass-effect rounded-xl overflow-hidden flex flex-col">
+                <div key={('id' in post ? post.id : `placeholder-${index}`)} className="glass-effect rounded-xl overflow-hidden flex flex-col">
                   <div className="relative h-48">
                     <Image 
                       src={getImage(post)} 
@@ -179,7 +221,7 @@ export default async function BlogPage() {
                       variant="ghost"
                       className="w-fit text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
                     >
-                      <Link href={`/blog/${post.slug}`}>
+                      <Link href={`/blog/${getSlug(post)}`}>
                         Read More <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
@@ -189,22 +231,26 @@ export default async function BlogPage() {
             </div>
 
             {/* Newsletter */}
-            <div className="mt-20 glass-effect rounded-xl p-8 md:p-12">
-              <div className="max-w-2xl mx-auto text-center">
-                <h3 className="text-2xl font-bold mb-4 font-heading">Subscribe to our newsletter</h3>
-                <p className="text-muted-foreground mb-6">
-                  Get the latest insights on AI in music delivered straight to your inbox.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Input type="email" placeholder="Enter your email" className="flex-grow" />
-                  <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">Subscribe</Button>
-                </div>
-              </div>
+            <div className="mt-24 max-w-2xl mx-auto text-center glass-effect rounded-xl p-8 md:p-12">
+              <h3 className="text-2xl font-bold mb-3 font-heading">Stay Updated</h3>
+              <p className="text-muted-foreground mb-6">
+                Subscribe to our newsletter for the latest updates on AI in music.
+              </p>
+              <form className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  placeholder="Your email address"
+                  className="flex-1 rounded-md bg-card border border-input px-4 py-2"
+                />
+                <Button type="submit" className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                  Subscribe
+                </Button>
+              </form>
             </div>
           </div>
         </section>
       </main>
       <Footer />
     </div>
-  )
+  );
 }

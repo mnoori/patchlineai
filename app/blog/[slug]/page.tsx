@@ -9,12 +9,10 @@ import { Calendar, ArrowLeft } from "lucide-react";
 import { getBlogPostBySlug } from "@/lib/blog-db";
 import ReactMarkdown from "react-markdown";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const post = await getBlogPostBySlug(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const { slug } = await Promise.resolve(params);
+  const cleanSlug = slug.replace(/-\d{6}$/, "");
+  const post = await getBlogPostBySlug(cleanSlug) || await getBlogPostBySlug(slug);
 
   if (!post) {
     return {
@@ -23,17 +21,15 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${post.title} | Your Music Label`,
+    title: `${post.title} | Patchline Music`,
     description: post.seoDescription || post.subtitle || "",
   };
 }
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const post = await getBlogPostBySlug(params.slug);
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+  const { slug } = await Promise.resolve(params);
+  const cleanSlug = slug.replace(/-\d{6}$/, "");
+  const post = await getBlogPostBySlug(cleanSlug) || await getBlogPostBySlug(slug);
 
   if (!post) {
     notFound();
@@ -111,35 +107,33 @@ export default async function BlogPostPage({
 
           {/* Featured image */}
           {post.heroImage && (
-            <div className="relative aspect-video w-full overflow-hidden rounded-xl mb-10">
+            <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] mb-12 rounded-xl overflow-hidden">
               <Image
                 src={post.heroImage}
                 alt={post.title}
                 fill
                 className="object-cover"
-                priority
               />
             </div>
           )}
 
-          {/* Content */}
-          <div className="prose dark:prose-invert max-w-none">
+          {/* Post content */}
+          <div className="prose prose-invert dark:prose-invert max-w-none">
             <ReactMarkdown>{post.content}</ReactMarkdown>
           </div>
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
-            <div className="mt-10 pt-6 border-t">
-              <h3 className="text-lg font-semibold mb-3">Tags</h3>
+            <div className="mt-12">
+              <h3 className="text-sm font-medium mb-3">Tags:</h3>
               <div className="flex flex-wrap gap-2">
                 {post.tags.map((tag, index) => (
-                  <Link
+                  <span
                     key={index}
-                    href={`/blog?tag=${tag}`}
-                    className="px-3 py-1 bg-muted rounded-full text-sm hover:bg-muted/80 transition-colors"
+                    className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground"
                   >
                     {tag}
-                  </Link>
+                  </span>
                 ))}
               </div>
             </div>
