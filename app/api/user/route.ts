@@ -4,6 +4,13 @@ import { marshall, unmarshall } from "@aws-sdk/util-dynamodb"
 import { USERS_TABLE } from "@/lib/aws-config"
 
 const REGION = process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1"
+console.log('[API User] Initializing DynamoDB client with region:', REGION);
+console.log('[API User] AWS credentials check:',
+  'ACCESS_KEY:', process.env.AWS_ACCESS_KEY_ID ? 'exists' : 'missing',
+  'SECRET_KEY:', process.env.AWS_SECRET_ACCESS_KEY ? 'exists' : 'missing',
+  'SESSION_TOKEN:', process.env.AWS_SESSION_TOKEN ? 'exists' : 'missing'
+);
+
 const ddbClient = new DynamoDBClient({ region: REGION })
 
 export async function GET(req: Request) {
@@ -11,6 +18,15 @@ export async function GET(req: Request) {
   const userId = searchParams.get("userId")
 
   console.log(`[API /user GET] Received request for userId: ${userId}, using table: ${USERS_TABLE}`)
+  
+  // Detailed credential check at request time
+  console.log("--- AWS Credentials Check ---");
+  console.log("AWS_REGION:", process.env.AWS_REGION || "NOT SET");
+  console.log("AWS_ACCESS_KEY_ID exists:", process.env.AWS_ACCESS_KEY_ID ? "YES" : "NO");
+  console.log("AWS_SECRET_ACCESS_KEY exists:", process.env.AWS_SECRET_ACCESS_KEY ? "YES" : "NO");
+  console.log("AWS_SESSION_TOKEN exists:", process.env.AWS_SESSION_TOKEN ? "YES" : "NO");
+  console.log("USERS_TABLE:", USERS_TABLE);
+  console.log("--- End Credentials Check ---");
 
   if (!userId) {
     console.log("[API /user GET] Missing userId parameter")

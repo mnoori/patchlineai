@@ -57,7 +57,7 @@ export default function ContentPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Content Creator</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Blog Post Creator</h1>
           <p className="text-muted-foreground">
             Generate blog posts and content with AI assistance
           </p>
