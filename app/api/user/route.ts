@@ -3,7 +3,7 @@ import { DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb"
 import { USERS_TABLE } from "@/lib/aws-config"
 
-const REGION = process.env.AWS_REGION || "us-east-1"
+const REGION = process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1"
 const ddbClient = new DynamoDBClient({ region: REGION })
 
 export async function GET(req: Request) {

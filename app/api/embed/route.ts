@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid"
 import { EMBEDS_TABLE } from "@/lib/aws-config"
 import { createExpressionAttributeNames, isReservedKeyword } from "@/lib/dynamodb-utils"
 
-const REGION = process.env.AWS_REGION || "us-east-1"
+const REGION = process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1"
 const ddbClient = new DynamoDBClient({ region: REGION })
 
 // GET /api/embed?userId=123

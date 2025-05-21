@@ -9,7 +9,15 @@
  */
 
 // AWS Region configuration
-export const AWS_REGION = process.env.AWS_REGION || process.env.NEXT_PUBLIC_AWS_REGION || "us-east-1"
+// Allow REGION_AWS (used in Amplify where variables cannot start with AWS_) as an alternative.
+const resolvedRegion = process.env.AWS_REGION || process.env.REGION_AWS || process.env.NEXT_PUBLIC_AWS_REGION || "us-east-1";
+
+// If only REGION_AWS is provided, propagate it so other libraries that expect AWS_REGION still work.
+if (!process.env.AWS_REGION && process.env.REGION_AWS) {
+  process.env.AWS_REGION = process.env.REGION_AWS;
+}
+
+export const AWS_REGION = resolvedRegion
 
 // DynamoDB table names with proper environment variable fallbacks
 export const USERS_TABLE = process.env.USERS_TABLE || process.env.NEXT_PUBLIC_USERS_TABLE || "Users-staging"

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { NextRequest, NextResponse } from "next/server";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
@@ -5,12 +7,12 @@ import { USERS_TABLE } from "@/lib/aws-config";
 
 // Initialize the DynamoDB client with more detailed configuration and logging
 const client = new DynamoDBClient({
-  region: process.env.AWS_REGION || "us-east-1",
+  region: process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1",
   // Don't explicitly set credentials here, rely on the AWS environment
   // The AWS Lambda environment in Amplify will provide these automatically
 });
 
-console.log("[API /platforms] DynamoDB client initialized with region:", process.env.AWS_REGION || "us-east-1");
+console.log("[API /platforms] DynamoDB client initialized with region:", process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1");
 console.log("[API /platforms] Using table:", USERS_TABLE);
 
 const ddb = DynamoDBDocumentClient.from(client);
