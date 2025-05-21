@@ -80,7 +80,15 @@ export async function listBlogPosts(limit = 10): Promise<BlogPost[]> {
     })
   );
 
-  return (result.Items || []) as BlogPost[];
+  // Sort posts by publishedDate in descending order (newest first)
+  const posts = result.Items || [];
+  posts.sort((a, b) => {
+    const dateA = new Date(a.publishedDate || a.createdAt || 0);
+    const dateB = new Date(b.publishedDate || b.createdAt || 0);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  return posts as BlogPost[];
 }
 
 // Content draft functions
