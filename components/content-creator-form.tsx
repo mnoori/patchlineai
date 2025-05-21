@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Loader2, Sparkles } from "lucide-react";
 import { ContentPrompt } from "@/lib/blog-types";
+import { BEDROCK_MODELS } from "@/lib/bedrock-client";
 
 interface ContentCreatorFormProps {
   onContentGenerated?: (draftId: string) => void;
@@ -22,6 +24,8 @@ export function ContentCreatorForm({ onContentGenerated }: ContentCreatorFormPro
     tone: "professional",
     length: "medium",
     contentType: "blog",
+    modelId: BEDROCK_MODELS[0].id, // Default to first model
+    showPrompt: false,
   });
   const [keywords, setKeywords] = useState("");
   const [activeTab, setActiveTab] = useState("basic");
@@ -75,9 +79,10 @@ export function ContentCreatorForm({ onContentGenerated }: ContentCreatorFormPro
       <CardContent>
         <form onSubmit={handleSubmit}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="basic">Basic</TabsTrigger>
               <TabsTrigger value="advanced">Advanced</TabsTrigger>
+              <TabsTrigger value="model">AI Model</TabsTrigger>
             </TabsList>
             <TabsContent value="basic" className="space-y-4 pt-4">
               <div className="space-y-2">
@@ -157,6 +162,43 @@ export function ContentCreatorForm({ onContentGenerated }: ContentCreatorFormPro
                     setPrompt({ ...prompt, callToAction: e.target.value })
                   }
                 />
+              </div>
+            </TabsContent>
+            <TabsContent value="model" className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="modelId">AI Model</Label>
+                <Select
+                  value={prompt.modelId}
+                  onValueChange={(value: string) => setPrompt({ ...prompt, modelId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select AI model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BEDROCK_MODELS.map(model => (
+                      <SelectItem key={model.id} value={model.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{model.name}</span>
+                          {model.id.includes("claude") && <Sparkles className="h-3 w-3 text-yellow-400" />}
+                        </div>
+                        <p className="text-xs text-gray-500">{model.description}</p>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center space-x-2 pt-2">
+                <Switch
+                  id="show-prompt"
+                  checked={prompt.showPrompt}
+                  onCheckedChange={(checked) => setPrompt({ ...prompt, showPrompt: checked })}
+                />
+                <Label htmlFor="show-prompt" className="cursor-pointer">
+                  Show AI prompt in result
+                </Label>
+              </div>
+              <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+                <p>Select an AI model for content generation. More powerful models may deliver higher quality content but can take longer to generate.</p>
               </div>
             </TabsContent>
           </Tabs>

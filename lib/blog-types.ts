@@ -31,6 +31,8 @@ export interface ContentPrompt {
   length?: 'short' | 'medium' | 'long';
   contentType?: 'blog' | 'newsletter' | 'social' | 'product';
   callToAction?: string;
+  modelId?: string; // Bedrock model ID to use
+  showPrompt?: boolean; // Whether to show the generated prompt
 }
 
 export interface AIGenerationParams {
@@ -45,6 +47,7 @@ export interface ContentDraft {
   id: string;
   prompt: ContentPrompt;
   content: string;
+  promptUsed?: string; // The actual prompt sent to the AI
   createdAt: string;
   updatedAt: string;
   status: 'generating' | 'ready' | 'edited' | 'approved' | 'rejected';

@@ -29,3 +29,47 @@ For AWS SDK v3 in Amplify SSR, ensure credentials are explicitly provided:
    - Amplify SSR environment does not automatically use the service role for credentials
    - The credential provider chain works differently in SSR context
    - Logging env variable presence (not values) helps diagnose issues 
+
+## AWS Bedrock Integration
+
+### Setup
+
+1. Ensure your AWS user/role has permissions for Amazon Bedrock:
+   - Required permissions: `bedrock:InvokeModel`
+   - Model access must be granted in the Bedrock console
+
+2. Add environment variables:
+   ```
+   # AWS Bedrock Configuration
+   BEDROCK_MODEL_ID=anthropic.claude-3-haiku-20240307-v1:0
+   ```
+
+3. Available Bedrock models:
+   - `anthropic.claude-3-haiku-20240307-v1:0` (fastest, lowest cost)
+   - `anthropic.claude-3-sonnet-20240229-v1:0` (higher quality)
+   - `amazon.titan-text-lite-v1:0` (Amazon's model)
+   - `amazon.nova-microns-v0:0` (Very small model)
+   - `cohere.command-text-v14:0` (Cohere's model)
+
+### Usage
+
+The content generation API now uses Bedrock to generate high-quality content. When a user:
+
+1. Enters a topic and options in the content creator form
+2. Clicks "Generate Content"
+3. The app will:
+   - Create a draft record in DynamoDB
+   - Send the prompt to Amazon Bedrock
+   - Update the draft with the generated content
+
+If Bedrock is unavailable or fails, the system will fall back to mock content generation.
+
+### Cost Considerations
+
+AWS Bedrock is billed based on tokens processed:
+- Input tokens: ~$0.50-$1.50 per million tokens
+- Output tokens: ~$1.50-$5.00 per million tokens
+
+For typical blog posts:
+- Claude Haiku: ~$0.01-$0.05 per generation
+- Claude Sonnet: ~$0.05-$0.15 per generation 

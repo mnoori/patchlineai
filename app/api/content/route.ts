@@ -2,28 +2,55 @@ import { NextResponse } from "next/server";
 import { ContentPrompt } from "@/lib/blog-types";
 import { createContentDraft, getContentDraft, updateContentDraft } from "@/lib/blog-db";
 import { CONTENT_DRAFTS_TABLE } from "@/lib/aws-config";
+import { generateContentWithBedrock } from "@/lib/bedrock-client";
 
-// Simulate AI content generation
-async function generateContent(prompt: ContentPrompt): Promise<string> {
-  console.log(`[API /content generateContent] Generating content for topic: "${prompt.topic}"`);
-  // TODO: Replace with actual API call to an LLM API service
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Mockup response for testing
-      const intro = `# ${prompt.topic}\n\n`;
-      const paragraphs = [
-        `As the music industry evolves with technological advancements, artists and labels face new challenges and opportunities.`,
-        `In this article, we explore how ${prompt.topic} is changing the landscape for musicians worldwide.`,
-        `## Key Innovations\n\nThe most significant developments include AI-assisted composition, automated mastering, and personalized fan experiences.`,
-        `## Impact on Artists\n\nCreators can now focus more on creative expression while automation handles technical aspects.`,
-        `## Future Outlook\n\nWe anticipate further integration of technology into all aspects of music creation and distribution.`,
-      ];
-      
-      const content = intro + paragraphs.join("\n\n");
-      console.log(`[API /content generateContent] Content generation completed for topic: "${prompt.topic}" (${content.length} chars)`);
-      resolve(content);
-    }, 2000); // Simulate a 2-second delay for AI generation
-  });
+// Generate content using Amazon Bedrock
+async function generateContent(prompt: ContentPrompt): Promise<{content: string, promptUsed?: string}> {
+  console.log(`[API /content generateContent] Generating content for topic: "${prompt.topic}" using Bedrock`);
+  console.log(`[API /content generateContent] Using model: ${prompt.modelId || 'default'}, show prompt: ${prompt.showPrompt === true}`);
+  
+  try {
+    // Use Bedrock to generate content
+    const result = await generateContentWithBedrock(
+      prompt, 
+      prompt.modelId, 
+      prompt.showPrompt === true
+    );
+    
+    console.log(`[API /content generateContent] Content generation completed for topic: "${prompt.topic}" (${result.content.length} chars)`);
+    return result;
+  } catch (error) {
+    console.error(`[API /content generateContent] Error using Bedrock:`, error);
+    console.error(`[API /content generateContent] Falling back to mock content generation`);
+    
+    // Fallback to mock content if Bedrock fails
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Mockup response for testing
+        const intro = `# ${prompt.topic}\n\n`;
+        const paragraphs = [
+          `As the music industry evolves with technological advancements, artists and labels face new challenges and opportunities.`,
+          `In this article, we explore how ${prompt.topic} is changing the landscape for musicians worldwide.`,
+          `## Key Innovations\n\nThe most significant developments include AI-assisted composition, automated mastering, and personalized fan experiences.`,
+          `## Impact on Artists\n\nCreators can now focus more on creative expression while automation handles technical aspects.`,
+          `## Future Outlook\n\nWe anticipate further integration of technology into all aspects of music creation and distribution.`,
+        ];
+        
+        const content = intro + paragraphs.join("\n\n");
+        console.log(`[API /content generateContent] Mock content generation completed for topic: "${prompt.topic}" (${content.length} chars)`);
+        
+        // Include a mock prompt if requested
+        const mockPrompt = prompt.showPrompt 
+          ? `System: You are a professional content writer.\nUser: Write about ${prompt.topic}` 
+          : undefined;
+        
+        resolve({ 
+          content,
+          promptUsed: mockPrompt
+        });
+      }, 2000); // Simulate a 2-second delay for AI generation
+    });
+  }
 }
 
 // POST /api/content - Start content generation
@@ -31,6 +58,7 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
     console.log(`[API /content POST] Received request to generate content for topic: "${data.topic}"`);
+    console.log(`[API /content POST] Model: ${data.modelId || 'default'}, Show prompt: ${data.showPrompt === true}`);
     console.log(`[API /content POST] Using table: ${CONTENT_DRAFTS_TABLE}`);
     
     // Validate the prompt
@@ -48,16 +76,17 @@ export async function POST(req: Request) {
     console.log(`[API /content POST] Draft created with ID: ${draft.id}`);
     
     // Start the content generation process (async)
-    generateContent(data).then(async (content) => {
+    generateContent(data).then(async (result) => {
       console.log(`[API /content POST] Content generated, updating draft ID: ${draft.id}`);
       // Update the draft with the generated content
       const updatedDraft = await updateContentDraft({
         ...draft,
-        content,
+        content: result.content,
+        promptUsed: result.promptUsed,
         status: "ready",
       });
       
-      console.log(`[API /content POST] Draft updated successfully. ID: ${draft.id}, content length: ${content.length} chars`);
+      console.log(`[API /content POST] Draft updated successfully. ID: ${draft.id}, content length: ${result.content.length} chars`);
     }).catch((error) => {
       console.error(`[API /content POST] Error generating content for draft ID: ${draft.id}`, error);
       console.error(`[API /content POST] Error details: ${error.message}`);
