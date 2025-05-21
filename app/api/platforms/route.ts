@@ -8,8 +8,12 @@ import { USERS_TABLE } from "@/lib/aws-config";
 // Initialize the DynamoDB client with more detailed configuration and logging
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1",
-  // Don't explicitly set credentials here, rely on the AWS environment
-  // The AWS Lambda environment in Amplify will provide these automatically
+  // Explicit credentials configuration for AWS SDK v3
+  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    ...(process.env.AWS_SESSION_TOKEN && { sessionToken: process.env.AWS_SESSION_TOKEN })
+  } : undefined
 });
 
 console.log("[API /platforms] DynamoDB client initialized with region:", process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1");

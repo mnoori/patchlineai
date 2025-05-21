@@ -6,7 +6,15 @@ import { EMBEDS_TABLE } from "@/lib/aws-config"
 import { createExpressionAttributeNames, isReservedKeyword } from "@/lib/dynamodb-utils"
 
 const REGION = process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1"
-const ddbClient = new DynamoDBClient({ region: REGION })
+const ddbClient = new DynamoDBClient({ 
+  region: REGION,
+  // Explicit credentials configuration for AWS SDK v3
+  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    ...(process.env.AWS_SESSION_TOKEN && { sessionToken: process.env.AWS_SESSION_TOKEN })
+  } : undefined
+})
 
 // GET /api/embed?userId=123
 export async function GET(req: Request) {
