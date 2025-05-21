@@ -5,18 +5,26 @@ import { USERS_TABLE } from "@/lib/aws-config"
 
 const REGION = process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1"
 console.log('[API User] Initializing DynamoDB client with region:', REGION);
-console.log('[API User] AWS credentials check:',
-  'ACCESS_KEY:', process.env.AWS_ACCESS_KEY_ID ? 'exists' : 'missing',
-  'SECRET_KEY:', process.env.AWS_SECRET_ACCESS_KEY ? 'exists' : 'missing',
-  'SESSION_TOKEN:', process.env.AWS_SESSION_TOKEN ? 'exists' : 'missing'
-);
 
-const ddbClient = new DynamoDBClient({ 
+const ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID
+const SECRET_KEY = process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY
+const SESSION_TOKEN = process.env.AWS_SESSION_TOKEN
+
+console.log('[API User] Env keys check:', {
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ? 'set' : 'undefined',
+  ACCESS_KEY_ID: process.env.ACCESS_KEY_ID ? 'set' : 'undefined',
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ? 'set' : 'undefined',
+  SECRET_ACCESS_KEY: process.env.SECRET_ACCESS_KEY ? 'set' : 'undefined',
+  AWS_SESSION_TOKEN: SESSION_TOKEN ? 'set' : 'undefined',
+  AWS_ROLE_ARN: process.env.AWS_ROLE_ARN || 'undefined'
+})
+
+const ddbClient = new DynamoDBClient({
   region: REGION,
-  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    ...(process.env.AWS_SESSION_TOKEN && { sessionToken: process.env.AWS_SESSION_TOKEN })
+  credentials: ACCESS_KEY && SECRET_KEY ? {
+    accessKeyId: ACCESS_KEY,
+    secretAccessKey: SECRET_KEY,
+    ...(SESSION_TOKEN && { sessionToken: SESSION_TOKEN })
   } : undefined
 });
 

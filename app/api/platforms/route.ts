@@ -5,18 +5,29 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { USERS_TABLE } from "@/lib/aws-config";
 
+const REGION = process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1"
+const ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID
+const SECRET_KEY = process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY
+const SESSION_TOKEN = process.env.AWS_SESSION_TOKEN
+
 // Initialize the DynamoDB client with more detailed configuration and logging
 const client = new DynamoDBClient({
-  region: process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1",
-  // Explicit credentials configuration for AWS SDK v3
-  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    ...(process.env.AWS_SESSION_TOKEN && { sessionToken: process.env.AWS_SESSION_TOKEN })
+  region: REGION,
+  credentials: ACCESS_KEY && SECRET_KEY ? {
+    accessKeyId: ACCESS_KEY,
+    secretAccessKey: SECRET_KEY,
+    ...(SESSION_TOKEN && { sessionToken: SESSION_TOKEN })
   } : undefined
 });
 
-console.log("[API /platforms] DynamoDB client initialized with region:", process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1");
+console.log("[API /platforms] DynamoDB client initialized with region:", REGION);
+console.log("[API /platforms] Env keys:", {
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ? 'set' : 'undefined',
+  ACCESS_KEY_ID: process.env.ACCESS_KEY_ID ? 'set' : 'undefined',
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ? 'set' : 'undefined',
+  SECRET_ACCESS_KEY: process.env.SECRET_ACCESS_KEY ? 'set' : 'undefined',
+  AWS_ROLE_ARN: process.env.AWS_ROLE_ARN || 'undefined'
+});
 console.log("[API /platforms] Using table:", USERS_TABLE);
 
 const ddb = DynamoDBDocumentClient.from(client);

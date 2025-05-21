@@ -6,14 +6,25 @@ import { EMBEDS_TABLE } from "@/lib/aws-config"
 import { createExpressionAttributeNames, isReservedKeyword } from "@/lib/dynamodb-utils"
 
 const REGION = process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1"
+const ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID
+const SECRET_KEY = process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY
+const SESSION_TOKEN = process.env.AWS_SESSION_TOKEN
+
 const ddbClient = new DynamoDBClient({ 
   region: REGION,
-  // Explicit credentials configuration for AWS SDK v3
-  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    ...(process.env.AWS_SESSION_TOKEN && { sessionToken: process.env.AWS_SESSION_TOKEN })
+  credentials: ACCESS_KEY && SECRET_KEY ? {
+    accessKeyId: ACCESS_KEY,
+    secretAccessKey: SECRET_KEY,
+    ...(SESSION_TOKEN && { sessionToken: SESSION_TOKEN })
   } : undefined
+})
+
+console.log('[API /embed] Env keys:', {
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ? 'set' : 'undefined',
+  ACCESS_KEY_ID: process.env.ACCESS_KEY_ID ? 'set' : 'undefined',
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ? 'set' : 'undefined',
+  SECRET_ACCESS_KEY: process.env.SECRET_ACCESS_KEY ? 'set' : 'undefined',
+  AWS_ROLE_ARN: process.env.AWS_ROLE_ARN || 'undefined'
 })
 
 // GET /api/embed?userId=123
