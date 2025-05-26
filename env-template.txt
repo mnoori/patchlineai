@@ -1,7 +1,7 @@
-# AWS Configuration
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your_aws_access_key_here
-AWS_SECRET_ACCESS_KEY=your_aws_secret_key_here
+# AWS Configuration (using Amplify console naming)
+REGION_AWS=us-east-1
+ACCESS_KEY_ID=your_aws_access_key_here
+SECRET_ACCESS_KEY=your_aws_secret_key_here
 
 # DynamoDB Tables
 USERS_TABLE=Users-staging
