@@ -26,50 +26,67 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ provider: string }> }
 ) {
-  const { provider: providerParam } = await params
-  const provider = providerParam.toLowerCase()
-  
-  // Validate provider
-  if (!OAUTH_ENDPOINTS[provider as keyof typeof OAUTH_ENDPOINTS]) {
-    return NextResponse.json(
-      { error: 'Invalid provider' },
-      { status: 400 }
-    )
+  try {
+    const { provider: providerParam } = await params
+    const provider = providerParam.toLowerCase()
+    
+    console.log(`[OAuth ${provider} Init] Starting OAuth flow for provider: ${provider}`)
+    console.log(`[OAuth ${provider} Init] Request URL: ${request.url}`)
+    
+    // Validate provider
+    if (!OAUTH_ENDPOINTS[provider as keyof typeof OAUTH_ENDPOINTS]) {
+      console.error(`[OAuth ${provider} Init] Invalid provider: ${provider}`)
+      return NextResponse.redirect(`${CONFIG.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=invalid_provider`)
+    }
+    
+    // Get provider config
+    const providerConfig = OAUTH_ENDPOINTS[provider as keyof typeof OAUTH_ENDPOINTS]
+    const clientId = CONFIG[`${provider.toUpperCase()}_CLIENT_ID` as keyof typeof CONFIG]
+    const clientSecret = CONFIG[`${provider.toUpperCase()}_CLIENT_SECRET` as keyof typeof CONFIG]
+    const redirectUri = CONFIG[`${provider.toUpperCase()}_REDIRECT_URI` as keyof typeof CONFIG]
+    
+    console.log(`[OAuth ${provider} Init] Client ID: ${clientId ? 'SET' : 'NOT SET'}`)
+    console.log(`[OAuth ${provider} Init] Client Secret: ${clientSecret ? 'SET' : 'NOT SET'}`)
+    console.log(`[OAuth ${provider} Init] Redirect URI: ${redirectUri}`)
+    
+    if (!clientId || !redirectUri) {
+      console.error(`[OAuth ${provider} Init] Missing configuration - Client ID: ${!!clientId}, Redirect URI: ${!!redirectUri}`)
+      return NextResponse.redirect(`${CONFIG.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=configuration_missing`)
+    }
+    
+    // For Spotify, we need the client secret for the callback, but not for the initial auth
+    // However, we should warn if it's missing
+    if (provider === 'spotify' && !clientSecret) {
+      console.warn(`[OAuth ${provider} Init] WARNING: Spotify client secret not set - OAuth callback will fail`)
+      return NextResponse.redirect(`${CONFIG.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=spotify_secret_missing`)
+    }
+    
+    // Generate state for CSRF protection
+    const state = crypto.randomBytes(16).toString('hex')
+    console.log(`[OAuth ${provider} Init] Generated state: ${state.substring(0, 8)}...`)
+    
+    // Build auth URL
+    const authUrl = buildAuthUrl(provider, providerConfig, clientId as string, redirectUri as string, state)
+    console.log(`[OAuth ${provider} Init] Auth URL: ${authUrl}`)
+    
+    // Store state in cookie for validation later
+    const response = NextResponse.redirect(authUrl)
+    
+    response.cookies.set(`oauth_state_${provider}`, state, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 600, // 10 minutes
+      path: '/',
+    })
+    
+    console.log(`[OAuth ${provider} Init] State cookie set, redirecting to: ${authUrl}`)
+    return response
+    
+  } catch (error) {
+    console.error(`[OAuth Init] Unexpected error:`, error)
+    return NextResponse.redirect(`${CONFIG.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=connection_failed`)
   }
-  
-  // Get provider config
-  const providerConfig = OAUTH_ENDPOINTS[provider as keyof typeof OAUTH_ENDPOINTS]
-  const clientId = CONFIG[`${provider.toUpperCase()}_CLIENT_ID` as keyof typeof CONFIG]
-  const redirectUri = CONFIG[`${provider.toUpperCase()}_REDIRECT_URI` as keyof typeof CONFIG]
-  
-  if (!clientId || !redirectUri) {
-    return NextResponse.json(
-      { error: `${provider} not configured` },
-      { status: 500 }
-    )
-  }
-  
-  // Generate state for CSRF protection
-  const state = crypto.randomBytes(16).toString('hex')
-  console.log(`[OAuth ${provider} Auth] Generated state:`, state.substring(0, 8) + '...')
-  
-  // Build auth URL
-  const authUrl = buildAuthUrl(provider, providerConfig, clientId as string, redirectUri as string, state)
-  console.log(`[OAuth ${provider} Auth] Redirecting to:`, authUrl)
-  
-  // Store state in cookie for validation later
-  const response = NextResponse.redirect(authUrl)
-  
-  response.cookies.set(`oauth_state_${provider}`, state, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 600, // 10 minutes
-    path: '/',
-  })
-  
-  console.log(`[OAuth ${provider} Auth] State cookie set with maxAge: 600s`)
-  return response
 }
 
 function buildAuthUrl(

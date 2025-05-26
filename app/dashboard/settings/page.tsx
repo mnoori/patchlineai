@@ -94,7 +94,26 @@ export default function SettingsPage() {
       // Reload platforms to show the new connection
       refreshPlatforms()
     } else if (error) {
-      toast.error(`Connection failed: ${error}`)
+      let errorMessage = 'Connection failed'
+      
+      switch (error) {
+        case 'spotify_secret_missing':
+          errorMessage = 'Spotify connection failed: Client secret not configured. Please contact support.'
+          break
+        case 'configuration_missing':
+          errorMessage = 'Platform not properly configured. Please contact support.'
+          break
+        case 'invalid_provider':
+          errorMessage = 'Invalid platform selected.'
+          break
+        case 'connection_failed':
+          errorMessage = 'Connection failed. Please try again.'
+          break
+        default:
+          errorMessage = `Connection failed: ${error}`
+      }
+      
+      toast.error(errorMessage)
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, [refreshPlatforms])
