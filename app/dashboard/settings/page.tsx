@@ -47,6 +47,7 @@ import {
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { motion } from "framer-motion"
 import { userAPI, platformsAPI } from "@/lib/api-client"
+import { usePlatformConnections } from "@/hooks/use-platform-connections"
 
 export default function SettingsPage() {
   const { userId } = useCurrentUser()
@@ -78,8 +79,7 @@ export default function SettingsPage() {
 
   const [isDirty, setIsDirty] = useState(false)
 
-  const [platforms, setPlatforms] = useState<any>({})
-  const [loadingPlatforms, setLoadingPlatforms] = useState(false)
+  const { platforms, loading: loadingPlatforms, connectPlatform, disconnectPlatform, refreshPlatforms } = usePlatformConnections()
 
   // Handle OAuth callback
   useEffect(() => {
@@ -92,22 +92,18 @@ export default function SettingsPage() {
       // Clear the URL parameters
       window.history.replaceState({}, document.title, window.location.pathname)
       // Reload platforms to show the new connection
-      if (userId) {
-        platformsAPI.get(userId).then((data: any) => {
-          setPlatforms(data.platforms || {})
-        })
-      }
+      refreshPlatforms()
     } else if (error) {
       toast.error(`Connection failed: ${error}`)
       window.history.replaceState({}, document.title, window.location.pathname)
     }
-  }, [])
+  }, [refreshPlatforms])
 
   useEffect(() => {
     async function loadUser() {
       if (!userId) return
       try {
-        const data = await userAPI.get(userId)
+        const data = await userAPI.get(userId) as any
         setFullName(data.fullName || "")
         setEmail(data.email || "")
         setCompany(data.company || "")
@@ -120,21 +116,7 @@ export default function SettingsPage() {
     loadUser()
   }, [userId])
 
-  useEffect(() => {
-    async function loadPlatforms() {
-      if (!userId) return
-      setLoadingPlatforms(true)
-      try {
-        const data = await platformsAPI.get(userId)
-        setPlatforms(data.platforms || {})
-      } catch (e) {
-        console.error("Failed to fetch platforms", e)
-      } finally {
-        setLoadingPlatforms(false)
-      }
-    }
-    loadPlatforms()
-  }, [userId])
+  // Platform loading is now handled by the usePlatformConnections hook
 
   async function handleProfileSave() {
     if (!userId) return
@@ -156,23 +138,14 @@ export default function SettingsPage() {
   const markDirty = () => setIsDirty(true)
 
   async function handlePlatformConnect(platform: string, connect: boolean) {
-    if (!userId) return
-    
     if (connect) {
-      // Redirect to OAuth flow
-      window.location.href = `/api/auth/${platform}`
+      connectPlatform(platform)
     } else {
-      // Disconnect platform
-      setLoadingPlatforms(true)
-      try {
-        await platformsAPI.update({ userId, platform, connected: false })
-        setPlatforms((prev: any) => ({ ...prev, [platform]: false }))
+      const result = await disconnectPlatform(platform)
+      if (result?.success) {
         toast.success(`${platform} disconnected successfully`)
-      } catch (e) {
-        console.error("Failed to disconnect platform", e)
-        toast.error(`Failed to disconnect ${platform}`)
-      } finally {
-        setLoadingPlatforms(false)
+      } else {
+        toast.error(result?.error || `Failed to disconnect ${platform}`)
       }
     }
   }

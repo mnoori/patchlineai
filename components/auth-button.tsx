@@ -71,20 +71,15 @@ export function AuthButton() {
       await signOut()
       
       // Clear localStorage
-      localStorage.removeItem("patchline-auth-token")
       localStorage.removeItem("patchline-user")
-      
-      // Clear cookie
-      document.cookie = "patchline-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
       
       setIsLoggedIn(false)
       window.location.href = "/login"
     } catch (error) {
       console.error("Error signing out:", error)
       // Force logout even if Cognito signout fails
-      localStorage.removeItem("patchline-auth-token")
       localStorage.removeItem("patchline-user")
-      document.cookie = "patchline-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+      
       setIsLoggedIn(false)
       window.location.href = "/login"
     }

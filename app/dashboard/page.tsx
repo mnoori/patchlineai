@@ -46,6 +46,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { fetchDashboardData, platformsAPI } from "@/lib/api-client"
+import { usePlatformConnections } from "@/hooks/use-platform-connections"
 
 // Add DollarSign component before DashboardPage
 function DollarSign(props: React.SVGProps<SVGSVGElement>) {
@@ -69,64 +70,77 @@ function DollarSign(props: React.SVGProps<SVGSVGElement>) {
 }
 
 // Compact Horizontal Integrations Component
-function IntegrationsPanel({ connectedCount }: { connectedCount: number }) {
+function IntegrationsPanel() {
   const [expanded, setExpanded] = useState(true) // Open by default
-  const [integrations] = useState([
+  const { platforms, loading, connectPlatform, getConnectedCount } = usePlatformConnections()
+  
+  const integrations = [
     {
       name: "Gmail",
+      platform: "google",
       icon: <Mail className="h-4 w-4" />,
-      connected: true,
+      connected: platforms.google?.connected || false,
       color: "from-red-500 to-red-600",
     },
     {
       name: "Google Calendar",
+      platform: "google",
       icon: <CalendarIcon className="h-4 w-4" />,
-      connected: false,
+      connected: platforms.google?.connected || false,
       color: "from-blue-500 to-blue-600",
     },
     {
       name: "Spotify",
+      platform: "spotify",
       icon: <Spotify className="h-4 w-4" />,
-      connected: true,
+      connected: platforms.spotify?.connected || false,
       color: "from-green-500 to-green-600",
     },
     {
       name: "Apple Music",
+      platform: "applemusic",
       icon: <Apple className="h-4 w-4" />,
-      connected: false,
+      connected: platforms.applemusic?.connected || false,
       color: "from-gray-600 to-gray-700",
     },
     {
       name: "SoundCloud",
+      platform: "soundcloud",
       icon: <Music2 className="h-4 w-4" />,
-      connected: true,
+      connected: platforms.soundcloud?.connected || false,
       color: "from-orange-500 to-orange-600",
     },
     {
       name: "YouTube",
+      platform: "youtube",
       icon: <Youtube className="h-4 w-4" />,
-      connected: false,
+      connected: platforms.youtube?.connected || false,
       color: "from-red-600 to-red-700",
     },
     {
       name: "Instagram",
+      platform: "instagram",
       icon: <Instagram className="h-4 w-4" />,
-      connected: true,
+      connected: platforms.instagram?.connected || false,
       color: "from-pink-500 to-purple-600",
     },
     {
       name: "Twitter",
+      platform: "twitter",
       icon: <Twitter className="h-4 w-4" />,
-      connected: false,
+      connected: platforms.twitter?.connected || false,
       color: "from-blue-400 to-blue-500",
     },
     {
       name: "Facebook",
+      platform: "facebook",
       icon: <Facebook className="h-4 w-4" />,
-      connected: false,
+      connected: platforms.facebook?.connected || false,
       color: "from-blue-600 to-blue-700",
     },
-  ])
+  ]
+  
+  const connectedCount = getConnectedCount()
 
   return (
     <Card className="glass-effect bg-gradient-to-r from-cosmic-midnight/50 to-cosmic-purple/20 border-cosmic-teal/10 overflow-hidden">
@@ -217,6 +231,7 @@ function IntegrationsPanel({ connectedCount }: { connectedCount: number }) {
                       size="sm"
                       variant="outline"
                       className="h-5 text-xs px-2 border-cosmic-teal/30 text-cosmic-teal hover:bg-cosmic-teal hover:text-black transition-all duration-300"
+                      onClick={() => connectPlatform(integration.platform)}
                     >
                       +
                     </Button>
@@ -667,7 +682,7 @@ export default function DashboardPage() {
     async function loadDashboardData() {
       setLoadingDashboard(true)
       try {
-        const data = await fetchDashboardData()
+        const data = await fetchDashboardData() as any
         setDashboardData({
           revenue: data.revenue || 45231.89,
           listeners: data.listeners || 2350412,
@@ -691,7 +706,7 @@ export default function DashboardPage() {
     async function fetchPlatforms() {
       if (!userId) return
       try {
-        const data = await platformsAPI.get(userId)
+        const data = await platformsAPI.get(userId) as any
         // Count number of connected platforms
         const count = Object.values(data.platforms || {}).filter(Boolean).length
         setConnectedPlatforms(count)
@@ -780,7 +795,7 @@ export default function DashboardPage() {
       <TimeCapsuleFeed />
 
       {/* Integrations Panel */}
-      <IntegrationsPanel connectedCount={connectedPlatforms} />
+                      <IntegrationsPanel />
 
       {/* Critical Alert Banner */}
       <CriticalAlertBanner alert={criticalAlert} onDismiss={removeAlert} onAction={handleAlertAction} />

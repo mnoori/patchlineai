@@ -53,6 +53,19 @@ export function useCurrentUser() {
       } catch (err) {
         console.error("Error getting current user:", err)
         setError(err as Error)
+
+        // If user is not authenticated, clear user data and redirect to login
+        if ((err as Error)?.name === "UserUnAuthenticatedException") {
+          try {
+            localStorage.removeItem("patchline-user")
+          } catch {}
+
+          // Redirect to login if not already there
+          if (window.location.pathname !== "/login") {
+            window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`
+          }
+        }
+
         setIsLoading(false)
       }
     }

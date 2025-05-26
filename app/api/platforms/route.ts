@@ -16,7 +16,7 @@ const isAwsSupported = () => {
 }
 
 // Only import AWS SDK if supported
-let DynamoDBClient: any, GetItemCommand: any, PutItemCommand: any, marshall: any, unmarshall: any
+let DynamoDBClient: any, GetItemCommand: any, PutItemCommand: any, QueryCommand: any, marshall: any, unmarshall: any
 let ddbClient: any = null
 
 if (isAwsSupported()) {
@@ -27,6 +27,7 @@ if (isAwsSupported()) {
     DynamoDBClient = dynamodb.DynamoDBClient
     GetItemCommand = dynamodb.GetItemCommand
     PutItemCommand = dynamodb.PutItemCommand
+    QueryCommand = dynamodb.QueryCommand
     marshall = util.marshall
     unmarshall = util.unmarshall
 
@@ -49,7 +50,7 @@ if (isAwsSupported()) {
 
     console.log("[API /platforms] AWS SDK initialized successfully")
   } catch (error) {
-    console.log("[API /platforms] Failed to initialize AWS SDK, will use mock data:", error.message)
+    console.log("[API /platforms] Failed to initialize AWS SDK, will use mock data:", error instanceof Error ? error.message : String(error))
     ddbClient = null
   }
 } else {
@@ -57,40 +58,36 @@ if (isAwsSupported()) {
 }
 
 const USERS_TABLE = process.env.USERS_TABLE || process.env.NEXT_PUBLIC_USERS_TABLE || "Users-staging"
+const PLATFORM_CONNECTIONS_TABLE = process.env.PLATFORM_CONNECTIONS_TABLE || "PlatformConnections-staging"
 
-// Mock platforms data
+// Mock platforms data - ALL PLATFORMS START AS DISCONNECTED
 const generateMockPlatforms = (userId: string) => ({
   platforms: {
     spotify: {
-      connected: true,
-      accessToken: "mock_spotify_token",
-      refreshToken: "mock_spotify_refresh",
-      expiresAt: new Date(Date.now() + 3600000).toISOString(),
-      userId: "spotify_user_123",
-      displayName: "Luna Echo",
-      connectedAt: new Date(Date.now() - 86400000).toISOString(),
+      connected: false,
+    },
+    google: {
+      connected: false,
     },
     soundcloud: {
-      connected: true,
-      accessToken: "mock_soundcloud_token",
-      userId: "soundcloud_user_456",
-      displayName: "Luna Echo",
-      connectedAt: new Date(Date.now() - 172800000).toISOString(),
+      connected: false,
     },
     instagram: {
-      connected: true,
-      accessToken: "mock_instagram_token",
-      userId: "instagram_user_789",
-      displayName: "lunaecho_music",
-      connectedAt: new Date(Date.now() - 259200000).toISOString(),
+      connected: false,
+    },
+    applemusic: {
+      connected: false,
     },
     youtube: {
       connected: false,
     },
-    tiktok: {
+    twitter: {
       connected: false,
     },
-    twitter: {
+    facebook: {
+      connected: false,
+    },
+    distrokid: {
       connected: false,
     },
   },
@@ -105,6 +102,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Missing userId" }, { status: 400 })
   }
 
+  console.log(`[API /platforms GET] Received request for userId: ${userId}, using table: ${USERS_TABLE}`)
+
   // If AWS is not supported, return mock data immediately
   if (!ddbClient) {
     console.log(`[API /platforms GET] Using mock data for userId: ${userId}`)
@@ -112,21 +111,58 @@ export async function GET(req: Request) {
   }
 
   try {
-    const result = await ddbClient.send(
+    console.log(`[API /platforms GET] Attempting to get user from table: ${USERS_TABLE} for userId: ${userId}`)
+    
+    // Get user data from Users table
+    const userResult = await ddbClient.send(
       new GetItemCommand({
         TableName: USERS_TABLE,
         Key: marshall({ userId }),
       }),
     )
 
-    if (!result.Item) {
-      return NextResponse.json({ platforms: {} })
+    // Get platform connections from PlatformConnections table
+    console.log(`[API /platforms GET] Querying platform connections from table: ${PLATFORM_CONNECTIONS_TABLE}`)
+    const connectionsResult = await ddbClient.send(
+      new QueryCommand({
+        TableName: PLATFORM_CONNECTIONS_TABLE,
+        KeyConditionExpression: "userId = :userId",
+        ExpressionAttributeValues: marshall({
+          ":userId": userId
+        })
+      })
+    )
+
+    // Start with user's platform data (legacy format)
+    let platforms: Record<string, any> = {}
+    if (userResult.Item) {
+      const user = unmarshall(userResult.Item)
+      platforms = user.platforms || {}
+      console.log(`[API /platforms GET] Found existing platforms for userId: ${userId}`, platforms)
     }
 
-    const user = unmarshall(result.Item)
-    return NextResponse.json({ platforms: user.platforms || {} })
+    // Override with actual platform connections (new format)
+    if (connectionsResult.Items && connectionsResult.Items.length > 0) {
+      console.log(`[API /platforms GET] Found ${connectionsResult.Items.length} platform connections`)
+      
+      connectionsResult.Items.forEach((item: any) => {
+        const connection = unmarshall(item)
+        platforms[connection.provider] = {
+          connected: true,
+          accessToken: connection.accessToken,
+          refreshToken: connection.refreshToken,
+          expiresAt: connection.expiresIn ? new Date(Date.now() + connection.expiresIn * 1000).toISOString() : null,
+          connectedAt: connection.connectedAt,
+          scope: connection.scope,
+          displayName: connection.displayName || connection.provider
+        }
+      })
+    }
+
+    console.log(`[API /platforms GET] Returning platforms for userId: ${userId}`, platforms)
+    return NextResponse.json({ platforms })
   } catch (error: any) {
-    console.error("Error fetching platforms:", error)
+    console.error(`[API /platforms GET] Error fetching platforms for userId: ${userId}:`, error)
 
     // Return mock data on any error
     console.log(`[API /platforms GET] Returning mock data due to error for userId: ${userId}`)

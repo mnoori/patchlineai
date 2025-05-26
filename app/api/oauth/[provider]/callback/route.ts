@@ -24,16 +24,24 @@ const TOKEN_ENDPOINTS = {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { provider: string } }
+  { params }: { params: Promise<{ provider: string }> }
 ) {
-  const provider = params.provider.toLowerCase()
+  const { provider: providerParam } = await params
+  const provider = providerParam.toLowerCase()
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get('code')
   const state = searchParams.get('state')
   const error = searchParams.get('error')
   
+  console.log(`[OAuth ${provider} Callback] Received:`, {
+    code: code ? 'present' : 'missing',
+    state: state ? state.substring(0, 8) + '...' : 'missing',
+    error: error || 'none'
+  })
+  
   // Handle errors from provider
   if (error) {
+    console.log(`[OAuth ${provider} Callback] Provider error:`, error)
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?error=${error}`
     )
@@ -41,7 +49,14 @@ export async function GET(
   
   // Validate state for CSRF protection
   const storedState = request.cookies.get(`oauth_state_${provider}`)?.value
+  console.log(`[OAuth ${provider} Callback] State validation:`, {
+    received: state ? state.substring(0, 8) + '...' : 'missing',
+    stored: storedState ? storedState.substring(0, 8) + '...' : 'missing',
+    match: state === storedState
+  })
+  
   if (!state || state !== storedState) {
+    console.log(`[OAuth ${provider} Callback] State validation failed`)
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?error=invalid_state`
     )
@@ -58,12 +73,22 @@ export async function GET(
     // Get current user
     const user = await getCurrentUser()
     const userId = user.userId
+    console.log(`[OAuth ${provider} Callback] User authenticated:`, userId)
     
     // Exchange code for tokens
+    console.log(`[OAuth ${provider} Callback] Exchanging code for tokens...`)
     const tokens = await exchangeCodeForTokens(provider, code)
+    console.log(`[OAuth ${provider} Callback] Tokens received:`, {
+      hasAccessToken: !!tokens.access_token,
+      hasRefreshToken: !!tokens.refresh_token,
+      expiresIn: tokens.expires_in,
+      scope: tokens.scope
+    })
     
     // Store tokens in DynamoDB
+    console.log(`[OAuth ${provider} Callback] Storing tokens for user:`, userId)
     await storeTokens(userId, provider, tokens)
+    console.log(`[OAuth ${provider} Callback] Tokens stored successfully`)
     
     // Clear state cookie and redirect to success
     const response = NextResponse.redirect(
@@ -71,9 +96,10 @@ export async function GET(
     )
     response.cookies.delete(`oauth_state_${provider}`)
     
+    console.log(`[OAuth ${provider} Callback] Redirecting to success page`)
     return response
   } catch (error) {
-    console.error(`OAuth callback error for ${provider}:`, error)
+    console.error(`[OAuth ${provider} Callback] Error:`, error)
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?error=connection_failed`
     )
@@ -154,8 +180,10 @@ async function storeTokens(userId: string, provider: string, tokens: any) {
     ...(provider === 'spotify' && { scope: tokens.scope }),
   }
   
+  const PLATFORM_CONNECTIONS_TABLE = process.env.PLATFORM_CONNECTIONS_TABLE || 'PlatformConnections-staging'
+  
   await docClient.send(new PutCommand({
-    TableName: 'PlatformConnections-staging',
+    TableName: PLATFORM_CONNECTIONS_TABLE,
     Item: item,
   }))
 } 

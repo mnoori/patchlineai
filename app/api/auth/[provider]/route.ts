@@ -24,9 +24,10 @@ const OAUTH_ENDPOINTS = {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { provider: string } }
+  { params }: { params: Promise<{ provider: string }> }
 ) {
-  const provider = params.provider.toLowerCase()
+  const { provider: providerParam } = await params
+  const provider = providerParam.toLowerCase()
   
   // Validate provider
   if (!OAUTH_ENDPOINTS[provider as keyof typeof OAUTH_ENDPOINTS]) {
@@ -50,19 +51,24 @@ export async function GET(
   
   // Generate state for CSRF protection
   const state = crypto.randomBytes(16).toString('hex')
+  console.log(`[OAuth ${provider} Auth] Generated state:`, state.substring(0, 8) + '...')
+  
+  // Build auth URL
+  const authUrl = buildAuthUrl(provider, providerConfig, clientId as string, redirectUri as string, state)
+  console.log(`[OAuth ${provider} Auth] Redirecting to:`, authUrl)
   
   // Store state in cookie for validation later
-  const response = NextResponse.redirect(
-    buildAuthUrl(provider, providerConfig, clientId as string, redirectUri as string, state)
-  )
+  const response = NextResponse.redirect(authUrl)
   
   response.cookies.set(`oauth_state_${provider}`, state, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 600, // 10 minutes
+    path: '/',
   })
   
+  console.log(`[OAuth ${provider} Auth] State cookie set with maxAge: 600s`)
   return response
 }
 

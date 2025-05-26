@@ -46,10 +46,15 @@ const PlatformCard = ({ name, icon, connected, onClick }: PlatformCardProps) => 
   )
 }
 
+import { usePlatformConnections } from "@/hooks/use-platform-connections"
+
 export function PlatformIntegrations() {
-  const platforms = [
+  const { platforms, connectPlatform } = usePlatformConnections()
+  
+  const platformList = [
     {
       name: "Gmail",
+      platform: "google",
       icon: (
         <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center text-white">
           <svg
@@ -68,10 +73,11 @@ export function PlatformIntegrations() {
           </svg>
         </div>
       ),
-      connected: true,
+      connected: platforms.google?.connected || false,
     },
     {
       name: "Google Calendar",
+      platform: "google",
       icon: (
         <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center text-white">
           <svg
@@ -98,10 +104,11 @@ export function PlatformIntegrations() {
           </svg>
         </div>
       ),
-      connected: false,
+      connected: platforms.google?.connected || false,
     },
     {
       name: "Spotify",
+      platform: "spotify",
       icon: (
         <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center text-white">
           <svg
@@ -122,10 +129,11 @@ export function PlatformIntegrations() {
           </svg>
         </div>
       ),
-      connected: true,
+      connected: platforms.spotify?.connected || false,
     },
     {
       name: "Apple Music",
+      platform: "applemusic",
       icon: (
         <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center text-white">
           <svg
@@ -152,10 +160,11 @@ export function PlatformIntegrations() {
           </svg>
         </div>
       ),
-      connected: false,
+      connected: platforms.applemusic?.connected || false,
     },
     {
       name: "SoundCloud",
+      platform: "soundcloud",
       icon: (
         <div className="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center text-white">
           <svg
@@ -182,10 +191,11 @@ export function PlatformIntegrations() {
           </svg>
         </div>
       ),
-      connected: true,
+      connected: platforms.soundcloud?.connected || false,
     },
     {
       name: "YouTube",
+      platform: "youtube",
       icon: (
         <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center text-white">
           <svg
@@ -204,10 +214,11 @@ export function PlatformIntegrations() {
           </svg>
         </div>
       ),
-      connected: false,
+      connected: platforms.youtube?.connected || false,
     },
     {
       name: "Instagram",
+      platform: "instagram",
       icon: (
         <div className="w-10 h-10 rounded-lg bg-pink-600 flex items-center justify-center text-white">
           <svg
@@ -227,10 +238,11 @@ export function PlatformIntegrations() {
           </svg>
         </div>
       ),
-      connected: true,
+      connected: platforms.instagram?.connected || false,
     },
     {
       name: "Twitter",
+      platform: "twitter",
       icon: (
         <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center text-white">
           <svg
@@ -248,10 +260,11 @@ export function PlatformIntegrations() {
           </svg>
         </div>
       ),
-      connected: false,
+      connected: platforms.twitter?.connected || false,
     },
     {
       name: "Facebook",
+      platform: "facebook",
       icon: (
         <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center text-white">
           <svg
@@ -269,7 +282,7 @@ export function PlatformIntegrations() {
           </svg>
         </div>
       ),
-      connected: false,
+      connected: platforms.facebook?.connected || false,
     },
     {
       name: "Add More",
@@ -282,8 +295,8 @@ export function PlatformIntegrations() {
     },
   ]
 
-  const connectedCount = platforms.filter((p) => p.connected).length
-  const totalCount = platforms.length - 1 // Excluding "Add More"
+  const connectedCount = platformList.filter((p) => p.connected).length
+  const totalCount = platformList.length - 1 // Excluding "Add More"
   const percentage = Math.round((connectedCount / totalCount) * 100)
 
   return (
@@ -305,7 +318,7 @@ export function PlatformIntegrations() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-4">
-            {platforms.map((platform, index) => (
+            {platformList.map((platform, index) => (
               <motion.div
                 key={platform.name}
                 initial={{ opacity: 0, y: 10 }}
@@ -316,7 +329,7 @@ export function PlatformIntegrations() {
                   name={platform.name}
                   icon={platform.icon}
                   connected={platform.connected}
-                  onClick={() => console.log(`Clicked ${platform.name}`)}
+                  onClick={() => platform.platform ? connectPlatform(platform.platform) : console.log(`Clicked ${platform.name}`)}
                 />
               </motion.div>
             ))}

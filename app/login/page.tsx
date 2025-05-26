@@ -64,9 +64,12 @@ export default function LoginPage() {
           email: email.trim()
         }))
         
-        // Set a simple auth flag
-        localStorage.setItem("patchline-auth-token", "cognito-authenticated")
-        document.cookie = `patchline-auth-token=cognito-authenticated; path=/; max-age=${7 * 24 * 60 * 60}` // 7 days
+        // Store user info for the app
+        localStorage.setItem("patchline-user", JSON.stringify({
+          userId: user.userId,
+          username: user.username,
+          email: email.trim()
+        }))
 
         toast.success("Login successful!")
         

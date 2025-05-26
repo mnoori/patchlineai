@@ -61,6 +61,7 @@ export const CONFIG = {
   // Spotify
   SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || "1c3ef44bdb494a4c90c591f56fd4bc37",
   SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET || "",
+  // Use environment variable for production, localhost for development
   SPOTIFY_REDIRECT_URI: process.env.SPOTIFY_REDIRECT_URI || "http://localhost:3000/api/oauth/spotify/callback",
   
   // Google/Gmail
