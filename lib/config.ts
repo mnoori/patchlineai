@@ -61,8 +61,13 @@ export const CONFIG = {
   // Spotify
   SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || "1c3ef44bdb494a4c90c591f56fd4bc37",
   SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET || "",
-  // Use environment variable for production, localhost for development
-  SPOTIFY_REDIRECT_URI: process.env.SPOTIFY_REDIRECT_URI || "http://localhost:3000/api/oauth/spotify/callback",
+  // Use explicit env var if provided, otherwise build from NEXT_PUBLIC_APP_URL.
+  // If the URL contains "localhost", convert it to 127.0.0.1 to satisfy Spotify's new loopback rule.
+  SPOTIFY_REDIRECT_URI:
+    process.env.SPOTIFY_REDIRECT_URI ||
+    `${(
+      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    ).replace("localhost", "127.0.0.1")}/api/oauth/spotify/callback`,
   
   // Google/Gmail
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",

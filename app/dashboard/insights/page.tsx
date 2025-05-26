@@ -9,6 +9,7 @@ import { PatchyInsights } from "@/components/insights/patchy-insights"
 import { CustomReportBuilder } from "@/components/insights/custom-report-builder"
 import { InsightsDigest } from "@/components/insights/insights-digest"
 import { PlatformIntegrations } from "@/components/insights/platform-integrations"
+import { SoundCloudEmbeds } from "@/components/insights/soundcloud-embeds"
 import { Button } from "@/components/ui/button"
 import { Calendar, Download, Share2, Users, DollarSign, BarChart2, Music } from "lucide-react"
 import { motion } from "framer-motion"
@@ -570,6 +571,17 @@ export default function InsightsPage() {
       >
         <PlatformIntegrations />
       </motion.div>
+
+      {/* SoundCloud Embeds Section */}
+      {embeds.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.75 }}
+        >
+          <SoundCloudEmbeds embeds={embeds} />
+        </motion.div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div
