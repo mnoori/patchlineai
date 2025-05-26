@@ -9,7 +9,7 @@ import { PatchyInsights } from "@/components/insights/patchy-insights"
 import { CustomReportBuilder } from "@/components/insights/custom-report-builder"
 import { InsightsDigest } from "@/components/insights/insights-digest"
 import { PlatformIntegrations } from "@/components/insights/platform-integrations"
-import { SoundCloudEmbeds } from "@/components/insights/soundcloud-embeds"
+
 import { Button } from "@/components/ui/button"
 import { Calendar, Download, Share2, Users, DollarSign, BarChart2, Music } from "lucide-react"
 import { motion } from "framer-motion"
@@ -417,11 +417,11 @@ export default function InsightsPage() {
       setIsLoading(true)
       try {
         // Load embeds data
-        const embedsData = await embedAPI.getAll(userId)
+        const embedsData = await embedAPI.getAll(userId) as any
         setEmbeds(embedsData.embeds || [])
 
         // Load dashboard metrics
-        const metrics = await fetchDashboardData()
+        const metrics = await fetchDashboardData() as any
         setDashboardMetrics({
           revenue: metrics.revenue || 45231.89,
           listeners: metrics.listeners || 2350412,
@@ -536,7 +536,7 @@ export default function InsightsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <PatchyInsights insights={mockData.patchyInsights} />
+          <PatchyInsights insights={mockData.patchyInsights as any} />
         </motion.div>
       </div>
 
@@ -572,16 +572,7 @@ export default function InsightsPage() {
         <PlatformIntegrations />
       </motion.div>
 
-      {/* SoundCloud Embeds Section */}
-      {embeds.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.75 }}
-        >
-          <SoundCloudEmbeds embeds={embeds} />
-        </motion.div>
-      )}
+
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div
@@ -609,7 +600,7 @@ export default function InsightsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 1.0 }}
       >
-        <TopTracksIntelligence tracks={mockData.topTracks} timeframe="30days" />
+        <TopTracksIntelligence tracks={mockData.topTracks as any} timeframe="30days" />
       </motion.div>
 
       <motion.div
@@ -617,7 +608,7 @@ export default function InsightsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 1.1 }}
       >
-        <CustomReportBuilder availableModules={mockData.reportModules} defaultActiveTab="library" />
+        <CustomReportBuilder availableModules={mockData.reportModules as any} defaultActiveTab="library" />
       </motion.div>
     </div>
   )

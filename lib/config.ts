@@ -61,13 +61,24 @@ export const CONFIG = {
   // Spotify
   SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || "1c3ef44bdb494a4c90c591f56fd4bc37",
   SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET || "",
-  // Use explicit env var if provided, otherwise build from NEXT_PUBLIC_APP_URL.
-  // If the URL contains "localhost", convert it to 127.0.0.1 to satisfy Spotify's new loopback rule.
+  // Use explicit env var if provided. Otherwise derive from NEXT_PUBLIC_APP_URL.
+  // ‑ In production we should never fallback to 127.0.0.1 – instead use the public site URL.
+  // ‑ In local development Spotify now requires 127.0.0.1 instead of localhost.
   SPOTIFY_REDIRECT_URI:
     process.env.SPOTIFY_REDIRECT_URI ||
-    `${(
-      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-    ).replace("localhost", "127.0.0.1")}/api/oauth/spotify/callback`,
+    (() => {
+      const isProd = process.env.NODE_ENV === "production"
+      const baseUrl =
+        process.env.NEXT_PUBLIC_APP_URL ||
+        (isProd ? "https://www.patchline.ai" : "http://localhost:3000")
+
+      // In development use 127.0.0.1 loopback rule, otherwise keep domain intact
+      const sanitizedBase = !isProd && baseUrl.includes("localhost")
+        ? baseUrl.replace("localhost", "127.0.0.1")
+        : baseUrl
+
+      return `${sanitizedBase}/api/oauth/spotify/callback`
+    })(),
   
   // Google/Gmail
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",

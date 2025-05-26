@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -39,15 +39,72 @@ import {
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Progress } from "@/components/ui/progress"
+import { SoundCloudEmbeds } from "@/components/insights/soundcloud-embeds"
+import { SpotifyEmbeds } from "@/components/spotify/spotify-embeds"
+import { useCurrentUser } from "@/hooks/use-current-user"
+import { usePlatformConnections } from "@/hooks/use-platform-connections"
+import { embedAPI } from "@/lib/api-client"
 
 export default function CatalogPage() {
+  const { userId } = useCurrentUser()
+  const { platforms } = usePlatformConnections()
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("tracks")
   const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(true)
+  const [isMobileAgentOpen, setIsMobileAgentOpen] = useState(false)
   const [openTrackDrawer, setOpenTrackDrawer] = useState<string | null>(null)
   const [openAlbumDrawer, setOpenAlbumDrawer] = useState<string | null>(null)
   const [openPlaylistDrawer, setOpenPlaylistDrawer] = useState<string | null>(null)
   const [pitchInProgress, setPitchInProgress] = useState<string | null>(null)
+  const [embeds, setEmbeds] = useState<any[]>([])
+  const [isLoadingEmbeds, setIsLoadingEmbeds] = useState(true)
+
+  const [spotifyTracks, setSpotifyTracks] = useState<any[]>([])
+  const [isLoadingSpotify, setIsLoadingSpotify] = useState(false)
+
+  // Load embeds data
+  useEffect(() => {
+    async function loadEmbeds() {
+      if (!userId) return
+      
+      setIsLoadingEmbeds(true)
+      try {
+        const embedsData = (await embedAPI.getAll(userId)) as any
+        const rawEmbeds: any[] = embedsData.embeds || []
+        // Deduplicate by unique url/id
+        const unique = Array.from(new Map(rawEmbeds.map((e: any) => [e.url || e.id, e])).values())
+        setEmbeds(unique)
+      } catch (error) {
+        console.error("Failed to load embeds data:", error)
+      } finally {
+        setIsLoadingEmbeds(false)
+      }
+    }
+
+    loadEmbeds()
+  }, [userId])
+
+  // Load Spotify top tracks when connected
+  useEffect(() => {
+    async function loadSpotifyTracks() {
+      if (!userId || !platforms.spotify?.connected) return
+
+      setIsLoadingSpotify(true)
+      try {
+        const res = await fetch(`/api/spotify/top-tracks?userId=${userId}`)
+        if (res.ok) {
+          const data = await res.json()
+          setSpotifyTracks(data.tracks || [])
+        }
+      } catch (err) {
+        console.error("Failed to load Spotify tracks", err)
+      } finally {
+        setIsLoadingSpotify(false)
+      }
+    }
+
+    loadSpotifyTracks()
+  }, [userId, platforms.spotify?.connected])
 
   // Handle tab change
   const handleTabChange = (value: string) => {
@@ -1385,11 +1442,25 @@ export default function CatalogPage() {
               {playlists.map((playlist) => renderPlaylistDrawer(playlist.id))}
             </TabsContent>
           </Tabs>
+
+          {/* SoundCloud Embeds Section */}
+          {embeds.length > 0 && !isLoadingEmbeds && (
+            <div className="mt-6">
+              <SoundCloudEmbeds embeds={embeds} />
+            </div>
+          )}
+
+          {/* Spotify Embeds Section */}
+          {spotifyTracks.length > 0 && !isLoadingSpotify && (
+            <div className="mt-6">
+              <SpotifyEmbeds tracks={spotifyTracks} />
+            </div>
+          )}
         </div>
 
-        {/* Agent-assist side panel - Fixed positioning */}
+        {/* Agent-assist side panel - Desktop only */}
         {isAgentPanelOpen && (
-          <div className="w-full xl:w-72 xl:sticky xl:top-20 xl:h-fit space-y-4">
+          <div className="hidden xl:block w-72 sticky top-20 h-fit space-y-4">
             <Card className="glass-effect">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -1433,6 +1504,60 @@ export default function CatalogPage() {
           </div>
         )}
       </div>
+
+      {/* Mobile Patchy Chat Button - Fixed floating button */}
+      <div className="xl:hidden">
+        <Button
+          onClick={() => setIsMobileAgentOpen(true)}
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black shadow-lg z-50"
+          size="icon"
+        >
+          <Zap className="h-6 w-6" />
+        </Button>
+      </div>
+
+      {/* Mobile Patchy Chat Modal */}
+      <Sheet open={isMobileAgentOpen} onOpenChange={setIsMobileAgentOpen}>
+        <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-cosmic-teal" />
+              Agent Assist
+            </SheetTitle>
+            <SheetDescription>Patchy's recommendations</SheetDescription>
+          </SheetHeader>
+          
+          <div className="mt-6 space-y-4">
+            {anomalies.map((anomaly, index) => (
+              <div key={index} className="p-3 rounded-lg border bg-background/50 space-y-2">
+                <div className="flex items-start gap-2">
+                  {anomaly.severity === "warning" && <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5" />}
+                  {anomaly.severity === "critical" && <XCircle className="h-4 w-4 text-rose-500 mt-0.5" />}
+                  {anomaly.severity === "opportunity" && <Zap className="h-4 w-4 text-cosmic-teal mt-0.5" />}
+                  <div>
+                    <p className="text-sm font-medium">{anomaly.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Affects: {anomaly.affectedItems.join(", ")}
+                    </p>
+                  </div>
+                </div>
+                <Button size="sm" className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                  {anomaly.action}
+                </Button>
+              </div>
+            ))}
+
+            <div className="pt-2">
+              <div className="relative">
+                <Input placeholder="Ask Patchy..." className="pr-10" />
+                <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-full aspect-square">
+                  <Zap className="h-4 w-4 text-cosmic-teal" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Catalog Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

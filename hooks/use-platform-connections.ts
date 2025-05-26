@@ -56,7 +56,7 @@ export function usePlatformConnections() {
       setLoading(true)
       setError(null)
       
-      const response = await platformsAPI.get(userId) as { platforms?: Record<string, PlatformConnection> }
+      const response = await platformsAPI.get(userId) as { platforms?: Record<string, PlatformConnection | boolean> }
       
       // Always start with disconnected state, then update with actual connections
       const basePlatforms: PlatformConnections = {
@@ -75,8 +75,12 @@ export function usePlatformConnections() {
       if (response?.platforms) {
         Object.keys(response.platforms).forEach((platform) => {
           const connectionData = response.platforms?.[platform]
-          if (connectionData && connectionData.connected && connectionData.accessToken) {
-            basePlatforms[platform as keyof PlatformConnections] = connectionData
+          // Handle both new format (object with connected property) and legacy format (boolean)
+          if (connectionData === true || (connectionData && connectionData.connected)) {
+            basePlatforms[platform as keyof PlatformConnections] = {
+              connected: true,
+              ...(typeof connectionData === 'object' ? connectionData : {})
+            }
           }
         })
       }

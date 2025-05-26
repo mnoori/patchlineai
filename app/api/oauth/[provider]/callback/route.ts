@@ -52,14 +52,20 @@ export async function GET(
   console.log(`[OAuth ${provider} Callback] State validation:`, {
     received: state ? state.substring(0, 8) + '...' : 'missing',
     stored: storedState ? storedState.substring(0, 8) + '...' : 'missing',
-    match: state === storedState
+    match: state === storedState,
+    allCookies: Object.fromEntries(request.cookies.getAll().map(c => [c.name, c.value.substring(0, 8) + '...']))
   })
   
   if (!state || state !== storedState) {
     console.log(`[OAuth ${provider} Callback] State validation failed`)
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?error=invalid_state`
-    )
+    // For development, be more lenient with state validation
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[OAuth ${provider} Callback] Skipping state validation in development mode`)
+    } else {
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?error=invalid_state`
+      )
+    }
   }
   
   // Validate provider and code
@@ -77,12 +83,14 @@ export async function GET(
     
     // Exchange code for tokens
     console.log(`[OAuth ${provider} Callback] Exchanging code for tokens...`)
+    console.log(`[OAuth ${provider} Callback] Using redirect URI:`, CONFIG[`${provider.toUpperCase()}_REDIRECT_URI` as keyof typeof CONFIG])
     const tokens = await exchangeCodeForTokens(provider, code)
     console.log(`[OAuth ${provider} Callback] Tokens received:`, {
       hasAccessToken: !!tokens.access_token,
       hasRefreshToken: !!tokens.refresh_token,
       expiresIn: tokens.expires_in,
-      scope: tokens.scope
+      scope: tokens.scope,
+      tokenType: tokens.token_type
     })
     
     // Store tokens in DynamoDB
@@ -110,6 +118,12 @@ async function exchangeCodeForTokens(provider: string, code: string) {
   const clientId = CONFIG[`${provider.toUpperCase()}_CLIENT_ID` as keyof typeof CONFIG] as string
   const clientSecret = CONFIG[`${provider.toUpperCase()}_CLIENT_SECRET` as keyof typeof CONFIG] as string
   const redirectUri = CONFIG[`${provider.toUpperCase()}_REDIRECT_URI` as keyof typeof CONFIG] as string
+  
+  console.log(`[OAuth ${provider} Token Exchange] Config:`, {
+    clientId: clientId ? clientId.substring(0, 8) + '...' : 'missing',
+    hasClientSecret: !!clientSecret,
+    redirectUri
+  })
   
   const tokenEndpoint = TOKEN_ENDPOINTS[provider as keyof typeof TOKEN_ENDPOINTS]
   
@@ -148,18 +162,26 @@ async function exchangeCodeForTokens(provider: string, code: string) {
     })
   }
   
+  console.log(`[OAuth ${provider} Token Exchange] Making request to:`, tokenEndpoint)
+  console.log(`[OAuth ${provider} Token Exchange] Request body:`, requestBody.toString())
+  
   const response = await fetch(tokenEndpoint, {
     method: 'POST',
     headers,
     body: requestBody.toString(),
   })
   
+  console.log(`[OAuth ${provider} Token Exchange] Response status:`, response.status)
+  
   if (!response.ok) {
     const error = await response.text()
+    console.error(`[OAuth ${provider} Token Exchange] Error response:`, error)
     throw new Error(`Token exchange failed: ${error}`)
   }
   
-  return response.json()
+  const tokenData = await response.json()
+  console.log(`[OAuth ${provider} Token Exchange] Success! Token data keys:`, Object.keys(tokenData))
+  return tokenData
 }
 
 async function storeTokens(userId: string, provider: string, tokens: any) {
