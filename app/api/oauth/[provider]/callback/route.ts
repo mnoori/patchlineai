@@ -26,8 +26,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ provider: string }> }
 ) {
-  const { provider: providerParam } = await params
-  const provider = providerParam.toLowerCase()
+  const resolvedParams = await params
+  const provider = resolvedParams.provider.toLowerCase()
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get('code')
   const state = searchParams.get('state')

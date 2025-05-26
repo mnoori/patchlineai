@@ -20,3 +20,29 @@ export function SoundEffects({ children }: SoundEffectsProps) {
     // Set volume
     if (tapSoundRef.current) tapSoundRef.current.volume = 0.2
     if (successSoundRef.current) successSoundRef.current.volume = 0.3
+  }, [])
+
+  const playTapSound = () => {
+    if (tapSoundRef.current) {
+      tapSoundRef.current.currentTime = 0
+      tapSoundRef.current.play().catch(() => {
+        // Ignore audio play errors
+      })
+    }
+  }
+
+  const playSuccessSound = () => {
+    if (successSoundRef.current) {
+      successSoundRef.current.currentTime = 0
+      successSoundRef.current.play().catch(() => {
+        // Ignore audio play errors
+      })
+    }
+  }
+
+  return (
+    <div onClick={playTapSound}>
+      {children}
+    </div>
+  )
+}
