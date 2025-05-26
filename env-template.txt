@@ -1,0 +1,39 @@
+# AWS Configuration
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your_aws_access_key_here
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key_here
+
+# DynamoDB Tables
+USERS_TABLE=Users-staging
+EMBEDS_TABLE=Embeds-staging
+BLOG_POSTS_TABLE=BlogPosts-staging
+CONTENT_DRAFTS_TABLE=ContentDrafts-staging
+
+# Platform Integrations
+# Spotify (Client ID is public, but secret should be private)
+SPOTIFY_CLIENT_ID=1c3ef44bdb494a4c90c591f56fd4bc37
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
+SPOTIFY_REDIRECT_URI=http://localhost:3000/api/oauth/spotify/callback
+
+# Google/Gmail
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/oauth/google/callback
+
+# SoundCloud
+SOUNDCLOUD_CLIENT_ID=your_soundcloud_client_id_here
+SOUNDCLOUD_CLIENT_SECRET=your_soundcloud_client_secret_here
+SOUNDCLOUD_REDIRECT_URI=http://localhost:3000/api/oauth/soundcloud/callback
+
+# Instagram
+INSTAGRAM_CLIENT_ID=your_instagram_app_id_here
+INSTAGRAM_CLIENT_SECRET=your_instagram_app_secret_here
+INSTAGRAM_REDIRECT_URI=http://localhost:3000/api/oauth/instagram/callback
+
+# Application Settings
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+JWT_SECRET=your_jwt_secret_here
+ENV=development
+
+# AI Configuration
+BEDROCK_MODEL_ID=amazon.nova-micro-v1:0 

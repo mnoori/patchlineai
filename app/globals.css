@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 260 90% 5%;
+    --foreground: 0 0% 98%;
+    --card: 260 50% 11%;
+    --card-foreground: 0 0% 98%;
+    --popover: 260 50% 11%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 184 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 260 30% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 260 30% 16%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 260 30% 16%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 260 30% 16%;
+    --input: 260 30% 16%;
+    --ring: 184 100% 50%;
+    --radius: 0.75rem;
+
+    /* Custom colors */
+    --cosmic-teal: 184 100% 50%;
+    --cosmic-pink: 330 100% 50%;
+    --cosmic-space: 260 30% 10%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-cosmic-teal to-cosmic-pink;
+}
+
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: linear-gradient(to right, theme("colors.cosmic.teal"), theme("colors.cosmic.pink"));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.glass-effect {
+  @apply bg-cosmic-midnight/80 backdrop-blur-md border border-white/10;
+}
+
+/* Chat button active state with glow effect */
+.chat-button-active {
+  @apply bg-cosmic-teal/20 text-cosmic-teal border border-cosmic-teal/30;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 5px rgba(0, 240, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.chat-button-active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(0, 240, 255, 0.1), rgba(255, 42, 109, 0.05));
+  z-index: 0;
+  opacity: 0.7;
+}
+
+/* Chat interface transitions */
+.chat-main {
+  transition: margin-right 0.3s ease-out;
+}
+
+.chat-shifted {
+  margin-right: 64px;
+}
+
+.chat-expanded-shift {
+  margin-right: 320px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Custom scrollbar styling for chat interface */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.5);
+}
+
+/* Pulsing glow effect for Patchy button */
+.patchy-button-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.1), 0 0 0 0 rgba(255, 42, 109, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 10px 2px rgba(0, 240, 255, 0.3), 0 0 15px 5px rgba(255, 42, 109, 0.1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.1), 0 0 0 0 rgba(255, 42, 109, 0.1);
+  }
+}

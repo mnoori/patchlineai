@@ -1,0 +1,16 @@
+{
+  "name": "patchline-backend",
+  "version": "1.0.0",
+  "description": "PatchlineAI Backend API Server",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "fastify": "^4.24.3",
+    "@fastify/cors": "^8.4.0",
+    "aws-sdk": "^2.1490.0"
+  },
+  "type": "module"
+} 
