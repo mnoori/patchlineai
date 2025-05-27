@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CONFIG } from '@/lib/config'
-import { getCurrentUser } from 'aws-amplify/auth'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
-
+import { getAuthenticatedUser } from '@/utils/amplifyServerUtils'
 // Initialize DynamoDB client
 const dynamoClient = new DynamoDBClient({
   region: CONFIG.AWS_REGION,
@@ -68,6 +67,18 @@ export async function GET(
     }
   }
   
+  // Extract user ID from state
+  let userId: string | null = null
+  if (state) {
+    try {
+      const stateData = JSON.parse(Buffer.from(state, 'base64url').toString())
+      userId = stateData.userId
+      console.log(`[OAuth ${provider} Callback] Extracted user ID from state:`, userId)
+    } catch (error) {
+      console.error(`[OAuth ${provider} Callback] Failed to parse state:`, error)
+    }
+  }
+  
   // Validate provider and code
   if (!TOKEN_ENDPOINTS[provider as keyof typeof TOKEN_ENDPOINTS] || !code) {
     return NextResponse.redirect(
@@ -76,10 +87,25 @@ export async function GET(
   }
   
   try {
-    // Get current user
-    const user = await getCurrentUser()
-    const userId = user.userId
-    console.log(`[OAuth ${provider} Callback] User authenticated:`, userId)
+    // Use the user ID from state if available, otherwise try to get authenticated user
+    let finalUserId: string
+    
+    if (userId) {
+      // Use the user ID extracted from state
+      finalUserId = userId
+      console.log(`[OAuth ${provider} Callback] Using user ID from state:`, finalUserId)
+    } else {
+      // Fallback to getting authenticated user (for backward compatibility)
+      const user = await getAuthenticatedUser()
+      if (!user) {
+        console.error(`[OAuth ${provider} Callback] User not authenticated and no user ID in state`)
+        return NextResponse.redirect(
+          `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?error=not_authenticated`
+        )
+      }
+      finalUserId = user.userId
+      console.log(`[OAuth ${provider} Callback] User authenticated via session:`, finalUserId)
+    }
     
     // Exchange code for tokens
     console.log(`[OAuth ${provider} Callback] Exchanging code for tokens...`)
@@ -94,8 +120,8 @@ export async function GET(
     })
     
     // Store tokens in DynamoDB
-    console.log(`[OAuth ${provider} Callback] Storing tokens for user:`, userId)
-    await storeTokens(userId, provider, tokens)
+    console.log(`[OAuth ${provider} Callback] Storing tokens for user:`, finalUserId)
+    await storeTokens(finalUserId, provider, tokens)
     console.log(`[OAuth ${provider} Callback] Tokens stored successfully`)
     
     // Clear state cookie and redirect to success

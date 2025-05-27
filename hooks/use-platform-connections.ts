@@ -97,8 +97,16 @@ export function usePlatformConnections() {
   }
 
   const connectPlatform = (platform: string) => {
-    // Redirect to OAuth flow
-    window.location.href = `/api/auth/${platform}`
+    if (!userId) {
+      console.error('No user ID available for OAuth connection')
+      return
+    }
+    
+    // Store user ID in session storage temporarily
+    sessionStorage.setItem('oauth_user_id', userId)
+    
+    // Redirect to OAuth flow with user ID in query params
+    window.location.href = `/api/auth/${platform}?uid=${encodeURIComponent(userId)}`
   }
 
   const disconnectPlatform = async (platform: string) => {

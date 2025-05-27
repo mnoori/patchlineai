@@ -32,6 +32,14 @@ export async function GET(
     
     console.log(`[OAuth ${provider} Init] Starting OAuth flow for provider: ${provider}`)
     console.log(`[OAuth ${provider} Init] Request URL: ${request.url}`)
+    console.log(`[OAuth ${provider} Init] Environment: ${process.env.NODE_ENV}`)
+    console.log(`[OAuth ${provider} Init] Available env vars:`, {
+      SPOTIFY_CLIENT_ID: !!process.env.SPOTIFY_CLIENT_ID,
+      SPOTIFY_CLIENT_SECRET: !!process.env.SPOTIFY_CLIENT_SECRET,
+      SPOTIFY_REDIRECT_URI: !!process.env.SPOTIFY_REDIRECT_URI,
+      SPOTIFY_LOCAL_REDIRECT_URI: !!process.env.SPOTIFY_LOCAL_REDIRECT_URI,
+      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL
+    })
     
     // Validate provider
     if (!OAUTH_ENDPOINTS[provider as keyof typeof OAUTH_ENDPOINTS]) {
@@ -48,6 +56,11 @@ export async function GET(
     console.log(`[OAuth ${provider} Init] Client ID: ${clientId ? 'SET' : 'NOT SET'}`)
     console.log(`[OAuth ${provider} Init] Client Secret: ${clientSecret ? 'SET' : 'NOT SET'}`)
     console.log(`[OAuth ${provider} Init] Redirect URI: ${redirectUri}`)
+    console.log(`[OAuth ${provider} Init] Config values:`, {
+      clientId: clientId ? `${clientId.substring(0, 8)}...` : 'missing',
+      hasClientSecret: !!clientSecret,
+      redirectUri
+    })
     
     if (!clientId || !redirectUri) {
       console.error(`[OAuth ${provider} Init] Missing configuration - Client ID: ${!!clientId}, Redirect URI: ${!!redirectUri}`)
@@ -61,9 +74,25 @@ export async function GET(
       return NextResponse.redirect(`${CONFIG.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=spotify_secret_missing`)
     }
     
-    // Generate state for CSRF protection
-    const state = crypto.randomBytes(16).toString('hex')
-    console.log(`[OAuth ${provider} Init] Generated state: ${state.substring(0, 8)}...`)
+    // Get the user ID from query params
+    const searchParams = request.nextUrl.searchParams
+    const userId = searchParams.get('uid')
+    
+    if (!userId) {
+      console.error(`[OAuth ${provider} Init] No user ID provided in query params`)
+      return NextResponse.redirect(`${CONFIG.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=no_user_id`)
+    }
+    
+    // Generate state for CSRF protection and include user ID
+    const stateData = {
+      csrf: crypto.randomBytes(16).toString('hex'),
+      userId: userId,
+      timestamp: Date.now()
+    }
+    
+    // Encode state as base64 to keep it URL-safe
+    const state = Buffer.from(JSON.stringify(stateData)).toString('base64url')
+    console.log(`[OAuth ${provider} Init] Generated state with user ID: ${userId}`)
     
     // Build auth URL
     const authUrl = buildAuthUrl(provider, providerConfig, clientId as string, redirectUri as string, state)

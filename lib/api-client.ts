@@ -171,6 +171,25 @@ export const platformsAPI = {
 }
 
 /**
+ * Spotify Artist Profile Management
+ */
+export const spotifyArtistAPI = {
+  async getProfile(userId: string) {
+    const response = await fetch(`/api/spotify/artist-profile?userId=${userId}`)
+    return handleResponse(response)
+  },
+
+  async storeProfile(data: { userId: string; artistId: string; artistName: string; spotifyUrl?: string }) {
+    const response = await fetch('/api/spotify/artist-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    return handleResponse(response)
+  }
+}
+
+/**
  * Authentication
  */
 export const authAPI = {

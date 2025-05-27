@@ -10,7 +10,7 @@
 // DEVELOPMENT MODE TOGGLE
 // Set this to false when deploying to production
 // ======================================================================
-export const IS_DEVELOPMENT_MODE = false
+export const IS_DEVELOPMENT_MODE = process.env.NODE_ENV === 'development'
 
 // ======================================================================
 // AUTHENTICATION BYPASS
@@ -66,6 +66,7 @@ export const CONFIG = {
   // ‑ In local development Spotify now requires 127.0.0.1 instead of localhost.
   SPOTIFY_REDIRECT_URI:
     process.env.SPOTIFY_REDIRECT_URI ||
+    process.env.SPOTIFY_LOCAL_REDIRECT_URI ||
     (() => {
       const isProd = process.env.NODE_ENV === "production"
       const baseUrl =

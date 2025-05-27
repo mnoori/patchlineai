@@ -61,6 +61,9 @@ export default function CatalogPage() {
 
   const [spotifyTracks, setSpotifyTracks] = useState<any[]>([])
   const [isLoadingSpotify, setIsLoadingSpotify] = useState(false)
+  const [artistTracks, setArtistTracks] = useState<any[]>([])
+  const [artistInfo, setArtistInfo] = useState<any>(null)
+  const [needsArtistSetup, setNeedsArtistSetup] = useState(false)
 
   // Load embeds data
   useEffect(() => {
@@ -95,6 +98,9 @@ export default function CatalogPage() {
         if (res.ok) {
           const data = await res.json()
           setSpotifyTracks(data.tracks || [])
+        } else {
+          const error = await res.json()
+          console.error("Failed to load Spotify tracks:", error)
         }
       } catch (err) {
         console.error("Failed to load Spotify tracks", err)
@@ -104,6 +110,51 @@ export default function CatalogPage() {
     }
 
     loadSpotifyTracks()
+  }, [userId, platforms.spotify?.connected])
+
+  // Load artist tracks when connected
+  useEffect(() => {
+    async function loadArtistTracks() {
+      if (!userId || !platforms.spotify?.connected) return
+
+      try {
+        // First, search for the artist profile
+        const searchRes = await fetch(`/api/spotify/search-artist?userId=${userId}`)
+        if (searchRes.ok) {
+          const searchData = await searchRes.json()
+          console.log("Artist search results:", searchData)
+          
+          // If we found an artist ID, fetch their tracks
+          const artistId = searchData.matchedArtist?.id || searchData.knownArtistId
+          
+          if (artistId) {
+            const res = await fetch(`/api/spotify/artist-tracks?userId=${userId}&artistId=${artistId}`)
+            if (res.ok) {
+              const data = await res.json()
+              setArtistTracks(data.tracks || [])
+              setArtistInfo(data.artistInfo)
+              setNeedsArtistSetup(false) // Reset setup flag on successful load
+              console.log("Artist tracks loaded:", data)
+            } else {
+              const errorData = await res.json()
+              if (errorData.needsSetup) {
+                console.log("Artist profile needs setup:", errorData.error)
+                setNeedsArtistSetup(true)
+              } else {
+                console.error("Failed to load artist tracks:", errorData.error)
+              }
+            }
+          } else {
+            console.log("No artist profile found, user needs to configure their artist profile")
+            setNeedsArtistSetup(true)
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load artist tracks", err)
+      }
+    }
+
+    loadArtistTracks()
   }, [userId, platforms.spotify?.connected])
 
   // Handle tab change
@@ -1443,17 +1494,78 @@ export default function CatalogPage() {
             </TabsContent>
           </Tabs>
 
-          {/* SoundCloud Embeds Section */}
-          {embeds.length > 0 && !isLoadingEmbeds && (
+          {/* Spotify Artist Tracks Section - First */}
+          {artistTracks.length > 0 && artistInfo && (
             <div className="mt-6">
-              <SoundCloudEmbeds embeds={embeds} />
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Spotify Tracks</h2>
+                <Card className="glass-effect">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{artistInfo.name}</CardTitle>
+                        <CardDescription>
+                          {artistInfo.followers.toLocaleString()} followers • {artistInfo.genres.join(', ')}
+                        </CardDescription>
+                      </div>
+                      <Badge variant="outline" className="bg-[#1DB954]/10 text-[#1DB954] border-[#1DB954]/20">
+                        Spotify
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <SpotifyEmbeds tracks={artistTracks} />
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           )}
 
-          {/* Spotify Embeds Section */}
-          {spotifyTracks.length > 0 && !isLoadingSpotify && (
+          {/* Artist Profile Setup Prompt */}
+          {needsArtistSetup && platforms.spotify?.connected && (
             <div className="mt-6">
-              <SpotifyEmbeds tracks={spotifyTracks} />
+              <Card className="glass-effect border-amber-500/20 bg-amber-500/5">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                    <CardTitle className="text-lg">Artist Profile Setup Required</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Configure your Spotify artist profile to see your tracks in the catalog
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Your Spotify account is connected, but we need to know which artist profile belongs to you. 
+                      This ensures we show the correct tracks and artist information.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => window.location.href = '/dashboard/settings'}
+                        className="gap-2 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Configure Artist Profile
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => setNeedsArtistSetup(false)}
+                        size="sm"
+                      >
+                        Dismiss
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* SoundCloud Embeds Section - Second */}
+          {embeds.length > 0 && !isLoadingEmbeds && (
+            <div className="mt-6">
+              <SoundCloudEmbeds embeds={embeds} />
             </div>
           )}
         </div>

@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup-env": "node scripts/setup-env.js",
+    "check-env": "node scripts/check-env.js",
+    "setup-algoryx": "node scripts/setup-algoryx-profile.js",
+    "setup-algoryx-mehdi": "node scripts/setup-algoryx-profile.js 14287408-6011-70b3-5ac6-089f0cafdc10",
+    "fix-mehdi-profile": "node scripts/fix-mehdi-profile.js",
+    "test-artist-profile": "node test-artist-profile.js"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.11.2",
