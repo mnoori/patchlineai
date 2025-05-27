@@ -8,8 +8,17 @@ import json
 import time
 import sys
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from pathlib import Path
+
+# Import centralized configuration
+from config import (
+    DEFAULT_REGION, 
+    AGENT_CONFIG, 
+    S3_CONFIG, 
+    BEDROCK_MODELS,
+    get_model_id
+)
 
 # Load environment variables from .env.local
 def load_env_file():
@@ -31,12 +40,24 @@ def load_env_file():
     if os.environ.get('REGION_AWS') and not os.environ.get('AWS_REGION'):
         os.environ['AWS_REGION'] = os.environ['REGION_AWS']
 
-# Configuration constants (these don't need env vars)
-AGENT_NAME = 'PatchlineEmailAgent'
-AGENT_DESCRIPTION = 'AI assistant for managing emails and communications'
-FOUNDATION_MODEL = 'anthropic.claude-3-sonnet-20240229-v1:0'
-ACTION_GROUP_NAME = 'GmailActions'
-KNOWLEDGE_BASE_NAME = 'PatchlineEmailKnowledge'
+# Configuration from centralized config
+AGENT_NAME = AGENT_CONFIG['name']
+AGENT_DESCRIPTION = AGENT_CONFIG['description']
+FOUNDATION_MODEL = AGENT_CONFIG['foundation_model']
+ACTION_GROUP_NAME = AGENT_CONFIG['action_group_name']
+KNOWLEDGE_BASE_NAME = AGENT_CONFIG['knowledge_base_name']
+
+# Allow model override via environment variable
+MODEL_OVERRIDE = os.environ.get('BEDROCK_MODEL_NAME')
+if MODEL_OVERRIDE:
+    try:
+        FOUNDATION_MODEL = get_model_id(MODEL_OVERRIDE)
+        print(f"🔄 Using model override: {MODEL_OVERRIDE} ({FOUNDATION_MODEL})")
+    except ValueError as e:
+        print(f"⚠️  Invalid model override '{MODEL_OVERRIDE}': {e}")
+        print(f"🔄 Using default model: {FOUNDATION_MODEL}")
+
+print(f"🤖 Using foundation model: {FOUNDATION_MODEL}")
 
 # Global variables will be initialized in main()
 REGION = None
@@ -47,11 +68,103 @@ s3 = None
 lambda_client = None
 
 # ---------------------------------------------------------------------------
+# UTILITY FUNCTIONS
+# ---------------------------------------------------------------------------
+
+def find_existing_agent() -> Optional[Dict[str, Any]]:
+    """Find existing agent by name"""
+    try:
+        response = bedrock_agent.list_agents()
+        for agent_summary in response.get('agentSummaries', []):
+            if agent_summary['agentName'] == AGENT_NAME:
+                # Get full agent details
+                agent_response = bedrock_agent.get_agent(agentId=agent_summary['agentId'])
+                return agent_response['agent']
+        return None
+    except Exception as e:
+        print(f"Error checking for existing agent: {str(e)}")
+        return None
+
+def cleanup_existing_agent(agent_id: str):
+    """Clean up existing agent and its components"""
+    try:
+        print(f"🧹 Cleaning up existing agent {agent_id}...")
+        
+        # List and delete action groups
+        try:
+            action_groups = bedrock_agent.list_agent_action_groups(
+                agentId=agent_id,
+                agentVersion='DRAFT'
+            )
+            for ag in action_groups.get('actionGroupSummaries', []):
+                bedrock_agent.delete_agent_action_group(
+                    agentId=agent_id,
+                    agentVersion='DRAFT',
+                    actionGroupId=ag['actionGroupId']
+                )
+                print(f"   Deleted action group: {ag['actionGroupName']}")
+        except Exception as e:
+            print(f"   Warning: Could not clean up action groups: {str(e)}")
+        
+        # List and delete aliases
+        try:
+            aliases = bedrock_agent.list_agent_aliases(agentId=agent_id)
+            for alias in aliases.get('agentAliasSummaries', []):
+                if alias['agentAliasName'] != 'TSTALIASID':  # Don't delete test alias
+                    bedrock_agent.delete_agent_alias(
+                        agentId=agent_id,
+                        agentAliasId=alias['agentAliasId']
+                    )
+                    print(f"   Deleted alias: {alias['agentAliasName']}")
+        except Exception as e:
+            print(f"   Warning: Could not clean up aliases: {str(e)}")
+        
+        # Delete the agent
+        bedrock_agent.delete_agent(agentId=agent_id)
+        print(f"✅ Deleted existing agent")
+        
+        # Wait for deletion
+        time.sleep(5)
+        
+    except Exception as e:
+        print(f"Error cleaning up agent: {str(e)}")
+
+def validate_openapi_schema(schema_path: str) -> bool:
+    """Validate OpenAPI schema format"""
+    try:
+        with open(schema_path, 'r') as f:
+            schema = json.load(f)
+        
+        # Basic validation
+        required_fields = ['openapi', 'info', 'paths']
+        for field in required_fields:
+            if field not in schema:
+                print(f"❌ Missing required field in OpenAPI schema: {field}")
+                return False
+        
+        # Check OpenAPI version
+        if not schema['openapi'].startswith('3.0'):
+            print(f"❌ Unsupported OpenAPI version: {schema['openapi']}")
+            return False
+        
+        # Validate paths
+        if not schema['paths']:
+            print("❌ No paths defined in OpenAPI schema")
+            return False
+        
+        print("✅ OpenAPI schema validation passed")
+        return True
+        
+    except json.JSONDecodeError as e:
+        print(f"❌ Invalid JSON in OpenAPI schema: {str(e)}")
+        return False
+    except Exception as e:
+        print(f"❌ Error validating OpenAPI schema: {str(e)}")
+        return False
+
+# ---------------------------------------------------------------------------
 # IAM ROLE HELPERS
 # ---------------------------------------------------------------------------
-# If AGENT_ROLE_ARN env var is provided we simply return it. Otherwise the
-# script will create (or reuse) the default <AGENT_NAME>Role and attach the
-# required inline policy.
 
 def create_agent_role():
     """Create IAM role for Bedrock Agent"""
@@ -115,13 +228,29 @@ def create_agent_role():
             {
                 "Effect": "Allow",
                 "Action": [
-                    "s3:GetObject",
+                    "s3:GetObject"
+                ],
+                "Resource": [
+                    f"arn:aws:s3:::{S3_CONFIG['schema_bucket']}/*",
+                    f"arn:aws:s3:::{S3_CONFIG['knowledge_base_bucket']}/*"
+                ]
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
                     "s3:ListBucket"
                 ],
                 "Resource": [
-                    "arn:aws:s3:::patchline-agent-schemas/*",
-                    "arn:aws:s3:::patchline-email-knowledge-base/*"
+                    f"arn:aws:s3:::{S3_CONFIG['schema_bucket']}",
+                    f"arn:aws:s3:::{S3_CONFIG['knowledge_base_bucket']}"
                 ]
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "bedrock:InvokeModel"
+                ],
+                "Resource": "*"
             }
         ]
     }
@@ -149,7 +278,7 @@ def create_agent_role():
 
 def upload_api_schema():
     """Upload OpenAPI schema to S3"""
-    bucket_name = 'patchline-agent-schemas'
+    bucket_name = S3_CONFIG['schema_bucket']
     
     try:
         if REGION == 'us-east-1':
@@ -166,8 +295,13 @@ def upload_api_schema():
     except s3.exceptions.BucketAlreadyOwnedByYou:
         print(f"S3 bucket already owned: {bucket_name}")
     
-    # Upload schema
+    # Validate schema before upload
     schema_path = os.path.join(os.path.dirname(__file__), '../lambda/gmail-actions-openapi.json')
+    if not validate_openapi_schema(schema_path):
+        print("❌ OpenAPI schema validation failed. Please fix the schema.")
+        sys.exit(1)
+    
+    # Upload schema
     with open(schema_path, 'r') as f:
         schema_content = f.read()
     
@@ -268,6 +402,18 @@ def create_action_group(agent_id: str, lambda_arn: str, schema_s3_url: str):
         
     except Exception as e:
         print(f"Error creating action group: {str(e)}")
+        print(f"Schema S3 URL: {schema_s3_url}")
+        print(f"Bucket: {bucket}, Key: {key}")
+        
+        # Try to read the schema from S3 to debug
+        try:
+            obj = s3.get_object(Bucket=bucket, Key=key)
+            schema_content = obj['Body'].read().decode('utf-8')
+            print("Schema content preview:")
+            print(schema_content[:500] + "..." if len(schema_content) > 500 else schema_content)
+        except Exception as s3_error:
+            print(f"Could not read schema from S3: {str(s3_error)}")
+        
         sys.exit(1)
 
 def prepare_agent(agent_id: str):
@@ -279,7 +425,9 @@ def prepare_agent(agent_id: str):
         print(f"Preparing agent...")
         
         # Wait for preparation
-        while True:
+        max_attempts = 30
+        attempt = 0
+        while attempt < max_attempts:
             response = bedrock_agent.get_agent(
                 agentId=agent_id
             )
@@ -291,8 +439,13 @@ def prepare_agent(agent_id: str):
                 print("Agent preparation failed")
                 sys.exit(1)
             else:
-                print(f"Agent status: {status}")
-                time.sleep(5)
+                print(f"Agent status: {status} (attempt {attempt + 1}/{max_attempts})")
+                time.sleep(10)
+                attempt += 1
+        
+        if attempt >= max_attempts:
+            print("Agent preparation timed out")
+            sys.exit(1)
                 
     except Exception as e:
         print(f"Error preparing agent: {str(e)}")
@@ -311,7 +464,9 @@ def create_agent_alias(agent_id: str) -> Dict[str, Any]:
         print(f"Created agent alias: {alias['agentAliasId']}")
         
         # Wait for alias to be ready
-        while True:
+        max_attempts = 20
+        attempt = 0
+        while attempt < max_attempts:
             response = bedrock_agent.get_agent_alias(
                 agentId=agent_id,
                 agentAliasId=alias['agentAliasId']
@@ -321,8 +476,13 @@ def create_agent_alias(agent_id: str) -> Dict[str, Any]:
                 print("Agent alias ready")
                 break
             else:
-                print(f"Alias status: {status}")
-                time.sleep(5)
+                print(f"Alias status: {status} (attempt {attempt + 1}/{max_attempts})")
+                time.sleep(10)
+                attempt += 1
+        
+        if attempt >= max_attempts:
+            print("Agent alias creation timed out")
+            sys.exit(1)
         
         return alias
         
@@ -337,7 +497,7 @@ def main():
     
     # Now initialize configuration and AWS clients with loaded env vars
     global REGION, bedrock_agent, bedrock_runtime, iam, s3, lambda_client
-    REGION = os.environ.get('AWS_REGION', 'us-east-1')
+    REGION = os.environ.get('AWS_REGION', DEFAULT_REGION)
     
     # Initialize AWS clients
     bedrock_agent = boto3.client('bedrock-agent', region_name=REGION)
@@ -347,6 +507,17 @@ def main():
     lambda_client = boto3.client('lambda', region_name=REGION)
     
     print("Creating Bedrock Agent for Gmail integration...\n")
+    
+    # Check for existing agent
+    existing_agent = find_existing_agent()
+    if existing_agent:
+        print(f"Found existing agent: {existing_agent['agentName']} (ID: {existing_agent['agentId']})")
+        response = input("Do you want to delete and recreate it? (y/N): ").strip().lower()
+        if response == 'y':
+            cleanup_existing_agent(existing_agent['agentId'])
+        else:
+            print("Exiting. Please delete the existing agent manually if you want to recreate it.")
+            sys.exit(0)
     
     # Step 1: Create IAM role
     print("Step 1: Creating IAM role...")
