@@ -216,13 +216,23 @@ def handle_search_emails(user_id: str, request_body: Dict) -> Dict:
         service = get_user_gmail_service(user_id)
         # Parse request
         content = request_body.get('content', {})
+        json_content = {}
         if isinstance(content, dict):
             json_content = content.get('application/json', {})
-        else:
-            json_content = {}
-        
-        query = json_content.get('query', '')
-        max_results = json_content.get('maxResults', 10)
+            # Bedrock Agent may wrap parameters as list under "properties"
+            if not json_content and 'properties' in content.get('application/json', {}):
+                try:
+                    props_list = content['application/json']['properties']
+                    # convert list of {name,value} into dict
+                    json_content = {p['name']: p.get('value') for p in props_list if isinstance(p, dict) and 'name' in p}
+                except Exception as ex:
+                    logger.warning(f"Failed to parse properties list: {str(ex)}")
+
+        query = (json_content.get('query') or '').strip()
+        max_results = int(json_content.get('maxResults', 10))
+
+        if not query:
+            return create_response(400, {'error': 'Query is required'}, '/search-emails', 'POST')
         
         logger.info(f"Searching emails with query: {query}")
         

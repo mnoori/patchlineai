@@ -17,7 +17,7 @@ const agentClient = new BedrockAgentRuntimeClient({
 
 // Agent configuration from environment variables
 const AGENT_ID = process.env.BEDROCK_AGENT_ID || ''
-const AGENT_ALIAS_ID = process.env.BEDROCK_AGENT_ALIAS_ID || 'TSTALIASID' // Use test alias by default
+const AGENT_ALIAS_ID = process.env.BEDROCK_AGENT_ALIAS_ID || '' // Must be provided via env vars
 
 // Consistent logging with icons and colors
 const log = {
@@ -76,11 +76,11 @@ export async function POST(request: NextRequest) {
       
     } else if (mode === 'agent') {
       // AGENT MODE: Use Bedrock Agent with Gmail actions
-      if (!AGENT_ID) {
+      if (!AGENT_ID || !AGENT_ALIAS_ID) {
         log.error('Bedrock Agent not configured')
         return NextResponse.json({ 
           error: 'Bedrock Agent not configured',
-          details: 'BEDROCK_AGENT_ID environment variable is missing' 
+          details: 'BEDROCK_AGENT_ID or BEDROCK_AGENT_ALIAS_ID is missing' 
         }, { status: 500 })
       }
 

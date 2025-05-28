@@ -77,10 +77,13 @@ export function usePlatformConnections() {
       // Only mark as connected if we have valid connection data
       if (response?.platforms) {
         Object.keys(response.platforms).forEach((platform) => {
+          // Map deprecated or alias platform keys to canonical ones
+          const canonicalPlatform = platform === 'spotify-artist-profile' ? 'spotify' : platform
+
           const connectionData = response.platforms?.[platform]
           // Handle both new format (object with connected property) and legacy format (boolean)
           if (connectionData === true || (connectionData && connectionData.connected)) {
-            basePlatforms[platform as keyof PlatformConnections] = {
+            basePlatforms[canonicalPlatform as keyof PlatformConnections] = {
               connected: true,
               ...(typeof connectionData === 'object' ? connectionData : {})
             }
