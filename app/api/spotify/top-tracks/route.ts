@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb"
 import { CONFIG } from "@/lib/config"
-import { getAuthenticatedUser } from "@/utils/amplifyServerUtils"
 import { getValidSpotifyToken } from "@/lib/spotify-helpers"
 
 // Minimal API to fetch user top tracks from Spotify

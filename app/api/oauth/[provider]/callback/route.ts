@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { CONFIG } from '@/lib/config'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
-import { getAuthenticatedUser } from '@/utils/amplifyServerUtils'
+
 // Initialize DynamoDB client
 const dynamoClient = new DynamoDBClient({
   region: CONFIG.AWS_REGION,
@@ -95,16 +95,11 @@ export async function GET(
       finalUserId = userId
       console.log(`[OAuth ${provider} Callback] Using user ID from state:`, finalUserId)
     } else {
-      // Fallback to getting authenticated user (for backward compatibility)
-      const user = await getAuthenticatedUser()
-      if (!user) {
-        console.error(`[OAuth ${provider} Callback] User not authenticated and no user ID in state`)
-        return NextResponse.redirect(
-          `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?error=not_authenticated`
-        )
-      }
-      finalUserId = user.userId
-      console.log(`[OAuth ${provider} Callback] User authenticated via session:`, finalUserId)
+      // No user ID available - authentication required
+      console.error(`[OAuth ${provider} Callback] No user ID in state`)
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?error=not_authenticated`
+      )
     }
     
     // Exchange code for tokens

@@ -10,7 +10,7 @@
 // DEVELOPMENT MODE TOGGLE
 // Set this to false when deploying to production
 // ======================================================================
-export const IS_DEVELOPMENT_MODE = process.env.NODE_ENV === 'development'
+export const IS_DEVELOPMENT_MODE = false
 
 // ======================================================================
 // AUTHENTICATION BYPASS
@@ -106,7 +106,7 @@ export const CONFIG = {
  */
 export const PATCHLINE_CONFIG = {
   // Set to true for frontend development without backend dependencies
-  DEVELOPMENT_MODE: true,
+  DEVELOPMENT_MODE: false,
 
   // Feature flags
   features: {
@@ -162,7 +162,7 @@ export function getCredentialProvider() {
 // ======================================================================
 // DEMO MODE FOR INVESTOR PRESENTATIONS
 // ======================================================================
-export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true' || false
+export const DEMO_MODE = false
 
 // ======================================================================
 // MOCK DATA FOR DEVELOPMENT MODE
