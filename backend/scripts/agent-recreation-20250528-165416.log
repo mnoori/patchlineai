@@ -1,0 +1,8 @@
+2025-05-28 16:54:16,506 - INFO - Found credentials in shared credentials file: ~/.aws/credentials
+2025-05-28 16:54:16,854 - INFO - Found existing agent: TG2C910JGY
+2025-05-28 16:54:16,854 - INFO - Status: PREPARED
+2025-05-28 16:54:16,855 - INFO - Updated: 2025-05-28 15:17:53.833079+00:00
+2025-05-28 16:54:23,728 - WARNING - Could not delete action groups: An error occurred (ConflictException) when calling the DeleteAgentActionGroup operation: ActionGroup with ID A6ILPYEPDX cannot be deleted when it is Enabled.
+2025-05-28 16:54:23,919 - INFO - Deleted alias: patchyv0agent
+2025-05-28 16:54:24,013 - WARNING - Could not delete aliases: An error occurred (ValidationException) when calling the DeleteAgentAlias operation: 1 validation error detected: Value 'TSTALIASID' at 'agentAliasId' failed to satisfy constraint: Member must satisfy regular expression pattern: (?!\bTSTALIASID\b)[0-9a-zA-Z]+
+2025-05-28 16:54:24,092 - ERROR - Error checking for existing agent: An error occurred (ConflictException) when calling the DeleteAgent operation: Could not delete Agent with ID TG2C910JGY, since it has active aliases

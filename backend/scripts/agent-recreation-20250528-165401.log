@@ -1,0 +1,5 @@
+2025-05-28 16:54:01,503 - INFO - Found credentials in shared credentials file: ~/.aws/credentials
+2025-05-28 16:54:01,860 - INFO - Found existing agent: TG2C910JGY
+2025-05-28 16:54:01,860 - INFO - Status: PREPARED
+2025-05-28 16:54:01,860 - INFO - Updated: 2025-05-28 15:17:53.833079+00:00
+2025-05-28 16:54:06,139 - INFO - Keeping existing agent

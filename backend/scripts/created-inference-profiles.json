@@ -1,0 +1,55 @@
+{
+  "region": "us-east-1",
+  "profiles": [
+    {
+      "name": "patchline-nova-premier",
+      "arn": null,
+      "model_id": "amazon.nova-premier-v1:0",
+      "status": "failed",
+      "error": "'Bedrock' object has no attribute 'create_inference_profile'"
+    },
+    {
+      "name": "patchline-claude-3-5-sonnet-v2",
+      "arn": null,
+      "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+      "status": "failed",
+      "error": "'Bedrock' object has no attribute 'create_inference_profile'"
+    },
+    {
+      "name": "patchline-claude-3-5-haiku",
+      "arn": null,
+      "model_id": "anthropic.claude-3-5-haiku-20241022-v1:0",
+      "status": "failed",
+      "error": "'Bedrock' object has no attribute 'create_inference_profile'"
+    },
+    {
+      "name": "patchline-claude-3-opus",
+      "arn": null,
+      "model_id": "anthropic.claude-3-opus-20240229-v1:0",
+      "status": "failed",
+      "error": "'Bedrock' object has no attribute 'create_inference_profile'"
+    },
+    {
+      "name": "patchline-claude-3-7-sonnet",
+      "arn": null,
+      "model_id": "anthropic.claude-3-7-sonnet-20250219-v1:0",
+      "status": "failed",
+      "error": "'Bedrock' object has no attribute 'create_inference_profile'"
+    },
+    {
+      "name": "patchline-claude-4-sonnet",
+      "arn": null,
+      "model_id": "anthropic.claude-sonnet-4-20250514-v1:0",
+      "status": "failed",
+      "error": "'Bedrock' object has no attribute 'create_inference_profile'"
+    },
+    {
+      "name": "patchline-claude-4-opus",
+      "arn": null,
+      "model_id": "anthropic.claude-opus-4-20250514-v1:0",
+      "status": "failed",
+      "error": "'Bedrock' object has no attribute 'create_inference_profile'"
+    }
+  ],
+  "timestamp": "2025-05-28 17:01:51"
+}
