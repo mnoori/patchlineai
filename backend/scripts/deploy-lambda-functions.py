@@ -383,6 +383,8 @@ def main():
         'PLATFORM_CONNECTIONS_TABLE': 'PlatformConnections-staging',  # Use the existing table
         'GMAIL_SECRETS_NAME': 'patchline/gmail-oauth',
         'KNOWLEDGE_BASE_BUCKET': 'patchline-email-knowledge-base',
+        'BEDROCK_AGENT_ID': os.environ.get('BEDROCK_AGENT_ID', ''),
+        'BEDROCK_AGENT_ALIAS_ID': os.environ.get('BEDROCK_AGENT_ALIAS_ID', ''),
     }
 
     auth_fn_arn = deploy_lambda('gmail-auth-handler', 'gmail-auth-handler.py', role_arn, env_vars_common)
