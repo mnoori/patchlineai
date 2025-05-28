@@ -1,0 +1,65 @@
+{
+  "region": "us-east-1",
+  "accessible_models": [
+    {
+      "id": "amazon.nova-micro-v1:0",
+      "name": "Amazon Nova Micro"
+    }
+  ],
+  "all_results": [
+    {
+      "id": "amazon.nova-micro-v1:0",
+      "name": "Amazon Nova Micro",
+      "success": true,
+      "status": "accessible"
+    },
+    {
+      "id": "amazon.nova-premier-v1:0",
+      "name": "Amazon Nova Premier",
+      "success": false,
+      "status": "validation_error: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID amazon.nova-premier-v1:0 with on-demand throughput isn\u2019t supported. Retry your request with the ID or ARN of an inference profile that contains this model."
+    },
+    {
+      "id": "anthropic.claude-3-sonnet-20240229-v1:0",
+      "name": "Claude 3 Sonnet",
+      "success": false,
+      "status": "access_denied"
+    },
+    {
+      "id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+      "name": "Claude 3.5 Sonnet v2",
+      "success": false,
+      "status": "validation_error: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-sonnet-20241022-v2:0 with on-demand throughput isn\u2019t supported. Retry your request with the ID or ARN of an inference profile that contains this model."
+    },
+    {
+      "id": "anthropic.claude-3-5-haiku-20241022-v1:0",
+      "name": "Claude 3.5 Haiku",
+      "success": false,
+      "status": "validation_error: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-haiku-20241022-v1:0 with on-demand throughput isn\u2019t supported. Retry your request with the ID or ARN of an inference profile that contains this model."
+    },
+    {
+      "id": "anthropic.claude-3-opus-20240229-v1:0",
+      "name": "Claude 3 Opus",
+      "success": false,
+      "status": "validation_error: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-opus-20240229-v1:0 with on-demand throughput isn\u2019t supported. Retry your request with the ID or ARN of an inference profile that contains this model."
+    },
+    {
+      "id": "anthropic.claude-3-7-sonnet-20250219-v1:0",
+      "name": "Claude 3.7 Sonnet",
+      "success": false,
+      "status": "validation_error: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-7-sonnet-20250219-v1:0 with on-demand throughput isn\u2019t supported. Retry your request with the ID or ARN of an inference profile that contains this model."
+    },
+    {
+      "id": "anthropic.claude-sonnet-4-20250514-v1:0",
+      "name": "Claude 4 Sonnet",
+      "success": false,
+      "status": "validation_error: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-sonnet-4-20250514-v1:0 with on-demand throughput isn\u2019t supported. Retry your request with the ID or ARN of an inference profile that contains this model."
+    },
+    {
+      "id": "anthropic.claude-opus-4-20250514-v1:0",
+      "name": "Claude 4 Opus",
+      "success": false,
+      "status": "validation_error: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-opus-4-20250514-v1:0 with on-demand throughput isn\u2019t supported. Retry your request with the ID or ARN of an inference profile that contains this model."
+    }
+  ]
+}

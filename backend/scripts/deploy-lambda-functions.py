@@ -233,8 +233,48 @@ def deploy_lambda(function_name: str, handler_file: str, role_arn: str, env: Dic
     # Wait for code update to finish
     lambda_client.get_waiter('function_active').wait(FunctionName=function_name)
     fn_arn = lambda_client.get_function(FunctionName=function_name)['Configuration']['FunctionArn']
+    
+    # Add resource-based policy for Bedrock to invoke the function (for action handler)
+    if function_name == 'gmail-action-handler':
+        add_bedrock_invoke_permission(function_name)
+    
     print(f"🔗 {function_name} ARN: {fn_arn}")
     return fn_arn
+
+
+def add_bedrock_invoke_permission(function_name: str):
+    """Add resource-based policy to allow Bedrock to invoke the Lambda function"""
+    try:
+        # Get account ID using STS
+        sts_client = boto3.client('sts')
+        account_id = sts_client.get_caller_identity()['Account']
+        
+        lambda_client.add_permission(
+            FunctionName=function_name,
+            StatementId='AllowBedrockInvoke',
+            Action='lambda:InvokeFunction',
+            Principal='bedrock.amazonaws.com',
+            SourceAccount=account_id
+        )
+        print(f"✅ Added Bedrock invoke permission to {function_name}")
+    except lambda_client.exceptions.ResourceConflictException:
+        print(f"ℹ️  Bedrock invoke permission already exists for {function_name}")
+    except Exception as e:
+        print(f"⚠️  Could not add Bedrock permission: {str(e)}")
+        # Try without SourceAccount
+        try:
+            lambda_client.add_permission(
+                FunctionName=function_name,
+                StatementId='AllowBedrockInvokeSimple',
+                Action='lambda:InvokeFunction',
+                Principal='bedrock.amazonaws.com'
+            )
+            print(f"✅ Added simplified Bedrock invoke permission to {function_name}")
+        except lambda_client.exceptions.ResourceConflictException:
+            print(f"ℹ️  Bedrock invoke permission already exists for {function_name}")
+        except Exception as e2:
+            print(f"❌ Failed to add Bedrock permission: {str(e2)}")
+            print("   You may need to add this permission manually in the AWS console")
 
 
 # ---------------------------------------------------------------------------
@@ -278,7 +318,7 @@ def store_gmail_secret():
         
     secret_name = 'patchline/gmail-oauth'
     secret_val = {
-        'installed': {
+        'web': {
             'client_id': GMAIL_CLIENT_ID,
             'client_secret': GMAIL_CLIENT_SECRET,
             'redirect_uris': [GMAIL_REDIRECT_URI],
@@ -334,12 +374,13 @@ def main():
     role_arn = create_lambda_execution_role()
 
     # Supporting resources
-    ensure_dynamodb_table('patchline-gmail-oauth')
+    # Note: PlatformConnections-staging should already exist from your app
+    # ensure_dynamodb_table('PlatformConnections-staging')  # Commented out - table already exists
     ensure_s3_bucket('patchline-email-knowledge-base')
     store_gmail_secret()
 
     env_vars_common = {
-        'GMAIL_OAUTH_TABLE': 'patchline-gmail-oauth',
+        'PLATFORM_CONNECTIONS_TABLE': 'PlatformConnections-staging',  # Use the existing table
         'GMAIL_SECRETS_NAME': 'patchline/gmail-oauth',
         'KNOWLEDGE_BASE_BUCKET': 'patchline-email-knowledge-base',
     }

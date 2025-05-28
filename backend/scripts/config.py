@@ -13,46 +13,72 @@ BEDROCK_MODELS = {
         'name': 'Amazon Nova Micro',
         'description': 'Fast, lightweight model (free tier eligible)',
         'cost': 'low',
-        'speed': 'fast'
+        'speed': 'fast',
+        'inference_profile': None  # Direct model access works
     },
     'nova-premier': {
-        'id': 'amazon.nova-premier-v1:0', 
+        'id': 'amazon.nova-premier-v1:0',
         'name': 'Amazon Nova Premier',
         'description': 'Improved quality Nova model',
         'cost': 'medium',
-        'speed': 'medium'
+        'speed': 'medium',
+        'inference_profile': 'arn:aws:bedrock:us-east-1::inference-profile/us.amazon.nova-premier-v1:0'
     },
     'claude-haiku': {
         'id': 'anthropic.claude-3-5-haiku-20241022-v1:0',
         'name': 'Claude 3.5 Haiku',
         'description': 'Fast Claude model with good quality',
         'cost': 'medium',
-        'speed': 'fast'
+        'speed': 'fast',
+        'inference_profile': None  # Not available yet
     },
     'claude-sonnet': {
         'id': 'anthropic.claude-3-sonnet-20240229-v1:0',
         'name': 'Claude 3 Sonnet',
         'description': 'High quality model, higher cost',
         'cost': 'high',
-        'speed': 'medium'
+        'speed': 'medium',
+        'inference_profile': None  # Not available
     },
-    'claude-sonnet-new': {
+    'claude-3-7-sonnet': {
         'id': 'anthropic.claude-3-7-sonnet-20250219-v1:0',
         'name': 'Claude 3.7 Sonnet',
         'description': 'Premium quality model, highest cost',
         'cost': 'highest',
-        'speed': 'medium'
+        'speed': 'medium',
+        'inference_profile': 'arn:aws:bedrock:us-east-1::inference-profile/us.anthropic.claude-3-7-sonnet-20250219-v1:0'
+    },
+    'claude-4-sonnet': {
+        'id': 'anthropic.claude-sonnet-4-20250514-v1:0',
+        'name': 'Claude 4 Sonnet',
+        'description': 'Latest Claude Sonnet model',
+        'cost': 'highest',
+        'speed': 'medium',
+        'inference_profile': 'arn:aws:bedrock:us-east-1::inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0'
+    },
+    'claude-4-opus': {
+        'id': 'anthropic.claude-opus-4-20250514-v1:0',
+        'name': 'Claude 4 Opus',
+        'description': 'Most capable Claude model',
+        'cost': 'highest',
+        'speed': 'slow',
+        'inference_profile': 'arn:aws:bedrock:us-east-1::inference-profile/us.anthropic.claude-opus-4-20250514-v1:0'
     }
 }
 
-# Default model for Bedrock Agent
+# Default model for Bedrock Agent - using Nova Micro which works directly
 DEFAULT_FOUNDATION_MODEL = BEDROCK_MODELS['nova-micro']['id']
+
+# For agent mode, we need to use the base model ID, not the inference profile
+# Agents don't support inference profiles directly - they use model IDs
+# We'll stick with Nova Micro for now since it's the only one that works with agents
+AGENT_FOUNDATION_MODEL = BEDROCK_MODELS['nova-micro']['id']
 
 # Agent Configuration
 AGENT_CONFIG = {
     'name': 'PatchlineEmailAgent',
     'description': 'AI assistant for managing emails and communications',
-    'foundation_model': DEFAULT_FOUNDATION_MODEL,
+    'foundation_model': AGENT_FOUNDATION_MODEL,  # Using Nova Micro for agent
     'action_group_name': 'GmailActions',
     'knowledge_base_name': 'PatchlineEmailKnowledge',
     'idle_session_ttl': 900  # 15 minutes
@@ -66,7 +92,7 @@ S3_CONFIG = {
 
 # DynamoDB Configuration
 DYNAMODB_CONFIG = {
-    'oauth_table': 'patchline-gmail-oauth'
+    'oauth_table': 'PlatformConnections-staging'
 }
 
 # Secrets Manager Configuration
@@ -92,8 +118,24 @@ def get_model_by_name(model_name: str) -> dict:
     raise ValueError(f"Unknown model: {model_name}. Available: {list(BEDROCK_MODELS.keys())}")
 
 def get_model_id(model_name: str) -> str:
-    """Get model ID by name"""
-    return get_model_by_name(model_name)['id']
+    """Get model ID or inference profile ARN by name"""
+    model = get_model_by_name(model_name)
+    # Return inference profile if available, otherwise return model ID
+    return model.get('inference_profile') or model['id']
+
+def get_available_models_for_chat() -> list:
+    """Get models available for chat (have working access)"""
+    # Models that work for chat
+    available_models = ['nova-micro', 'nova-premier', 'claude-3-7-sonnet', 'claude-4-sonnet', 'claude-4-opus']
+    return [
+        {
+            'name': name,
+            'display_name': BEDROCK_MODELS[name]['name'],
+            'description': BEDROCK_MODELS[name]['description'],
+            'model_id': get_model_id(name)
+        }
+        for name in available_models
+    ]
 
 def list_available_models() -> list:
     """List all available models"""

@@ -1,0 +1,25 @@
+{
+  "region": "us-east-1",
+  "working_profiles": [
+    {
+      "name": "US Nova Premier",
+      "arn": "arn:aws:bedrock:us-east-1::inference-profile/us.amazon.nova-premier-v1:0",
+      "model_base": "nova-premier"
+    },
+    {
+      "name": "US Claude Sonnet 4",
+      "arn": "arn:aws:bedrock:us-east-1::inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0",
+      "model_base": "claude-sonnet-4"
+    },
+    {
+      "name": "US Claude Opus 4",
+      "arn": "arn:aws:bedrock:us-east-1::inference-profile/us.anthropic.claude-opus-4-20250514-v1:0",
+      "model_base": "claude-opus-4"
+    },
+    {
+      "name": "US Claude 3.7 Sonnet",
+      "arn": "arn:aws:bedrock:us-east-1::inference-profile/us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+      "model_base": "claude-3.7-sonnet"
+    }
+  ]
+}
