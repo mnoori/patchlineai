@@ -56,7 +56,7 @@ const pulseGlowStyle = `
     z-index: 30;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 400ms ease;
+    transition: opacity 200ms ease;
     cursor: pointer;
   }
   
@@ -65,12 +65,11 @@ const pulseGlowStyle = `
     pointer-events: all;
   }
 
-  /* Patchy's activity window */
-  .activity-box {
+  /* Patchy's activity card - Clean slide animation */
+  .activity-card {
     position: fixed;
     top: 100px;
     left: calc(256px + 400px + ((100vw - 256px - 400px) / 2));
-    transform: translateX(-50%);
     width: 380px;
     max-width: 90%;
     background: rgba(13, 13, 30, 0.3);
@@ -79,25 +78,41 @@ const pulseGlowStyle = `
     border-radius: 16px;
     padding: 24px;
     z-index: 35;
-    opacity: 0;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    transition: all 600ms cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-50%) translateY(-100px);
+    opacity: 0;
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), opacity 250ms ease;
+    pointer-events: none;
   }
 
-  .activity-box.active {
+  .activity-card.visible {
+    transform: translateX(-50%) translateY(0);
     opacity: 1;
+    pointer-events: auto;
   }
 
-  .activity-box.working {
-    width: 520px; /* 36% larger than original 380px */
-    padding: 32px; /* Slightly more padding */
+  .activity-card.closing {
+    transform: translateX(-50%) translateY(-100px);
+    opacity: 0;
+    transition: transform 250ms cubic-bezier(0.33, 0, 0.66, 1), opacity 200ms ease;
+  }
+
+  .activity-card.working {
+    width: 520px;
+    padding: 32px;
     background: rgba(13, 13, 30, 0.4);
     box-shadow: 
       0 12px 48px rgba(0, 0, 0, 0.4),
       0 0 0 1px rgba(0, 240, 255, 0.1);
+    transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1), 
+                padding 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                background 300ms ease,
+                box-shadow 300ms ease,
+                transform 300ms cubic-bezier(0.16, 1, 0.3, 1), 
+                opacity 250ms ease;
   }
 
-  .activity-box::before {
+  .activity-card::before {
     content: '';
     position: absolute;
     top: -1px;
@@ -112,6 +127,33 @@ const pulseGlowStyle = `
     opacity: 0.2;
     filter: blur(1px);
     z-index: -1;
+  }
+
+  /* Content wrapper to prevent reflow */
+  .activity-content-wrapper {
+    width: 100%;
+    transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Smooth content transitions */
+  .activity-content {
+    transition: opacity 200ms ease;
+  }
+
+  .activity-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    transition: all 200ms ease;
+  }
+
+  .suggestion-content {
+    transition: opacity 200ms ease;
+  }
+
+  /* Fade content during mode switch */
+  .activity-content.fade-out {
+    opacity: 0;
   }
 
   @keyframes blink {
@@ -129,6 +171,9 @@ const pulseGlowStyle = `
     font-size: 15px;
     line-height: 1.6;
     min-height: 24px;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .dot {
@@ -156,81 +201,81 @@ const pulseGlowStyle = `
   }
 
   .logs-container {
-  max-height: 540px; /* 10% less than 600px */
-  overflow-y: scroll; /* Always show scrollbar to prevent jumping */
-  padding-right: 8px;
-  scroll-behavior: smooth;
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-  line-height: 1.4;
-  scrollbar-gutter: stable; /* Prevent layout shift when scrollbar appears */
-}
+    max-height: 540px;
+    overflow-y: scroll;
+    padding-right: 8px;
+    scroll-behavior: smooth;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+    line-height: 1.4;
+    scrollbar-gutter: stable;
+  }
 
-.logs-container::-webkit-scrollbar {
-  width: 6px;
-}
+  .logs-container::-webkit-scrollbar {
+    width: 6px;
+  }
 
-.logs-container::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
-}
+  .logs-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+  }
 
-.logs-container::-webkit-scrollbar-thumb {
-  background: rgba(0, 240, 255, 0.3);
-  border-radius: 3px;
-}
+  .logs-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 240, 255, 0.3);
+    border-radius: 3px;
+  }
 
-.log-line {
-  display: flex;
-  align-items: flex-start;
-  padding: 4px 0;
-  font-size: 12px;
-  color: rgba(226, 232, 240, 0.9);
-  opacity: 0;
-  transform: translateY(10px);
-  animation: filmRoll 0.3s ease-out forwards;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-@keyframes filmRoll {
-  0% {
+  .log-line {
+    display: flex;
+    align-items: flex-start;
+    padding: 4px 0;
+    font-size: 12px;
+    color: rgba(226, 232, 240, 0.9);
     opacity: 0;
     transform: translateY(10px);
+    animation: filmRoll 0.3s ease-out forwards;
+    white-space: nowrap;
+    overflow: hidden;
   }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
+
+  @keyframes filmRoll {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-}
 
-.log-timestamp {
-  color: rgba(0, 240, 255, 0.6);
-  margin-right: 8px;
-  font-size: 10px;
-  min-width: 60px;
-}
+  .log-timestamp {
+    color: rgba(0, 240, 255, 0.6);
+    margin-right: 8px;
+    font-size: 10px;
+    min-width: 60px;
+  }
 
-.log-icon {
-  margin-right: 6px;
-  font-size: 11px;
-}
+  .log-icon {
+    margin-right: 6px;
+    font-size: 11px;
+  }
 
-.log-message {
-  color: rgba(226, 232, 240, 0.8);
-  flex: 1;
-}
+  .log-message {
+    color: rgba(226, 232, 240, 0.8);
+    flex: 1;
+  }
 
-.log-success .log-message {
-  color: rgba(34, 197, 94, 0.9);
-}
+  .log-success .log-message {
+    color: rgba(34, 197, 94, 0.9);
+  }
 
-.log-working .log-message {
-  color: rgba(251, 191, 36, 0.9);
-}
+  .log-working .log-message {
+    color: rgba(251, 191, 36, 0.9);
+  }
 
-.log-error .log-message {
-  color: rgba(239, 68, 68, 0.9);
-}
+  .log-error .log-message {
+    color: rgba(239, 68, 68, 0.9);
+  }
 `
 
 const sidebarItems = [
@@ -386,6 +431,7 @@ export function SidebarWithChat() {
   const [displayedText, setDisplayedText] = useState("")
   const [isAgentWorking, setIsAgentWorking] = useState(false)
   const [currentLogs, setCurrentLogs] = useState<typeof simulationLogs>([])
+  const [isClosing, setIsClosing] = useState(false)
   const { unreadCount, setAgentActivity } = usePatchyStore()
 
   // Set Agents submenu to open by default
@@ -434,7 +480,7 @@ export function SidebarWithChat() {
                 setIsAgentWorking(false)
               }, 2000)
             }
-          }, index * 1200) // Slightly faster - 1.2 seconds between each log
+          }, index * 1200 + 400) // Add initial delay for smooth transition
         })
       } else {
         // REAL MODE: Show actual console logs
@@ -579,16 +625,11 @@ export function SidebarWithChat() {
     blurOverlay.id = "dashboard-blur"
     document.body.appendChild(blurOverlay)
 
-    // Create activity box
-    const activityBox = document.createElement("div")
-    activityBox.className = "activity-box"
-    activityBox.id = "activity-box"
-    document.body.appendChild(activityBox)
-
     // Clean up
     return () => {
-      document.body.removeChild(blurOverlay)
-      document.body.removeChild(activityBox)
+      if (document.body.contains(blurOverlay)) {
+        document.body.removeChild(blurOverlay)
+      }
     }
   }, []) // NO dependencies - create only once!
 
@@ -602,24 +643,25 @@ export function SidebarWithChat() {
       e.stopPropagation()
       // Only close if the chat is expanded
       if (isChatExpanded) {
-        setIsChatExpanded(false)
+        // Trigger the slide-up animation for the card
+        setIsClosing(true)
         
-        // Toggle UI elements (same as toggleChat function)
-        const activityBox = document.getElementById("activity-box")
-        if (activityBox) {
-          activityBox.classList.remove("active")
-          blurOverlay.classList.remove("active")
-          // Don't reset agent state when closing - let it continue working
+        // Wait a brief moment before closing the interface
+        setTimeout(() => {
+          setIsChatExpanded(false)
+          setIsClosing(false)
+          
+          // Reset logs if agent is not working
           if (!isAgentWorking) {
             setCurrentLogs([])
           }
-        }
-        
-        // Dispatch event (same as toggleChat function)
-        const event = new CustomEvent("chat-expanded", {
-          detail: { expanded: false },
-        })
-        window.dispatchEvent(event)
+          
+          // Dispatch event
+          const closeEvent = new CustomEvent("chat-expanded", {
+            detail: { expanded: false },
+          })
+          window.dispatchEvent(closeEvent)
+        }, 200) // Slightly faster to feel snappier
       }
     }
 
@@ -630,43 +672,21 @@ export function SidebarWithChat() {
     return () => {
       blurOverlay.removeEventListener("click", handleBlurClick)
     }
-  }, [isChatExpanded, isAgentWorking]) // Dependencies for the click handler only
+  }, [isChatExpanded, isAgentWorking]) // Dependencies for the click handler
 
-  // Update activity box content
+  // Control blur overlay visibility
   useEffect(() => {
-    const activityBox = document.getElementById("activity-box")
-    if (!activityBox) return
-
-    if (isAgentWorking) {
-      activityBox.classList.add("working")
-      activityBox.innerHTML = `
-        <div style="display: flex; align-items: center; margin-bottom: 20px;">
-          <div class="spinner" style="width: 16px; height: 16px; border: 2px solid rgba(0, 240, 255, 0.3); border-top: 2px solid #00f0ff; border-radius: 50%; margin-right: 12px;"></div>
-          <span style="color: #00f0ff; font-size: 14px; font-weight: 600;">Agent Activity</span>
-        </div>
-        <div class="logs-container" id="logs-container"></div>
-      `
-    } else {
-      activityBox.classList.remove("working")
-      activityBox.innerHTML = `
-        <div style="display: flex; align-items: center; margin-bottom: 16px;">
-          <div class="dot"></div>
-          <span style="color: #00f0ff; font-size: 14px; font-weight: 500;">Patchy's Suggestions</span>
-        </div>
-        <div id="suggestion-text" class="suggestion-text"></div>
-      `
-    }
-    
-    // Make sure blur overlay blocks all clicks when active
     const blurOverlay = document.getElementById("dashboard-blur")
-    if (blurOverlay) {
-      if (isChatExpanded) {
-        blurOverlay.style.pointerEvents = "all"
-      } else {
-        blurOverlay.style.pointerEvents = "none"
-      }
+    if (!blurOverlay) return
+    
+    if (isChatExpanded) {
+      blurOverlay.classList.add("active")
+      blurOverlay.style.pointerEvents = "all"
+    } else {
+      blurOverlay.classList.remove("active")
+      blurOverlay.style.pointerEvents = "none"
     }
-  }, [isAgentWorking, isChatExpanded])
+  }, [isChatExpanded])
 
   // Update logs with smooth film-roll effect
   useEffect(() => {
@@ -712,37 +732,90 @@ export function SidebarWithChat() {
   }
 
   const toggleChat = () => {
-    setIsChatExpanded(!isChatExpanded)
-
-    // Toggle UI elements
-    const blurOverlay = document.getElementById("dashboard-blur")
-    const activityBox = document.getElementById("activity-box")
-
-    if (blurOverlay && activityBox) {
-      if (!isChatExpanded) {
-        blurOverlay.classList.add("active")
-        activityBox.classList.add("active")
-      } else {
-        activityBox.classList.remove("active")
-        blurOverlay.classList.remove("active")
-        // Don't reset agent state when closing - let it continue working
-        // Only reset logs if agent is not working
+    if (isChatExpanded) {
+      // Closing - trigger the slide-up animation for the card
+      setIsClosing(true)
+      
+      setTimeout(() => {
+        setIsChatExpanded(false)
+        setIsClosing(false)
+        
+        // Reset logs if agent is not working
         if (!isAgentWorking) {
           setCurrentLogs([])
         }
-      }
+        
+        // Dispatch event
+        const closeEvent = new CustomEvent("chat-expanded", {
+          detail: { expanded: false },
+        })
+        window.dispatchEvent(closeEvent)
+      }, 200)
+    } else {
+      // Opening
+      setIsChatExpanded(true)
+      
+      // Dispatch event
+      const openEvent = new CustomEvent("chat-expanded", {
+        detail: { expanded: true },
+      })
+      window.dispatchEvent(openEvent)
     }
-
-    // Dispatch event
-    const event = new CustomEvent("chat-expanded", {
-      detail: { expanded: !isChatExpanded },
-    })
-    window.dispatchEvent(event)
   }
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: pulseGlowStyle }} />
+      
+      {/* Activity Card - React-based rendering */}
+      {(isChatExpanded || isClosing) && (
+        <div className={cn(
+          "activity-card",
+          isChatExpanded && !isClosing && "visible",
+          isClosing && "closing",
+          isAgentWorking && "working"
+        )}>
+          <div className="activity-content-wrapper">
+            <div className="activity-content">
+              <div className="activity-header">
+                {isAgentWorking ? (
+                  <>
+                    <div className="spinner" style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid rgba(0, 240, 255, 0.3)',
+                      borderTop: '2px solid #00f0ff',
+                      borderRadius: '50%',
+                      marginRight: '12px'
+                    }} />
+                    <span style={{ color: '#00f0ff', fontSize: '14px', fontWeight: 600 }}>
+                      Agent Activity
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="dot" />
+                    <span style={{ color: '#00f0ff', fontSize: '14px', fontWeight: 500 }}>
+                      Patchy's Suggestions
+                    </span>
+                  </>
+                )}
+              </div>
+              
+              {isAgentWorking ? (
+                <div className="logs-container" id="logs-container" />
+              ) : (
+                <div className="suggestion-content">
+                  <div className="suggestion-text">
+                    {displayedText}<span className="cursor">|</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="fixed top-16 bottom-0 left-0 z-40 hidden md:flex">
         {/* Main Sidebar */}
         <div className="w-64 flex flex-col border-r border-border bg-background relative z-50">
