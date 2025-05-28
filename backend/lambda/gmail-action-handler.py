@@ -245,19 +245,23 @@ def handle_search_emails(user_id: str, request_body: Dict) -> Dict:
         logger.info(f"[DEBUG] Content type: {type(content)}, Content: {json.dumps(content) if isinstance(content, dict) else str(content)}")
         
         if isinstance(content, dict):
-            json_content = content.get('application/json', {})
-            logger.info(f"[DEBUG] Initial json_content: {json.dumps(json_content)}")
+            app_json = content.get('application/json', {})
+            logger.info(f"[DEBUG] app_json: {json.dumps(app_json)}")
             
-            # Bedrock Agent may wrap parameters as list under "properties"
-            if not json_content and 'properties' in content.get('application/json', {}):
+            # Bedrock Agent sends parameters as list under "properties"
+            if 'properties' in app_json and isinstance(app_json['properties'], list):
                 try:
-                    props_list = content['application/json']['properties']
+                    props_list = app_json['properties']
                     logger.info(f"[DEBUG] Found properties list: {json.dumps(props_list)}")
                     # convert list of {name,value} into dict
                     json_content = {p['name']: p.get('value') for p in props_list if isinstance(p, dict) and 'name' in p}
                     logger.info(f"[DEBUG] Converted properties to dict: {json.dumps(json_content)}")
                 except Exception as ex:
                     logger.warning(f"Failed to parse properties list: {str(ex)}")
+            else:
+                # Fallback to direct JSON content
+                json_content = app_json
+                logger.info(f"[DEBUG] Using direct json_content: {json.dumps(json_content)}")
 
         query = (json_content.get('query') or '').strip()
         max_results = int(json_content.get('maxResults', 10))

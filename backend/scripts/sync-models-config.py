@@ -44,8 +44,8 @@ def sync_models_to_frontend():
         # Determine which modes this model supports
         supported_modes = []
         
-        # Agent mode now supports Claude 3.7 Sonnet (as configured)
-        if model_key == 'claude-3-7-sonnet':
+        # Agent mode now supports Claude 4 Sonnet (as configured)
+        if model_key == 'claude-4-sonnet':
             supported_modes = ['chat', 'agent']
         # Other models only work in chat mode if they're in the available list
         elif model_key in chat_model_names:
@@ -96,10 +96,10 @@ export const getAvailableModels = (mode: 'chat' | 'agent' | 'all' = 'all'): Bedr
 }
 
 export const getDefaultModel = (mode: 'chat' | 'agent'): string => {
-  return mode === 'agent' ? 'claude-3-7-sonnet' : 'claude-3-7-sonnet'
+  return mode === 'agent' ? 'claude-4-sonnet' : 'claude-4-sonnet'
 }
 
-export const AGENT_MODEL_NOTE = 'Note: Agent mode uses Claude 3.7 Sonnet. Model selection in agent mode is for display only - the actual model is configured in AWS Console.'
+export const AGENT_MODEL_NOTE = 'Note: Agent mode uses Claude 4 Sonnet. Model selection in agent mode is for display only - the actual model is configured in AWS Console.'
 """
     
     # Write to lib directory
@@ -111,42 +111,6 @@ export const AGENT_MODEL_NOTE = 'Note: Agent mode uses Claude 3.7 Sonnet. Model 
     for key, model in frontend_models.items():
         modes = ', '.join(model['supportedModes'])
         print(f"   - {model['name']} ({key}): {modes}")
-    
-    # Also update the API route to use the same data
-    api_models_content = """import { NextRequest, NextResponse } from 'next/server'
-import { BEDROCK_MODELS, getAvailableModels, getDefaultModel, AGENT_MODEL_NOTE } from '@/lib/models-config'
-
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url)
-    const mode = searchParams.get('mode') as 'chat' | 'agent' | 'all' || 'all'
-
-    // Get models for the requested mode
-    const models = getAvailableModels(mode)
-
-    // Add mode-specific information
-    const response = {
-      models,
-      defaultModel: mode === 'all' ? 'claude-3-7-sonnet' : getDefaultModel(mode),
-      agentModelNote: mode === 'agent' ? AGENT_MODEL_NOTE : null
-    }
-
-    return NextResponse.json(response)
-  } catch (error) {
-    console.error('[MODELS] Error fetching models:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch models' },
-      { status: 500 }
-    )
-  }
-}
-"""
-    
-    # Update the API route
-    api_route_path = project_root / 'app' / 'api' / 'models' / 'route.ts'
-    api_route_path.write_text(api_models_content)
-    
-    print(f"✅ Updated API route at {api_route_path}")
     
     return True
 

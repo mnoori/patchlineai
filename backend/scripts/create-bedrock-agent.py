@@ -27,14 +27,14 @@ def load_env_file():
     env_file = project_root / '.env.local'
     
     if env_file.exists():
-        print(f"📁 Loading environment variables from {env_file}...")
+        print(f"[LOAD] Loading environment variables from {env_file}...")
         with open(env_file, 'r') as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith('#') and '=' in line:
                     key, value = line.split('=', 1)
                     os.environ[key.strip()] = value.strip()
-        print("✅ Environment variables loaded from .env.local")
+        print("[OK] Environment variables loaded from .env.local")
     
     # Normalize variable names
     if os.environ.get('REGION_AWS') and not os.environ.get('AWS_REGION'):
@@ -52,12 +52,12 @@ MODEL_OVERRIDE = os.environ.get('BEDROCK_MODEL_NAME')
 if MODEL_OVERRIDE:
     try:
         FOUNDATION_MODEL = get_model_id(MODEL_OVERRIDE)
-        print(f"🔄 Using model override: {MODEL_OVERRIDE} ({FOUNDATION_MODEL})")
+        print(f"[UPDATE] Using model override: {MODEL_OVERRIDE} ({FOUNDATION_MODEL})")
     except ValueError as e:
-        print(f"⚠️  Invalid model override '{MODEL_OVERRIDE}': {e}")
-        print(f"🔄 Using default model: {FOUNDATION_MODEL}")
+        print(f"[WARNING] Invalid model override '{MODEL_OVERRIDE}': {e}")
+        print(f"[UPDATE] Using default model: {FOUNDATION_MODEL}")
 
-print(f"🤖 Using foundation model: {FOUNDATION_MODEL}")
+print(f"[ROBOT] Using foundation model: {FOUNDATION_MODEL}")
 
 # Global variables will be initialized in main()
 REGION = None
@@ -88,7 +88,7 @@ def find_existing_agent() -> Optional[Dict[str, Any]]:
 def cleanup_existing_agent(agent_id: str):
     """Clean up existing agent and its components"""
     try:
-        print(f"🧹 Cleaning up existing agent {agent_id}...")
+        print(f"[CLEAN] Cleaning up existing agent {agent_id}...")
         
         # List and delete action groups
         try:
@@ -121,7 +121,7 @@ def cleanup_existing_agent(agent_id: str):
         
         # Delete the agent
         bedrock_agent.delete_agent(agentId=agent_id)
-        print(f"✅ Deleted existing agent")
+        print(f"[OK] Deleted existing agent")
         
         # Wait for deletion
         time.sleep(5)
@@ -139,27 +139,27 @@ def validate_openapi_schema(schema_path: str) -> bool:
         required_fields = ['openapi', 'info', 'paths']
         for field in required_fields:
             if field not in schema:
-                print(f"❌ Missing required field in OpenAPI schema: {field}")
+                print(f"[ERROR] Missing required field in OpenAPI schema: {field}")
                 return False
         
         # Check OpenAPI version
         if not schema['openapi'].startswith('3.0'):
-            print(f"❌ Unsupported OpenAPI version: {schema['openapi']}")
+            print(f"[ERROR] Unsupported OpenAPI version: {schema['openapi']}")
             return False
         
         # Validate paths
         if not schema['paths']:
-            print("❌ No paths defined in OpenAPI schema")
+            print("[ERROR] No paths defined in OpenAPI schema")
             return False
         
-        print("✅ OpenAPI schema validation passed")
+        print("[OK] OpenAPI schema validation passed")
         return True
         
     except json.JSONDecodeError as e:
-        print(f"❌ Invalid JSON in OpenAPI schema: {str(e)}")
+        print(f"[ERROR] Invalid JSON in OpenAPI schema: {str(e)}")
         return False
     except Exception as e:
-        print(f"❌ Error validating OpenAPI schema: {str(e)}")
+        print(f"[ERROR] Error validating OpenAPI schema: {str(e)}")
         return False
 
 # ---------------------------------------------------------------------------
@@ -298,7 +298,7 @@ def upload_api_schema():
     # Validate schema before upload
     schema_path = os.path.join(os.path.dirname(__file__), '../lambda/gmail-actions-openapi.json')
     if not validate_openapi_schema(schema_path):
-        print("❌ OpenAPI schema validation failed. Please fix the schema.")
+        print("[ERROR] OpenAPI schema validation failed. Please fix the schema.")
         sys.exit(1)
     
     # Upload schema

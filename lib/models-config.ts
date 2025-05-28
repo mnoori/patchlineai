@@ -48,11 +48,10 @@ export const BEDROCK_MODELS: Record<string, BedrockModel> = {
     "description": "Premium quality model, highest cost",
     "cost": "highest",
     "speed": "medium",
-    "inferenceProfile": "arn:aws:bedrock:us-east-1::inference-profile/us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+    "inferenceProfile": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
     "available": true,
     "supportedModes": [
-      "chat",
-      "agent"
+      "chat"
     ]
   },
   "claude-4-sonnet": {
@@ -62,10 +61,11 @@ export const BEDROCK_MODELS: Record<string, BedrockModel> = {
     "description": "Latest Claude Sonnet model",
     "cost": "highest",
     "speed": "medium",
-    "inferenceProfile": "arn:aws:bedrock:us-east-1::inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0",
+    "inferenceProfile": "us.anthropic.claude-sonnet-4-20250514-v1:0",
     "available": true,
     "supportedModes": [
-      "chat"
+      "chat",
+      "agent"
     ]
   },
   "claude-4-opus": {
@@ -93,7 +93,7 @@ export const getAvailableModels = (mode: 'chat' | 'agent' | 'all' = 'all'): Bedr
 }
 
 export const getDefaultModel = (mode: 'chat' | 'agent'): string => {
-  return mode === 'agent' ? 'claude-3-7-sonnet' : 'claude-3-7-sonnet'
+  return mode === 'agent' ? 'claude-4-sonnet' : 'claude-4-sonnet'
 }
 
-export const AGENT_MODEL_NOTE = 'Note: Agent mode uses Claude 3.7 Sonnet. Model selection in agent mode is for display only - the actual model is configured in AWS Console.'
+export const AGENT_MODEL_NOTE = 'Note: Agent mode uses Claude 4 Sonnet. Model selection in agent mode is for display only - the actual model is configured in AWS Console.'
