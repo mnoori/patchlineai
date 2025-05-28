@@ -12,10 +12,14 @@
     "setup-algoryx": "node scripts/setup-algoryx-profile.js",
     "setup-algoryx-mehdi": "node scripts/setup-algoryx-profile.js 14287408-6011-70b3-5ac6-089f0cafdc10",
     "fix-mehdi-profile": "node scripts/fix-mehdi-profile.js",
-    "test-artist-profile": "node test-artist-profile.js"
+    "test-artist-profile": "node test-artist-profile.js",
+    "test-gmail": "node test-gmail-integration.js",
+    "test-chat": "node test-chat-gmail.js",
+    "demo": "node scripts/toggle-demo-mode.js"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.11.2",
+    "@aws-sdk/client-bedrock-agent-runtime": "^3.817.0",
     "@aws-sdk/client-bedrock-runtime": "latest",
     "@aws-sdk/client-dynamodb": "latest",
     "@aws-sdk/credential-providers": "latest",
@@ -64,6 +68,8 @@
     "fastify": "latest",
     "framer-motion": "latest",
     "fs": "latest",
+    "google-auth-library": "^9.15.1",
+    "googleapis": "^149.0.0",
     "immer": "latest",
     "input-otp": "latest",
     "lucide-react": "^0.454.0",

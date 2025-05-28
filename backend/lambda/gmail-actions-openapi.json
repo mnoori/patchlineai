@@ -1,0 +1,271 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Gmail Actions API",
+    "version": "1.0.0",
+    "description": "API for Gmail operations through Bedrock Agent"
+  },
+  "paths": {
+    "/search-emails": {
+      "post": {
+        "summary": "Search emails based on query",
+        "description": "Search through user's Gmail inbox using Gmail search syntax",
+        "operationId": "search_emails",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Gmail search query (e.g., 'from:john@example.com subject:contract')"
+                  },
+                  "maxResults": {
+                    "type": "integer",
+                    "description": "Maximum number of results to return",
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "emails": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {"type": "string"},
+                          "subject": {"type": "string"},
+                          "from": {"type": "string"},
+                          "date": {"type": "string"},
+                          "snippet": {"type": "string"}
+                        }
+                      }
+                    },
+                    "totalResults": {"type": "integer"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/read-email": {
+      "post": {
+        "summary": "Read a specific email",
+        "description": "Get full details of a specific email by ID",
+        "operationId": "read_email",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["emailId"],
+                "properties": {
+                  "emailId": {
+                    "type": "string",
+                    "description": "Gmail message ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "string"},
+                    "subject": {"type": "string"},
+                    "from": {"type": "string"},
+                    "to": {"type": "string"},
+                    "date": {"type": "string"},
+                    "body": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/draft-email": {
+      "post": {
+        "summary": "Create an email draft",
+        "description": "Create a draft email that can be reviewed before sending",
+        "operationId": "draft_email",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["to", "subject"],
+                "properties": {
+                  "to": {
+                    "type": "string",
+                    "description": "Recipient email address"
+                  },
+                  "subject": {
+                    "type": "string",
+                    "description": "Email subject"
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "Email body content"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Draft created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "draftId": {"type": "string"},
+                    "message": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/send-email": {
+      "post": {
+        "summary": "Send an email",
+        "description": "Send an existing draft or create and send a new email. Requires user confirmation before sending.",
+        "operationId": "send_email",
+        "x-requireConfirmation": "ENABLED",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "draftId": {
+                    "type": "string",
+                    "description": "Draft ID to send (if sending existing draft)"
+                  },
+                  "to": {
+                    "type": "string",
+                    "description": "Recipient email address (if sending new email)"
+                  },
+                  "subject": {
+                    "type": "string",
+                    "description": "Email subject (if sending new email)"
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "Email body content (if sending new email)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "messageId": {"type": "string"},
+                    "message": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/list-labels": {
+      "get": {
+        "summary": "List Gmail labels",
+        "description": "Get list of all labels in user's Gmail account",
+        "operationId": "list_labels",
+        "responses": {
+          "200": {
+            "description": "List of labels",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "labels": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {"type": "string"},
+                          "name": {"type": "string"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-email-stats": {
+      "get": {
+        "summary": "Get email statistics",
+        "description": "Get counts of inbox, sent, and unread emails",
+        "operationId": "get_email_stats",
+        "responses": {
+          "200": {
+            "description": "Email statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "inbox": {"type": "integer"},
+                        "sent": {"type": "integer"},
+                        "unread": {"type": "integer"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} 

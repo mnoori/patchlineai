@@ -15,6 +15,7 @@ export interface PlatformConnection {
 export interface PlatformConnections {
   spotify?: PlatformConnection
   google?: PlatformConnection
+  gmail?: PlatformConnection
   soundcloud?: PlatformConnection
   instagram?: PlatformConnection
   applemusic?: PlatformConnection
@@ -35,6 +36,7 @@ export function usePlatformConnections() {
     setPlatforms({
       spotify: { connected: false },
       google: { connected: false },
+      gmail: { connected: false },
       soundcloud: { connected: false },
       instagram: { connected: false },
       applemusic: { connected: false },
@@ -62,6 +64,7 @@ export function usePlatformConnections() {
       const basePlatforms: PlatformConnections = {
         spotify: { connected: false },
         google: { connected: false },
+        gmail: { connected: false },
         soundcloud: { connected: false },
         instagram: { connected: false },
         applemusic: { connected: false },
@@ -105,7 +108,13 @@ export function usePlatformConnections() {
     // Store user ID in session storage temporarily
     sessionStorage.setItem('oauth_user_id', userId)
     
-    // Redirect to OAuth flow with user ID in query params
+    // Handle Gmail specifically - use our custom Gmail OAuth flow
+    if (platform === 'gmail') {
+      window.location.href = `/api/auth/gmail/connect?userId=${encodeURIComponent(userId)}`
+      return
+    }
+    
+    // For other platforms, use the generic OAuth flow
     window.location.href = `/api/auth/${platform}?uid=${encodeURIComponent(userId)}`
   }
 

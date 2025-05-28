@@ -1,11 +1,19 @@
 import { create } from "zustand"
+import type React from "react"
 
 type Message = {
   id: string
   role: "user" | "assistant"
   content: string
+  pending?: boolean
   timestamp: Date
   type?: "text" | "suggestion" | "action" | "error"
+  actions?: Array<{
+    label: string
+    onClick: () => void
+    variant?: "default" | "outline" | "secondary" | "ghost"
+    icon?: React.ReactNode
+  }>
 }
 
 interface PatchyStore {
@@ -27,6 +35,7 @@ interface PatchyStore {
 
   // Actions
   addMessage: (message: Message) => void
+  updateMessage: (id: string, updates: Partial<Message>) => void
   setUnreadCount: (count: number) => void
   setMode: (mode: "agent" | "chat") => void
   setThreadId: (id: string) => void
@@ -52,6 +61,15 @@ export const usePatchyStore = create<PatchyStore>((set, get) => ({
       messages: [...state.messages, message],
       lastMessage: message,
       unreadCount: message.role === "assistant" ? state.unreadCount + 1 : state.unreadCount,
+    })),
+
+  updateMessage: (id, updates) =>
+    set((state) => ({
+      messages: state.messages.map((message) =>
+        message.id === id ? { ...message, ...updates } : message
+      ),
+      lastMessage:
+        id === state.lastMessage?.id ? { ...state.lastMessage, ...updates } : state.lastMessage,
     })),
 
   setUnreadCount: (count) => set({ unreadCount: count }),

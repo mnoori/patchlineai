@@ -54,7 +54,7 @@ export function PlatformIntegrations() {
   const platformList = [
     {
       name: "Gmail",
-      platform: "google",
+      platform: "gmail",
       icon: (
         <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center text-white">
           <svg
@@ -73,7 +73,7 @@ export function PlatformIntegrations() {
           </svg>
         </div>
       ),
-      connected: platforms.google?.connected || false,
+      connected: platforms.gmail?.connected || false,
     },
     {
       name: "Google Calendar",

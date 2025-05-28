@@ -25,6 +25,7 @@ import { TRSCableLogo } from "../icons/trs-cable-logo"
 import { usePatchyStore } from "@/hooks/use-patchy-store"
 import { Badge } from "@/components/ui/badge"
 import { motion, AnimatePresence } from "framer-motion"
+import { DEMO_MODE } from "@/lib/config"
 
 const pulseGlowStyle = `
   @keyframes pulse-glow {
@@ -56,10 +57,12 @@ const pulseGlowStyle = `
     opacity: 0;
     pointer-events: none;
     transition: opacity 400ms ease;
+    cursor: pointer;
   }
   
   .dashboard-blur.active {
     opacity: 1;
+    pointer-events: all;
   }
 
   /* Patchy's activity window */
@@ -395,47 +398,135 @@ export function SidebarWithChat() {
     const handleAgentActivity = () => {
       if (!isChatExpanded) return
 
-      setIsAgentWorking(true)
-      setCurrentLogs([])
+      if (DEMO_MODE) {
+        // DEMO MODE: Show mock logs for investor presentations
+        setIsAgentWorking(true)
+        setCurrentLogs([])
 
-      // Simulate agent logs appearing over time with smoother intervals
-      simulationLogs.forEach((log, index) => {
-        setTimeout(() => {
-          setCurrentLogs((prev) => {
-            const newLogs = [...prev, log]
+        // Simulate agent logs appearing over time with smoother intervals
+        simulationLogs.forEach((log, index) => {
+          setTimeout(() => {
+            setCurrentLogs((prev) => {
+              const newLogs = [...prev, log]
 
-            // Trigger smooth scroll after state update
-            setTimeout(() => {
-              const logsContainer = document.querySelector(".logs-container")
-              if (logsContainer) {
-                const isNearBottom =
-                  logsContainer.scrollHeight - logsContainer.scrollTop <= logsContainer.clientHeight + 50
+              // Trigger smooth scroll after state update
+              setTimeout(() => {
+                const logsContainer = document.querySelector(".logs-container")
+                if (logsContainer) {
+                  const isNearBottom =
+                    logsContainer.scrollHeight - logsContainer.scrollTop <= logsContainer.clientHeight + 50
 
-                if (isNearBottom) {
-                  logsContainer.scrollTo({
-                    top: logsContainer.scrollHeight,
-                    behavior: "smooth",
-                  })
+                  if (isNearBottom) {
+                    logsContainer.scrollTo({
+                      top: logsContainer.scrollHeight,
+                      behavior: "smooth",
+                    })
+                  }
                 }
-              }
-            }, 50)
+              }, 50)
 
-            return newLogs
-          })
+              return newLogs
+            })
 
-          // Mark as complete when done
-          if (index === simulationLogs.length - 1) {
-            setTimeout(() => {
-              setIsAgentWorking(false)
-            }, 2000)
-          }
-        }, index * 1200) // Slightly faster - 1.2 seconds between each log
-      })
+            // Mark as complete when done
+            if (index === simulationLogs.length - 1) {
+              setTimeout(() => {
+                setIsAgentWorking(false)
+              }, 2000)
+            }
+          }, index * 1200) // Slightly faster - 1.2 seconds between each log
+        })
+      } else {
+        // REAL MODE: Show actual console logs
+        setIsAgentWorking(true)
+        setCurrentLogs([])
+        
+        // In real mode, logs will be populated by intercepting console.log
+        // The agent will complete when the API call finishes
+      }
+    }
+
+    const handleAgentComplete = () => {
+      if (!DEMO_MODE) {
+        setTimeout(() => {
+          setIsAgentWorking(false)
+        }, 1000) // Small delay to show final logs
+      }
     }
 
     window.addEventListener("agent-activity", handleAgentActivity)
-    return () => window.removeEventListener("agent-activity", handleAgentActivity)
+    window.addEventListener("agent-complete", handleAgentComplete)
+    return () => {
+      window.removeEventListener("agent-activity", handleAgentActivity)
+      window.removeEventListener("agent-complete", handleAgentComplete)
+    }
   }, [isChatExpanded])
+
+  // Intercept console logs in real mode to show them in the activity panel
+  useEffect(() => {
+    if (DEMO_MODE || !isAgentWorking) return
+
+    const originalConsoleLog = console.log
+    
+    console.log = (...args) => {
+      // Call original console.log
+      originalConsoleLog.apply(console, args)
+      
+      // Check if this is a log we want to show in the activity panel
+      const message = args.join(' ')
+      if (message.includes('[CHAT]') || message.includes('[AGENT]') || message.includes('[GMAIL]') || message.includes('[MODEL]')) {
+        const timestamp = new Date().toLocaleTimeString('en-US', { 
+          hour12: false, 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit' 
+        })
+        
+        let type = 'working'
+        let icon = '⚙️'
+        
+        if (message.includes('✅')) {
+          type = 'success'
+          icon = '✅'
+        } else if (message.includes('❌')) {
+          type = 'error'
+          icon = '❌'
+        } else if (message.includes('📧')) {
+          icon = '📧'
+        } else if (message.includes('🤖')) {
+          icon = '🤖'
+        } else if (message.includes('🧠')) {
+          icon = '🧠'
+        } else if (message.includes('🔵')) {
+          icon = '🔵'
+        }
+        
+        const logEntry = {
+          timestamp,
+          message: message.replace(/^[🔵✅❌⚠️🤖🧠📧]\s*\[(CHAT|AGENT|GMAIL|MODEL)\]\s*/, ''),
+          type,
+          icon
+        }
+        
+        setCurrentLogs(prev => [...prev, logEntry])
+        
+        // Auto-scroll to bottom
+        setTimeout(() => {
+          const logsContainer = document.querySelector(".logs-container")
+          if (logsContainer) {
+            logsContainer.scrollTo({
+              top: logsContainer.scrollHeight,
+              behavior: "smooth",
+            })
+          }
+        }, 50)
+      }
+    }
+    
+    return () => {
+      console.log = originalConsoleLog
+    }
+  }, [DEMO_MODE, isAgentWorking])
 
   // Patchy's suggestions (when not working)
   const suggestions = [
@@ -480,7 +571,7 @@ export function SidebarWithChat() {
     }
   }, [currentSuggestion, isChatExpanded, isAgentWorking])
 
-  // Create UI elements
+  // Create UI elements (only once)
   useEffect(() => {
     // Create blur overlay
     const blurOverlay = document.createElement("div")
@@ -499,7 +590,47 @@ export function SidebarWithChat() {
       document.body.removeChild(blurOverlay)
       document.body.removeChild(activityBox)
     }
-  }, [])
+  }, []) // NO dependencies - create only once!
+
+  // Add click handler to blur overlay (separate effect)
+  useEffect(() => {
+    const blurOverlay = document.getElementById("dashboard-blur")
+    if (!blurOverlay) return
+
+    const handleBlurClick = (e: Event) => {
+      e.preventDefault()
+      e.stopPropagation()
+      // Only close if the chat is expanded
+      if (isChatExpanded) {
+        setIsChatExpanded(false)
+        
+        // Toggle UI elements (same as toggleChat function)
+        const activityBox = document.getElementById("activity-box")
+        if (activityBox) {
+          activityBox.classList.remove("active")
+          blurOverlay.classList.remove("active")
+          // Don't reset agent state when closing - let it continue working
+          if (!isAgentWorking) {
+            setCurrentLogs([])
+          }
+        }
+        
+        // Dispatch event (same as toggleChat function)
+        const event = new CustomEvent("chat-expanded", {
+          detail: { expanded: false },
+        })
+        window.dispatchEvent(event)
+      }
+    }
+
+    // Add click handler directly to the blur overlay element
+    blurOverlay.addEventListener("click", handleBlurClick)
+    
+    // Clean up
+    return () => {
+      blurOverlay.removeEventListener("click", handleBlurClick)
+    }
+  }, [isChatExpanded, isAgentWorking]) // Dependencies for the click handler only
 
   // Update activity box content
   useEffect(() => {
@@ -525,7 +656,17 @@ export function SidebarWithChat() {
         <div id="suggestion-text" class="suggestion-text"></div>
       `
     }
-  }, [isAgentWorking])
+    
+    // Make sure blur overlay blocks all clicks when active
+    const blurOverlay = document.getElementById("dashboard-blur")
+    if (blurOverlay) {
+      if (isChatExpanded) {
+        blurOverlay.style.pointerEvents = "all"
+      } else {
+        blurOverlay.style.pointerEvents = "none"
+      }
+    }
+  }, [isAgentWorking, isChatExpanded])
 
   // Update logs with smooth film-roll effect
   useEffect(() => {
@@ -584,9 +725,11 @@ export function SidebarWithChat() {
       } else {
         activityBox.classList.remove("active")
         blurOverlay.classList.remove("active")
-        // Reset state when closing
-        setIsAgentWorking(false)
-        setCurrentLogs([])
+        // Don't reset agent state when closing - let it continue working
+        // Only reset logs if agent is not working
+        if (!isAgentWorking) {
+          setCurrentLogs([])
+        }
       }
     }
 

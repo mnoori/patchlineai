@@ -66,19 +66,18 @@ BEDROCK_MODELS = {
     }
 }
 
-# Default model for Bedrock Agent - using Nova Micro which works directly
-DEFAULT_FOUNDATION_MODEL = BEDROCK_MODELS['nova-micro']['id']
+# Default model for Bedrock Agent - using Claude 4 Sonnet as you configured
+DEFAULT_FOUNDATION_MODEL = BEDROCK_MODELS['claude-4-sonnet']['id']
 
-# For agent mode, we need to use the base model ID, not the inference profile
-# Agents don't support inference profiles directly - they use model IDs
-# We'll stick with Nova Micro for now since it's the only one that works with agents
-AGENT_FOUNDATION_MODEL = BEDROCK_MODELS['nova-micro']['id']
+# For agent mode, we're now using Claude 4 Sonnet
+# The agent has been updated in the console to use this model
+AGENT_FOUNDATION_MODEL = BEDROCK_MODELS['claude-4-sonnet']['id']
 
 # Agent Configuration
 AGENT_CONFIG = {
     'name': 'PatchlineEmailAgent',
     'description': 'AI assistant for managing emails and communications',
-    'foundation_model': AGENT_FOUNDATION_MODEL,  # Using Nova Micro for agent
+    'foundation_model': AGENT_FOUNDATION_MODEL,  # Using Claude 4 Sonnet for agent
     'action_group_name': 'GmailActions',
     'knowledge_base_name': 'PatchlineEmailKnowledge',
     'idle_session_ttl': 900  # 15 minutes

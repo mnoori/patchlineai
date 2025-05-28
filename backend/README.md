@@ -1,3 +1,108 @@
+# Patchline Backend Documentation
+
+## Overview
+
+Patchline is an AI-powered platform for music industry professionals that combines email management, catalog analysis, and intelligent automation. The backend consists of AWS Bedrock Agents, Lambda functions, and various AWS services.
+
+## Architecture
+
+### Core Components
+
+1. **Bedrock Agent** (Claude 4 Sonnet)
+   - Primary AI interface for email management
+   - Configured with Gmail action group
+   - Uses Claude 4 Sonnet model (configured via AWS Console)
+   - Memory enabled for context retention
+   - User input enabled for clarifying questions
+
+2. **Lambda Functions**
+   - `gmail-auth-handler`: OAuth2 authentication flow
+   - `gmail-action-handler`: Gmail API operations (search, read, draft, send)
+   
+3. **Data Storage**
+   - DynamoDB: `PlatformConnections-staging` (OAuth tokens)
+   - S3: Email knowledge base storage
+   - Secrets Manager: Gmail OAuth credentials
+
+### Model Configuration
+
+Models are centrally managed in `backend/scripts/config.py`:
+
+- **Agent Mode**: Claude 4 Sonnet (fixed, configured in AWS Console)
+- **Chat Mode**: Multiple models available via inference profiles
+  - Claude 4 Sonnet/Opus
+  - Claude 3.7 Sonnet
+  - Nova Premier/Micro
+
+To update models:
+1. Edit `backend/scripts/config.py`
+2. Run `python backend/scripts/sync-models-config.py`
+
+### Gmail Integration
+
+#### Authentication Flow
+1. User initiates connection via `/api/auth/gmail`
+2. Lambda function generates OAuth URL
+3. User authorizes in Google
+4. Callback stores tokens in DynamoDB
+
+#### Action Flow
+1. Agent receives user request
+2. Invokes Gmail action via Lambda
+3. Lambda uses stored OAuth tokens
+4. Results returned to agent for response generation
+
+### Key Files
+
+- `backend/scripts/config.py` - Central configuration
+- `backend/lambda/gmail-action-handler.py` - Gmail operations
+- `backend/scripts/create-bedrock-agent.py` - Agent setup
+- `backend/scripts/deploy-lambda.py` - Lambda deployment
+
+## Deployment
+
+### Prerequisites
+- AWS CLI configured
+- Python 3.9+
+- Node.js 18+
+- Gmail OAuth credentials in Secrets Manager
+
+### Steps
+1. Deploy Lambda functions: `python backend/scripts/deploy-lambda.py`
+2. Create/update agent: `python backend/scripts/create-bedrock-agent.py`
+3. Sync models: `python backend/scripts/sync-models-config.py`
+
+## Environment Variables
+
+Required in `.env.local`:
+```
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=xxx
+AWS_SECRET_ACCESS_KEY=xxx
+BEDROCK_AGENT_ID=xxx
+BEDROCK_AGENT_ALIAS_ID=TSTALIASID
+```
+
+## Testing
+
+- Agent test: `python backend/scripts/test-agent-with-session.py`
+- Model access: `python backend/scripts/test-model-access.py`
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"invalid_scope" error**: DynamoDB storing scopes as string instead of list
+   - Fixed in `gmail-action-handler.py` with `parse_scopes()` function
+
+2. **Agent using wrong model**: 
+   - Agent model is fixed in AWS Console
+   - Cannot be changed dynamically via API
+
+3. **Actions not visible in UI**:
+   - Ensure client-side logging is enabled
+   - Check sidebar console.log interception
+
 # PatchlineAI Backend
 
 **Complete backend setup and integration guide for PatchlineAI music platform**

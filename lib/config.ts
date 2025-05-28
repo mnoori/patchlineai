@@ -82,9 +82,9 @@ export const CONFIG = {
     })(),
   
   // Google/Gmail
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
-  GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI || "http://localhost:3000/api/oauth/google/callback",
+  GMAIL_CLIENT_ID: process.env.GMAIL_CLIENT_ID || "",
+  GMAIL_CLIENT_SECRET: process.env.GMAIL_CLIENT_SECRET || "",
+  APP_BASE_URL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   
   // SoundCloud
   SOUNDCLOUD_CLIENT_ID: process.env.SOUNDCLOUD_CLIENT_ID || "",
@@ -158,6 +158,11 @@ export function getCredentialProvider() {
   }
   return credentials
 }
+
+// ======================================================================
+// DEMO MODE FOR INVESTOR PRESENTATIONS
+// ======================================================================
+export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true' || false
 
 // ======================================================================
 // MOCK DATA FOR DEVELOPMENT MODE

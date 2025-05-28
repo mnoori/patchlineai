@@ -15,14 +15,19 @@ import {
   ChevronRight,
   Sparkles,
   Brain,
+  CheckCircle,
 } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { BEDROCK_MODELS } from "@/lib/bedrock-client"
+import { BEDROCK_MODELS, getAvailableModels, getDefaultModel, AGENT_MODEL_NOTE, type BedrockModel, type BedrockModelWithKey } from "@/lib/models-config"
 import { Button } from "@/components/ui/button"
 import { usePatchyStore } from "@/hooks/use-patchy-store"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { TRSCableLogo } from "@/components/icons/trs-cable-logo"
 import { Switch } from "@/components/ui/switch"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { DEMO_MODE } from "@/lib/config"
 
 type Message = {
   id: string
@@ -58,13 +63,31 @@ const QUICK_COMMANDS = [
 
 export function ChatInterface() {
   // Global state from Zustand
-  const { lastMessage, unreadCount, setUnreadCount, mode, setMode, threadId, setThreadId, addMessage, markAsRead } =
-    usePatchyStore()
+  const { 
+    messages: globalMessages, 
+    lastMessage, 
+    unreadCount, 
+    setUnreadCount, 
+    mode, 
+    setMode, 
+    threadId, 
+    setThreadId, 
+    addMessage, 
+    updateMessage,
+    markAsRead 
+  } = usePatchyStore()
+  
+  // Get current user
+  const { userId } = useCurrentUser()
 
-  // Local state
-  const [messages, setMessages] = useState<Message[]>([])
+  // Get available models for current mode
+  const availableModels: BedrockModelWithKey[] = getAvailableModels(mode) as BedrockModelWithKey[]
+  const defaultModelKey = getDefaultModel(mode)
+  const defaultModel: BedrockModelWithKey = availableModels.find(m => m.key === defaultModelKey) || availableModels[0]
+
+  // Local state - removed local messages state since we're using global
   const [input, setInput] = useState("")
-  const [selectedModel, setSelectedModel] = useState(BEDROCK_MODELS[0])
+  const [selectedModel, setSelectedModel] = useState<BedrockModelWithKey>(defaultModel)
   const [isGenerating, setIsGenerating] = useState(false)
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const [commandSuggestions, setCommandSuggestions] = useState<typeof QUICK_COMMANDS>([])
@@ -142,10 +165,27 @@ export function ChatInterface() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom when messages change (but not on initial mount)
+  const [hasInitialized, setHasInitialized] = useState(false)
+  
   useEffect(() => {
+    // Skip scroll on initial mount
+    if (!hasInitialized) {
+      setHasInitialized(true)
+      return
+    }
+    
+    // Only scroll for new messages
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+  }, [globalMessages, hasInitialized])
+
+  // Scroll to bottom on initial mount after a delay (to show latest messages)
+  useEffect(() => {
+    // Use instant scroll on mount to show latest messages without animation
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "instant" })
+    }, 100)
+  }, [])
 
   // Focus input when component mounts
   useEffect(() => {
@@ -169,76 +209,13 @@ export function ChatInterface() {
     }
   }, [input])
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isGenerating) return
-
-    // Generate a unique ID for the message
-    const userMessageId = `user-${Date.now()}`
-    const assistantMessageId = `assistant-${Date.now()}`
-
-    // Add user message
-    const userMessage: Message = {
-      id: userMessageId,
-      role: "user",
-      content: input,
-      timestamp: new Date(),
-      type: "text",
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    addMessage(userMessage)
-
-    // Clear input immediately
-    setInput("")
-
-    // Trigger agent activity simulation
-    window.dispatchEvent(new CustomEvent("agent-activity"))
-
-    // Add pending assistant message
-    const pendingMessage: Message = {
-      id: assistantMessageId,
-      role: "assistant",
-      content: "",
-      pending: true,
-      timestamp: new Date(),
-      type: "text",
-    }
-
-    setMessages((prev) => [...prev, pendingMessage])
-    setIsGenerating(true)
-
-    // Simulate response after agent work is done (18 seconds total)
-    setTimeout(() => {
-      const finalMessage: Message = {
-        id: assistantMessageId,
-        role: "assistant",
-        content:
-          "I've completed a comprehensive analysis of your catalog! I found 12 optimization opportunities and identified 8 relevant playlists for your tracks. Your top-performing track 'Summer Vibes' has great potential for playlist placement. I've also detected some metadata inconsistencies that we should address to improve discoverability.",
-        timestamp: new Date(),
-        type: "text",
-        actions: [
-          {
-            label: "View Report",
-            onClick: () => console.log("Opening detailed report"),
-            variant: "default",
-            icon: <ChevronRight className="h-3 w-3 mr-1" />,
-          },
-          {
-            label: "Fix Metadata",
-            onClick: () => console.log("Starting metadata fixes"),
-            variant: "outline",
-            icon: <Sparkles className="h-3 w-3 mr-1" />,
-          },
-        ],
-      }
-
-      setMessages((prev) => prev.map((msg) => (msg.id === assistantMessageId ? finalMessage : msg)))
-      addMessage(finalMessage)
-      setIsGenerating(false)
-    }, 18000) // 18 seconds to match the simulation
-  }
+  // Update selected model when mode changes
+  useEffect(() => {
+    const newAvailableModels: BedrockModelWithKey[] = getAvailableModels(mode) as BedrockModelWithKey[]
+    const newDefaultModelKey = getDefaultModel(mode)
+    const newDefaultModel: BedrockModelWithKey = newAvailableModels.find(m => m.key === newDefaultModelKey) || newAvailableModels[0]
+    setSelectedModel(newDefaultModel)
+  }, [mode])
 
   // Generate action buttons based on response content
   const generateActionsFromResponse = (content: string): Message["actions"] => {
@@ -273,6 +250,155 @@ export function ChatInterface() {
     }
 
     return actions
+  }
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim() || isGenerating) return
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input.trim(),
+      timestamp: new Date(),
+      type: "text",
+    }
+
+    const assistantMessageId = (Date.now() + 1).toString()
+    const pendingMessage: Message = {
+      id: assistantMessageId,
+      role: "assistant",
+      content: "",
+      pending: true,
+      timestamp: new Date(),
+      type: "text",
+    }
+
+    addMessage(userMessage)
+    setInput("")
+    addMessage(pendingMessage)
+    setIsGenerating(true)
+
+    // Trigger agent activity simulation for sidebar logs (in both demo and real mode)
+    if (mode === "agent") {
+      window.dispatchEvent(new CustomEvent("agent-activity"))
+    }
+
+    // Handle different modes
+    if (mode === "agent" && DEMO_MODE) {
+      // DEMO MODE: Show mock response for investor presentations
+      setTimeout(() => {
+        updateMessage(assistantMessageId, {
+          content:
+            "I've completed a comprehensive analysis of your catalog! I found 12 optimization opportunities and identified 8 relevant playlists for your tracks. Your top-performing track 'Summer Vibes' has great potential for playlist placement. I've also detected some metadata inconsistencies that we should address to improve discoverability.",
+          pending: false,
+          type: "text",
+          actions: [
+            {
+              label: "View Report",
+              onClick: () => console.log("Opening detailed report"),
+              variant: "default",
+              icon: <ChevronRight className="h-3 w-3 mr-1" />,
+            },
+            {
+              label: "Fix Metadata",
+              onClick: () => console.log("Starting metadata fixes"),
+              variant: "outline",
+              icon: <Sparkles className="h-3 w-3 mr-1" />,
+            },
+          ],
+        })
+        setIsGenerating(false)
+      }, 18000) // 18 seconds to match the simulation
+    } else {
+      // REAL MODE: Call the chat API for both chat and agent modes
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: input.trim(),
+            userId: userId,
+            mode: mode,
+            modelId: selectedModel.id
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to get response from chat API')
+        }
+
+        const data = await response.json()
+        
+        updateMessage(assistantMessageId, {
+          content: data.response,
+          pending: false,
+          type: "text",
+          actions: generateActionsFromResponse(data.response),
+        })
+        setIsGenerating(false)
+
+        // Stop agent working state in real mode
+        if (mode === "agent" && !DEMO_MODE) {
+          window.dispatchEvent(new CustomEvent("agent-complete"))
+        }
+
+        // Show additional info if email context was used
+        if (data.hasEmailContext) {
+          console.log(`✅ [AGENT] Response included Gmail context from ${data.actionsInvoked?.length || 0} actions`)
+          
+          // Log each action for visibility in the sidebar
+          if (data.actionsInvoked && data.actionsInvoked.length > 0) {
+            data.actionsInvoked.forEach((action: string, index: number) => {
+              setTimeout(() => {
+                let actionDisplay = ''
+                switch (action) {
+                  case '/search-emails':
+                    actionDisplay = '📧 [GMAIL] Searching emails...'
+                    break
+                  case '/read-email':
+                    actionDisplay = '📧 [GMAIL] Reading email content...'
+                    break
+                  case '/draft-email':
+                    actionDisplay = '📧 [GMAIL] Creating email draft...'
+                    break
+                  case '/send-email':
+                    actionDisplay = '📧 [GMAIL] Sending email...'
+                    break
+                  case '/list-labels':
+                    actionDisplay = '📧 [GMAIL] Fetching email labels...'
+                    break
+                  case '/get-email-stats':
+                    actionDisplay = '📧 [GMAIL] Getting email statistics...'
+                    break
+                  default:
+                    actionDisplay = `📧 [GMAIL] Action: ${action}`
+                }
+                console.log(actionDisplay)
+                
+                // Log completion after a delay
+                setTimeout(() => {
+                  console.log(`✅ [GMAIL] ${action} completed`)
+                }, 500)
+              }, index * 600) // Stagger the logs for visibility
+            })
+          }
+        }
+
+      } catch (error) {
+        console.error('❌ [CHAT] Error getting response:', error)
+        
+        updateMessage(assistantMessageId, {
+          content: "Sorry, I encountered an error while processing your request. Please try again.",
+          pending: false,
+          type: "error",
+        })
+        setIsGenerating(false)
+      }
+    }
   }
 
   // Handle keyboard shortcuts
@@ -335,10 +461,8 @@ export function ChatInterface() {
 
   // Get display name for selected model
   const getModelDisplayName = () => {
-    // Extract just the model name without provider prefix
-    const fullName = selectedModel.name
-    const parts = fullName.split(" ")
-    return parts[parts.length - 1] // Return the last part (e.g., "Sonnet" from "Claude Sonnet")
+    // Use the displayName property for consistency
+    return selectedModel.displayName
   }
 
   return (
@@ -348,6 +472,11 @@ export function ChatInterface() {
         <div className="flex items-center space-x-2">
           <TRSCableLogo className="h-5 w-5 text-cosmic-teal" />
           <span className="font-semibold tracking-wide text-cosmic-teal">Patchy</span>
+          {DEMO_MODE && (
+            <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/30">
+              Demo Mode
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -358,7 +487,7 @@ export function ChatInterface() {
         role="log"
         aria-live="polite"
       >
-        {messages.length === 0 ? (
+        {globalMessages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cosmic-teal/20 to-cosmic-pink/20 flex items-center justify-center mb-4">
               <TRSCableLogo className="h-6 w-6 text-cosmic-teal" />
@@ -367,7 +496,7 @@ export function ChatInterface() {
           </div>
         ) : (
           <>
-            {messages.map((message) => (
+            {globalMessages.map((message) => (
               <div key={message.id} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
                 <div
                   className={cn(
@@ -509,12 +638,12 @@ export function ChatInterface() {
           <div className="relative">
             <Button
               variant="ghost"
-              className="text-sm h-8 px-2 flex items-center gap-2"
+              className="text-xs h-8 px-2 flex items-center gap-2"
               type="button"
               onClick={() => setShowModelMenu((prev) => !prev)}
             >
               <div className="w-2 h-2 rounded-full bg-cosmic-teal" />
-              <span className="text-muted-foreground">{getModelDisplayName()}</span>
+              <span className="text-muted-foreground text-xs">{getModelDisplayName()}</span>
               <ChevronDown className="h-3 w-3 opacity-50" />
             </Button>
 
@@ -540,23 +669,23 @@ export function ChatInterface() {
                   </div>
 
                   <div className="border-t border-border/50 pt-3 space-y-1 max-h-[300px] overflow-y-auto custom-scrollbar">
-                    {BEDROCK_MODELS.map((model) => (
+                    {availableModels.map((model) => (
                       <div
-                        key={model.id}
+                        key={model.key}
                         onClick={() => {
                           setSelectedModel(model)
                           setShowModelMenu(false)
                         }}
                         className={cn(
                           "cursor-pointer flex items-center text-sm rounded-md px-3 py-2 gap-3",
-                          selectedModel.id === model.id ? "bg-cosmic-teal/10" : "hover:bg-muted/50",
+                          selectedModel.key === model.key ? "bg-cosmic-teal/10" : "hover:bg-muted/50",
                         )}
                       >
                         <Brain className="h-4 w-4 text-muted-foreground" />
                         <div className="flex-1">
                           <div className="font-medium">{model.name}</div>
                         </div>
-                        {selectedModel.id === model.id && <Check className="h-4 w-4 text-cosmic-teal" />}
+                        {selectedModel.key === model.key && <Check className="h-4 w-4 text-cosmic-teal" />}
                       </div>
                     ))}
                   </div>
