@@ -136,6 +136,13 @@ def lambda_handler(event, context):
     try:
         logger.info(f"Event: {json.dumps(event)}")
         
+        # Log agent information for debugging
+        agent_info = event.get('agent', {})
+        logger.info(f"[DEBUG] Agent ID: {agent_info.get('id')}")
+        logger.info(f"[DEBUG] Agent Alias: {agent_info.get('alias')}")
+        logger.info(f"[DEBUG] Agent Name: {agent_info.get('name')}")
+        logger.info(f"[DEBUG] Agent Version: {agent_info.get('version')}")
+        
         # Extract action details from Bedrock Agent event
         action_group = event.get('actionGroup', '')
         api_path = event.get('apiPath', '')
