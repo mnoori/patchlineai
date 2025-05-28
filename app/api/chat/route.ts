@@ -84,6 +84,11 @@ export async function POST(request: NextRequest) {
         }, { status: 500 })
       }
 
+      // Debug logging to track what we're actually using
+      log.info(`[DEBUG] === FRONTEND ENV VARS ===`)
+      log.info(`[DEBUG] BEDROCK_AGENT_ID: ${process.env.BEDROCK_AGENT_ID}`)
+      log.info(`[DEBUG] BEDROCK_AGENT_ALIAS_ID: ${process.env.BEDROCK_AGENT_ALIAS_ID}`)
+      log.info(`[DEBUG] === INVOKING AGENT ===`)
       log.agent(`Invoking agent ${AGENT_ID} with alias ${AGENT_ALIAS_ID}`)
 
       // Prepare the agent invocation

@@ -28,15 +28,15 @@ def test_agent_with_session():
     
     region = os.environ.get('AWS_REGION', 'us-east-1')
     agent_id = os.environ.get('BEDROCK_AGENT_ID')
-    # Use TSTALIASID which points to DRAFT version with Nova Micro
-    agent_alias_id = 'TSTALIASID'  # Changed from ZXJXKIIXVO
+    # Use production alias instead of test alias
+    agent_alias_id = 'HSMSCJ23TU'  # Production alias pointing to Version 3
     
     if not agent_id:
         print("❌ Missing BEDROCK_AGENT_ID in environment")
         return False
     
     print(f"🤖 Testing Bedrock Agent: {agent_id}")
-    print(f"🔗 Using alias: {agent_alias_id} (Test alias pointing to DRAFT)")
+    print(f"🔗 Using alias: {agent_alias_id} (Production alias pointing to Version 3)")
     
     # Initialize Bedrock runtime client
     bedrock_runtime = boto3.client('bedrock-agent-runtime', region_name=region)

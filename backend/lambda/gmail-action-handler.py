@@ -134,14 +134,20 @@ def get_user_gmail_service(user_id: str):
 def lambda_handler(event, context):
     """Main Lambda handler for Bedrock Agent actions"""
     try:
+        # Critical Debug Logging - Track Environment vs Event
+        logger.info(f"[DEBUG] === LAMBDA ENV VARS ===")
+        logger.info(f"[DEBUG] ENV BEDROCK_AGENT_ID: {os.environ.get('BEDROCK_AGENT_ID', 'NOT_SET')}")
+        logger.info(f"[DEBUG] ENV BEDROCK_AGENT_ALIAS_ID: {os.environ.get('BEDROCK_AGENT_ALIAS_ID', 'NOT_SET')}")
+        
+        logger.info(f"[DEBUG] === EVENT DATA ===")
         logger.info(f"Event: {json.dumps(event)}")
         
         # Log agent information for debugging
         agent_info = event.get('agent', {})
-        logger.info(f"[DEBUG] Agent ID: {agent_info.get('id')}")
-        logger.info(f"[DEBUG] Agent Alias: {agent_info.get('alias')}")
-        logger.info(f"[DEBUG] Agent Name: {agent_info.get('name')}")
-        logger.info(f"[DEBUG] Agent Version: {agent_info.get('version')}")
+        logger.info(f"[DEBUG] EVENT Agent ID: {agent_info.get('id', 'NOT_SET')}")
+        logger.info(f"[DEBUG] EVENT Agent Alias: {agent_info.get('alias', 'NOT_SET')}")
+        logger.info(f"[DEBUG] EVENT Agent Name: {agent_info.get('name', 'NOT_SET')}")
+        logger.info(f"[DEBUG] EVENT Agent Version: {agent_info.get('version', 'NOT_SET')}")
         
         # Extract action details from Bedrock Agent event
         action_group = event.get('actionGroup', '')
