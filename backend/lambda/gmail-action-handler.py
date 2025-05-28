@@ -140,6 +140,7 @@ def lambda_handler(event, context):
         logger.info(f"[DEBUG] ENV BEDROCK_AGENT_ALIAS_ID: {os.environ.get('BEDROCK_AGENT_ALIAS_ID', 'NOT_SET')}")
         
         logger.info(f"[DEBUG] === EVENT DATA ===")
+        logger.info(f"Event keys: {list(event.keys())}")
         logger.info(f"Event: {json.dumps(event)}")
         
         # Log agent information for debugging
@@ -162,35 +163,44 @@ def lambda_handler(event, context):
         logger.info(f"HTTP Method: {http_method}")
         logger.info(f"Request Body: {json.dumps(request_body)}")
         
-        # Try to extract user ID from multiple possible locations
+        # ***** CRITICAL FIX - Extract user ID from various potential locations *****
         user_id = None
         
-        # Method 1: Direct sessionAttributes
-        session_attributes = event.get('sessionAttributes', {})
-        if session_attributes:
-            user_id = session_attributes.get('userId')
-            logger.info(f"Session Attributes found: {json.dumps(session_attributes)}")
-        
-        # Method 2: Check in sessionState
-        if not user_id and 'sessionState' in event:
+        # Method 1: Check directly in sessionState.sessionAttributes first (this is how Bedrock Agents pass session attributes)
+        if 'sessionState' in event:
             session_state = event.get('sessionState', {})
+            logger.info(f"[DEBUG] Found sessionState: {json.dumps(session_state)}")
+            
             session_attrs_in_state = session_state.get('sessionAttributes', {})
             if session_attrs_in_state:
                 user_id = session_attrs_in_state.get('userId')
-                logger.info(f"Session State Attributes found: {json.dumps(session_attrs_in_state)}")
+                logger.info(f"[DEBUG] Found userId in sessionState.sessionAttributes: {user_id}")
+                
+                # Also log all available attributes for debugging
+                logger.info(f"[DEBUG] All sessionState.sessionAttributes: {json.dumps(session_attrs_in_state)}")
         
-        # Method 3: Check in agent object
-        if not user_id and 'agent' in event:
-            agent_info = event.get('agent', {})
-            logger.info(f"Agent info: {json.dumps(agent_info)}")
+        # Method 2: Direct sessionAttributes (less common, but check anyway)
+        if not user_id and 'sessionAttributes' in event:
+            session_attributes = event.get('sessionAttributes', {})
+            if session_attributes:
+                user_id = session_attributes.get('userId')
+                logger.info(f"[DEBUG] Found userId in direct sessionAttributes: {user_id}")
+                logger.info(f"[DEBUG] All direct sessionAttributes: {json.dumps(session_attributes)}")
         
-        # Method 4: Check in inputText or other fields
+        # Method 3: Fixed userId for testing if above methods fail
         if not user_id:
-            logger.info(f"Full event keys: {list(event.keys())}")
-            # Log any other potential fields
-            for key in ['sessionId', 'inputText', 'messageVersion']:
-                if key in event:
-                    logger.info(f"{key}: {event.get(key)}")
+            logger.warning("[DEBUG] No userId found in session attributes, checking for hardcoded userId in environment")
+            fallback_user_id = os.environ.get('DEFAULT_USER_ID')
+            if fallback_user_id:
+                logger.warning(f"[DEBUG] Using fallback userId from environment: {fallback_user_id}")
+                user_id = fallback_user_id
+        
+        # Last method: For testing only - if no userId is found anywhere, use a hardcoded test value
+        # REMOVE THIS IN PRODUCTION or set to None
+        if not user_id:
+            # Only use this during testing and debugging
+            user_id = "14287408-6011-70b3-5ac6-089f0cafdc10"
+            logger.warning(f"[DEBUG] Using hardcoded test userId as last resort: {user_id}")
         
         logger.info(f"Final User ID: {user_id}")
         

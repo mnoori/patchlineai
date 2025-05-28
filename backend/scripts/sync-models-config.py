@@ -44,8 +44,8 @@ def sync_models_to_frontend():
         # Determine which modes this model supports
         supported_modes = []
         
-        # Agent mode now supports Claude 4 Sonnet (as configured in console)
-        if model_key == 'claude-4-sonnet':
+        # Agent mode now supports Claude 3.7 Sonnet (as configured)
+        if model_key == 'claude-3-7-sonnet':
             supported_modes = ['chat', 'agent']
         # Other models only work in chat mode if they're in the available list
         elif model_key in chat_model_names:
@@ -96,10 +96,10 @@ export const getAvailableModels = (mode: 'chat' | 'agent' | 'all' = 'all'): Bedr
 }
 
 export const getDefaultModel = (mode: 'chat' | 'agent'): string => {
-  return mode === 'agent' ? 'claude-4-sonnet' : 'claude-3-7-sonnet'
+  return mode === 'agent' ? 'claude-3-7-sonnet' : 'claude-3-7-sonnet'
 }
 
-export const AGENT_MODEL_NOTE = 'Note: Agent mode uses Claude 4 Sonnet. Model selection in agent mode is for display only - the actual model is configured in AWS Console.'
+export const AGENT_MODEL_NOTE = 'Note: Agent mode uses Claude 3.7 Sonnet. Model selection in agent mode is for display only - the actual model is configured in AWS Console.'
 """
     
     # Write to lib directory

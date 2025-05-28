@@ -46,7 +46,7 @@ BEDROCK_MODELS = {
         'description': 'Premium quality model, highest cost',
         'cost': 'highest',
         'speed': 'medium',
-        'inference_profile': 'arn:aws:bedrock:us-east-1::inference-profile/us.anthropic.claude-3-7-sonnet-20250219-v1:0'
+        'inference_profile': 'us.anthropic.claude-3-7-sonnet-20250219-v1:0'
     },
     'claude-4-sonnet': {
         'id': 'anthropic.claude-sonnet-4-20250514-v1:0',
@@ -54,7 +54,7 @@ BEDROCK_MODELS = {
         'description': 'Latest Claude Sonnet model',
         'cost': 'highest',
         'speed': 'medium',
-        'inference_profile': 'arn:aws:bedrock:us-east-1::inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0'
+        'inference_profile': 'us.anthropic.claude-sonnet-4-20250514-v1:0'
     },
     'claude-4-opus': {
         'id': 'anthropic.claude-opus-4-20250514-v1:0',
@@ -66,18 +66,18 @@ BEDROCK_MODELS = {
     }
 }
 
-# Default model for Bedrock Agent - using Claude 4 Sonnet as you configured
-DEFAULT_FOUNDATION_MODEL = BEDROCK_MODELS['claude-4-sonnet']['id']
+# Default model for Bedrock Agent - using Claude 3.7 Sonnet for better performance/cost balance
+DEFAULT_FOUNDATION_MODEL = BEDROCK_MODELS['claude-3-7-sonnet']['inference_profile'] or BEDROCK_MODELS['claude-3-7-sonnet']['id']
 
-# For agent mode, we're now using Claude 4 Sonnet
-# The agent has been updated in the console to use this model
-AGENT_FOUNDATION_MODEL = BEDROCK_MODELS['claude-4-sonnet']['id']
+# For agent mode, we're now using Claude 3.7 Sonnet
+# The agent will be configured to use the inference profile ID (preferred if available)
+AGENT_FOUNDATION_MODEL = DEFAULT_FOUNDATION_MODEL
 
 # Agent Configuration
 AGENT_CONFIG = {
     'name': 'PatchlineEmailAgent',
     'description': 'AI assistant for managing emails and communications',
-    'foundation_model': AGENT_FOUNDATION_MODEL,  # Using Claude 4 Sonnet for agent
+    'foundation_model': AGENT_FOUNDATION_MODEL,  # Using Claude 3.7 Sonnet for agent
     'action_group_name': 'GmailActions',
     'knowledge_base_name': 'PatchlineEmailKnowledge',
     'idle_session_ttl': 900  # 15 minutes
