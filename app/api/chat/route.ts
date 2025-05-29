@@ -15,9 +15,15 @@ const agentClient = new BedrockAgentRuntimeClient({
   },
 })
 
-// Agent configuration from environment variables
-const AGENT_ID = CONFIG.BEDROCK_AGENT_ID || process.env.BEDROCK_AGENT_ID || ''
-const AGENT_ALIAS_ID = CONFIG.BEDROCK_AGENT_ALIAS_ID || process.env.BEDROCK_AGENT_ALIAS_ID || ''
+// Agent configuration - now using named agents for better modularity
+const ACTIVE_AGENT_NAME = CONFIG.ACTIVE_AGENT || 'GMAIL_AGENT'
+const ACTIVE_AGENT_CONFIG = CONFIG.BEDROCK_AGENTS[ACTIVE_AGENT_NAME as keyof typeof CONFIG.BEDROCK_AGENTS]
+
+// Get agent details with fallbacks
+const AGENT_ID = ACTIVE_AGENT_CONFIG?.ID || CONFIG.BEDROCK_AGENT_ID || process.env.BEDROCK_AGENT_ID || 'C7VZ0QWDSG'
+const AGENT_ALIAS_ID = ACTIVE_AGENT_CONFIG?.ALIAS_ID || CONFIG.BEDROCK_AGENT_ALIAS_ID || process.env.BEDROCK_AGENT_ALIAS_ID || 'WDGFWL1YCB'
+const AGENT_NAME = ACTIVE_AGENT_CONFIG?.NAME || 'Default Agent'
+const AGENT_DESCRIPTION = ACTIVE_AGENT_CONFIG?.DESCRIPTION || 'Bedrock Agent'
 
 // Consistent logging with icons and colors
 const log = {
@@ -87,11 +93,13 @@ export async function POST(request: NextRequest) {
       }
 
       // Debug logging to track what we're actually using
-      log.info(`[DEBUG] === FRONTEND ENV VARS ===`)
+      log.info(`[DEBUG] === AGENT CONFIGURATION ===`)
+      log.info(`[DEBUG] Active Agent: ${AGENT_NAME} (${ACTIVE_AGENT_NAME})`)
+      log.info(`[DEBUG] Description: ${AGENT_DESCRIPTION}`)
       log.info(`[DEBUG] BEDROCK_AGENT_ID: ${AGENT_ID}`)
       log.info(`[DEBUG] BEDROCK_AGENT_ALIAS_ID: ${AGENT_ALIAS_ID}`)
       log.info(`[DEBUG] === INVOKING AGENT ===`)
-      log.agent(`Invoking agent ${AGENT_ID} with alias ${AGENT_ALIAS_ID}`)
+      log.agent(`Invoking ${AGENT_NAME} (${AGENT_ID}) with alias ${AGENT_ALIAS_ID}`)
 
       // Prepare the agent invocation
       const command = new InvokeAgentCommand({

@@ -385,6 +385,11 @@ def main():
         'KNOWLEDGE_BASE_BUCKET': 'patchline-email-knowledge-base',
         'BEDROCK_AGENT_ID': os.environ.get('BEDROCK_AGENT_ID', ''),
         'BEDROCK_AGENT_ALIAS_ID': os.environ.get('BEDROCK_AGENT_ALIAS_ID', ''),
+        # Gmail-specific variables (for existing Gmail agent)
+        'GMAIL_REDIRECT_URI': os.environ.get('GMAIL_REDIRECT_URI', 'https://www.patchline.ai/api/auth/gmail/callback'),
+        'FRONTEND_URL': os.environ.get('FRONTEND_URL', 'https://www.patchline.ai'),
+        'GMAIL_CLIENT_ID': os.environ.get('GMAIL_CLIENT_ID', ''),
+        'GMAIL_CLIENT_SECRET': os.environ.get('GMAIL_CLIENT_SECRET', ''),
     }
 
     auth_fn_arn = deploy_lambda('gmail-auth-handler', 'gmail-auth-handler.py', role_arn, env_vars_common)

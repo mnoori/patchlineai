@@ -38,8 +38,29 @@ export const CONFIG = {
   AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN || undefined,
 
   // Bedrock Agent Configuration
-  BEDROCK_AGENT_ID: process.env.BEDROCK_AGENT_ID || "",
-  BEDROCK_AGENT_ALIAS_ID: process.env.BEDROCK_AGENT_ALIAS_ID || "",
+  // Define multiple agents by name for easy switching
+  BEDROCK_AGENTS: {
+    GMAIL_AGENT: {
+      ID: process.env.BEDROCK_GMAIL_AGENT_ID || "C7VZ0QWDSG",
+      ALIAS_ID: process.env.BEDROCK_GMAIL_AGENT_ALIAS_ID || "WDGFWL1YCB",
+      NAME: "Gmail Agent",
+      DESCRIPTION: "Handles email operations via Gmail API"
+    },
+    // Future agents can be added here
+    // CALENDAR_AGENT: {
+    //   ID: process.env.BEDROCK_CALENDAR_AGENT_ID || "",
+    //   ALIAS_ID: process.env.BEDROCK_CALENDAR_AGENT_ALIAS_ID || "",
+    //   NAME: "Calendar Agent",
+    //   DESCRIPTION: "Manages calendar and scheduling"
+    // },
+  },
+  
+  // Current active agent (can be changed to switch agents)
+  ACTIVE_AGENT: "GMAIL_AGENT",
+  
+  // Legacy support - these will use the active agent
+  BEDROCK_AGENT_ID: process.env.BEDROCK_AGENT_ID || "C7VZ0QWDSG",
+  BEDROCK_AGENT_ALIAS_ID: process.env.BEDROCK_AGENT_ALIAS_ID || "WDGFWL1YCB",
 
   // DynamoDB Tables
   USERS_TABLE: process.env.USERS_TABLE || "Users-staging",
