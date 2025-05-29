@@ -1494,9 +1494,15 @@ export default function CatalogPage() {
             </TabsContent>
           </Tabs>
 
-          {/* Spotify Artist Tracks Section - First */}
-          {artistTracks.length > 0 && artistInfo && (
-            <div className="mt-6">
+          {/* Embed sections side-by-side */}
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            {/* SoundCloud (left) */}
+            {embeds.length > 0 && !isLoadingEmbeds && (
+              <SoundCloudEmbeds embeds={embeds} />
+            )}
+
+            {/* Spotify (right) */}
+            {artistTracks.length > 0 && artistInfo && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">Spotify Tracks</h2>
                 <Card className="glass-effect">
@@ -1518,8 +1524,8 @@ export default function CatalogPage() {
                   </CardContent>
                 </Card>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Artist Profile Setup Prompt */}
           {needsArtistSetup && platforms.spotify?.connected && (
@@ -1559,13 +1565,6 @@ export default function CatalogPage() {
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          )}
-
-          {/* SoundCloud Embeds Section - Second */}
-          {embeds.length > 0 && !isLoadingEmbeds && (
-            <div className="mt-6">
-              <SoundCloudEmbeds embeds={embeds} />
             </div>
           )}
         </div>

@@ -41,13 +41,29 @@ export function SoundCloudEmbeds({ embeds }: SoundCloudEmbedsProps) {
                 {embed.artist && <span className="text-muted-foreground"> by {embed.artist}</span>}
               </div>
             )}
-            <div 
-              className="w-full rounded-lg overflow-hidden"
-              dangerouslySetInnerHTML={{ __html: embed.html }}
-            />
+            <div
+              className="w-full rounded-lg overflow-hidden soundcloud-embed"
+            >
+              {/* eslint-disable-next-line react/no-danger */}
+              {(() => {
+                // Enforce compact widget: visual=false and smaller height
+                const cleanedHtml = embed.html
+                  .replace(/visual=true/g, 'visual=false')
+                  .replace(/height="\d+"/g, 'height="150"')
+                  .replace(/show_artwork=true/g, 'show_artwork=false')
+                return <div dangerouslySetInnerHTML={{ __html: cleanedHtml }} />
+              })()}
+            </div>
           </div>
         ))}
       </CardContent>
+      {/* Global height override for iframes */}
+      <style jsx global>{`
+        .soundcloud-embed iframe {
+          height: 180px !important;
+          width: 100% !important;
+        }
+      `}</style>
     </Card>
   )
 } 

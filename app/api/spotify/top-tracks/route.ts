@@ -9,10 +9,14 @@ const PLATFORM_CONNECTIONS_TABLE = process.env.PLATFORM_CONNECTIONS_TABLE || "Pl
 
 const dynamoClient = new DynamoDBClient({
   region: CONFIG.AWS_REGION,
-  credentials: {
-    accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
-    secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
-  },
+  credentials:
+    CONFIG.AWS_ACCESS_KEY_ID && CONFIG.AWS_SECRET_ACCESS_KEY
+      ? {
+          accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
+          secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
+          ...(CONFIG.AWS_SESSION_TOKEN && { sessionToken: CONFIG.AWS_SESSION_TOKEN }),
+        }
+      : undefined,
 })
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
 

@@ -4,10 +4,15 @@ import { CONFIG } from '@/lib/config'
 
 const dynamoDB = new DynamoDBClient({
   region: CONFIG.AWS_REGION,
-  credentials: {
-    accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
-    secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
-  },
+  // Only provide credentials explicitly if they are set (e.g., during local development)
+  credentials:
+    CONFIG.AWS_ACCESS_KEY_ID && CONFIG.AWS_SECRET_ACCESS_KEY
+      ? {
+          accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
+          secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
+          ...(CONFIG.AWS_SESSION_TOKEN && { sessionToken: CONFIG.AWS_SESSION_TOKEN }),
+        }
+      : undefined, // In production (Lambda), rely on the IAM role attached to the function
 })
 
 export async function GET(request: NextRequest) {

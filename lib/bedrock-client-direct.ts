@@ -20,11 +20,14 @@ export class BedrockClientDirect {
     // Always initialize the real client
     this.client = new BedrockRuntimeClient({
       region: CONFIG.AWS_REGION,
-      credentials: {
-        accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
-        secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
-        ...(CONFIG.AWS_SESSION_TOKEN && { sessionToken: CONFIG.AWS_SESSION_TOKEN }),
-      },
+      credentials:
+        CONFIG.AWS_ACCESS_KEY_ID && CONFIG.AWS_SECRET_ACCESS_KEY
+          ? {
+              accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
+              secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
+              ...(CONFIG.AWS_SESSION_TOKEN && { sessionToken: CONFIG.AWS_SESSION_TOKEN }),
+            }
+          : undefined, // In Lambda, rely on role-based credentials
     })
   }
 
