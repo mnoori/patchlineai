@@ -7,12 +7,15 @@ import { BedrockClientDirect } from '@/lib/bedrock-client-direct'
 import { CONFIG } from '@/lib/config'
 
 // Initialize Bedrock Agent Runtime client
+const agentCredentials = CONFIG.AWS_ACCESS_KEY_ID && CONFIG.AWS_SECRET_ACCESS_KEY ? {
+  accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
+  secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
+  ...(CONFIG.AWS_SESSION_TOKEN && { sessionToken: CONFIG.AWS_SESSION_TOKEN })
+} : undefined
+
 const agentClient = new BedrockAgentRuntimeClient({
   region: CONFIG.AWS_REGION,
-  credentials: {
-    accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
-    secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
-  },
+  ...(agentCredentials && { credentials: agentCredentials }),
 })
 
 // Agent configuration - now using named agents for better modularity
