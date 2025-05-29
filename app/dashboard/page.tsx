@@ -582,25 +582,25 @@ export default function DashboardPage() {
       title: "Summer EP",
       date: "June 15, 2025",
       status: "In Progress",
-      artwork: "/summer-electronic-album-cover.png",
+      artwork: "/placeholder.svg",
     },
     {
       title: "Remix Package",
       date: "July 22, 2025",
       status: "Scheduled",
-      artwork: "/electronic-album-remix.png",
+      artwork: "/placeholder.svg",
     },
     {
       title: "Acoustic Sessions",
       date: "August 10, 2025",
       status: "Scheduled",
-      artwork: "/acoustic-sessions-album-cover.png",
+      artwork: "/placeholder.svg",
     },
     {
       title: "Collaboration EP",
       date: "September 5, 2025",
       status: "Scheduled",
-      artwork: "/electronic-collaboration-album.png",
+      artwork: "/placeholder.svg",
     },
   ]
 

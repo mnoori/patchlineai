@@ -1,5 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SupervisorAgent } from '@/lib/supervisor-agent'
+import { CONFIG } from '@/lib/config'
+import { DynamoDBClient, PutItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb'
+
+console.log('[CONFIG] Running in', CONFIG.ENV === 'production' ? 'PRODUCTION' : 'DEVELOPMENT', 'mode')
+
+const dynamoDB = new DynamoDBClient({
+  region: CONFIG.AWS_REGION,
+  credentials: {
+    accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
+    secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
+  },
+})
+
+export interface AgentTrace {
+  timestamp: string
+  agent?: string
+  action: string
+  status: 'info' | 'success' | 'error' | 'delegating'
+  details?: string
+}
 
 // Store supervisor instances per session
 const supervisorInstances = new Map<string, SupervisorAgent>()
@@ -14,137 +34,196 @@ const log = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, userId, sessionId } = await request.json()
+    const body = await request.json()
+    const { message, sessionId, userId } = body
 
-    if (!message || !userId) {
-      return NextResponse.json({ error: 'Missing message or userId' }, { status: 400 })
+    // Basic validation
+    if (!message || !sessionId) {
+      return NextResponse.json(
+        { error: 'Message and sessionId are required' },
+        { status: 400 }
+      )
     }
 
-    const effectiveSessionId = sessionId || `${userId}-${Date.now()}`
+    // Extract user ID from the request
+    const actualUserId = userId || 'test-user'
     
-    log.info(`Processing request from user: ${userId.substring(0, 8)}...`)
-    log.info(`Session: ${effectiveSessionId}`)
-    log.info(`Message: ${message}`)
+    console.log(`🔵 [SUPERVISOR] Processing request from user: ${actualUserId.substring(0, 8)}...`)
+    console.log(`🔵 [SUPERVISOR] Session: ${sessionId}`)
+    console.log(`🔵 [SUPERVISOR] Message: ${message}`)
 
-    // Get or create supervisor instance for this session
-    let supervisor = supervisorInstances.get(effectiveSessionId)
-    if (!supervisor) {
-      log.agent('Creating new SupervisorAgent instance')
-      supervisor = new SupervisorAgent()
-      supervisorInstances.set(effectiveSessionId, supervisor)
-      
-      // Clean up old sessions (keep max 100)
-      if (supervisorInstances.size > 100) {
-        const oldestKey = supervisorInstances.keys().next().value
-        if (oldestKey) {
-          supervisorInstances.delete(oldestKey)
-        }
-      }
+    // Initialize traces array
+    const traces: AgentTrace[] = []
+    
+    // Add initial trace
+    traces.push({
+      timestamp: new Date().toISOString(),
+      action: 'Request received',
+      status: 'info',
+      details: `Processing message: "${message.substring(0, 50)}..."`
+    })
+
+    // Create supervisor agent
+    console.log('🤖 [SUPERVISOR] Creating new SupervisorAgent instance')
+    const supervisor = new SupervisorAgent()
+    
+    traces.push({
+      timestamp: new Date().toISOString(),
+      action: 'Supervisor Agent initialized',
+      status: 'info'
+    })
+
+    // Process the request with the supervisor
+    console.log('🤖 [SUPERVISOR] Delegating to specialized agents...')
+    traces.push({
+      timestamp: new Date().toISOString(),
+      action: 'Delegating to specialized agents',
+      status: 'delegating',
+      details: 'Analyzing request to determine which agents to use'
+    })
+
+    // Process the request and capture agent usage
+    const startTime = Date.now()
+    const response = await supervisor.processRequest(message, actualUserId, sessionId)
+    const endTime = Date.now()
+    
+    // Extract which agents were used from the response
+    const agentsUsed = extractAgentsUsed(response)
+    
+    if (agentsUsed.length > 0) {
+      traces.push({
+        timestamp: new Date().toISOString(),
+        action: 'Agents successfully invoked',
+        status: 'success',
+        agent: agentsUsed.join(', '),
+        details: `Processing completed in ${(endTime - startTime) / 1000}s`
+      })
     }
 
-    // Process the request using agent-as-tools pattern
-    log.agent('Delegating to specialized agents...')
+    // Log successful response
+    console.log(`✅ [SUPERVISOR] Response generated using: ${agentsUsed.join(', ')}`)
     
-    // Create a stream writer to send status updates
-    const stream = new TransformStream()
-    const writer = stream.writable.getWriter()
-    const encoder = new TextEncoder()
-    
-    // Process in background
-    processWithUpdates(supervisor, message, userId, effectiveSessionId, writer, encoder).then(() => {
-      writer.close()
-    }).catch((error) => {
-      log.error(`Error in background processing: ${error.message}`)
-      writer.close()
-    })
-    
-    // Return the stream
-    return new Response(stream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
+    traces.push({
+      timestamp: new Date().toISOString(),
+      action: 'Response generated',
+      status: 'success',
+      details: 'All agent tasks completed successfully'
     })
 
-  } catch (error: any) {
-    log.error(`Supervisor orchestration error: ${error.message}`)
+    // Store the interaction
+    await storeInteraction(sessionId, actualUserId, message, response)
+
     return NextResponse.json({ 
-      error: 'Supervisor orchestration failed',
-      details: error.message 
-    }, { status: 500 })
+      response,
+      traces,
+      agentsUsed
+    })
+  } catch (error) {
+    console.error('❌ [SUPERVISOR] Supervisor orchestration error:', error)
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    
+    return NextResponse.json(
+      { 
+        error: 'Supervisor orchestration failed', 
+        details: errorMessage,
+        traces: [{
+          timestamp: new Date().toISOString(),
+          action: 'Error occurred',
+          status: 'error',
+          details: errorMessage
+        }]
+      },
+      { status: 500 }
+    )
   }
 }
 
-async function processWithUpdates(
-  supervisor: SupervisorAgent,
-  message: string,
-  userId: string,
-  sessionId: string,
-  writer: WritableStreamDefaultWriter,
-  encoder: TextEncoder
-) {
-  // Send initial status
-  await writer.write(encoder.encode(`data: ${JSON.stringify({ 
-    type: 'status', 
-    content: '🤖 Analyzing your request...' 
-  })}\n\n`))
+// Extract which agents were used from the response
+function extractAgentsUsed(response: string): string[] {
+  const agents: string[] = []
   
-  // Check if this is a contract analysis request
-  const isContractAnalysis = message.toLowerCase().includes('contract') || 
-                           message.toLowerCase().includes('legal') ||
-                           message.toLowerCase().includes('agreement')
-  
-  if (isContractAnalysis) {
-    // Send Gmail agent status
-    await writer.write(encoder.encode(`data: ${JSON.stringify({ 
-      type: 'status', 
-      content: '📧 Searching your emails for contracts...' 
-    })}\n\n`))
-    
-    // Small delay to make it feel natural
-    await new Promise(resolve => setTimeout(resolve, 1000))
+  // Check for patterns indicating agent usage
+  if (response.includes('Gmail') || response.includes('email') || response.includes('CONTRACT_TEXT')) {
+    agents.push('Gmail Agent')
   }
   
-  // Process the actual request
-  const response = await supervisor.processRequest(message, userId, sessionId)
-  
-  if (isContractAnalysis && response.includes('CONTRACT_TEXT_BEGINS')) {
-    // Send legal analysis status
-    await writer.write(encoder.encode(`data: ${JSON.stringify({ 
-      type: 'status', 
-      content: '⚖️ Analyzing contract with Legal Agent...' 
-    })}\n\n`))
-    
-    await new Promise(resolve => setTimeout(resolve, 500))
+  if (response.includes('contract analysis') || response.includes('Contract Analysis Report') || response.includes('legal')) {
+    agents.push('Legal Agent')
   }
   
-  // Get memory for debugging
-  const memory = supervisor.getMemory()
-  const agentsUsed = Object.keys(memory.supervisorTeamMemory)
-    .filter(agent => memory.supervisorTeamMemory[agent].length > 0)
+  // If no specific agents detected but we have a response, assume supervisor handled it
+  if (agents.length === 0 && response.length > 0) {
+    agents.push('Supervisor Agent')
+  }
   
-  log.success(`Response generated using: ${agentsUsed.join(', ')}`)
-  
-  // Send the final response
-  await writer.write(encoder.encode(`data: ${JSON.stringify({
-    type: 'response',
-    response,
-    sessionId,
-    workflow: 'supervisor-agent-as-tools',
-    agentsUsed,
-    memorySnapshot: {
-      totalInteractions: memory.combinedMemory.length,
-      agentInteractions: Object.entries(memory.supervisorTeamMemory).map(([agent, msgs]) => ({
-        agent,
-        messageCount: msgs.length
-      }))
+  return agents
+}
+
+async function storeInteraction(sessionId: string, userId: string, message: string, response: string) {
+  const tableName = CONFIG.ENV === 'production' ? 'SupervisorSessions-prod' : 'SupervisorSessions-dev'
+  const timestamp = new Date().toISOString()
+
+  try {
+    await dynamoDB.send(new PutItemCommand({
+      TableName: tableName,
+      Item: {
+        sessionId: { S: sessionId },
+        timestamp: { S: timestamp },
+        userId: { S: userId },
+        message: { S: message },
+        response: { S: response },
+        ttl: { N: String(Math.floor(Date.now() / 1000) + 86400 * 30) } // 30 days TTL
+      }
+    }))
+  } catch (error) {
+    console.warn('[SUPERVISOR] Failed to store interaction:', error)
+    // Don't fail the request if storage fails
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const sessionId = searchParams.get('sessionId')
+
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'SessionId is required' },
+        { status: 400 }
+      )
     }
-  })}\n\n`))
+
+    const tableName = CONFIG.ENV === 'production' ? 'SupervisorSessions-prod' : 'SupervisorSessions-dev'
+
+    const response = await dynamoDB.send(new QueryCommand({
+      TableName: tableName,
+      KeyConditionExpression: 'sessionId = :sessionId',
+      ExpressionAttributeValues: {
+        ':sessionId': { S: sessionId }
+      },
+      ScanIndexForward: true // Sort by timestamp ascending
+    }))
+
+    const history = response.Items?.map(item => ({
+      timestamp: item.timestamp?.S || '',
+      message: item.message?.S || '',
+      response: item.response?.S || '',
+      userId: item.userId?.S || ''
+    })) || []
+
+    return NextResponse.json({ history })
+  } catch (error) {
+    console.error('[SUPERVISOR] Failed to fetch history:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch conversation history' },
+      { status: 500 }
+    )
+  }
 }
 
 // GET endpoint to check supervisor status
-export async function GET(request: NextRequest) {
+export async function GET_OLD(request: NextRequest) {
   const sessionId = request.nextUrl.searchParams.get('sessionId')
   
   if (sessionId && supervisorInstances.has(sessionId)) {

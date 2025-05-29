@@ -631,13 +631,15 @@ export function SidebarWithChat() {
       typeChar()
     }
 
-    typeText()
+    // Only start typing if we're not already in the middle of typing
+    const timeoutId = setTimeout(typeText, 100)
 
     return () => {
+      clearTimeout(timeoutId)
       clearTimeout(typingTimeout)
       clearTimeout(displayTimeout)
     }
-  }, [currentSuggestion, isChatExpanded, isAgentWorking])
+  }, [currentSuggestion, isChatExpanded, isAgentWorking, suggestions.length]) // Added suggestions.length to stable deps
 
   // Create UI elements (only once)
   useEffect(() => {

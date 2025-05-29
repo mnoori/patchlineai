@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import type React from "react"
+import type { AgentTrace } from '@/app/api/chat/supervisor/route'
 
 type Message = {
   id: string
@@ -14,6 +15,14 @@ type Message = {
     variant?: "default" | "outline" | "secondary" | "ghost"
     icon?: React.ReactNode
   }>
+  metadata?: {
+    agent: string
+    agentKey: string
+    model: string
+    timestamp: string
+    agentsUsed?: string[]
+    traces?: AgentTrace[]
+  }
 }
 
 interface PatchyStore {

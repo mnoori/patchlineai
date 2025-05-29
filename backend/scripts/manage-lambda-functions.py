@@ -379,8 +379,11 @@ def ensure_dynamodb_table(table_name: str) -> None:
             BillingMode='PAY_PER_REQUEST',
         )
         print(f"✅ Created DynamoDB table: {table_name}")
-    except dynamodb.meta.client.exceptions.ResourceInUseException:
-        print(f"ℹ️  DynamoDB table already exists: {table_name}")
+    except Exception as e:
+        if 'ResourceInUseException' in str(e) or 'Table already exists' in str(e):
+            print(f"ℹ️  DynamoDB table already exists: {table_name}")
+        else:
+            print(f"⚠️  Error creating DynamoDB table: {str(e)}")
 
 def ensure_s3_bucket(bucket_name: str) -> None:
     try:

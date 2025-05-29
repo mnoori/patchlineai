@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import {
   Send,
   Zap,
@@ -16,6 +16,7 @@ import {
   Sparkles,
   Brain,
   CheckCircle,
+  Activity,
 } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -28,6 +29,8 @@ import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { DEMO_MODE } from "@/lib/config"
+import { SupervisorTraces } from '@/components/supervisor-traces'
+import type { AgentTrace } from '@/app/api/chat/supervisor/route'
 
 type Message = {
   id: string
@@ -42,6 +45,14 @@ type Message = {
     variant?: "default" | "outline" | "secondary" | "ghost"
     icon?: React.ReactNode
   }>
+  metadata?: {
+    agent: string
+    agentKey: string
+    model: string
+    timestamp: string
+    agentsUsed?: string[]
+    traces?: AgentTrace[]
+  }
 }
 
 // Quick commands for autocompletion
@@ -111,6 +122,9 @@ export function ChatInterface() {
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0)
   const [showModelMenu, setShowModelMenu] = useState(false)
   const [autoMode, setAutoMode] = useState(false)
+  const [currentStatus, setCurrentStatus] = useState<string>("")
+  const [showTraces, setShowTraces] = useState(false)
+  const [selectedTraces, setSelectedTraces] = useState<AgentTrace[]>([])
 
   // Refs
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -225,30 +239,30 @@ export function ChatInterface() {
     }
   }, [input])
 
-  // Update selected model when mode changes
-  useEffect(() => {
+  // Update selected model when mode changes - use useLayoutEffect to prevent flicker
+  useLayoutEffect(() => {
     if (mode === "chat") {
       // Restore last chat model
       setSelectedModel(lastChatModel)
     } else if (mode === "agent") {
-      // Restore last agent selection
+      // Restore last agent selection  
       setSelectedAgent(lastAgentSelection)
       // Agent mode uses a fixed model, not the chat models
       const agentModels = getAvailableModels(mode) as BedrockModelWithKey[]
       setSelectedModel(agentModels[0] || defaultModel)
     }
-  }, [mode, lastChatModel, lastAgentSelection, defaultModel])
+  }, [mode]) // Only trigger when mode changes
   
   // Track model changes for chat mode
   useEffect(() => {
-    if (mode === "chat" && selectedModel) {
+    if (mode === "chat") {
       setLastChatModel(selectedModel)
     }
-  }, [selectedModel, mode])
+  }, [selectedModel?.id, mode])
   
   // Track agent changes for agent mode
   useEffect(() => {
-    if (mode === "agent" && selectedAgent) {
+    if (mode === "agent") {
       setLastAgentSelection(selectedAgent)
     }
   }, [selectedAgent, mode])
@@ -315,6 +329,7 @@ export function ChatInterface() {
     setInput("")
     addMessage(pendingMessage)
     setIsGenerating(true)
+    setCurrentStatus("")
 
     // Trigger agent activity simulation for sidebar logs (in both demo and real mode)
     if (mode === "agent") {
@@ -346,25 +361,26 @@ export function ChatInterface() {
           ],
         })
         setIsGenerating(false)
+        setCurrentStatus("")
       }, 18000) // 18 seconds to match the simulation
     } else {
       // REAL MODE: Call the chat API for both chat and agent modes
       try {
         // Use the supervisor endpoint when Supervisor Agent is selected
-        const endpoint = (mode === "agent" && selectedAgent === "SUPERVISOR_AGENT") 
-          ? '/api/chat/supervisor' 
-          : '/api/chat'
+        const isSupervisor = mode === "agent" && selectedAgent === "SUPERVISOR_AGENT"
         
-        // For supervisor, handle streaming
-        if (mode === "agent" && selectedAgent === "SUPERVISOR_AGENT") {
-          const response = await fetch(endpoint, {
+        if (isSupervisor) {
+          // Supervisor mode - use the new API with traces
+          setCurrentStatus("🤖 Analyzing your request...")
+          
+          const response = await fetch("/api/chat/supervisor", {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
               message: input.trim(),
-              userId: userId,
+              userId: userId || 'test-user',
               sessionId: threadId || `session-${Date.now()}`,
             }),
           })
@@ -373,64 +389,54 @@ export function ChatInterface() {
             throw new Error('Failed to get response from supervisor API')
           }
 
-          // Handle streaming response
-          const reader = response.body?.getReader()
-          if (!reader) throw new Error('No reader available')
+          const data = await response.json()
           
-          const decoder = new TextDecoder()
-          let buffer = ''
-          
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-            
-            buffer += decoder.decode(value, { stream: true })
-            
-            // Parse SSE messages
-            const lines = buffer.split('\n')
-            buffer = lines.pop() || ''
-            
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                try {
-                  const data = JSON.parse(line.slice(6))
-                  
-                  if (data.type === 'status') {
-                    // Update the pending message with status
-                    updateMessage(assistantMessageId, {
-                      content: data.content,
-                      pending: true,
-                      type: "text",
-                    })
-                    
-                    // Log status to console for sidebar
-                    console.log(data.content)
-                  } else if (data.type === 'response') {
-                    // Final response
-                    updateMessage(assistantMessageId, {
-                      content: data.response,
-                      pending: false,
-                      type: "text",
-                      actions: generateActionsFromResponse(data.response),
-                    })
-                    
-                    // Log completion
-                    if (data.agentsUsed && data.agentsUsed.length > 0) {
-                      console.log(`✅ [SUPERVISOR] Used agents: ${data.agentsUsed.join(', ')}`)
-                    }
-                  }
-                } catch (e) {
-                  console.error('Failed to parse SSE data:', e)
+          // Handle traces and show real-time status updates
+          if (data.traces) {
+            // Show real-time status from traces
+            data.traces.forEach((trace: AgentTrace, index: number) => {
+              setTimeout(() => {
+                if (trace.status === 'delegating') {
+                  setCurrentStatus(`🤖 ${trace.action}...`)
+                } else if (trace.agent) {
+                  setCurrentStatus(`✨ Using ${trace.agent}...`)
                 }
-              }
+              }, index * 500) // Stagger the status updates
+            })
+          }
+          
+          // Update the message with response and metadata
+          updateMessage(assistantMessageId, {
+            content: data.response,
+            pending: false,
+            type: "text",
+            actions: generateActionsFromResponse(data.response),
+            metadata: {
+              agent: "Supervisor Agent",
+              agentKey: "supervisor",
+              model: "Claude 3.5 Sonnet",
+              timestamp: new Date().toISOString(),
+              agentsUsed: data.agentsUsed,
+              traces: data.traces
             }
+          })
+          
+          // Clear status after a delay
+          setTimeout(() => setCurrentStatus(""), 2000)
+          
+          // Log completion
+          if (data.agentsUsed && data.agentsUsed.length > 0) {
+            console.log(`✅ [SUPERVISOR] Used agents: ${data.agentsUsed.join(', ')}`)
           }
           
           setIsGenerating(false)
           window.dispatchEvent(new CustomEvent("agent-complete"))
           
         } else {
-          // Regular non-streaming endpoint
+          // Regular non-supervisor endpoint
+          const endpoint = '/api/chat'
+          setCurrentStatus("🤖 Thinking...")
+          
           const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -458,6 +464,7 @@ export function ChatInterface() {
             actions: generateActionsFromResponse(data.response),
           })
           setIsGenerating(false)
+          setCurrentStatus("")
 
           // Stop agent working state in real mode
           if (mode === "agent" && !DEMO_MODE) {
@@ -516,6 +523,7 @@ export function ChatInterface() {
           type: "error",
         })
         setIsGenerating(false)
+        setCurrentStatus("")
       }
     }
   }
@@ -678,6 +686,23 @@ export function ChatInterface() {
                           ))}
                         </div>
                       )}
+
+                      {message.metadata?.agentKey === "supervisor" && message.metadata?.traces && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="ml-2 text-xs text-muted-foreground hover:text-foreground"
+                          onClick={() => {
+                            if (message.metadata?.traces) {
+                              setSelectedTraces(message.metadata.traces)
+                              setShowTraces(true)
+                            }
+                          }}
+                        >
+                          <Activity className="h-3 w-3 mr-1" />
+                          See traces
+                        </Button>
+                      )}
                     </>
                   )}
                 </div>
@@ -730,7 +755,11 @@ export function ChatInterface() {
           {/* Agent/Chat Toggle */}
           <div className="flex items-center space-x-1">
             <button
-              onClick={() => setMode("agent")}
+              onClick={() => {
+                if (mode !== "agent") {
+                  setMode("agent")
+                }
+              }}
               className={cn(
                 "px-3 py-1.5 text-sm rounded-md transition-all flex items-center",
                 mode === "agent"
@@ -742,7 +771,11 @@ export function ChatInterface() {
               Agent
             </button>
             <button
-              onClick={() => setMode("chat")}
+              onClick={() => {
+                if (mode !== "chat") {
+                  setMode("chat")
+                }
+              }}
               className={cn(
                 "px-3 py-1.5 text-sm rounded-md transition-all flex items-center",
                 mode === "chat"
@@ -795,7 +828,9 @@ export function ChatInterface() {
                           <div
                             key={agent.key}
                             onClick={() => {
-                              setSelectedAgent(agent.key)
+                              if (selectedAgent !== agent.key) {
+                                setSelectedAgent(agent.key)
+                              }
                               setShowModelMenu(false)
                             }}
                             className={cn(
@@ -814,7 +849,9 @@ export function ChatInterface() {
                           <div
                             key={model.key}
                             onClick={() => {
-                              setSelectedModel(model)
+                              if (selectedModel.key !== model.key) {
+                                setSelectedModel(model)
+                              }
                               setShowModelMenu(false)
                             }}
                             className={cn(
@@ -887,8 +924,20 @@ export function ChatInterface() {
               </div>
             </div>
           </div>
+
+          {currentStatus && (
+            <div className="px-4 py-2 text-sm text-muted-foreground animate-pulse">
+              {currentStatus}
+            </div>
+          )}
         </form>
       </div>
+
+      <SupervisorTraces 
+        traces={selectedTraces}
+        isOpen={showTraces}
+        onClose={() => setShowTraces(false)}
+      />
     </div>
   )
 }

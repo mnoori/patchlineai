@@ -91,6 +91,23 @@ export function usePlatformConnections() {
         })
       }
 
+      // Check for Instagram embeds to auto-connect Instagram
+      try {
+        const embedsResponse = await fetch(`/api/embeds?userId=${encodeURIComponent(userId)}`)
+        if (embedsResponse.ok) {
+          const embedsData = await embedsResponse.json()
+          const hasInstagramEmbeds = embedsData.embeds?.some((embed: any) => 
+            embed.platform?.toLowerCase() === 'instagram'
+          )
+          
+          if (hasInstagramEmbeds) {
+            basePlatforms.instagram = { connected: true }
+          }
+        }
+      } catch (embedError) {
+        console.warn('Could not check for Instagram embeds:', embedError)
+      }
+
       setPlatforms(basePlatforms)
     } catch (err) {
       console.error('Failed to fetch platforms:', err)

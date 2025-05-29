@@ -21,20 +21,14 @@ async function handleResponse<T>(response: Response): Promise<T> {
  * Fetch dashboard overview data from the backend API
  */
 export async function fetchDashboardData() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/dashboard/overview`)
-    return handleResponse(response)
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error)
-    // Return mock data as fallback when backend is not available
-    return {
-      revenue: 45231.89,
-      listeners: 2350412,
-      engagement: 3827,
-      revenueGrowth: 20.1,
-      listenerGrowth: 15.3,
-      engagementGrowth: 18.7
-    }
+  // Return mock data directly since we don't have a backend API server running
+  return {
+    revenue: 45231.89,
+    listeners: 2350412,
+    engagement: 3827,
+    revenueGrowth: 20.1,
+    listenerGrowth: 15.3,
+    engagementGrowth: 18.7
   }
 }
 

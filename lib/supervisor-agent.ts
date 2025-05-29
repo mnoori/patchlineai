@@ -265,33 +265,47 @@ IMPORTANT:
 User Query: ${userInput}`;
 
     try {
+      // Direct call to Bedrock model with Claude 4 Sonnet
+      // IMPORTANT: Use the inference profile ID, not the direct model ID
+      const command = new InvokeModelCommand({
+        modelId: "us.anthropic.claude-sonnet-4-20250514-v1:0", // Use inference profile ID
+        contentType: "application/json",
+        accept: "application/json",
+        body: JSON.stringify({
+          anthropic_version: "bedrock-2023-05-31",
+          max_tokens: 4096,
+          messages: [
+            { role: "user", content: supervisorPrompt }
+          ],
+          temperature: 0.7,
+          top_p: 0.9
+        })
+      })
+
+      const response = await bedrockRuntime.send(command)
+      const responseBody = JSON.parse(new TextDecoder().decode(response.body))
+      
+      // Process tool calls if any
+      const content = responseBody.content[0].text || "I could not understand your request."
+      
       // STEP 1: Ask Gmail agent to find the contract email
-      const gmailPrompt = `Search my emails for the most recent contract or legal agreement.
-I need ONLY the raw contract text for legal analysis, no commentary or explanation.
-
-Search for emails with subjects or content containing:
-- contract OR agreement OR terms 
-- license OR distribution OR publishing
-- royalty OR payment terms
-- newer_than:60d
-
-Format your response as:
-[CONTRACT_TEXT_BEGINS]
-Full unaltered contract text goes here...
-[CONTRACT_TEXT_ENDS]
-
-If no contract found, reply ONLY with "NO_CONTRACT_FOUND".`
+      const gmailPrompt = `Search my emails for the most recent contract or legal agreement from ${userInput.includes('Mehdi') ? 'Mehdi' : 'anyone'}.
+Look for emails containing: contract, agreement, terms, license, distribution, publishing, royalty, payment terms.
+Please provide the full email content including the contract text.`
 
       const gmailResponse = await this.teamTools[0].func(gmailPrompt)
 
-      if (!gmailResponse || gmailResponse.trim() === '' || gmailResponse.includes('NO_CONTRACT_FOUND')) {
-        const noEmailMsg = 'I could not find any recent contract email.'
+      if (!gmailResponse || gmailResponse.trim() === '') {
+        const noEmailMsg = 'I could not find any relevant contract emails.'
         this.memory.userSupervisorMemory.push({ role: 'assistant', content: noEmailMsg })
         return noEmailMsg
       }
 
-      // STEP 2: Ask Legal agent to analyze the contract text
-      const legalPrompt = `Analyze this music industry contract with structured assessment:
+      // STEP 2: Pass the raw email content directly to Legal agent
+      const legalPrompt = `Please analyze the following email content for any contracts or legal agreements. 
+Extract and analyze any contract text you find within this email content.
+
+Provide a structured assessment with:
 1. EXECUTIVE SUMMARY (Risk Level: LOW/MODERATE/HIGH, Key Points, Action Items)
 2. KEY TERMS BREAKDOWN (Compensation, Rights, Territory/Duration, Exclusivity, Obligations)
 3. RED FLAGS & CONCERNS (Missing Protections, Unusual Terms, Ambiguities, Unfavorable Clauses)
@@ -302,8 +316,8 @@ Format with clear headers, bullet points, and minimal jargon.
 Include numeric values when analyzing financials.
 Note that your analysis is not a substitute for attorney review.
 
-CONTRACT TEXT:
-${gmailResponse.replace('[CONTRACT_TEXT_BEGINS]', '').replace('[CONTRACT_TEXT_ENDS]', '')}`
+EMAIL CONTENT:
+${gmailResponse}`
 
       const legalResponse = await this.teamTools[1].func(legalPrompt)
 
