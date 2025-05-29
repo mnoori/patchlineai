@@ -15,6 +15,20 @@ interface AgentTool {
   func: (...args: any[]) => Promise<any>
 }
 
+// Enhanced trace interface
+export interface AgentTrace {
+  timestamp: string
+  agent?: string
+  action: string
+  status: 'info' | 'success' | 'error' | 'delegating'
+  details?: string
+  emailData?: {
+    subject?: string
+    from?: string
+    date?: string
+  }
+}
+
 // Memory storage interface
 interface ChatMemory {
   userSupervisorMemory: Array<{ role: string; content: string }>
@@ -52,6 +66,7 @@ export class SupervisorAgent {
   private description: string
   private memory: ChatMemory
   private teamTools: AgentTool[]
+  private traces: AgentTrace[]
   
   constructor() {
     this.name = "Patchline Supervisor"
@@ -64,6 +79,7 @@ export class SupervisorAgent {
       },
       combinedMemory: []
     }
+    this.traces = []
     
     // Initialize team members as tools
     this.teamTools = [
@@ -71,6 +87,39 @@ export class SupervisorAgent {
       this.createLegalAgentTool(),
       this.createSendMessagesTools()
     ]
+  }
+
+  // Add trace helper
+  private addTrace(action: string, status: AgentTrace['status'], agent?: string, details?: string, emailData?: AgentTrace['emailData']) {
+    this.traces.push({
+      timestamp: new Date().toISOString(),
+      action,
+      status,
+      agent,
+      details,
+      emailData
+    })
+  }
+
+  // Extract email metadata from Gmail response
+  private extractEmailMetadata(gmailResponse: string): AgentTrace['emailData'] | undefined {
+    try {
+      // Look for email patterns in the response
+      const subjectMatch = gmailResponse.match(/Subject:\s*(.+?)(?:\n|$)/i)
+      const fromMatch = gmailResponse.match(/From:\s*(.+?)(?:\n|$)/i)
+      const dateMatch = gmailResponse.match(/Date:\s*(.+?)(?:\n|$)/i)
+      
+      if (subjectMatch || fromMatch || dateMatch) {
+        return {
+          subject: subjectMatch?.[1]?.trim(),
+          from: fromMatch?.[1]?.trim(),
+          date: dateMatch?.[1]?.trim()
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to extract email metadata:', error)
+    }
+    return undefined
   }
 
   // Create Gmail Agent as a tool
@@ -86,45 +135,65 @@ export class SupervisorAgent {
       },
       required: ['message'],
       func: async (message: string) => {
+        this.addTrace('Delegating to Gmail Agent', 'delegating', 'Gmail Agent', 'Searching and reading emails...')
+        
         // Record supervisor->team communication
         this.memory.supervisorTeamMemory['Gmail Agent'].push({
           role: 'supervisor',
           content: message
         })
         
-        // Invoke Gmail agent
-        const command = new InvokeAgentCommand({
-          agentId: GMAIL_AGENT.agentId,
-          agentAliasId: GMAIL_AGENT.agentAliasId,
-          sessionId: `supervisor-gmail-${Date.now()}`,
-          inputText: message,
-        })
-        
-        const response = await agentRuntime.send(command)
-        let agentResponse = ''
-        
-        if (response.completion) {
-          for await (const chunk of response.completion) {
-            if (chunk.chunk?.bytes) {
-              agentResponse += new TextDecoder().decode(chunk.chunk.bytes)
+        try {
+          // Invoke Gmail agent
+          const command = new InvokeAgentCommand({
+            agentId: GMAIL_AGENT.agentId,
+            agentAliasId: GMAIL_AGENT.agentAliasId,
+            sessionId: `supervisor-gmail-${Date.now()}`,
+            inputText: message,
+          })
+          
+          const response = await agentRuntime.send(command)
+          let agentResponse = ''
+          
+          if (response.completion) {
+            for await (const chunk of response.completion) {
+              if (chunk.chunk?.bytes) {
+                agentResponse += new TextDecoder().decode(chunk.chunk.bytes)
+              }
             }
           }
+          
+          // Extract email metadata for traces
+          const emailData = this.extractEmailMetadata(agentResponse)
+          
+          // Record team->supervisor response
+          this.memory.supervisorTeamMemory['Gmail Agent'].push({
+            role: 'agent',
+            content: agentResponse
+          })
+          
+          // Add to combined memory
+          this.memory.combinedMemory.push({
+            role: 'assistant',
+            content: agentResponse,
+            agent: 'Gmail Agent'
+          })
+          
+          // Add success trace with email metadata
+          this.addTrace(
+            'Gmail Agent completed', 
+            'success', 
+            'Gmail Agent', 
+            emailData ? `Found email: "${emailData.subject}"` : 'Email search completed',
+            emailData
+          )
+          
+          return agentResponse
+          
+        } catch (error) {
+          this.addTrace('Gmail Agent failed', 'error', 'Gmail Agent', error instanceof Error ? error.message : 'Unknown error')
+          throw error
         }
-        
-        // Record team->supervisor response
-        this.memory.supervisorTeamMemory['Gmail Agent'].push({
-          role: 'agent',
-          content: agentResponse
-        })
-        
-        // Add to combined memory
-        this.memory.combinedMemory.push({
-          role: 'assistant',
-          content: agentResponse,
-          agent: 'Gmail Agent'
-        })
-        
-        return agentResponse
       }
     }
   }
@@ -142,45 +211,56 @@ export class SupervisorAgent {
       },
       required: ['message'],
       func: async (message: string) => {
+        this.addTrace('Delegating to Legal Agent', 'delegating', 'Legal Agent', 'Analyzing contract terms and legal implications...')
+        
         // Record supervisor->team communication
         this.memory.supervisorTeamMemory['Legal Agent'].push({
           role: 'supervisor',
           content: message
         })
         
-        // Invoke Legal agent
-        const command = new InvokeAgentCommand({
-          agentId: LEGAL_AGENT.agentId,
-          agentAliasId: LEGAL_AGENT.agentAliasId,
-          sessionId: `supervisor-legal-${Date.now()}`,
-          inputText: message,
-        })
-        
-        const response = await agentRuntime.send(command)
-        let agentResponse = ''
-        
-        if (response.completion) {
-          for await (const chunk of response.completion) {
-            if (chunk.chunk?.bytes) {
-              agentResponse += new TextDecoder().decode(chunk.chunk.bytes)
+        try {
+          // Invoke Legal agent
+          const command = new InvokeAgentCommand({
+            agentId: LEGAL_AGENT.agentId,
+            agentAliasId: LEGAL_AGENT.agentAliasId,
+            sessionId: `supervisor-legal-${Date.now()}`,
+            inputText: message,
+          })
+          
+          const response = await agentRuntime.send(command)
+          let agentResponse = ''
+          
+          if (response.completion) {
+            for await (const chunk of response.completion) {
+              if (chunk.chunk?.bytes) {
+                agentResponse += new TextDecoder().decode(chunk.chunk.bytes)
+              }
             }
           }
+          
+          // Record team->supervisor response
+          this.memory.supervisorTeamMemory['Legal Agent'].push({
+            role: 'agent',
+            content: agentResponse
+          })
+          
+          // Add to combined memory
+          this.memory.combinedMemory.push({
+            role: 'assistant',
+            content: agentResponse,
+            agent: 'Legal Agent'
+          })
+          
+          // Add success trace
+          this.addTrace('Legal Agent completed', 'success', 'Legal Agent', 'Contract analysis and risk assessment completed')
+          
+          return agentResponse
+          
+        } catch (error) {
+          this.addTrace('Legal Agent failed', 'error', 'Legal Agent', error instanceof Error ? error.message : 'Unknown error')
+          throw error
         }
-        
-        // Record team->supervisor response
-        this.memory.supervisorTeamMemory['Legal Agent'].push({
-          role: 'agent',
-          content: agentResponse
-        })
-        
-        // Add to combined memory
-        this.memory.combinedMemory.push({
-          role: 'assistant',
-          content: agentResponse,
-          agent: 'Legal Agent'
-        })
-        
-        return agentResponse
       }
     }
   }
@@ -212,6 +292,8 @@ export class SupervisorAgent {
       },
       required: ['messages'],
       func: async (messages: Array<{recipient: string; content: string}>) => {
+        this.addTrace('Parallel agent execution', 'delegating', 'Multiple Agents', `Coordinating ${messages.length} agents simultaneously`)
+        
         const results = await Promise.all(
           messages.map(async (msg) => {
             if (msg.recipient === 'gmail_agent') {
@@ -229,13 +311,21 @@ export class SupervisorAgent {
           })
         )
         
-        return results.filter(r => r !== null)
+        const validResults = results.filter(r => r !== null)
+        this.addTrace('Parallel execution completed', 'success', 'Multiple Agents', `${validResults.length} agents completed successfully`)
+        
+        return validResults
       }
     }
   }
 
   // Process user request using supervisor with tools
   async processRequest(userInput: string, userId: string, sessionId: string): Promise<string> {
+    // Clear previous traces for new request
+    this.traces = []
+    
+    this.addTrace('Request analysis started', 'info', undefined, 'Supervisor analyzing user request and planning workflow')
+    
     // Add user message to memory
     this.memory.userSupervisorMemory.push({
       role: 'user',
@@ -302,6 +392,8 @@ User Query: ${userInput}`;
       // Process Nova model response
       const content = responseBody?.output?.message?.content?.[0]?.text || "I could not understand your request."
       
+      this.addTrace('Workflow planning completed', 'success', undefined, 'Email search → Contract extraction → Legal analysis')
+      
       // STEP 1: Ask Gmail agent to find the contract email
       const gmailPrompt = `Search my emails for the most recent contract or legal agreement from ${userInput.includes('Mehdi') ? 'Mehdi' : 'anyone'}.
 Look for emails containing: contract, agreement, terms, license, distribution, publishing, royalty, payment terms.
@@ -312,6 +404,7 @@ Please provide the full email content including the contract text.`
       if (!gmailResponse || gmailResponse.trim() === '') {
         const noEmailMsg = 'I could not find any relevant contract emails.'
         this.memory.userSupervisorMemory.push({ role: 'assistant', content: noEmailMsg })
+        this.addTrace('Workflow completed', 'error', undefined, 'No contract emails found')
         return noEmailMsg
       }
 
@@ -341,12 +434,20 @@ ${gmailResponse}`
       // Record supervisor response
       this.memory.userSupervisorMemory.push({ role: 'assistant', content: combined })
 
+      this.addTrace('Workflow completed successfully', 'success', undefined, 'Contract analysis report generated and delivered')
+
       return combined
 
     } catch (error: any) {
       console.error('Supervisor error:', error)
+      this.addTrace('Workflow failed', 'error', undefined, error.message)
       throw new Error(`Supervisor orchestration failed: ${error.message}`)
     }
+  }
+
+  // Get traces
+  getTraces(): AgentTrace[] {
+    return this.traces
   }
 
   // Build tools prompt for the supervisor
@@ -399,5 +500,6 @@ ${this.memory.combinedMemory.map(msg =>
       },
       combinedMemory: []
     }
+    this.traces = []
   }
 } 

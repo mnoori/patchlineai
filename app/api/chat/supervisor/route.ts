@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { SupervisorAgent } from '@/lib/supervisor-agent'
+import { SupervisorAgent, type AgentTrace } from '@/lib/supervisor-agent'
 import { CONFIG } from '@/lib/config'
 import { DynamoDBClient, PutItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb'
 
@@ -12,14 +12,6 @@ const dynamoDB = new DynamoDBClient({
     secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
   },
 })
-
-export interface AgentTrace {
-  timestamp: string
-  agent?: string
-  action: string
-  status: 'info' | 'success' | 'error' | 'delegating'
-  details?: string
-}
 
 // Store supervisor instances per session
 const supervisorInstances = new Map<string, SupervisorAgent>()
@@ -52,63 +44,37 @@ export async function POST(request: NextRequest) {
     console.log(`🔵 [SUPERVISOR] Session: ${sessionId}`)
     console.log(`🔵 [SUPERVISOR] Message: ${message}`)
 
-    // Initialize traces array
-    const traces: AgentTrace[] = []
-    
-    // Add initial trace
-    traces.push({
-      timestamp: new Date().toISOString(),
-      action: 'Request received',
-      status: 'info',
-      details: `Processing message: "${message.substring(0, 50)}..."`
-    })
-
     // Create supervisor agent
     console.log('🤖 [SUPERVISOR] Creating new SupervisorAgent instance')
     const supervisor = new SupervisorAgent()
-    
-    traces.push({
-      timestamp: new Date().toISOString(),
-      action: 'Supervisor Agent initialized',
-      status: 'info'
-    })
 
     // Process the request with the supervisor
     console.log('🤖 [SUPERVISOR] Delegating to specialized agents...')
-    traces.push({
-      timestamp: new Date().toISOString(),
-      action: 'Delegating to specialized agents',
-      status: 'delegating',
-      details: 'Analyzing request to determine which agents to use'
-    })
 
     // Process the request and capture agent usage
     const startTime = Date.now()
     const response = await supervisor.processRequest(message, actualUserId, sessionId)
     const endTime = Date.now()
     
-    // Extract which agents were used from the response
-    const agentsUsed = extractAgentsUsed(response)
+    // Get enhanced traces from supervisor
+    const traces = supervisor.getTraces()
     
-    if (agentsUsed.length > 0) {
-      traces.push({
-        timestamp: new Date().toISOString(),
-        action: 'Agents successfully invoked',
-        status: 'success',
-        agent: agentsUsed.join(', '),
-        details: `Processing completed in ${(endTime - startTime) / 1000}s`
-      })
-    }
-
-    // Log successful response
-    console.log(`✅ [SUPERVISOR] Response generated using: ${agentsUsed.join(', ')}`)
+    // Extract which agents were used from the traces
+    const agentsUsed = traces
+      .filter(trace => trace.agent && trace.status === 'success')
+      .map(trace => trace.agent!)
+      .filter((agent, index, array) => array.indexOf(agent) === index) // unique agents
     
+    // Add final timing trace
     traces.push({
       timestamp: new Date().toISOString(),
       action: 'Response generated',
       status: 'success',
-      details: 'All agent tasks completed successfully'
+      details: `All agent tasks completed successfully in ${((endTime - startTime) / 1000).toFixed(1)}s`
     })
+
+    // Log successful response
+    console.log(`✅ [SUPERVISOR] Response generated using: ${agentsUsed.join(', ')}`)
 
     // Store the interaction
     await storeInteraction(sessionId, actualUserId, message, response)
@@ -139,49 +105,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Extract which agents were used from the response
-function extractAgentsUsed(response: string): string[] {
-  const agents: string[] = []
-  
-  // Check for patterns indicating agent usage
-  if (response.includes('Gmail') || response.includes('email') || response.includes('CONTRACT_TEXT')) {
-    agents.push('Gmail Agent')
-  }
-  
-  if (response.includes('contract analysis') || response.includes('Contract Analysis Report') || response.includes('legal')) {
-    agents.push('Legal Agent')
-  }
-  
-  // If no specific agents detected but we have a response, assume supervisor handled it
-  if (agents.length === 0 && response.length > 0) {
-    agents.push('Supervisor Agent')
-  }
-  
-  return agents
-}
-
-async function storeInteraction(sessionId: string, userId: string, message: string, response: string) {
-  const tableName = CONFIG.ENV === 'production' ? 'SupervisorSessions-prod' : 'SupervisorSessions-dev'
-  const timestamp = new Date().toISOString()
-
-  try {
-    await dynamoDB.send(new PutItemCommand({
-      TableName: tableName,
-      Item: {
-        sessionId: { S: sessionId },
-        timestamp: { S: timestamp },
-        userId: { S: userId },
-        message: { S: message },
-        response: { S: response },
-        ttl: { N: String(Math.floor(Date.now() / 1000) + 86400 * 30) } // 30 days TTL
-      }
-    }))
-  } catch (error) {
-    console.warn('[SUPERVISOR] Failed to store interaction:', error)
-    // Don't fail the request if storage fails
-  }
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -194,35 +117,77 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const tableName = CONFIG.ENV === 'production' ? 'SupervisorSessions-prod' : 'SupervisorSessions-dev'
+    // Get supervisor instance for this session
+    const supervisor = supervisorInstances.get(sessionId)
+    
+    if (!supervisor) {
+      return NextResponse.json({
+        status: 'no_session',
+        message: 'No active session found'
+      })
+    }
 
-    const response = await dynamoDB.send(new QueryCommand({
-      TableName: tableName,
-      KeyConditionExpression: 'sessionId = :sessionId',
-      ExpressionAttributeValues: {
-        ':sessionId': { S: sessionId }
+    // Get memory and traces from supervisor
+    const memory = supervisor.getMemory()
+    const traces = supervisor.getTraces()
+    
+    return NextResponse.json({
+      status: 'active',
+      memory: {
+        totalInteractions: memory.combinedMemory.length,
+        agentInteractions: Object.entries(memory.supervisorTeamMemory).map(([agent, interactions]) => ({
+          agent,
+          messageCount: interactions.length
+        }))
       },
-      ScanIndexForward: true // Sort by timestamp ascending
-    }))
-
-    const history = response.Items?.map(item => ({
-      timestamp: item.timestamp?.S || '',
-      message: item.message?.S || '',
-      response: item.response?.S || '',
-      userId: item.userId?.S || ''
-    })) || []
-
-    return NextResponse.json({ history })
+      traces
+    })
   } catch (error) {
-    console.error('[SUPERVISOR] Failed to fetch history:', error)
+    console.error('❌ [SUPERVISOR] Error getting session status:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch conversation history' },
+      { error: 'Failed to get session status' },
       { status: 500 }
     )
   }
 }
 
-// GET endpoint to check supervisor status
+// Extract agents used from response (fallback method)
+function extractAgentsUsed(response: string): string[] {
+  const agents: string[] = []
+  
+  if (response.includes('Gmail') || response.includes('email')) {
+    agents.push('Gmail Agent')
+  }
+  
+  if (response.includes('Legal') || response.includes('contract') || response.includes('agreement')) {
+    agents.push('Legal Agent')
+  }
+  
+  return agents
+}
+
+// Store interaction in DynamoDB
+async function storeInteraction(sessionId: string, userId: string, message: string, response: string) {
+  const tableName = CONFIG.ENV === 'production' ? 'SupervisorInteractions-prod' : 'SupervisorInteractions-staging'
+  
+  try {
+    await dynamoDB.send(new PutItemCommand({
+      TableName: tableName,
+      Item: {
+        sessionId: { S: sessionId },
+        timestamp: { S: new Date().toISOString() },
+        userId: { S: userId },
+        userMessage: { S: message },
+        supervisorResponse: { S: response },
+        ttl: { N: Math.floor(Date.now() / 1000 + 30 * 24 * 60 * 60).toString() } // 30 days TTL
+      }
+    }))
+  } catch (error) {
+    console.error('[SUPERVISOR] Failed to store interaction:', error)
+    // Don't throw - this is non-critical
+  }
+}
+
 export async function GET_OLD(request: NextRequest) {
   const sessionId = request.nextUrl.searchParams.get('sessionId')
   

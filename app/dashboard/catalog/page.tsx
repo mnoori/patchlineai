@@ -1506,27 +1506,7 @@ export default function CatalogPage() {
 
             {/* Spotify (right) */}
             {artistTracks.length > 0 && artistInfo && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Spotify Tracks</h2>
-                <Card className="glass-effect">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{artistInfo.name}</CardTitle>
-                        <CardDescription>
-                          {artistInfo.followers.toLocaleString()} followers • {artistInfo.genres.join(', ')}
-                        </CardDescription>
-                      </div>
-                      <Badge variant="outline" className="bg-[#1DB954]/10 text-[#1DB954] border-[#1DB954]/20">
-                        Spotify
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <SpotifyEmbeds tracks={artistTracks} />
-                  </CardContent>
-                </Card>
-              </div>
+              <SpotifyEmbeds tracks={artistTracks} />
             )}
           </div>
 

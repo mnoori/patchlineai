@@ -372,15 +372,38 @@ def handle_read_email(user_id: str, request_body: Dict) -> Dict:
     try:
         service = get_user_gmail_service(user_id)
         content = request_body.get('content', {})
+        json_content = {}
+        
+        logger.info(f"[DEBUG] Raw request_body: {json.dumps(request_body)}")
+        logger.info(f"[DEBUG] Content type: {type(content)}, Content: {json.dumps(content) if isinstance(content, dict) else str(content)}")
+        
         if isinstance(content, dict):
-            json_content = content.get('application/json', {})
-        else:
-            json_content = {}
+            app_json = content.get('application/json', {})
+            logger.info(f"[DEBUG] app_json: {json.dumps(app_json)}")
+            
+            # Bedrock Agent sends parameters as list under "properties"
+            if 'properties' in app_json and isinstance(app_json['properties'], list):
+                try:
+                    props_list = app_json['properties']
+                    logger.info(f"[DEBUG] Found properties list: {json.dumps(props_list)}")
+                    # convert list of {name,value} into dict
+                    json_content = {p['name']: p.get('value') for p in props_list if isinstance(p, dict) and 'name' in p}
+                    logger.info(f"[DEBUG] Converted properties to dict: {json.dumps(json_content)}")
+                except Exception as ex:
+                    logger.warning(f"Failed to parse properties list: {str(ex)}")
+            else:
+                # Fallback to direct JSON content
+                json_content = app_json
+                logger.info(f"[DEBUG] Using direct json_content: {json.dumps(json_content)}")
         
         email_id = json_content.get('emailId', '')
+        logger.info(f"[DEBUG] Final parsed emailId: '{email_id}'")
         
         if not email_id:
+            logger.error("[DEBUG] Email ID is empty after parsing!")
             return create_response(400, {'error': 'Email ID is required'}, '/read-email', 'POST')
+        
+        logger.info(f"Reading email with ID: {email_id}")
         
         message = service.users().messages().get(userId='me', id=email_id, format='full').execute()
         headers = message['payload'].get('headers', [])
@@ -411,10 +434,24 @@ def handle_draft_email(user_id: str, request_body: Dict) -> Dict:
     try:
         service = get_user_gmail_service(user_id)
         content = request_body.get('content', {})
+        json_content = {}
+        
+        logger.info(f"[DEBUG] Raw request_body: {json.dumps(request_body)}")
+        
         if isinstance(content, dict):
-            json_content = content.get('application/json', {})
-        else:
-            json_content = {}
+            app_json = content.get('application/json', {})
+            
+            # Bedrock Agent sends parameters as list under "properties"
+            if 'properties' in app_json and isinstance(app_json['properties'], list):
+                try:
+                    props_list = app_json['properties']
+                    json_content = {p['name']: p.get('value') for p in props_list if isinstance(p, dict) and 'name' in p}
+                    logger.info(f"[DEBUG] Converted properties to dict: {json.dumps(json_content)}")
+                except Exception as ex:
+                    logger.warning(f"Failed to parse properties list: {str(ex)}")
+            else:
+                # Fallback to direct JSON content
+                json_content = app_json
         
         to_email = json_content.get('to', '')
         subject = json_content.get('subject', '')
@@ -453,10 +490,24 @@ def handle_send_email(user_id: str, request_body: Dict) -> Dict:
     try:
         service = get_user_gmail_service(user_id)
         content = request_body.get('content', {})
+        json_content = {}
+        
+        logger.info(f"[DEBUG] Raw request_body: {json.dumps(request_body)}")
+        
         if isinstance(content, dict):
-            json_content = content.get('application/json', {})
-        else:
-            json_content = {}
+            app_json = content.get('application/json', {})
+            
+            # Bedrock Agent sends parameters as list under "properties"
+            if 'properties' in app_json and isinstance(app_json['properties'], list):
+                try:
+                    props_list = app_json['properties']
+                    json_content = {p['name']: p.get('value') for p in props_list if isinstance(p, dict) and 'name' in p}
+                    logger.info(f"[DEBUG] Converted properties to dict: {json.dumps(json_content)}")
+                except Exception as ex:
+                    logger.warning(f"Failed to parse properties list: {str(ex)}")
+            else:
+                # Fallback to direct JSON content
+                json_content = app_json
         
         draft_id = json_content.get('draftId', '')
         

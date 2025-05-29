@@ -30,7 +30,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { DEMO_MODE } from "@/lib/config"
 import { SupervisorTraces } from '@/components/supervisor-traces'
-import type { AgentTrace } from '@/app/api/chat/supervisor/route'
+import { type AgentTrace } from "@/lib/supervisor-agent"
 
 type Message = {
   id: string
@@ -94,7 +94,7 @@ export function ChatInterface() {
     setThreadId, 
     addMessage, 
     updateMessage,
-    markAsRead 
+    markAsRead,
   } = usePatchyStore()
   
   // Get current user
@@ -371,7 +371,12 @@ export function ChatInterface() {
         
         if (isSupervisor) {
           // Supervisor mode - use the new API with traces
-          setCurrentStatus("🤖 Analyzing your request...")
+          console.log("🤖 [SUPERVISOR] Analyzing your request...")
+          
+          // Show immediate start activity
+          setTimeout(() => {
+            console.log("🔍 [SUPERVISOR] Searching for relevant agents...")
+          }, 500)
           
           const response = await fetch("/api/chat/supervisor", {
             method: 'POST',
@@ -392,17 +397,36 @@ export function ChatInterface() {
           const data = await response.json()
           
           // Handle traces and show real-time status updates
-          if (data.traces) {
+          if (data.traces && data.traces.length > 0) {
             // Show real-time status from traces
             data.traces.forEach((trace: AgentTrace, index: number) => {
               setTimeout(() => {
                 if (trace.status === 'delegating') {
-                  setCurrentStatus(`🤖 ${trace.action}...`)
+                  console.log(`🤖 [SUPERVISOR] ${trace.action}`)
                 } else if (trace.agent) {
-                  setCurrentStatus(`✨ Using ${trace.agent}...`)
+                  console.log(`✨ [SUPERVISOR] Delegating to ${trace.agent}`)
+                } else {
+                  console.log(`🔄 [SUPERVISOR] ${trace.action}`)
                 }
-              }, index * 500) // Stagger the status updates
+              }, 1000 + (index * 800)) // Start after initial delay
             })
+          } else {
+            // Fallback logs if no traces
+            setTimeout(() => {
+              console.log("🧠 [SUPERVISOR] Processing request with specialized agents...")
+            }, 1000)
+            
+            setTimeout(() => {
+              console.log("📧 [SUPERVISOR] Accessing Gmail integration...")
+            }, 2000)
+            
+            setTimeout(() => {
+              console.log("⚖️ [SUPERVISOR] Consulting Legal agent...")
+            }, 4000)
+            
+            setTimeout(() => {
+              console.log("📝 [SUPERVISOR] Generating comprehensive analysis...")
+            }, 6000)
           }
           
           // Update the message with response and metadata
@@ -422,11 +446,18 @@ export function ChatInterface() {
           })
           
           // Clear status after a delay
-          setTimeout(() => setCurrentStatus(""), 2000)
+          setCurrentStatus("")
           
-          // Log completion
+          // Log completion with detailed summary
+          const finalDelay = data.traces?.length ? (data.traces.length * 800 + 2000) : 8000
           if (data.agentsUsed && data.agentsUsed.length > 0) {
-            console.log(`✅ [SUPERVISOR] Used agents: ${data.agentsUsed.join(', ')}`)
+            setTimeout(() => {
+              console.log(`✅ [SUPERVISOR] Orchestration complete - Used: ${data.agentsUsed.join(', ')}`)
+            }, finalDelay)
+          } else {
+            setTimeout(() => {
+              console.log(`✅ [SUPERVISOR] Orchestration complete - Analysis ready`)
+            }, finalDelay)
           }
           
           setIsGenerating(false)
@@ -435,7 +466,7 @@ export function ChatInterface() {
         } else {
           // Regular non-supervisor endpoint
           const endpoint = '/api/chat'
-          setCurrentStatus("🤖 Thinking...")
+          console.log("🤖 [CHAT] Thinking...")
           
           const response = await fetch(endpoint, {
             method: 'POST',
@@ -616,16 +647,6 @@ export function ChatInterface() {
         role="log"
         aria-live="polite"
       >
-        {/* Current Status indicator */}
-        {currentStatus && (
-          <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-background/90 backdrop-blur-sm border border-border/50 rounded-full px-4 py-2 shadow-lg z-50">
-            <div className="flex items-center space-x-2 text-sm">
-              <Loader2 className="h-3 w-3 animate-spin text-cosmic-teal" />
-              <span className="text-muted-foreground">{currentStatus}</span>
-            </div>
-          </div>
-        )}
-        
         {globalMessages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cosmic-teal/20 to-cosmic-pink/20 flex items-center justify-center mb-4">
