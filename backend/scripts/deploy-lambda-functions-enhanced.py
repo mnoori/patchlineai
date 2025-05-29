@@ -224,6 +224,91 @@ def add_bedrock_permissions_with_logging(lambda_client, function_name: str):
             logger.error(f"❌ Failed to add {perm['StatementId']}: {str(e)}")
 
 # ---------------------------------------------------------------------------
+# IAM ROLE SETUP
+# ---------------------------------------------------------------------------
+
+def setup_iam_role(iam_client) -> str:
+    """Create or get IAM role for Lambda execution"""
+    role_name = 'PatchlineLambdaExecutionRole'
+    
+    try:
+        # Check if role exists
+        role = iam_client.get_role(RoleName=role_name)
+        logger.info(f"Using existing role: {role['Role']['Arn']}")
+        return role['Role']['Arn']
+    except iam_client.exceptions.NoSuchEntityException:
+        logger.info(f"Creating new IAM role: {role_name}")
+        
+    # Create the role
+    trust_policy = {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": "lambda.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+            }
+        ]
+    }
+    
+    try:
+        role_response = iam_client.create_role(
+            RoleName=role_name,
+            AssumeRolePolicyDocument=json.dumps(trust_policy),
+            Description='Role for Patchline Lambda functions'
+        )
+        role_arn = role_response['Role']['Arn']
+        logger.info(f"Created role: {role_arn}")
+        
+        # Attach necessary policies
+        policies = [
+            'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
+            'arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess',
+            'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+        ]
+        
+        for policy in policies:
+            iam_client.attach_role_policy(
+                RoleName=role_name,
+                PolicyArn=policy
+            )
+            logger.info(f"Attached policy: {policy}")
+        
+        # Create and attach inline policy for Secrets Manager
+        secrets_policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "secretsmanager:GetSecretValue",
+                        "secretsmanager:DescribeSecret"
+                    ],
+                    "Resource": "arn:aws:secretsmanager:*:*:secret:patchline/*"
+                }
+            ]
+        }
+        
+        iam_client.put_role_policy(
+            RoleName=role_name,
+            PolicyName='PatchlineSecretsAccess',
+            PolicyDocument=json.dumps(secrets_policy)
+        )
+        logger.info("Attached Secrets Manager policy")
+        
+        # Wait for role to be ready
+        logger.info("Waiting for role to propagate...")
+        time.sleep(10)
+        
+        return role_arn
+        
+    except Exception as e:
+        logger.error(f"Error creating role: {str(e)}")
+        raise
+
+# ---------------------------------------------------------------------------
 # MAIN DEPLOYMENT
 # ---------------------------------------------------------------------------
 
@@ -273,45 +358,48 @@ def create_deployment_package(function_name: str, source_filename: str) -> bytes
 
 def main():
     """Main deployment function"""
-    # Load environment
+    logger.info("Starting Lambda function deployment...")
+    
+    # Load environment variables
     load_env_file()
-    
-    # Initialize AWS clients
-    REGION = os.environ.get('AWS_REGION', 'us-east-1')
-    logger.info(f"\n🌍 AWS Region: {REGION}")
-    
-    lambda_client = boto3.client('lambda', region_name=REGION)
-    iam = boto3.client('iam')
     
     # Configuration
     function_configs = [
-        ('gmail-auth-handler', 'gmail-auth-handler.py'),
-        ('gmail-action-handler', 'gmail-action-handler.py')
+        ("gmail-auth-handler", "gmail-auth-handler.py"),
+        ("gmail-action-handler", "gmail-action-handler.py")
     ]
     
-    # Check for cleanup
+    region = os.environ.get('AWS_REGION', 'us-east-1')
+    agent_id = os.environ.get('BEDROCK_AGENT_ID')
+    alias_id = os.environ.get('BEDROCK_AGENT_ALIAS_ID')
+    
+    if not agent_id or not alias_id:
+        logger.error("BEDROCK_AGENT_ID and BEDROCK_AGENT_ALIAS_ID must be set in environment")
+        sys.exit(1)
+    
+    print(f"🌍 AWS Region: {region}")
+    
+    # Initialize AWS clients
+    session = boto3.Session(region_name=region)
+    lambda_client = session.client('lambda')
+    iam_client = session.client('iam')
+    s3_client = session.client('s3')
+    
+    # Clean up existing functions if requested
     cleanup_existing_lambdas(lambda_client, [name for name, _ in function_configs])
     
-    # Create or get IAM role
+    # Setup IAM role
     logger.info("\n🔐 Setting up IAM role...")
-    role_name = 'PatchlineLambdaExecutionRole'
+    role_arn = setup_iam_role(iam_client)
     
-    try:
-        role = iam.get_role(RoleName=role_name)
-        role_arn = role['Role']['Arn']
-        logger.info(f"Using existing role: {role_arn}")
-    except iam.exceptions.NoSuchEntityException:
-        logger.info("Creating new IAM role...")
-        # Create role logic here (keeping it simple for now)
-        
-    # Environment variables
+    # Environment variables for Lambda functions
     env_vars = {
         'PLATFORM_CONNECTIONS_TABLE': 'PlatformConnections-staging',
         'GMAIL_SECRETS_NAME': 'patchline/gmail-oauth',
         'KNOWLEDGE_BASE_BUCKET': 'patchline-email-knowledge-base',
-        'BEDROCK_AGENT_ID': os.environ.get('BEDROCK_AGENT_ID', ''),
-        'BEDROCK_AGENT_ALIAS_ID': os.environ.get('BEDROCK_AGENT_ALIAS_ID', ''),
-        'AWS_REGION': REGION
+        'BEDROCK_AGENT_ID': agent_id,
+        'BEDROCK_AGENT_ALIAS_ID': alias_id
+        # Removed AWS_REGION as it's a reserved environment variable
     }
     
     logger.info("\n📋 Configuration Summary:")

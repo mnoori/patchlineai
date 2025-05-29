@@ -22,6 +22,42 @@ const OAUTH_ENDPOINTS = {
   },
 }
 
+// Helper function to get client credentials for each provider
+function getProviderCredentials(provider: string) {
+  switch (provider) {
+    case 'google':
+      return {
+        clientId: CONFIG.GMAIL_CLIENT_ID,
+        clientSecret: CONFIG.GMAIL_CLIENT_SECRET,
+        redirectUri: `${CONFIG.APP_BASE_URL}/api/auth/gmail/callback`
+      }
+    case 'spotify':
+      return {
+        clientId: CONFIG.SPOTIFY_CLIENT_ID,
+        clientSecret: CONFIG.SPOTIFY_CLIENT_SECRET,
+        redirectUri: CONFIG.SPOTIFY_REDIRECT_URI
+      }
+    case 'soundcloud':
+      return {
+        clientId: CONFIG.SOUNDCLOUD_CLIENT_ID,
+        clientSecret: CONFIG.SOUNDCLOUD_CLIENT_SECRET,
+        redirectUri: CONFIG.SOUNDCLOUD_REDIRECT_URI
+      }
+    case 'instagram':
+      return {
+        clientId: CONFIG.INSTAGRAM_CLIENT_ID,
+        clientSecret: CONFIG.INSTAGRAM_CLIENT_SECRET,
+        redirectUri: CONFIG.INSTAGRAM_REDIRECT_URI
+      }
+    default:
+      return {
+        clientId: '',
+        clientSecret: '',
+        redirectUri: ''
+      }
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ provider: string }> }
@@ -38,6 +74,8 @@ export async function GET(
       SPOTIFY_CLIENT_SECRET: !!process.env.SPOTIFY_CLIENT_SECRET,
       SPOTIFY_REDIRECT_URI: !!process.env.SPOTIFY_REDIRECT_URI,
       SPOTIFY_LOCAL_REDIRECT_URI: !!process.env.SPOTIFY_LOCAL_REDIRECT_URI,
+      GMAIL_CLIENT_ID: !!process.env.GMAIL_CLIENT_ID,
+      GMAIL_CLIENT_SECRET: !!process.env.GMAIL_CLIENT_SECRET,
       NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL
     })
     
@@ -49,9 +87,7 @@ export async function GET(
     
     // Get provider config
     const providerConfig = OAUTH_ENDPOINTS[provider as keyof typeof OAUTH_ENDPOINTS]
-    const clientId = CONFIG[`${provider.toUpperCase()}_CLIENT_ID` as keyof typeof CONFIG]
-    const clientSecret = CONFIG[`${provider.toUpperCase()}_CLIENT_SECRET` as keyof typeof CONFIG]
-    const redirectUri = CONFIG[`${provider.toUpperCase()}_REDIRECT_URI` as keyof typeof CONFIG]
+    const { clientId, clientSecret, redirectUri } = getProviderCredentials(provider)
     
     console.log(`[OAuth ${provider} Init] Client ID: ${clientId ? 'SET' : 'NOT SET'}`)
     console.log(`[OAuth ${provider} Init] Client Secret: ${clientSecret ? 'SET' : 'NOT SET'}`)
