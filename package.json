@@ -15,7 +15,13 @@
     "test-artist-profile": "node test-artist-profile.js",
     "test-gmail": "node test-gmail-integration.js",
     "test-chat": "node test-chat-gmail.js",
-    "demo": "node scripts/toggle-demo-mode.js"
+    "demo": "node scripts/toggle-demo-mode.js",
+    "lambda:check": "python backend/scripts/manage-lambda-functions.py --check",
+    "lambda:deploy": "python backend/scripts/manage-lambda-functions.py",
+    "lambda:recreate": "python backend/scripts/manage-lambda-functions.py --recreate",
+    "lambda:verify": "python backend/scripts/manage-lambda-functions.py --verify",
+    "lambda:gmail": "python backend/scripts/manage-lambda-functions.py --agent=gmail",
+    "lambda:legal": "python backend/scripts/manage-lambda-functions.py --agent=legal"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.11.2",

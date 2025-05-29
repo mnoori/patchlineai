@@ -77,9 +77,9 @@ function IntegrationsPanel() {
   const integrations = [
     {
       name: "Gmail",
-      platform: "google",
+      platform: "gmail",
       icon: <Mail className="h-4 w-4" />,
-      connected: platforms.google?.connected || false,
+      connected: platforms.gmail?.connected || platforms.google?.connected || false,
       color: "from-red-500 to-red-600",
     },
     {
@@ -140,7 +140,7 @@ function IntegrationsPanel() {
     },
   ]
   
-  const connectedCount = getConnectedCount()
+  const connectedCount = integrations.filter(i => i.connected).length
 
   return (
     <Card className="glass-effect bg-gradient-to-r from-cosmic-midnight/50 to-cosmic-purple/20 border-cosmic-teal/10 overflow-hidden">

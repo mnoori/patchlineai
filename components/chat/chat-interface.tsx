@@ -96,6 +96,10 @@ export function ChatInterface() {
 
   // Selected Agent (only relevant in agent mode)
   const [selectedAgent, setSelectedAgent] = useState<string>("GMAIL_AGENT")
+  
+  // Remember last selections for each mode
+  const [lastChatModel, setLastChatModel] = useState<BedrockModelWithKey>(defaultModel)
+  const [lastAgentSelection, setLastAgentSelection] = useState<string>("GMAIL_AGENT")
 
   // Local state - removed local messages state since we're using global
   const [input, setInput] = useState("")
@@ -223,11 +227,31 @@ export function ChatInterface() {
 
   // Update selected model when mode changes
   useEffect(() => {
-    const newAvailableModels: BedrockModelWithKey[] = getAvailableModels(mode) as BedrockModelWithKey[]
-    const newDefaultModelKey = getDefaultModel(mode)
-    const newDefaultModel: BedrockModelWithKey = newAvailableModels.find(m => m.key === newDefaultModelKey) || newAvailableModels[0]
-    setSelectedModel(newDefaultModel)
-  }, [mode])
+    if (mode === "chat") {
+      // Restore last chat model
+      setSelectedModel(lastChatModel)
+    } else if (mode === "agent") {
+      // Restore last agent selection
+      setSelectedAgent(lastAgentSelection)
+      // Agent mode uses a fixed model, not the chat models
+      const agentModels = getAvailableModels(mode) as BedrockModelWithKey[]
+      setSelectedModel(agentModels[0] || defaultModel)
+    }
+  }, [mode, lastChatModel, lastAgentSelection, defaultModel])
+  
+  // Track model changes for chat mode
+  useEffect(() => {
+    if (mode === "chat" && selectedModel) {
+      setLastChatModel(selectedModel)
+    }
+  }, [selectedModel, mode])
+  
+  // Track agent changes for agent mode
+  useEffect(() => {
+    if (mode === "agent" && selectedAgent) {
+      setLastAgentSelection(selectedAgent)
+    }
+  }, [selectedAgent, mode])
 
   // Generate action buttons based on response content
   const generateActionsFromResponse = (content: string): Message["actions"] => {
@@ -326,78 +350,160 @@ export function ChatInterface() {
     } else {
       // REAL MODE: Call the chat API for both chat and agent modes
       try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: input.trim(),
-            userId: userId,
-            mode: mode,
-            modelId: selectedModel.id,
-            ...(mode === "agent" && !autoMode ? { agentType: selectedAgent } : {}),
-          }),
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to get response from chat API')
-        }
-
-        const data = await response.json()
+        // Use the supervisor endpoint when Supervisor Agent is selected
+        const endpoint = (mode === "agent" && selectedAgent === "SUPERVISOR_AGENT") 
+          ? '/api/chat/supervisor' 
+          : '/api/chat'
         
-        updateMessage(assistantMessageId, {
-          content: data.response,
-          pending: false,
-          type: "text",
-          actions: generateActionsFromResponse(data.response),
-        })
-        setIsGenerating(false)
+        // For supervisor, handle streaming
+        if (mode === "agent" && selectedAgent === "SUPERVISOR_AGENT") {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: input.trim(),
+              userId: userId,
+              sessionId: threadId || `session-${Date.now()}`,
+            }),
+          })
 
-        // Stop agent working state in real mode
-        if (mode === "agent" && !DEMO_MODE) {
-          window.dispatchEvent(new CustomEvent("agent-complete"))
-        }
+          if (!response.ok) {
+            throw new Error('Failed to get response from supervisor API')
+          }
 
-        // Show additional info if email context was used
-        if (data.hasEmailContext) {
-          console.log(`✅ [AGENT] Response included Gmail context from ${data.actionsInvoked?.length || 0} actions`)
+          // Handle streaming response
+          const reader = response.body?.getReader()
+          if (!reader) throw new Error('No reader available')
           
-          // Log each action for visibility in the sidebar
-          if (data.actionsInvoked && data.actionsInvoked.length > 0) {
-            data.actionsInvoked.forEach((action: string, index: number) => {
-              setTimeout(() => {
-                let actionDisplay = ''
-                switch (action) {
-                  case '/search-emails':
-                    actionDisplay = '📧 [GMAIL] Searching emails...'
-                    break
-                  case '/read-email':
-                    actionDisplay = '📧 [GMAIL] Reading email content...'
-                    break
-                  case '/draft-email':
-                    actionDisplay = '📧 [GMAIL] Creating email draft...'
-                    break
-                  case '/send-email':
-                    actionDisplay = '📧 [GMAIL] Sending email...'
-                    break
-                  case '/list-labels':
-                    actionDisplay = '📧 [GMAIL] Fetching email labels...'
-                    break
-                  case '/get-email-stats':
-                    actionDisplay = '📧 [GMAIL] Getting email statistics...'
-                    break
-                  default:
-                    actionDisplay = `📧 [GMAIL] Action: ${action}`
+          const decoder = new TextDecoder()
+          let buffer = ''
+          
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            
+            buffer += decoder.decode(value, { stream: true })
+            
+            // Parse SSE messages
+            const lines = buffer.split('\n')
+            buffer = lines.pop() || ''
+            
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(line.slice(6))
+                  
+                  if (data.type === 'status') {
+                    // Update the pending message with status
+                    updateMessage(assistantMessageId, {
+                      content: data.content,
+                      pending: true,
+                      type: "text",
+                    })
+                    
+                    // Log status to console for sidebar
+                    console.log(data.content)
+                  } else if (data.type === 'response') {
+                    // Final response
+                    updateMessage(assistantMessageId, {
+                      content: data.response,
+                      pending: false,
+                      type: "text",
+                      actions: generateActionsFromResponse(data.response),
+                    })
+                    
+                    // Log completion
+                    if (data.agentsUsed && data.agentsUsed.length > 0) {
+                      console.log(`✅ [SUPERVISOR] Used agents: ${data.agentsUsed.join(', ')}`)
+                    }
+                  }
+                } catch (e) {
+                  console.error('Failed to parse SSE data:', e)
                 }
-                console.log(actionDisplay)
-                
-                // Log completion after a delay
+              }
+            }
+          }
+          
+          setIsGenerating(false)
+          window.dispatchEvent(new CustomEvent("agent-complete"))
+          
+        } else {
+          // Regular non-streaming endpoint
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: input.trim(),
+              userId: userId,
+              mode: mode,
+              modelId: selectedModel.id,
+              ...(mode === "agent" && !autoMode ? { agentType: selectedAgent } : {}),
+            }),
+          })
+
+          if (!response.ok) {
+            throw new Error('Failed to get response from chat API')
+          }
+
+          const data = await response.json()
+          
+          updateMessage(assistantMessageId, {
+            content: data.response,
+            pending: false,
+            type: "text",
+            actions: generateActionsFromResponse(data.response),
+          })
+          setIsGenerating(false)
+
+          // Stop agent working state in real mode
+          if (mode === "agent" && !DEMO_MODE) {
+            window.dispatchEvent(new CustomEvent("agent-complete"))
+          }
+
+          // Show additional info if email context was used
+          if (data.hasEmailContext) {
+            console.log(`✅ [AGENT] Response included Gmail context from ${data.actionsInvoked?.length || 0} actions`)
+            
+            // Log each action for visibility in the sidebar
+            if (data.actionsInvoked && data.actionsInvoked.length > 0) {
+              data.actionsInvoked.forEach((action: string, index: number) => {
                 setTimeout(() => {
-                  console.log(`✅ [GMAIL] ${action} completed`)
-                }, 500)
-              }, index * 600) // Stagger the logs for visibility
-            })
+                  let actionDisplay = ''
+                  switch (action) {
+                    case '/search-emails':
+                      actionDisplay = '📧 [GMAIL] Searching emails...'
+                      break
+                    case '/read-email':
+                      actionDisplay = '📧 [GMAIL] Reading email content...'
+                      break
+                    case '/draft-email':
+                      actionDisplay = '📧 [GMAIL] Creating email draft...'
+                      break
+                    case '/send-email':
+                      actionDisplay = '📧 [GMAIL] Sending email...'
+                      break
+                    case '/list-labels':
+                      actionDisplay = '📧 [GMAIL] Fetching email labels...'
+                      break
+                    case '/get-email-stats':
+                      actionDisplay = '📧 [GMAIL] Getting email statistics...'
+                      break
+                    default:
+                      actionDisplay = `📧 [GMAIL] Action: ${action}`
+                  }
+                  console.log(actionDisplay)
+                  
+                  // Log completion after a delay
+                  setTimeout(() => {
+                    console.log(`✅ [GMAIL] ${action} completed`)
+                  }, 500)
+                }, index * 600) // Stagger the logs for visibility
+              })
+            }
           }
         }
 
