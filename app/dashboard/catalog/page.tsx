@@ -115,8 +115,8 @@ export default function CatalogPage() {
   // Load artist tracks when connected
   useEffect(() => {
     async function loadArtistTracks() {
-      if (!userId || !platforms.spotify?.connected) return
-
+      if (!platforms.spotify?.connected || !userId) return
+      
       try {
         // First, search for the artist profile
         const searchRes = await fetch(`/api/spotify/search-artist?userId=${userId}`)
@@ -1498,7 +1498,10 @@ export default function CatalogPage() {
           <div className="mt-6 grid gap-6 md:grid-cols-2">
             {/* SoundCloud (left) */}
             {embeds.length > 0 && !isLoadingEmbeds && (
-              <SoundCloudEmbeds embeds={embeds} />
+              <SoundCloudEmbeds embeds={embeds.map(embed => ({
+                ...embed,
+                html: embed.embedHtml || embed.html
+              }))} />
             )}
 
             {/* Spotify (right) */}

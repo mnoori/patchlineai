@@ -616,6 +616,16 @@ export function ChatInterface() {
         role="log"
         aria-live="polite"
       >
+        {/* Current Status indicator */}
+        {currentStatus && (
+          <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-background/90 backdrop-blur-sm border border-border/50 rounded-full px-4 py-2 shadow-lg z-50">
+            <div className="flex items-center space-x-2 text-sm">
+              <Loader2 className="h-3 w-3 animate-spin text-cosmic-teal" />
+              <span className="text-muted-foreground">{currentStatus}</span>
+            </div>
+          </div>
+        )}
+        
         {globalMessages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cosmic-teal/20 to-cosmic-pink/20 flex items-center justify-center mb-4">
@@ -924,12 +934,6 @@ export function ChatInterface() {
               </div>
             </div>
           </div>
-
-          {currentStatus && (
-            <div className="px-4 py-2 text-sm text-muted-foreground animate-pulse">
-              {currentStatus}
-            </div>
-          )}
         </form>
       </div>
 

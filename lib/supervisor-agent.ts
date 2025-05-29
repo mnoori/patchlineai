@@ -273,28 +273,34 @@ IMPORTANT:
 User Query: ${userInput}`;
 
     try {
-      // Direct call to Bedrock model with Claude 4 Sonnet
-      // IMPORTANT: Use the inference profile ID, not the direct model ID
+      // Use Nova model for supervisor coordination
       const command = new InvokeModelCommand({
-        modelId: "us.anthropic.claude-sonnet-4-20250514-v1:0", // Use inference profile ID
+        modelId: "amazon.nova-micro-v1:0",
         contentType: "application/json",
         accept: "application/json",
         body: JSON.stringify({
-          anthropic_version: "bedrock-2023-05-31",
-          max_tokens: 4096,
           messages: [
-            { role: "user", content: supervisorPrompt }
+            {
+              role: "user",
+              content: [{ text: supervisorPrompt }]
+            }
           ],
-          temperature: 0.7,
-          top_p: 0.9
+          system: [{ 
+            text: "You are a supervisor agent that coordinates between specialized agents. Always delegate tasks to the appropriate agents and synthesize their responses." 
+          }],
+          inferenceConfig: { 
+            max_new_tokens: 2048,
+            temperature: 0.7,
+            top_p: 0.9
+          }
         })
       })
 
       const response = await bedrockRuntime.send(command)
       const responseBody = JSON.parse(new TextDecoder().decode(response.body))
       
-      // Process tool calls if any
-      const content = responseBody.content[0].text || "I could not understand your request."
+      // Process Nova model response
+      const content = responseBody?.output?.message?.content?.[0]?.text || "I could not understand your request."
       
       // STEP 1: Ask Gmail agent to find the contract email
       const gmailPrompt = `Search my emails for the most recent contract or legal agreement from ${userInput.includes('Mehdi') ? 'Mehdi' : 'anyone'}.

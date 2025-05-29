@@ -12,7 +12,7 @@ export class BedrockClientDirect {
   private systemPrompt: string
 
   constructor(modelId: string = CONFIG.BEDROCK_MODEL_ID, systemPrompt: string = CONFIG.SYSTEM_PROMPT) {
-    console.log(`[BedrockDirect] Initializing DIRECT client with model: ${modelId}`)
+    console.log(`[Bedrock] Initializing client with model: ${modelId}`)
     
     this.modelId = modelId
     this.systemPrompt = systemPrompt
