@@ -23,7 +23,7 @@ print("=" * 60)
 
 # Configuration
 USER_ID = "14287408-6011-70b3-5ac6-089f0cafdc10"
-PRODUCTION_URL = "https://app.patchline.ai"
+PRODUCTION_URL = "https://www.patchline.ai"
 REGION = 'us-east-1'
 SECRET_NAME = 'patchline/gmail-oauth'
 
@@ -120,7 +120,7 @@ print(f"   1. Visit: https://console.cloud.google.com/apis/credentials")
 print(f"   2. Find your OAuth 2.0 Client: {gmail_client_id}")
 print(f"   3. Verify redirect URIs include:")
 print(f"      - http://localhost:3000/api/auth/gmail/callback")
-print(f"      - https://app.patchline.ai/api/auth/gmail/callback")
+print(f"      - https://www.patchline.ai/api/auth/gmail/callback")
 print(f"   4. Verify test users include: mehdi@patchline.ai")
 
 # Test 4: Production Endpoint Accessibility
@@ -155,7 +155,7 @@ for var_name, var_value in local_vars.items():
 print(f"\n   📋 Amplify Environment Variables to verify:")
 print(f"   - GMAIL_CLIENT_ID = {gmail_client_id}")
 print(f"   - GMAIL_CLIENT_SECRET = [HIDDEN]")
-print(f"   - NEXT_PUBLIC_APP_URL = https://app.patchline.ai")
+print(f"   - NEXT_PUBLIC_APP_URL = https://www.patchline.ai")
 
 # Summary
 print(f"\n📊 Verification Summary:")

@@ -18,8 +18,8 @@ secrets_manager = boto3.client('secretsmanager')
 # Environment variables
 PLATFORM_CONNECTIONS_TABLE = os.environ.get('PLATFORM_CONNECTIONS_TABLE', 'PlatformConnections-staging')
 GMAIL_SECRETS_NAME = os.environ.get('GMAIL_SECRETS_NAME', 'patchline/gmail-oauth')
-REDIRECT_URI = os.environ.get('REDIRECT_URI', 'https://api.patchline.ai/auth/gmail/callback')
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://app.patchline.ai')
+REDIRECT_URI = os.environ.get('GMAIL_REDIRECT_URI', 'https://www.patchline.ai/api/auth/gmail/callback')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://www.patchline.ai')
 
 # Gmail OAuth scopes
 SCOPES = [

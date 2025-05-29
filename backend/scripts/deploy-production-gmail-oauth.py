@@ -94,8 +94,8 @@ try:
                 'Variables': {
                     'PLATFORM_CONNECTIONS_TABLE': 'PlatformConnections-staging',
                     'GMAIL_SECRETS_NAME': SECRET_NAME,
-                    'REDIRECT_URI': 'https://app.patchline.ai/api/auth/gmail/callback',
-                    'FRONTEND_URL': 'https://app.patchline.ai',
+                    'GMAIL_REDIRECT_URI': 'https://www.patchline.ai/api/auth/gmail/callback',
+                    'FRONTEND_URL': 'https://www.patchline.ai',
                     'GMAIL_CLIENT_ID': gmail_client_id,
                     'GMAIL_CLIENT_SECRET': gmail_client_secret
                 }
@@ -110,7 +110,7 @@ except Exception as e:
 
 # 4. Generate Production OAuth URLs
 print("\n4️⃣ Production OAuth URLs:")
-production_base_url = "https://app.patchline.ai"
+production_base_url = "https://www.patchline.ai"
 local_base_url = "http://localhost:3000"
 
 # Production URL
@@ -136,20 +136,20 @@ print("Make sure these are set in your Amplify console:")
 print(f"   GMAIL_CLIENT_ID = {gmail_client_id}")
 print(f"   GMAIL_CLIENT_SECRET = {gmail_client_secret[:10]}...{gmail_client_secret[-10:]}")
 print("   AWS_REGION = us-east-1")
-print("   NEXT_PUBLIC_APP_URL = https://app.patchline.ai")
+print("   NEXT_PUBLIC_APP_URL = https://www.patchline.ai")
 
 print("\n🔧 Google Cloud Console Checklist:")
 print("=" * 40)
 print("Make sure these redirect URIs are configured:")
 print("   ✅ http://localhost:3000/api/auth/gmail/callback (local)")
-print("   ✅ https://app.patchline.ai/api/auth/gmail/callback (production)")
+print("   ✅ https://patchline.ai/api/auth/gmail/callback (production)")
 
 print("\n🧪 Production Test URLs:")
 print("=" * 30)
 print("Local test URL:")
 print(f"   http://localhost:3000/api/auth/gmail/connect?userId={USER_ID}")
 print("\nProduction test URL:")
-print(f"   https://app.patchline.ai/api/auth/gmail/connect?userId={USER_ID}")
+print(f"   https://www.patchline.ai/api/auth/gmail/connect?userId={USER_ID}")
 
 print("\n🔗 Manual Production OAuth URL:")
 print("=" * 40)
