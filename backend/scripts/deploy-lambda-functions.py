@@ -234,8 +234,8 @@ def deploy_lambda(function_name: str, handler_file: str, role_arn: str, env: Dic
     lambda_client.get_waiter('function_active').wait(FunctionName=function_name)
     fn_arn = lambda_client.get_function(FunctionName=function_name)['Configuration']['FunctionArn']
     
-    # Add resource-based policy for Bedrock to invoke the function (for action handler)
-    if function_name == 'gmail-action-handler':
+    # Add resource-based policy for Bedrock to invoke the function
+    if function_name in ['gmail-action-handler', 'legal-contract-handler']:
         add_bedrock_invoke_permission(function_name)
     
     print(f"🔗 {function_name} ARN: {fn_arn}")
@@ -347,57 +347,84 @@ def main():
     # Ensure environment variables are loaded first
     load_env_file()
 
-    global REGION, LAMBDA_RUNTIME, LAMBDA_TIMEOUT, LAMBDA_MEMORY
-    global lambda_client, iam, logs_client, dynamodb, s3_client, secrets_client
+    # Ensure our AWS region is set
+    global REGION, lambda_client, iam, logs_client, dynamodb, s3_client, secrets_client
+    global LAMBDA_RUNTIME, LAMBDA_TIMEOUT, LAMBDA_MEMORY, GMAIL_CREDENTIALS
     global GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REDIRECT_URI
-    
-    # Set configuration
+
     REGION = os.environ.get('AWS_REGION', 'us-east-1')
-    LAMBDA_RUNTIME = 'python3.11'
-    LAMBDA_TIMEOUT = 300
-    LAMBDA_MEMORY = 512
-    
-    # Set Gmail variables
-    GMAIL_CLIENT_ID = os.environ.get('GMAIL_CLIENT_ID')
-    GMAIL_CLIENT_SECRET = os.environ.get('GMAIL_CLIENT_SECRET')
-    GMAIL_REDIRECT_URI = os.environ.get('GMAIL_REDIRECT_URI')
-    
-    # Initialize all AWS clients
+    print(f"⚙️  AWS Region: {REGION}")
+
+    # Set up AWS clients
     lambda_client = boto3.client('lambda', region_name=REGION)
-    iam = boto3.client('iam')
-    logs_client = boto3.client('logs')
-    dynamodb = boto3.resource('dynamodb', region_name=REGION)
+    iam = boto3.client('iam', region_name=REGION)
+    logs_client = boto3.client('logs', region_name=REGION)
+    dynamodb = boto3.client('dynamodb', region_name=REGION)
     s3_client = boto3.client('s3', region_name=REGION)
     secrets_client = boto3.client('secretsmanager', region_name=REGION)
 
-    print("🚀 Starting Patchline Lambda Functions Deployment")
+    # Set additional Lambda configs
+    LAMBDA_RUNTIME = os.environ.get('LAMBDA_RUNTIME', 'python3.9')
+    LAMBDA_TIMEOUT = int(os.environ.get('LAMBDA_TIMEOUT', '30'))
+    LAMBDA_MEMORY = int(os.environ.get('LAMBDA_MEMORY', '256'))
+    print(f"⚙️  Lambda Config: {LAMBDA_RUNTIME}, {LAMBDA_TIMEOUT}s timeout, {LAMBDA_MEMORY}MB memory")
+
+    # Gmail OAuth credentials
+    GMAIL_CLIENT_ID = os.environ.get('GMAIL_CLIENT_ID')
+    GMAIL_CLIENT_SECRET = os.environ.get('GMAIL_CLIENT_SECRET')
+    GMAIL_REDIRECT_URI = os.environ.get('GMAIL_REDIRECT_URI')
+
+    # Need execution role for Lambda
     role_arn = create_lambda_execution_role()
 
-    # Supporting resources
-    # Note: PlatformConnections-staging should already exist from your app
-    # ensure_dynamodb_table('PlatformConnections-staging')  # Commented out - table already exists
-    ensure_s3_bucket('patchline-email-knowledge-base')
-    store_gmail_secret()
+    # Get agent type from environment or default to Gmail
+    agent_type = os.environ.get('PATCHLINE_AGENT_TYPE', 'GMAIL').upper()
+    print(f"⚙️  Agent Type: {agent_type}")
 
-    env_vars_common = {
-        'PLATFORM_CONNECTIONS_TABLE': 'PlatformConnections-staging',  # Use the existing table
-        'GMAIL_SECRETS_NAME': 'patchline/gmail-oauth',
-        'KNOWLEDGE_BASE_BUCKET': 'patchline-email-knowledge-base',
-        'BEDROCK_AGENT_ID': os.environ.get('BEDROCK_AGENT_ID', ''),
-        'BEDROCK_AGENT_ALIAS_ID': os.environ.get('BEDROCK_AGENT_ALIAS_ID', ''),
-        # Gmail-specific variables (for existing Gmail agent)
-        'GMAIL_REDIRECT_URI': os.environ.get('GMAIL_REDIRECT_URI', 'https://www.patchline.ai/api/auth/gmail/callback'),
-        'FRONTEND_URL': os.environ.get('FRONTEND_URL', 'https://www.patchline.ai'),
-        'GMAIL_CLIENT_ID': os.environ.get('GMAIL_CLIENT_ID', ''),
-        'GMAIL_CLIENT_SECRET': os.environ.get('GMAIL_CLIENT_SECRET', ''),
+    # Common Lambda environment for all functions
+    LAMBDA_ENV = {
+        'PATCHLINE_AWS_REGION': REGION,  # Use a custom prefix to avoid reserved key AWS_REGION
+        'PATCHLINE_DDB_TABLE': 'PatchlineTokens',
+        'PATCHLINE_S3_BUCKET': f'patchline-files-{REGION}',
+        'PATCHLINE_SECRETS_ID': 'PatchlineGmailSecrets',
     }
 
-    auth_fn_arn = deploy_lambda('gmail-auth-handler', 'gmail-auth-handler.py', role_arn, env_vars_common)
-    action_fn_arn = deploy_lambda('gmail-action-handler', 'gmail-action-handler.py', role_arn, env_vars_common)
+    # Deploy appropriate Lambda functions based on agent type
+    if agent_type == 'LEGAL':
+        print("\n📑 Deploying Legal Contract Analysis Agent Lambda functions...")
+        # Deploy Legal Contract Lambda
+        deploy_lambda(
+            'legal-contract-handler',
+            'legal-contract-handler.py',
+            role_arn,
+            LAMBDA_ENV
+        )
+    else:  # Default to Gmail agent
+        print("\n📧 Deploying Gmail Agent Lambda functions...")
+        # Make sure we have DynamoDB table (for token storage)
+        ensure_dynamodb_table(LAMBDA_ENV['PATCHLINE_DDB_TABLE'])
 
-    print("\n🎉 Lambda functions deployed successfully!")
-    print("   • gmail-auth-handler  =>", auth_fn_arn)
-    print("   • gmail-action-handler =>", action_fn_arn)
+        # Make sure we have S3 bucket (for file attachments)
+        ensure_s3_bucket(LAMBDA_ENV['PATCHLINE_S3_BUCKET'])
+
+        # Make sure we have stored Gmail OAuth credentials in AWS Secrets Manager
+        store_gmail_secret()
+
+        # Deploy auth + action handler Lambdas
+        deploy_lambda(
+            'gmail-auth-handler',
+            'gmail-auth-handler.py',
+            role_arn,
+            LAMBDA_ENV
+        )
+        deploy_lambda(
+            'gmail-action-handler',
+            'gmail-action-handler.py',
+            role_arn,
+            LAMBDA_ENV
+        )
+
+    print("\n✅ All done!")
 
 
 if __name__ == '__main__':

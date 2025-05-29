@@ -19,7 +19,7 @@ import {
 } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { BEDROCK_MODELS, getAvailableModels, getDefaultModel, AGENT_MODEL_NOTE, type BedrockModel, type BedrockModelWithKey } from "@/lib/models-config"
+import { BEDROCK_MODELS, getAvailableModels, getDefaultModel, AGENT_MODEL_NOTE, type BedrockModel } from "@/lib/models-config"
 import { Button } from "@/components/ui/button"
 import { usePatchyStore } from "@/hooks/use-patchy-store"
 import { useCurrentUser } from "@/hooks/use-current-user"
@@ -61,6 +61,15 @@ const QUICK_COMMANDS = [
   { command: "/schedule", description: "Schedule a release", completion: "help me schedule my next release" },
 ]
 
+// Agent types for Bedrock Agent mode
+const AGENT_TYPES = [
+  { key: "GMAIL_AGENT", label: "Gmail" },
+  { key: "LEGAL_AGENT", label: "Legal" },
+  { key: "SUPERVISOR_AGENT", label: "Supervisor" },
+]
+
+type BedrockModelWithKey = BedrockModel & { key: string }
+
 export function ChatInterface() {
   // Global state from Zustand
   const { 
@@ -84,6 +93,9 @@ export function ChatInterface() {
   const availableModels: BedrockModelWithKey[] = getAvailableModels(mode) as BedrockModelWithKey[]
   const defaultModelKey = getDefaultModel(mode)
   const defaultModel: BedrockModelWithKey = availableModels.find(m => m.key === defaultModelKey) || availableModels[0]
+
+  // Selected Agent (only relevant in agent mode)
+  const [selectedAgent, setSelectedAgent] = useState<string>("GMAIL_AGENT")
 
   // Local state - removed local messages state since we're using global
   const [input, setInput] = useState("")
@@ -323,7 +335,8 @@ export function ChatInterface() {
             message: input.trim(),
             userId: userId,
             mode: mode,
-            modelId: selectedModel.id
+            modelId: selectedModel.id,
+            ...(mode === "agent" && !autoMode ? { agentType: selectedAgent } : {}),
           }),
         })
 
@@ -459,9 +472,11 @@ export function ChatInterface() {
     }).format(date)
   }
 
-  // Get display name for selected model
-  const getModelDisplayName = () => {
-    // Use the displayName property for consistency
+  // Get indicator label based on mode
+  const getIndicatorLabel = () => {
+    if (mode === "agent") {
+      return autoMode ? "Auto" : AGENT_TYPES.find(a => a.key === selectedAgent)?.label || "Agent"
+    }
     return selectedModel.displayName
   }
 
@@ -643,7 +658,7 @@ export function ChatInterface() {
               onClick={() => setShowModelMenu((prev) => !prev)}
             >
               <div className="w-2 h-2 rounded-full bg-cosmic-teal" />
-              <span className="text-muted-foreground text-xs">{getModelDisplayName()}</span>
+              <span className="text-muted-foreground text-xs">{getIndicatorLabel()}</span>
               <ChevronDown className="h-3 w-3 opacity-50" />
             </Button>
 
@@ -669,25 +684,45 @@ export function ChatInterface() {
                   </div>
 
                   <div className="border-t border-border/50 pt-3 space-y-1 max-h-[300px] overflow-y-auto custom-scrollbar">
-                    {availableModels.map((model) => (
-                      <div
-                        key={model.key}
-                        onClick={() => {
-                          setSelectedModel(model)
-                          setShowModelMenu(false)
-                        }}
-                        className={cn(
-                          "cursor-pointer flex items-center text-sm rounded-md px-3 py-2 gap-3",
-                          selectedModel.key === model.key ? "bg-cosmic-teal/10" : "hover:bg-muted/50",
-                        )}
-                      >
-                        <Brain className="h-4 w-4 text-muted-foreground" />
-                        <div className="flex-1">
-                          <div className="font-medium">{model.name}</div>
-                        </div>
-                        {selectedModel.key === model.key && <Check className="h-4 w-4 text-cosmic-teal" />}
-                      </div>
-                    ))}
+                    {mode === "agent"
+                      ? AGENT_TYPES.map((agent) => (
+                          <div
+                            key={agent.key}
+                            onClick={() => {
+                              setSelectedAgent(agent.key)
+                              setShowModelMenu(false)
+                            }}
+                            className={cn(
+                              "cursor-pointer flex items-center text-sm rounded-md px-3 py-2 gap-3",
+                              selectedAgent === agent.key ? "bg-cosmic-teal/10" : "hover:bg-muted/50",
+                            )}
+                          >
+                            <Brain className="h-4 w-4 text-muted-foreground" />
+                            <div className="flex-1">
+                              <div className="font-medium">{agent.label}</div>
+                            </div>
+                            {selectedAgent === agent.key && <Check className="h-4 w-4 text-cosmic-teal" />}
+                          </div>
+                        ))
+                      : availableModels.map((model) => (
+                          <div
+                            key={model.key}
+                            onClick={() => {
+                              setSelectedModel(model)
+                              setShowModelMenu(false)
+                            }}
+                            className={cn(
+                              "cursor-pointer flex items-center text-sm rounded-md px-3 py-2 gap-3",
+                              selectedModel.key === model.key ? "bg-cosmic-teal/10" : "hover:bg-muted/50",
+                            )}
+                          >
+                            <Brain className="h-4 w-4 text-muted-foreground" />
+                            <div className="flex-1">
+                              <div className="font-medium">{model.name}</div>
+                            </div>
+                            {selectedModel.key === model.key && <Check className="h-4 w-4 text-cosmic-teal" />}
+                          </div>
+                        ))}
                   </div>
                 </motion.div>
               )}

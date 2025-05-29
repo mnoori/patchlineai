@@ -1,0 +1,66 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Contract Analysis API",
+    "version": "1.0.0",
+    "description": "Endpoints used by Patchline Legal Agent for analysing contracts and legal documents."
+  },
+  "paths": {
+    "/analyze-contract": {
+      "post": {
+        "operationId": "analyzeContract",
+        "summary": "Analyze a contract and return a structured assessment.",
+        "description": "Analyzes a legal contract or agreement and returns key insights, risks, and recommendations.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contractText": {
+                    "type": "string",
+                    "description": "Raw text of the contract or agreement."
+                  },
+                  "context": {
+                    "type": "string",
+                    "description": "Optional context or instructions from the user."
+                  }
+                },
+                "required": ["contractText"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assessment generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "summary": { 
+                      "type": "string",
+                      "description": "Executive summary of the contract analysis" 
+                    },
+                    "risks": {
+                      "type": "array",
+                      "description": "List of identified risks or concerns",
+                      "items": { "type": "string" }
+                    },
+                    "recommendation": { 
+                      "type": "string",
+                      "description": "Overall recommendation regarding the contract" 
+                    }
+                  },
+                  "required": ["summary"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} 

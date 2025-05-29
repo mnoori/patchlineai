@@ -1,0 +1,50 @@
+# Patchline Multi-Agent System Configuration
+# This file serves as the single source of truth for all agent configurations
+# Use generate-agents.ts to create/update agents from this configuration
+
+gmail:
+  name: PatchlineEmailAgent
+  description: AI assistant for managing emails and communications
+  model: claude-3-7-sonnet  # key from backend/scripts/config.py
+  prompt: prompts/gmail-agent.md
+  action_group:
+    name: GmailActions
+    lambda: lambda/gmail-action-handler
+  knowledge_base: PatchlineEmailKnowledge
+  environment:
+    # Current configuration (for reference, not used in script)
+    agent_id: C7VZ0QWDSG
+    agent_alias_id: 8XX4RGKW15
+
+legal:
+  name: PatchlineLegalAgent
+  description: Legal AI assistant specialising in music contracts and rights
+  model: claude-3-7-sonnet
+  prompt: prompts/legal-agent.md
+  action_group:
+    name: ContractAnalysis
+    lambda: lambda/legal-action-handler
+  knowledge_base: PatchlineLegalKnowledge
+  environment:
+    # Current configuration (for reference, not used in script)
+    agent_id: XL4F5TPHXB
+    agent_alias_id: TQYPWUONTY
+
+supervisor:
+  name: PatchlineSupervisorAgent
+  description: Multi-agent supervisor that coordinates between Gmail and Legal specialists
+  model: claude-4-sonnet
+  prompt: prompts/supervisor-agent.md
+  collaborators: [gmail, legal]
+  environment:
+    # Current configuration (for reference, not used in script)
+    agent_id: TYQSQNB2GI
+    agent_alias_id: BXHO9QQ40S
+
+# Default agent (used when no specific agent is specified)
+default_agent: supervisor
+
+# Global configuration
+aws_region: us-east-1
+environment: staging
+idle_session_ttl: 900 

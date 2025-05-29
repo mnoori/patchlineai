@@ -46,6 +46,12 @@ export const CONFIG = {
       NAME: "Gmail Agent",
       DESCRIPTION: "Handles email operations via Gmail API"
     },
+    LEGAL_AGENT: {
+      ID: process.env.BEDROCK_LEGAL_AGENT_ID || "XL4F5TPHXB",
+      ALIAS_ID: process.env.BEDROCK_LEGAL_AGENT_ALIAS_ID || "EC7EVTWEUQ",
+      NAME: "Legal Agent",
+      DESCRIPTION: "Analyzes legal documents & contracts from a music-industry perspective"
+    },
     // Future agents can be added here
     // CALENDAR_AGENT: {
     //   ID: process.env.BEDROCK_CALENDAR_AGENT_ID || "",
@@ -313,3 +319,28 @@ if (IS_DEVELOPMENT_MODE) {
 } else {
   console.log("[CONFIG] Running in PRODUCTION mode")
 }
+
+export const GMAIL_AGENT = {
+  agentId: process.env.BEDROCK_AGENT_ID || 'C7VZ0QWDSG',
+  agentAliasId: process.env.BEDROCK_AGENT_ALIAS_ID || 'WDGFWL1YCB',
+  region: process.env.AWS_REGION || 'us-east-1'
+};
+
+export const LEGAL_AGENT = {
+  agentId: process.env.BEDROCK_LEGAL_AGENT_ID || 'XL4F5TPHXB',
+  agentAliasId: process.env.BEDROCK_LEGAL_AGENT_ALIAS_ID || 'EC7EVTWEUQ',
+  region: process.env.AWS_REGION || 'us-east-1'
+};
+
+export const SUPERVISOR_AGENT = {
+  agentId: process.env.BEDROCK_SUPERVISOR_AGENT_ID || 'TYQSQNB2GI',
+  agentAliasId: process.env.BEDROCK_SUPERVISOR_AGENT_ALIAS_ID || 'BXHO9QQ40S',
+  region: process.env.AWS_REGION || 'us-east-1'
+};
+
+// Agent types for UI
+export const AGENT_TYPES = [
+  { id: 'gmail', name: 'Gmail Agent', description: 'Email management and communication' },
+  { id: 'legal', name: 'Legal Agent', description: 'Contract analysis and legal review' },
+  { id: 'supervisor', name: 'Supervisor Agent', description: 'Multi-agent coordination and delegation' }
+];

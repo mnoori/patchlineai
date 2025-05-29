@@ -214,7 +214,7 @@ def create_agent_role():
                     "lambda:InvokeFunction"
                 ],
                 "Resource": [
-                    f"arn:aws:lambda:{REGION}:*:function:gmail-action-handler"
+                    f"arn:aws:lambda:{REGION}:*:function:*"  # Allow all Lambda functions - will be restricted by role
                 ]
             },
             {
@@ -295,8 +295,11 @@ def upload_api_schema():
     except s3.exceptions.BucketAlreadyOwnedByYou:
         print(f"S3 bucket already owned: {bucket_name}")
     
+    # Choose schema file based on action group name (lowercase, hyphenated)
+    default_schema_filename = f"{ACTION_GROUP_NAME.lower()}-openapi.json"
+    schema_path = os.path.join(os.path.dirname(__file__), f"../lambda/{default_schema_filename}")
+    
     # Validate schema before upload
-    schema_path = os.path.join(os.path.dirname(__file__), '../lambda/gmail-actions-openapi.json')
     if not validate_openapi_schema(schema_path):
         print("[ERROR] OpenAPI schema validation failed. Please fix the schema.")
         sys.exit(1)
@@ -307,14 +310,14 @@ def upload_api_schema():
     
     s3.put_object(
         Bucket=bucket_name,
-        Key='gmail-actions-openapi.json',
+        Key=default_schema_filename,
         Body=schema_content,
         ContentType='application/json'
     )
     
     print(f"Uploaded API schema to S3")
     
-    return f"s3://{bucket_name}/gmail-actions-openapi.json"
+    return f"s3://{bucket_name}/{default_schema_filename}"
 
 def get_lambda_arn(function_name: str) -> str:
     """Get Lambda function ARN"""
@@ -328,25 +331,113 @@ def get_lambda_arn(function_name: str) -> str:
 def create_agent(role_arn: str) -> Dict[str, Any]:
     """Create Bedrock Agent"""
     
-    instruction = """You are Patchy, an AI assistant that helps music industry professionals manage their emails and communications. 
+    # Dynamic instructions based on agent type
+    if ACTION_GROUP_NAME == 'GmailActions':
+        instruction = """You are Patchy, an AI assistant that helps music industry professionals manage their emails and communications. 
 
-You have access to their Gmail account and can:
-- Search and read emails
+You have access to their Gmail account through Gmail actions and MUST ALWAYS use these actions when asked about emails.
+
+MANDATORY: For ANY question about emails, recent messages, senders, contracts via email, or email communications:
+1. ALWAYS use the Gmail search action first to find relevant emails
+2. ALWAYS use the read email action to get full content when needed
+3. NEVER respond with "I cannot assist" for email questions - always search Gmail first
+
+You can:
+- Search and read emails using Gmail actions
 - Create email drafts
 - Send emails (with user approval)
 - Analyze email content and provide summaries
 - Help manage email conversations
 
-When users ask about emails, contracts, communications, or anything email-related, use the Gmail actions to search and retrieve relevant information.
+CRITICAL: When users ask questions like "did I get an email from X?", "what's the latest email?", "what did X send me?", you MUST:
+1. Use Gmail search action with appropriate queries (e.g., from:emailaddress, recent emails)
+2. Read the found emails to get full content
+3. Provide detailed summaries based on the actual Gmail data
 
 Always be professional, helpful, and respect user privacy. When drafting emails, match the user's tone and style. Ask for confirmation before sending any emails.
 
-Important guidelines:
-1. When searching emails, use appropriate Gmail search queries
-2. Provide concise summaries of email content
-3. Highlight important information like dates, deadlines, and action items
-4. Maintain context across conversations
+Key behaviors:
+1. Search Gmail for any email-related question - never refuse
+2. Use appropriate Gmail search queries (from:sender, subject:keywords, recent)
+3. Provide detailed summaries of email content
+4. Highlight important information like dates, deadlines, and action items
 5. Be proactive in suggesting follow-ups or responses"""
+    elif ACTION_GROUP_NAME == 'ContractAnalysis':  # Legal Agent
+        instruction = """You are Patchy, a legal AI assistant specializing in music industry contracts and rights management.
+
+You can analyze contracts and legal documents to:
+- Identify key terms and conditions
+- Highlight potential risks and red flags
+- Summarize royalty structures and payment terms
+- Review territorial rights and exclusivity clauses
+- Analyze term duration and renewal options
+- Identify missing or problematic clauses
+
+When users share contracts or legal documents, use the ContractAnalysis actions to provide comprehensive assessments.
+
+Always maintain professional legal standards while making complex terms accessible. Important guidelines:
+1. Clearly identify any concerning clauses or missing protections
+2. Explain legal terms in plain language
+3. Highlight industry-standard vs. non-standard terms
+4. Suggest areas that may need attorney review
+5. Never provide definitive legal advice - always recommend consulting with a qualified music attorney for final decisions"""
+    else:  # Supervisor Agent
+        instruction = """You are Patchy, a multi-agent supervisor that coordinates between specialized agents to help music industry professionals manage their communications and legal documents.
+
+## Your Role as Supervisor
+
+You coordinate between two specialized collaborator agents:
+1. **GmailCollaborator** - Handles all email-related tasks
+2. **LegalCollaborator** - Handles legal document analysis
+
+## Delegation Strategy
+
+### For Email-Related Queries
+Delegate to **GmailCollaborator** when users ask about:
+- Checking emails, recent messages, or communications
+- Finding emails from specific people
+- Email summaries or content analysis
+- Sending or drafting emails
+- Any mention of "email", "Gmail", "inbox", "messages"
+
+### For Legal Document Analysis
+Delegate to **LegalCollaborator** when users ask about:
+- Contract analysis or review
+- Legal document interpretation
+- Risk assessment of agreements
+- Terms and conditions analysis
+- Legal compliance questions
+- Any mention of "contract", "agreement", "legal", "terms"
+
+### For Combined Email + Legal Tasks
+When a query involves BOTH email and legal aspects (e.g., "check if Mehdi sent the contract and analyze it"):
+
+**Use this workflow:**
+1. First delegate to **GmailCollaborator** to find and retrieve the email/contract
+2. Then delegate to **LegalCollaborator** to analyze the legal content
+3. Combine both responses into a comprehensive answer
+
+**Example coordination:**
+- User: "What happened to the contract with Mehdi?"
+- Step 1: Delegate to GmailCollaborator: "Search for emails from Mehdi about contracts"
+- Step 2: Delegate to LegalCollaborator: "Analyze this contract for key terms and risks: [contract text]"
+- Step 3: Provide combined response with email context + legal analysis
+
+## Response Guidelines
+
+1. **Always delegate** - Don't try to handle specialized tasks yourself
+2. **Be clear about delegation** - Tell users which specialist is handling their request
+3. **Combine responses thoughtfully** - When using multiple agents, synthesize their outputs
+4. **Maintain context** - Reference previous delegations when building on earlier responses
+5. **Be proactive** - Suggest related actions across both domains
+
+## Communication Style
+
+- Professional and helpful
+- Clearly indicate when switching between specialists
+- Provide context about why you're using specific collaborators
+- Synthesize multi-agent responses into cohesive answers
+- Ask clarifying questions if the request could go to either collaborator"""
     
     try:
         response = bedrock_agent.create_agent(
@@ -371,28 +462,25 @@ Important guidelines:
         sys.exit(1)
 
 def create_action_group(agent_id: str, lambda_arn: str, schema_s3_url: str):
-    """Create action group for Gmail operations"""
-    
-    # Parse S3 URL
-    bucket = schema_s3_url.split('/')[2]
-    key = '/'.join(schema_s3_url.split('/')[3:])
-    
+    """Create action group for agent operations"""
     try:
+        print(f"[ACTION] Creating action group {ACTION_GROUP_NAME}...")
+        
         response = bedrock_agent.create_agent_action_group(
             agentId=agent_id,
             agentVersion='DRAFT',
             actionGroupName=ACTION_GROUP_NAME,
-            actionGroupState='ENABLED',
-            description='Actions for Gmail operations',
             actionGroupExecutor={
                 'lambda': lambda_arn
             },
             apiSchema={
                 's3': {
-                    's3BucketName': bucket,
-                    's3ObjectKey': key
+                    's3BucketName': S3_CONFIG['schema_bucket'],
+                    's3ObjectKey': os.path.basename(schema_s3_url.split('/')[-1])
                 }
-            }
+            },
+            description=f'Actions for {ACTION_GROUP_NAME} operations',
+            actionGroupState='ENABLED'
         )
         
         action_group = response['agentActionGroup']
@@ -403,11 +491,10 @@ def create_action_group(agent_id: str, lambda_arn: str, schema_s3_url: str):
     except Exception as e:
         print(f"Error creating action group: {str(e)}")
         print(f"Schema S3 URL: {schema_s3_url}")
-        print(f"Bucket: {bucket}, Key: {key}")
         
         # Try to read the schema from S3 to debug
         try:
-            obj = s3.get_object(Bucket=bucket, Key=key)
+            obj = s3.get_object(Bucket=S3_CONFIG['schema_bucket'], Key=os.path.basename(schema_s3_url.split('/')[-1]))
             schema_content = obj['Body'].read().decode('utf-8')
             print("Schema content preview:")
             print(schema_content[:500] + "..." if len(schema_content) > 500 else schema_content)
@@ -457,7 +544,7 @@ def create_agent_alias(agent_id: str) -> Dict[str, Any]:
         response = bedrock_agent.create_agent_alias(
             agentId=agent_id,
             agentAliasName='Production',
-            description='Production alias for Patchline Email Agent'
+            description=f'Production alias for {AGENT_NAME}'
         )
         
         alias = response['agentAlias']
@@ -506,7 +593,8 @@ def main():
     s3 = boto3.client('s3', region_name=REGION)
     lambda_client = boto3.client('lambda', region_name=REGION)
     
-    print("Creating Bedrock Agent for Gmail integration...\n")
+    # Use the correct description based on agent type
+    print(f"Creating Bedrock Agent for {AGENT_CONFIG['name']}...\n")
     
     # Check for existing agent
     existing_agent = find_existing_agent()
@@ -523,29 +611,39 @@ def main():
     print("Step 1: Creating IAM role...")
     role_arn = create_agent_role()
     
-    # Step 2: Upload API schema
-    print("\nStep 2: Uploading API schema...")
-    schema_s3_url = upload_api_schema()
-    
-    # Step 3: Get Lambda ARN
-    print("\nStep 3: Getting Lambda function...")
-    lambda_arn = get_lambda_arn('gmail-action-handler')
-    
-    # Step 4: Create agent
-    print("\nStep 4: Creating Bedrock Agent...")
+    # Step 2: Create agent
+    print("\nStep 2: Creating Bedrock Agent...")
     agent = create_agent(role_arn)
     agent_id = agent['agentId']
     
-    # Step 5: Create action group
-    print("\nStep 5: Creating action group...")
-    action_group = create_action_group(agent_id, lambda_arn, schema_s3_url)
+    # Check if this is a supervisor agent (no action groups needed)
+    is_supervisor = ACTION_GROUP_NAME is None
+    
+    if not is_supervisor:
+        # Step 3: Upload API schema (only for non-supervisor agents)
+        print("\nStep 3: Uploading API schema...")
+        schema_s3_url = upload_api_schema()
+        
+        # Step 4: Get Lambda ARN (only for non-supervisor agents)
+        print("\nStep 4: Getting Lambda function...")
+        # Determine Lambda name based on action group
+        lambda_function_name = 'gmail-action-handler' if ACTION_GROUP_NAME == 'GmailActions' else 'legal-contract-handler'
+        lambda_arn = get_lambda_arn(lambda_function_name)
+        
+        # Step 5: Create action group (only for non-supervisor agents)
+        print("\nStep 5: Creating action group...")
+        action_group = create_action_group(agent_id, lambda_arn, schema_s3_url)
+    else:
+        print("\nSupervisor agent - skipping action group creation...")
     
     # Step 6: Prepare agent
-    print("\nStep 6: Preparing agent...")
+    step_num = 6 if not is_supervisor else 3
+    print(f"\nStep {step_num}: Preparing agent...")
     prepare_agent(agent_id)
     
     # Step 7: Create alias
-    print("\nStep 7: Creating agent alias...")
+    step_num = 7 if not is_supervisor else 4
+    print(f"\nStep {step_num}: Creating agent alias...")
     alias = create_agent_alias(agent_id)
     
     # Output configuration
@@ -556,9 +654,20 @@ def main():
     print(f"Agent Alias ID: {alias['agentAliasId']}")
     print(f"Agent ARN: {agent['agentArn']}")
     print(f"Role ARN: {role_arn}")
-    print("\nAdd these to your environment variables:")
-    print(f"BEDROCK_AGENT_ID={agent_id}")
-    print(f"BEDROCK_AGENT_ALIAS_ID={alias['agentAliasId']}")
+    
+    if is_supervisor:
+        print("\nSUPERVISOR AGENT NOTES:")
+        print("- This is a supervisor agent that coordinates other agents")
+        print("- You need to manually set up collaborators in the AWS console")
+        print("- Add Gmail agent and Legal agent as collaborators")
+        print("\nAdd these to your environment variables:")
+        print(f"BEDROCK_SUPERVISOR_AGENT_ID={agent_id}")
+        print(f"BEDROCK_SUPERVISOR_AGENT_ALIAS_ID={alias['agentAliasId']}")
+    else:
+        print("\nAdd these to your environment variables:")
+        print(f"BEDROCK_AGENT_ID={agent_id}")
+        print(f"BEDROCK_AGENT_ALIAS_ID={alias['agentAliasId']}")
+    
     print("\nAgent is ready to use!")
 
 if __name__ == '__main__':

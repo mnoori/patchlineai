@@ -4,7 +4,7 @@ import {
   InvokeAgentCommand 
 } from '@aws-sdk/client-bedrock-agent-runtime'
 import { BedrockClientDirect } from '@/lib/bedrock-client-direct'
-import { CONFIG } from '@/lib/config'
+import { CONFIG, GMAIL_AGENT, LEGAL_AGENT, SUPERVISOR_AGENT } from '@/lib/config'
 
 // Initialize Bedrock Agent Runtime client
 const agentCredentials = CONFIG.AWS_ACCESS_KEY_ID && CONFIG.AWS_SECRET_ACCESS_KEY ? {
@@ -18,16 +18,6 @@ const agentClient = new BedrockAgentRuntimeClient({
   ...(agentCredentials && { credentials: agentCredentials }),
 })
 
-// Agent configuration - now using named agents for better modularity
-const ACTIVE_AGENT_NAME = CONFIG.ACTIVE_AGENT || 'GMAIL_AGENT'
-const ACTIVE_AGENT_CONFIG = CONFIG.BEDROCK_AGENTS[ACTIVE_AGENT_NAME as keyof typeof CONFIG.BEDROCK_AGENTS]
-
-// Get agent details with fallbacks
-const AGENT_ID = ACTIVE_AGENT_CONFIG?.ID || CONFIG.BEDROCK_AGENT_ID || process.env.BEDROCK_AGENT_ID || 'C7VZ0QWDSG'
-const AGENT_ALIAS_ID = ACTIVE_AGENT_CONFIG?.ALIAS_ID || CONFIG.BEDROCK_AGENT_ALIAS_ID || process.env.BEDROCK_AGENT_ALIAS_ID || 'WDGFWL1YCB'
-const AGENT_NAME = ACTIVE_AGENT_CONFIG?.NAME || 'Default Agent'
-const AGENT_DESCRIPTION = ACTIVE_AGENT_CONFIG?.DESCRIPTION || 'Bedrock Agent'
-
 // Consistent logging with icons and colors
 const log = {
   info: (msg: string) => console.log(`🔵 [CHAT] ${msg}`),
@@ -39,10 +29,13 @@ const log = {
   gmail: (msg: string) => console.log(`📧 [GMAIL] ${msg}`),
 }
 
+// Track agent ID for error handling across try/catch
+let currentAgentId: string | undefined
+
 // POST /api/chat - Handle both chat mode (direct model) and agent mode (Bedrock Agent)
 export async function POST(request: NextRequest) {
   try {
-    const { message, userId, mode = 'chat', sessionId, modelId } = await request.json()
+    const { message, userId, mode = 'chat', sessionId, modelId, agentType } = await request.json()
 
     if (!message || !userId) {
       log.error('Missing message or userId')
@@ -53,6 +46,9 @@ export async function POST(request: NextRequest) {
 
     // Create a session ID if not provided
     const chatSessionId = sessionId || `${userId}-${Date.now()}`
+
+    // Track agent ID for error handling
+    currentAgentId = undefined
 
     if (mode === 'chat') {
       // CHAT MODE: Use direct Bedrock model
@@ -84,7 +80,28 @@ export async function POST(request: NextRequest) {
       }
       
     } else if (mode === 'agent') {
-      // AGENT MODE: Use Bedrock Agent with Gmail actions
+      // AGENT MODE: Determine which agent to use (request can override)
+      let agentConfig;
+      switch (agentType) {
+        case 'GMAIL_AGENT':
+          agentConfig = GMAIL_AGENT;
+          break;
+        case 'LEGAL_AGENT':
+          agentConfig = LEGAL_AGENT;
+          break;
+        case 'SUPERVISOR_AGENT':
+          agentConfig = SUPERVISOR_AGENT;
+          break;
+        default:
+          agentConfig = GMAIL_AGENT; // Default fallback
+      }
+
+      // Resolve IDs with fallbacks
+      const AGENT_ID = agentConfig?.agentId || CONFIG.BEDROCK_AGENT_ID || process.env.BEDROCK_AGENT_ID || 'C7VZ0QWDSG'
+      const AGENT_ALIAS_ID = agentConfig?.agentAliasId || CONFIG.BEDROCK_AGENT_ALIAS_ID || process.env.BEDROCK_AGENT_ALIAS_ID || 'WDGFWL1YCB'
+      const AGENT_NAME = agentType === 'SUPERVISOR_AGENT' ? 'Supervisor Agent' : agentType === 'LEGAL_AGENT' ? 'Legal Agent' : 'Gmail Agent'
+      const AGENT_DESCRIPTION = agentType === 'SUPERVISOR_AGENT' ? 'Multi-agent coordinator' : agentType === 'LEGAL_AGENT' ? 'Legal document analysis' : 'Email management'
+
       if (!AGENT_ID || !AGENT_ALIAS_ID) {
         log.error('Bedrock Agent not configured')
         log.error(`BEDROCK_AGENT_ID: ${AGENT_ID ? 'set' : 'missing'}`)
@@ -97,12 +114,15 @@ export async function POST(request: NextRequest) {
 
       // Debug logging to track what we're actually using
       log.info(`[DEBUG] === AGENT CONFIGURATION ===`)
-      log.info(`[DEBUG] Active Agent: ${AGENT_NAME} (${ACTIVE_AGENT_NAME})`)
+      log.info(`[DEBUG] Active Agent: ${AGENT_NAME} (${agentType})`)
       log.info(`[DEBUG] Description: ${AGENT_DESCRIPTION}`)
       log.info(`[DEBUG] BEDROCK_AGENT_ID: ${AGENT_ID}`)
       log.info(`[DEBUG] BEDROCK_AGENT_ALIAS_ID: ${AGENT_ALIAS_ID}`)
       log.info(`[DEBUG] === INVOKING AGENT ===`)
       log.agent(`Invoking ${AGENT_NAME} (${AGENT_ID}) with alias ${AGENT_ALIAS_ID}`)
+
+      // Save for error handling
+      currentAgentId = AGENT_ID
 
       // Prepare the agent invocation
       const command = new InvokeAgentCommand({
@@ -236,7 +256,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ 
         error: 'Agent not found',
         details: 'The specified Bedrock Agent does not exist. Please check the agent ID and ensure it has been created.',
-        agentId: AGENT_ID 
+        agentId: currentAgentId || 'unknown' 
       }, { status: 404 })
     }
     

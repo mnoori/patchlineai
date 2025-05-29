@@ -73,15 +73,42 @@ DEFAULT_FOUNDATION_MODEL = BEDROCK_MODELS['claude-4-sonnet']['inference_profile'
 # The agent will be configured to use the inference profile ID (preferred if available)
 AGENT_FOUNDATION_MODEL = DEFAULT_FOUNDATION_MODEL
 
-# Agent Configuration
-AGENT_CONFIG = {
-    'name': 'PatchlineEmailAgent',
-    'description': 'AI assistant for managing emails and communications',
-    'foundation_model': AGENT_FOUNDATION_MODEL,  # Using Claude 4 Sonnet for agent
-    'action_group_name': 'GmailActions',
-    'knowledge_base_name': 'PatchlineEmailKnowledge',
-    'idle_session_ttl': 900  # 15 minutes
-}
+# ---------------------------------------------------------------------------
+# Agent Configuration – supports multiple agent types via env var
+# ---------------------------------------------------------------------------
+
+import os  # noqa: E402 – placed after imports above intentionally
+
+AGENT_TYPE = os.getenv("PATCHLINE_AGENT_TYPE", "GMAIL").upper()
+
+if AGENT_TYPE == "LEGAL":
+    AGENT_CONFIG = {
+        'name': 'PatchlineLegalAgent',
+        'description': 'Legal AI assistant specialising in music contracts and rights',
+        'foundation_model': BEDROCK_MODELS['claude-3-7-sonnet']['inference_profile'],  # Use Claude 3.7 Sonnet with inference profile
+        'action_group_name': 'ContractAnalysis',
+        'knowledge_base_name': 'PatchlineLegalKnowledge',
+        'idle_session_ttl': 900,
+    }
+elif AGENT_TYPE == "SUPERVISOR":
+    AGENT_CONFIG = {
+        'name': 'PatchlineSupervisorAgent',
+        'description': 'Multi-agent supervisor that coordinates between Gmail and Legal specialists',
+        'foundation_model': BEDROCK_MODELS['claude-4-sonnet']['inference_profile'],  # Use Claude 4 Sonnet with inference profile
+        'action_group_name': None,  # Supervisor doesn't need action groups, only collaborators
+        'knowledge_base_name': None,  # Supervisor delegates to other agents
+        'idle_session_ttl': 900,
+    }
+else:
+    # Default to Gmail agent
+    AGENT_CONFIG = {
+        'name': 'PatchlineEmailAgent',
+        'description': 'AI assistant for managing emails and communications',
+        'foundation_model': AGENT_FOUNDATION_MODEL,
+        'action_group_name': 'GmailActions',
+        'knowledge_base_name': 'PatchlineEmailKnowledge',
+        'idle_session_ttl': 900,
+    }
 
 # S3 Configuration
 S3_CONFIG = {
