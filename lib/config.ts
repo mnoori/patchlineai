@@ -37,6 +37,10 @@ export const CONFIG = {
     process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY || "",
   AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN || undefined,
 
+  // Bedrock Agent Configuration
+  BEDROCK_AGENT_ID: process.env.BEDROCK_AGENT_ID || "",
+  BEDROCK_AGENT_ALIAS_ID: process.env.BEDROCK_AGENT_ALIAS_ID || "",
+
   // DynamoDB Tables
   USERS_TABLE: process.env.USERS_TABLE || "Users-staging",
   EMBEDS_TABLE: process.env.EMBEDS_TABLE || "Embeds-staging",

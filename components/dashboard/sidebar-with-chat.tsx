@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -433,6 +433,7 @@ export function SidebarWithChat() {
   const [currentLogs, setCurrentLogs] = useState<typeof simulationLogs>([])
   const [isClosing, setIsClosing] = useState(false)
   const { unreadCount, setAgentActivity } = usePatchyStore()
+  const logsContainerRef = useRef<HTMLDivElement>(null)
 
   // Set Agents submenu to open by default
   useEffect(() => {
@@ -494,9 +495,16 @@ export function SidebarWithChat() {
 
     const handleAgentComplete = () => {
       if (!DEMO_MODE) {
+        // Keep showing logs for 10 seconds after completion
         setTimeout(() => {
+          // Clear logs first, then set agent working to false
+          setCurrentLogs([])
           setIsAgentWorking(false)
-        }, 1000) // Small delay to show final logs
+          
+          // Reset suggestion state to restart the typewriter effect
+          setDisplayedText("")
+          setCurrentSuggestion(0)
+        }, 10000) // Show logs for 10 seconds after completion
       }
     }
 
@@ -520,44 +528,56 @@ export function SidebarWithChat() {
       
       // Check if this is a log we want to show in the activity panel
       const message = args.join(' ')
-      if (message.includes('[CHAT]') || message.includes('[AGENT]') || message.includes('[GMAIL]') || message.includes('[MODEL]')) {
-        const timestamp = new Date().toLocaleTimeString('en-US', { 
-          hour12: false, 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit' 
-        })
+      
+      // Show all logs during agent activity, not just specific ones
+      const timestamp = new Date().toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      })
+      
+      let type = 'working'
+      let icon = '⚙️'
+      
+      if (message.includes('✅')) {
+        type = 'success'
+        icon = '✅'
+      } else if (message.includes('❌')) {
+        type = 'error'
+        icon = '❌'
+      } else if (message.includes('📧')) {
+        icon = '📧'
+      } else if (message.includes('🤖')) {
+        icon = '🤖'
+      } else if (message.includes('🧠')) {
+        icon = '🧠'
+      } else if (message.includes('🔵')) {
+        icon = '🔵'
+      } else if (message.includes('⚠️')) {
+        icon = '⚠️'
+        type = 'warning'
+      }
+      
+      // Extract clean message
+      let cleanMessage = message
+      // Remove emoji prefixes
+      cleanMessage = cleanMessage.replace(/^[🔵✅❌⚠️🤖🧠📧]\s*/, '')
+      // Remove [TAG] prefixes
+      cleanMessage = cleanMessage.replace(/\[(CHAT|AGENT|GMAIL|MODEL|CONFIG|API)\]\s*/, '')
+      
+      const logEntry = {
+        timestamp,
+        message: cleanMessage,
+        type,
+        icon
+      }
+      
+      setCurrentLogs(prev => {
+        const newLogs = [...prev, logEntry]
         
-        let type = 'working'
-        let icon = '⚙️'
-        
-        if (message.includes('✅')) {
-          type = 'success'
-          icon = '✅'
-        } else if (message.includes('❌')) {
-          type = 'error'
-          icon = '❌'
-        } else if (message.includes('📧')) {
-          icon = '📧'
-        } else if (message.includes('🤖')) {
-          icon = '🤖'
-        } else if (message.includes('🧠')) {
-          icon = '🧠'
-        } else if (message.includes('🔵')) {
-          icon = '🔵'
-        }
-        
-        const logEntry = {
-          timestamp,
-          message: message.replace(/^[🔵✅❌⚠️🤖🧠📧]\s*\[(CHAT|AGENT|GMAIL|MODEL)\]\s*/, ''),
-          type,
-          icon
-        }
-        
-        setCurrentLogs(prev => [...prev, logEntry])
-        
-        // Auto-scroll to bottom
-        setTimeout(() => {
+        // Immediately scroll to bottom for real-time feel
+        requestAnimationFrame(() => {
           const logsContainer = document.querySelector(".logs-container")
           if (logsContainer) {
             logsContainer.scrollTo({
@@ -565,8 +585,10 @@ export function SidebarWithChat() {
               behavior: "smooth",
             })
           }
-        }, 50)
-      }
+        })
+        
+        return newLogs
+      })
     }
     
     return () => {
@@ -688,44 +710,23 @@ export function SidebarWithChat() {
     }
   }, [isChatExpanded])
 
+  // Remove the DOM manipulation effects
   // Update logs with smooth film-roll effect
   useEffect(() => {
-    const logsContainer = document.getElementById("logs-container")
-    if (!logsContainer || !isAgentWorking) return
+    if (!isAgentWorking || !logsContainerRef.current) return
 
-    // Build the logs as simple lines
-    const logsHTML = currentLogs
-      .map(
-        (log, index) => `
-    <div class="log-line log-${log.type}" style="animation-delay: ${index * 0.1}s;">
-      <span class="log-timestamp">${log.timestamp}</span>
-      <span class="log-icon">${log.icon}</span>
-      <span class="log-message">${log.message}</span>
-    </div>
-  `,
-      )
-      .join("")
-
-    logsContainer.innerHTML = logsHTML
-
-    // Smooth scroll to bottom after a brief delay
-    setTimeout(() => {
-      logsContainer.scrollTo({
-        top: logsContainer.scrollHeight,
-        behavior: "smooth",
-      })
-    }, 100)
+    // Auto-scroll to bottom when new logs are added
+    requestAnimationFrame(() => {
+      if (logsContainerRef.current) {
+        logsContainerRef.current.scrollTo({
+          top: logsContainerRef.current.scrollHeight,
+          behavior: "smooth",
+        })
+      }
+    })
   }, [currentLogs, isAgentWorking])
 
-  // Update suggestion text (when not working)
-  useEffect(() => {
-    if (isAgentWorking) return
-
-    const textElement = document.getElementById("suggestion-text")
-    if (textElement) {
-      textElement.innerHTML = `${displayedText}<span class="cursor">|</span>`
-    }
-  }, [displayedText, isAgentWorking])
+  // Remove the suggestion text DOM manipulation effect
 
   const toggleSubmenu = (title: string) => {
     setOpenSubmenu(openSubmenu === title ? null : title)
@@ -803,7 +804,15 @@ export function SidebarWithChat() {
               </div>
               
               {isAgentWorking ? (
-                <div className="logs-container" id="logs-container" />
+                <div className="logs-container" ref={logsContainerRef}>
+                  {currentLogs.map((log, index) => (
+                    <div key={index} className={`log-line log-${log.type}`}>
+                      <span className="log-timestamp">{log.timestamp}</span>
+                      <span className="log-icon">{log.icon}</span>
+                      <span className="log-message">{log.message}</span>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="suggestion-content">
                   <div className="suggestion-text">

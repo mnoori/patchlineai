@@ -16,8 +16,8 @@ const agentClient = new BedrockAgentRuntimeClient({
 })
 
 // Agent configuration from environment variables
-const AGENT_ID = process.env.BEDROCK_AGENT_ID || ''
-const AGENT_ALIAS_ID = process.env.BEDROCK_AGENT_ALIAS_ID || '' // Must be provided via env vars
+const AGENT_ID = CONFIG.BEDROCK_AGENT_ID || process.env.BEDROCK_AGENT_ID || ''
+const AGENT_ALIAS_ID = CONFIG.BEDROCK_AGENT_ALIAS_ID || process.env.BEDROCK_AGENT_ALIAS_ID || ''
 
 // Consistent logging with icons and colors
 const log = {
@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
       // AGENT MODE: Use Bedrock Agent with Gmail actions
       if (!AGENT_ID || !AGENT_ALIAS_ID) {
         log.error('Bedrock Agent not configured')
+        log.error(`BEDROCK_AGENT_ID: ${AGENT_ID ? 'set' : 'missing'}`)
+        log.error(`BEDROCK_AGENT_ALIAS_ID: ${AGENT_ALIAS_ID ? 'set' : 'missing'}`)
         return NextResponse.json({ 
           error: 'Bedrock Agent not configured',
           details: 'BEDROCK_AGENT_ID or BEDROCK_AGENT_ALIAS_ID is missing' 
@@ -86,8 +88,8 @@ export async function POST(request: NextRequest) {
 
       // Debug logging to track what we're actually using
       log.info(`[DEBUG] === FRONTEND ENV VARS ===`)
-      log.info(`[DEBUG] BEDROCK_AGENT_ID: ${process.env.BEDROCK_AGENT_ID}`)
-      log.info(`[DEBUG] BEDROCK_AGENT_ALIAS_ID: ${process.env.BEDROCK_AGENT_ALIAS_ID}`)
+      log.info(`[DEBUG] BEDROCK_AGENT_ID: ${AGENT_ID}`)
+      log.info(`[DEBUG] BEDROCK_AGENT_ALIAS_ID: ${AGENT_ALIAS_ID}`)
       log.info(`[DEBUG] === INVOKING AGENT ===`)
       log.agent(`Invoking agent ${AGENT_ID} with alias ${AGENT_ALIAS_ID}`)
 
@@ -115,6 +117,7 @@ export async function POST(request: NextRequest) {
       let traces: any[] = []
       let emailContext = false
       let actionsInvoked: string[] = []
+      let actionDisplay = '' // Track current action for logging
 
       if (response.completion) {
         // Handle streaming response
@@ -138,7 +141,7 @@ export async function POST(request: NextRequest) {
                 actionsInvoked.push(actionPath)
                 
                 // Format action display based on the path
-                let actionDisplay = ''
+                actionDisplay = ''
                 switch (actionPath) {
                   case '/search-emails':
                     actionDisplay = 'Searching emails...'
@@ -162,15 +165,17 @@ export async function POST(request: NextRequest) {
                     actionDisplay = `Gmail action: ${actionPath}`
                 }
                 
-                // Log the action with a slight delay to make it visible
-                setTimeout(() => {
-                  log.gmail(actionDisplay)
-                }, 100)
-                
-                // Log when action completes (simulated delay for visibility)
-                setTimeout(() => {
-                  log.success(`${actionDisplay.replace('...', '')} completed`)
-                }, 800)
+                // Log the action immediately
+                log.gmail(actionDisplay)
+              }
+            }
+            
+            // Check for action completion
+            if (chunk.trace?.trace?.orchestrationTrace?.observation?.actionGroupInvocationOutput) {
+              const output = chunk.trace.trace.orchestrationTrace.observation.actionGroupInvocationOutput
+              if (output.text) {
+                // Log action completion
+                log.success(`${actionDisplay.replace('...', '')} completed`)
               }
             }
           }
