@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { PlatformIntegrations } from "@/components/insights/platform-integrations"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 import {
   User,
   Mail,
@@ -48,9 +49,21 @@ import { useCurrentUser } from "@/hooks/use-current-user"
 import { motion } from "framer-motion"
 import { userAPI, platformsAPI } from "@/lib/api-client"
 import { usePlatformConnections } from "@/hooks/use-platform-connections"
+import { usePermissions, UserTier } from "@/lib/permissions"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { getTierConfig, getUpgradePath, TIER_CONFIGS } from "@/lib/tier-config"
+import { UpgradeDialog } from "@/components/upgrade-dialog"
+import { useSearchParams } from "next/navigation"
 
 export default function SettingsPage() {
   const { userId } = useCurrentUser()
+  const { user, setUser, activateGodMode, deactivateGodMode } = usePermissions()
+  const searchParams = useSearchParams()
+  
+  // Check for tab parameter
+  const defaultTab = searchParams.get('tab') || 'profile'
+  const upgradeSuccess = searchParams.get('upgrade') === 'success'
 
   const [darkMode, setDarkMode] = useState(true)
   const [emailNotifications, setEmailNotifications] = useState(true)
@@ -70,6 +83,14 @@ export default function SettingsPage() {
   const [marketingConsent, setMarketingConsent] = useState(true)
   const [autoBackup, setAutoBackup] = useState(true)
   const [dataRetention, setDataRetention] = useState("1year")
+  
+  // God Mode states
+  const [showGodModeDialog, setShowGodModeDialog] = useState(false)
+  const [godModePassword, setGodModePassword] = useState("")
+  const [godModeError, setGodModeError] = useState("")
+  
+  // Upgrade dialog state
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
 
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
@@ -81,11 +102,33 @@ export default function SettingsPage() {
 
   const { platforms, loading: loadingPlatforms, connectPlatform, disconnectPlatform, refreshPlatforms } = usePlatformConnections()
 
-  // Handle OAuth callback
+  // Handle URL parameters
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search)
     const connected = searchParams.get('connected')
     const error = searchParams.get('error')
+    const upgrade = searchParams.get('upgrade')
+    
+    if (upgrade === 'success') {
+      // Show a different message that acknowledges the tier is already updated
+      toast.success('Your plan has been successfully upgraded! All new features are now available.')
+      
+      // Clear the URL parameter without reloading
+      const url = new URL(window.location.href)
+      url.searchParams.delete('upgrade')
+      window.history.replaceState({}, document.title, url.pathname + url.search)
+      
+      // Double check localStorage to ensure tier is properly stored
+      try {
+        const storedData = localStorage.getItem('patchline-permissions')
+        if (storedData) {
+          const permissions = JSON.parse(storedData)
+          console.log('Current stored permissions:', permissions?.state?.user?.tier)
+        }
+      } catch (e) {
+        console.error('Failed to check localStorage:', e)
+      }
+    }
     
     if (connected) {
       toast.success(`${connected} connected successfully!`)
@@ -156,6 +199,48 @@ export default function SettingsPage() {
 
   const markDirty = () => setIsDirty(true)
 
+  async function handleGodModeActivation() {
+    setGodModeError("")
+    
+    // Check if password is correct
+    if (godModePassword === "cassianandor") {
+      // First, upgrade user to GOD_MODE tier
+      if (user) {
+        const updatedUser = {
+          ...user,
+          tier: UserTier.GOD_MODE,
+          godModeActivated: true
+        }
+        
+        // Update in state
+        setUser(updatedUser)
+        
+        // Persist to localStorage directly
+        try {
+          const currentStore = JSON.parse(localStorage.getItem('patchline-permissions') || '{}')
+          currentStore.state = {
+            ...currentStore.state,
+            user: updatedUser
+          }
+          localStorage.setItem('patchline-permissions', JSON.stringify(currentStore))
+        } catch (error) {
+          console.error('Failed to persist God Mode:', error)
+        }
+        
+        toast.success("God Mode activated successfully! 🚀 You now have access to all internal tools.")
+        setShowGodModeDialog(false)
+        setGodModePassword("")
+        
+        // Refresh the page to update sidebar
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
+      }
+    } else {
+      setGodModeError("Invalid password. Please try again.")
+    }
+  }
+
   async function handlePlatformConnect(platform: string, connect: boolean) {
     if (connect) {
       connectPlatform(platform)
@@ -191,7 +276,7 @@ export default function SettingsPage() {
         <p className="text-muted-foreground">Manage your account settings and preferences</p>
       </motion.div>
 
-      <Tabs defaultValue="profile" className="w-full">
+      <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="grid w-full max-w-4xl grid-cols-5 mb-8">
           <TabsTrigger
             value="profile"
@@ -757,6 +842,28 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="security" className="space-y-6">
+          {/* God Mode Activation - Simple and straightforward */}
+          <motion.div variants={itemVariants}>
+            <Card className="glass-effect border-amber-500/30 hover:border-amber-500/50 transition-all duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-amber-400" />
+                  God Mode Activation
+                </CardTitle>
+                <CardDescription>Unlock internal admin tools (Admin access only)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  onClick={() => setShowGodModeDialog(true)}
+                  className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
+                >
+                  <Zap className="h-4 w-4 mr-2" />
+                  Activate God Mode
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
           <motion.div variants={itemVariants}>
             <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
               <CardHeader>
@@ -972,6 +1079,87 @@ export default function SettingsPage() {
             </Card>
           </motion.div>
 
+          {/* God Mode Activation Card */}
+          {user?.tier === UserTier.GOD_MODE && (
+            <motion.div variants={itemVariants}>
+              <Card className="glass-effect border-border/50 hover:border-amber-400/30 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-amber-400" />
+                    God Mode
+                  </CardTitle>
+                  <CardDescription>Access advanced AI features for power users</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>God Mode Status</Label>
+                      <p className="text-sm text-muted-foreground">
+                        {user.godModeActivated 
+                          ? "God Mode is currently active. You have access to all advanced features."
+                          : "Activate God Mode to unlock document processing, AI HR recruiter, and newsletter generator."}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {user.godModeActivated ? (
+                        <>
+                          <Badge className="bg-amber-400/20 text-amber-400 border-amber-400/30">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Active
+                          </Badge>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              deactivateGodMode()
+                              toast.success("God Mode deactivated")
+                              window.location.reload()
+                            }}
+                            className="text-amber-400 hover:bg-amber-400/10 hover:text-amber-400"
+                          >
+                            Deactivate
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          onClick={() => setShowGodModeDialog(true)}
+                          className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
+                        >
+                          <Zap className="h-4 w-4 mr-2" />
+                          Activate God Mode
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {user.godModeActivated && (
+                    <div className="space-y-2 pt-4 border-t">
+                      <h4 className="text-sm font-medium">Active Features:</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-amber-400" />
+                          <span>Document Processing & Tax Prep</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-amber-400" />
+                          <span>AI HR Recruiter</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-amber-400" />
+                          <span>Newsletter Generator</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-amber-400" />
+                          <span>Advanced AI Models</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
           <motion.div variants={itemVariants}>
             <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
               <CardHeader>
@@ -1067,6 +1255,67 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="billing" className="space-y-6">
+          {/* Dev Mode Tier Switcher */}
+          <motion.div variants={itemVariants}>
+            <Card className="glass-effect border-purple-500/30 hover:border-purple-500/50 transition-all duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-purple-400" />
+                  Dev Mode: Tier Switcher
+                </CardTitle>
+                <CardDescription>Switch between tiers for testing (Development only)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {Object.values(UserTier).map((tier) => (
+                    <Button
+                      key={tier}
+                      variant={user?.tier === tier ? "default" : "outline"}
+                      className={cn(
+                        "transition-all",
+                        user?.tier === tier && "bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                      )}
+                      onClick={() => {
+                        if (user) {
+                          const updatedUser = {
+                            ...user,
+                            tier: tier,
+                            godModeActivated: tier === UserTier.GOD_MODE
+                          }
+                          setUser(updatedUser)
+                          
+                          // Persist to localStorage
+                          try {
+                            const currentStore = JSON.parse(localStorage.getItem('patchline-permissions') || '{}')
+                            currentStore.state = {
+                              ...currentStore.state,
+                              user: updatedUser
+                            }
+                            localStorage.setItem('patchline-permissions', JSON.stringify(currentStore))
+                          } catch (error) {
+                            console.error('Failed to persist tier change:', error)
+                          }
+                          
+                          toast.success(`Switched to ${getTierConfig(tier).name} tier`)
+                          
+                          // Reload to update UI
+                          setTimeout(() => {
+                            window.location.reload()
+                          }, 500)
+                        }
+                      }}
+                    >
+                      {getTierConfig(tier).name}
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-4">
+                  ⚠️ This is for development testing only. In production, tier changes will be handled through Stripe subscriptions.
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
           <motion.div variants={itemVariants}>
             <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
               <CardHeader>
@@ -1077,59 +1326,124 @@ export default function SettingsPage() {
                 <CardDescription>Manage your subscription</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex flex-col md:flex-row justify-between gap-6">
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-                      <span className="text-cosmic-teal">Label Plan</span>
-                      <span className="text-xs bg-cosmic-teal/20 text-cosmic-teal px-2 py-0.5 rounded-full">
-                        Active
-                      </span>
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      $199<span className="text-sm">/month</span>
-                    </p>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-cosmic-teal" />
-                        <span className="text-sm">All agents</span>
+                {user && (
+                  <div className="flex flex-col md:flex-row justify-between gap-6">
+                    <div>
+                      <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+                        <span className="text-cosmic-teal">{getTierConfig(user.tier).name} Plan</span>
+                        <span className="text-xs bg-cosmic-teal/20 text-cosmic-teal px-2 py-0.5 rounded-full">
+                          Active
+                        </span>
+                      </h3>
+                      <p className="text-muted-foreground mb-4">
+                        {getTierConfig(user.tier).price.monthly === 0 
+                          ? "Free" 
+                          : `$${getTierConfig(user.tier).price.monthly}`}
+                        {getTierConfig(user.tier).price.monthly > 0 && <span className="text-sm">/month</span>}
+                      </p>
+                      <div className="space-y-2">
+                        {getTierConfig(user.tier).features.slice(0, 4).map((feature, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <CheckCircle2 className="h-4 w-4 text-cosmic-teal" />
+                            <span className="text-sm">{feature}</span>
+                          </div>
+                        ))}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-cosmic-teal" />
-                        <span className="text-sm">5 team seats</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-cosmic-teal" />
-                        <span className="text-sm">Advanced reports with exports</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-cosmic-teal" />
-                        <span className="text-sm">10,000 tracks/month processing</span>
+                    </div>
+                    <div className="flex flex-col justify-between">
+                      {user.tier !== UserTier.CREATOR && (
+                        <div className="text-sm text-muted-foreground">
+                          Your plan renews on <span className="font-medium">June 15, 2025</span>
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        {getUpgradePath(user.tier).length > 0 && (
+                          <Button
+                            variant="outline"
+                            className="hover:bg-cosmic-teal/20 hover:text-cosmic-teal transition-all duration-200"
+                            onClick={() => setShowUpgradeDialog(true)}
+                          >
+                            Upgrade Plan
+                          </Button>
+                        )}
+                        {user.tier !== UserTier.CREATOR && (
+                          <Button
+                            variant="outline"
+                            className="text-red-500 hover:bg-red-500/10 hover:text-red-500 transition-all duration-200"
+                          >
+                            Cancel Plan
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      Your plan renews on <span className="font-medium">June 15, 2025</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        className="hover:bg-cosmic-teal/20 hover:text-cosmic-teal transition-all duration-200"
-                      >
-                        Change Plan
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="text-red-500 hover:bg-red-500/10 hover:text-red-500 transition-all duration-200"
-                      >
-                        Cancel Plan
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* Upgrade Options */}
+          {user && getUpgradePath(user.tier).length > 0 && (
+            <motion.div variants={itemVariants}>
+              <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-cosmic-teal" />
+                    Upgrade Your Plan
+                  </CardTitle>
+                  <CardDescription>Unlock more features and capabilities</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4">
+                    {getUpgradePath(user.tier).map((tierOption) => {
+                      const config = getTierConfig(tierOption)
+                      return (
+                        <div
+                          key={tierOption}
+                          className="p-4 rounded-lg border border-border/50 hover:border-cosmic-teal/30 transition-all duration-200"
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="font-semibold text-lg">{config.name}</h4>
+                              <p className="text-sm text-muted-foreground">{config.tagline}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold">
+                                {config.price.monthly === 299 ? "Custom" : `$${config.price.monthly}`}
+                              </p>
+                              {config.price.monthly !== 299 && (
+                                <p className="text-sm text-muted-foreground">/month</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="space-y-1 mb-4">
+                            {config.features.slice(0, 3).map((feature, i) => (
+                              <div key={i} className="flex items-center gap-2 text-sm">
+                                <CheckCircle2 className="h-3 w-3 text-cosmic-teal" />
+                                <span>{feature}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <Button
+                            className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                            onClick={() => {
+                              if (tierOption === UserTier.ENTERPRISE) {
+                                window.location.href = "/contact"
+                              } else {
+                                setShowUpgradeDialog(true)
+                              }
+                            }}
+                          >
+                            {config.ctaText}
+                          </Button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           <motion.div variants={itemVariants}>
             <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
@@ -1253,6 +1567,86 @@ export default function SettingsPage() {
           </motion.div>
         </TabsContent>
       </Tabs>
+
+      {/* Upgrade Dialog */}
+      <UpgradeDialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog} />
+      
+      {/* God Mode Dialog */}
+      <Dialog open={showGodModeDialog} onOpenChange={setShowGodModeDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-amber-400" />
+              Activate God Mode
+            </DialogTitle>
+            <DialogDescription>
+              Enter your God Mode password to unlock advanced AI features.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="god-mode-password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="god-mode-password"
+                  type="password"
+                  placeholder="Enter God Mode password"
+                  value={godModePassword}
+                  onChange={(e) => setGodModePassword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleGodModeActivation()
+                    }
+                  }}
+                  className="pl-10"
+                />
+              </div>
+              {godModeError && (
+                <p className="text-sm text-red-500">{godModeError}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                God Mode includes:
+              </p>
+              <ul className="text-sm space-y-1">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3 w-3 text-amber-400" />
+                  Document Processing & Tax Preparation
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3 w-3 text-amber-400" />
+                  AI HR Recruiter with LinkedIn Analysis
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3 w-3 text-amber-400" />
+                  Newsletter Generator with Web Research
+                </li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowGodModeDialog(false)
+                setGodModePassword("")
+                setGodModeError("")
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleGodModeActivation}
+              disabled={!godModePassword}
+              className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
+            >
+              Activate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }

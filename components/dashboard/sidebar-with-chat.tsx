@@ -19,6 +19,7 @@ import {
   HelpCircle,
   Store,
   Edit3,
+  Zap,
 } from "lucide-react"
 import { ChatInterface } from "../chat/chat-interface"
 import { TRSCableLogo } from "../icons/trs-cable-logo"
@@ -26,6 +27,20 @@ import { usePatchyStore } from "@/hooks/use-patchy-store"
 import { Badge } from "@/components/ui/badge"
 import { motion, AnimatePresence } from "framer-motion"
 import { DEMO_MODE } from "@/lib/config"
+import { usePermissions, FeatureId, FEATURE_CATALOG } from "@/lib/permissions"
+
+// Define types for sidebar items
+interface SidebarItem {
+  title: string
+  href?: string
+  icon: React.ReactNode
+  isGodMode?: boolean
+  submenu?: {
+    title: string
+    href: string
+    icon: React.ReactNode
+  }[]
+}
 
 const pulseGlowStyle = `
   @keyframes pulse-glow {
@@ -41,6 +56,28 @@ const pulseGlowStyle = `
   .animate-pulse-glow {
     animation: pulse-glow 3s ease-in-out infinite;
     border: 1px solid rgba(0, 240, 255, 0.1);
+  }
+
+  @keyframes pulse-glow-yellow {
+    0%, 100% { 
+      box-shadow: 0 0 5px rgba(255, 215, 0, 0.2), 0 0 10px rgba(255, 215, 0, 0.1);
+      border-color: rgba(255, 215, 0, 0.2);
+      background-color: rgba(255, 215, 0, 0.05);
+    }
+    50% { 
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4), 0 0 25px rgba(255, 215, 0, 0.2);
+      border-color: rgba(255, 215, 0, 0.4);
+      background-color: rgba(255, 215, 0, 0.1);
+    }
+  }
+  .animate-pulse-glow-yellow {
+    animation: pulse-glow-yellow 2s ease-in-out infinite;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    color: rgba(255, 215, 0, 0.9) !important;
+  }
+  .animate-pulse-glow-yellow:hover {
+    background-color: rgba(255, 215, 0, 0.15) !important;
+    color: rgba(255, 215, 0, 1) !important;
   }
 
   /* Soft v0-style dashboard blur */
@@ -278,74 +315,23 @@ const pulseGlowStyle = `
   }
 `
 
-const sidebarItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: <LayoutDashboard className="h-5 w-5" />,
-  },
-  {
-    title: "Catalog",
-    href: "/dashboard/catalog",
-    icon: <Music2 className="h-5 w-5" />,
-  },
-  {
-    title: "Releases",
-    href: "/dashboard/releases",
-    icon: <Calendar className="h-5 w-5" />,
-  },
-  {
-    title: "Content",
-    href: "/dashboard/content",
-    icon: <Edit3 className="h-5 w-5" />,
-  },
-  {
-    title: "Agents",
-    icon: <PlusCircle className="h-5 w-5" />,
-    submenu: [
-      {
-        title: "Scout",
-        href: "/dashboard/agents/scout",
-        icon: <Search className="h-5 w-5" />,
-      },
-      {
-        title: "Legal",
-        href: "/dashboard/agents/legal",
-        icon: <FileText className="h-5 w-5" />,
-      },
-      {
-        title: "Metadata",
-        href: "/dashboard/agents/metadata",
-        icon: <Database className="h-5 w-5" />,
-      },
-      {
-        title: "Fan",
-        href: "/dashboard/agents/fan",
-        icon: <Users className="h-5 w-5" />,
-      },
-      {
-        title: "Marketplace",
-        href: "/dashboard/agents/marketplace",
-        icon: <Store className="h-5 w-5" />,
-      },
-    ],
-  },
-  {
-    title: "Insights",
-    href: "/dashboard/insights",
-    icon: <BarChart2 className="h-5 w-5" />,
-  },
-  {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: <Settings className="h-5 w-5" />,
-  },
-  {
-    title: "Help",
-    href: "/dashboard/help",
-    icon: <HelpCircle className="h-5 w-5" />,
-  },
-]
+// Icon mapping for features
+const featureIcons: Record<string, React.ReactNode> = {
+  [FeatureId.DASHBOARD]: <LayoutDashboard className="h-5 w-5" />,
+  [FeatureId.CATALOG]: <Music2 className="h-5 w-5" />,
+  [FeatureId.RELEASES]: <Calendar className="h-5 w-5" />,
+  [FeatureId.CONTENT]: <Edit3 className="h-5 w-5" />,
+  [FeatureId.INSIGHTS]: <BarChart2 className="h-5 w-5" />,
+  [FeatureId.SETTINGS]: <Settings className="h-5 w-5" />,
+  [FeatureId.HELP]: <HelpCircle className="h-5 w-5" />,
+  [FeatureId.GOD_MODE_ACCESS]: <Zap className="h-5 w-5" />,
+  [FeatureId.SCOUT_AGENT]: <Search className="h-5 w-5" />,
+  [FeatureId.LEGAL_AGENT]: <FileText className="h-5 w-5" />,
+  [FeatureId.METADATA_AGENT]: <Database className="h-5 w-5" />,
+  [FeatureId.FAN_AGENT]: <Users className="h-5 w-5" />,
+  [FeatureId.MARKETPLACE_AGENT]: <Store className="h-5 w-5" />,
+  [FeatureId.EDUCATION_AGENT]: <HelpCircle className="h-5 w-5" />,
+}
 
 // Simulation logs for agent activity
 const simulationLogs = [
@@ -432,8 +418,91 @@ export function SidebarWithChat() {
   const [isAgentWorking, setIsAgentWorking] = useState(false)
   const [currentLogs, setCurrentLogs] = useState<typeof simulationLogs>([])
   const [isClosing, setIsClosing] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const { unreadCount, setAgentActivity } = usePatchyStore()
   const logsContainerRef = useRef<HTMLDivElement>(null)
+  const { hasFeature, getAvailableFeatures } = usePermissions()
+
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // Generate sidebar items based on permissions
+  const getSidebarItems = (): SidebarItem[] => {
+    const items: SidebarItem[] = []
+    const availableFeatures = getAvailableFeatures()
+    
+    // Core features
+    const coreFeatures = [
+      FeatureId.DASHBOARD,
+      FeatureId.CATALOG,
+      FeatureId.RELEASES,
+      FeatureId.CONTENT,
+      FeatureId.INSIGHTS
+    ]
+    
+    coreFeatures.forEach(featureId => {
+      if (availableFeatures.includes(featureId)) {
+        const feature = FEATURE_CATALOG[featureId]
+        items.push({
+          title: feature.name,
+          href: feature.route!,
+          icon: featureIcons[featureId]
+        })
+      }
+    })
+    
+    // Agent features - grouped under submenu
+    const agentFeatures = availableFeatures.filter(f => 
+      FEATURE_CATALOG[f].type === 'agent'
+    )
+    
+    if (agentFeatures.length > 0) {
+      const agentSubmenu: SidebarItem = {
+        title: "Agents",
+        icon: <PlusCircle className="h-5 w-5" />,
+        submenu: agentFeatures.map(featureId => {
+          const feature = FEATURE_CATALOG[featureId]
+          return {
+            title: feature.name.replace(' Agent', ''),
+            href: feature.route!,
+            icon: featureIcons[featureId]
+          }
+        })
+      }
+      items.push(agentSubmenu)
+    }
+    
+    // God Mode (if available)
+    if (hasFeature(FeatureId.GOD_MODE_ACCESS)) {
+      const godModeFeature = FEATURE_CATALOG[FeatureId.GOD_MODE_ACCESS]
+      items.push({
+        title: godModeFeature.name,
+        href: godModeFeature.route!,
+        icon: featureIcons[FeatureId.GOD_MODE_ACCESS],
+        isGodMode: true
+      })
+    }
+    
+    // Settings and Help (always visible)
+    items.push({
+      title: "Settings",
+      href: "/dashboard/settings",
+      icon: <Settings className="h-5 w-5" />
+    })
+    
+    items.push({
+      title: "Help",
+      href: "/dashboard/help",
+      icon: <HelpCircle className="h-5 w-5" />
+    })
+    
+    return items
+  }
+  
+  // Only generate sidebar items after component is mounted to prevent hydration mismatch
+  const sidebarItems = isMounted ? getSidebarItems() : []
 
   // Set Agents submenu to open by default
   useEffect(() => {
@@ -833,7 +902,18 @@ export function SidebarWithChat() {
           {/* Navigation */}
           <div className="flex-1 overflow-y-auto py-4">
             <nav className="space-y-1 px-2">
-              {sidebarItems.map((item) => {
+              {!isMounted ? (
+                // Loading skeleton to prevent hydration mismatch
+                <div className="space-y-1">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="flex items-center rounded-md px-3 py-2">
+                      <div className="h-5 w-5 bg-muted animate-pulse rounded" />
+                      <div className="ml-3 h-4 w-20 bg-muted animate-pulse rounded" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                sidebarItems.map((item) => {
                 const isActive = item.href
                   ? pathname === item.href
                   : item.submenu?.some((subItem) => pathname === subItem.href)
@@ -887,7 +967,9 @@ export function SidebarWithChat() {
                         href={item.href!}
                         className={cn(
                           "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                          isActive
+                          item.isGodMode
+                            ? "text-amber-400 hover:bg-amber-400/10"
+                            : isActive
                             ? "bg-cosmic-teal/10 text-cosmic-teal"
                             : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         )}
@@ -898,7 +980,8 @@ export function SidebarWithChat() {
                     )}
                   </div>
                 )
-              })}
+              })
+              )}
             </nav>
           </div>
 

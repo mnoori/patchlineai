@@ -44,6 +44,9 @@ import { signOut } from "aws-amplify/auth"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { motion, AnimatePresence } from "framer-motion"
 import { usePathname } from "next/navigation"
+import { usePermissions } from "@/lib/permissions"
+import { getTierConfig } from "@/lib/tier-config"
+import { Badge } from "@/components/ui/badge"
 
 interface UserInfo {
   fullName: string
@@ -129,6 +132,7 @@ export function DashboardNavbar() {
   const { userId } = useCurrentUser()
   const [unreadNotifications, setUnreadNotifications] = useState(3)
   const pathname = usePathname()
+  const { user } = usePermissions()
 
   // Fetch user profile once we have a userId
   useEffect(() => {
@@ -323,6 +327,11 @@ export function DashboardNavbar() {
                       <div className="flex flex-col space-y-0.5">
                         <p className="text-sm font-medium leading-none">{userInfo.fullName}</p>
                         <p className="text-xs leading-none text-muted-foreground">{userInfo.email}</p>
+                        {user && (
+                          <Badge variant="secondary" className="mt-1 text-xs">
+                            {getTierConfig(user.tier).name} Plan
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -367,6 +376,20 @@ export function DashboardNavbar() {
                     <span>Documentation</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  {user && user.tier !== 'enterprise' && (
+                    <>
+                      <DropdownMenuItem
+                        asChild
+                        className="flex items-center gap-2 py-1.5 cursor-pointer bg-gradient-to-r from-cosmic-teal/20 to-purple-500/20 hover:from-cosmic-teal/30 hover:to-purple-500/30 focus:from-cosmic-teal/30 focus:to-purple-500/30"
+                      >
+                        <Link href="/dashboard/settings?tab=billing">
+                          <Zap className="mr-2 h-4 w-4 text-cosmic-teal" />
+                          <span className="font-medium">Upgrade Plan</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem
                     onClick={handleLogout}
                     className="flex items-center gap-2 py-1.5 cursor-pointer text-red-500 hover:bg-red-500/10 focus:bg-red-500/10"

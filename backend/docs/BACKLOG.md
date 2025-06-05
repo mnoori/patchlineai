@@ -2,6 +2,9 @@
 
 ## Current Priority Items
 
+- [ ] Implement Stripe integration for tier subscription management
+- [ ] Create backend persistence for user tiers in DynamoDB
+- [ ] Add Cognito custom attributes for tier information
 - [ ] Build a pipeline for generating custom content ideas based on user profile and activity
 - [ ] Improve Bedrock integration with better error handling and retry logic
 - [ ] Implement user-specific AWS Bedrock usage tracking and quota management
@@ -24,6 +27,18 @@
 - [ ] Add voice input/output capabilities to the chat interface
 - [ ] Build in-context learning for better personalized responses
 - [ ] Implement agent memory to remember user preferences and history
+
+## Tier System Implementation
+
+- [ ] Set up Stripe subscription products for each tier
+- [ ] Create webhook handler for Stripe subscription events
+- [ ] Add API endpoints for tier management (GET/PUT /api/user/tier)
+- [ ] Implement admin dashboard for managing user tiers
+- [ ] Create automated email notifications for tier changes
+- [ ] Add usage tracking for tier-specific limits (AI actions, seats, etc.)
+- [ ] Implement tier upgrade/downgrade flows with pro-rated billing
+- [ ] Add invoice generation and history in user dashboard
+- [ ] Create visual indicators for tier-restricted features
 
 ## User Experience Improvements
 
@@ -71,6 +86,13 @@
 
 ## Completed Items
 
+- [x] Implement tiered permission system for feature access
+- [x] Create tier configuration with CREATOR, ROSTER, ENTERPRISE, and GOD_MODE tiers
+- [x] Add client-side tier persistence with localStorage
+- [x] Implement upgrade flow UI with simulated payment process
+- [x] Build dev mode tier switcher for testing
+- [x] Fix tier reset issues with TierPersistence component
+- [x] Add God Mode activation for internal admin features
 - [x] Implement AWS Bedrock integration for AI content generation
 - [x] Create content idea carousel for content inspiration
 - [x] Update chat interface to use Bedrock models

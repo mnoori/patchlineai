@@ -1,68 +1,22 @@
+"use client"
+
 import Link from "next/link"
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
+import { TIER_CONFIGS, UserTier } from "@/lib/tier-config"
+import { Badge } from "@/components/ui/badge"
 
 export default function PricingPage() {
-  const plans = [
-    {
-      name: "Artist",
-      price: "$29",
-      period: "/month",
-      description: "Perfect for independent artists and small teams.",
-      features: [
-        "2 agents of your choice",
-        "1 team seat",
-        "Basic reports (PDF only)",
-        "Email support",
-        "1,000 tracks/month processing",
-      ],
-      cta: "Start Free Trial",
-      popular: false,
-    },
-    {
-      name: "Label",
-      price: "$199",
-      period: "/month",
-      description: "For labels and growing music businesses.",
-      features: [
-        "All agents",
-        "5 team seats",
-        "Advanced reports with exports",
-        "Priority support",
-        "10,000 tracks/month processing",
-        "API access",
-        "Custom integrations",
-      ],
-      cta: "Start Free Trial",
-      popular: true,
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      description: "For larger labels, distributors, and educational institutions.",
-      features: [
-        "All agents + custom development",
-        "Unlimited team seats",
-        "Custom reporting solutions",
-        "Dedicated support",
-        "Unlimited data processing",
-        "Priority API access",
-        "Custom integrations",
-        "SLA guarantees",
-        "Private deployment options",
-      ],
-      cta: "Contact Sales",
-      popular: false,
-    },
-  ]
+  // Filter out GOD_MODE from public pricing
+  const plans = Object.values(TIER_CONFIGS).filter(tier => tier.id !== UserTier.GOD_MODE)
 
   const addOns = [
     {
       name: "Additional Team Members",
-      price: "+$19/seat/mo",
-      description: "Add more users to your account",
+      price: "+$9/seat/mo",
+      description: "Add more users to your Roster account",
     },
     {
       name: "Premium Agents",
@@ -100,16 +54,16 @@ export default function PricingPage() {
         <section className="py-8">
           <div className="container">
             <div className="grid md:grid-cols-3 gap-6">
-              {plans.map((plan, index) => (
+              {plans.map((plan) => (
                 <div
-                  key={index}
+                  key={plan.id}
                   className={`glass-effect rounded-xl p-6 relative ${
-                    plan.popular
+                    plan.highlighted
                       ? "border-cosmic-teal/50 ring-1 ring-cosmic-teal/50"
                       : "border-border hover:border-cosmic-teal/30"
                   } transition-all duration-300`}
                 >
-                  {plan.popular && (
+                  {plan.highlighted && (
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-cosmic-teal px-3 py-1 rounded-full text-xs font-medium text-black">
                       Most Popular
                     </div>
@@ -117,28 +71,49 @@ export default function PricingPage() {
                   <div className="mb-4">
                     <h2 className="text-2xl font-bold mb-2 font-heading">{plan.name}</h2>
                     <div className="flex items-baseline mb-2">
-                      <span className="text-4xl font-bold">{plan.price}</span>
-                      {plan.period && <span className="text-muted-foreground ml-1">{plan.period}</span>}
+                      <span className="text-4xl font-bold">
+                        {plan.price.monthly === 0 ? "Free" : plan.price.monthly === 299 ? "Custom" : `$${plan.price.monthly}`}
+                      </span>
+                      {plan.price.monthly > 0 && plan.price.monthly !== 299 && (
+                        <span className="text-muted-foreground ml-1">/month</span>
+                      )}
                     </div>
-                    <p className="text-muted-foreground">{plan.description}</p>
+                    <p className="text-muted-foreground mb-3">{plan.tagline}</p>
+                    <p className="text-sm text-muted-foreground">{plan.description}</p>
                   </div>
+                  
+                  {/* Target Personas */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">IDEAL FOR:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {plan.personas.slice(0, 3).map((persona, i) => (
+                        <Badge key={i} variant="secondary" className="text-xs">
+                          {persona}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
                   <ul className="space-y-2 mb-6">
                     {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start">
                         <Check className="h-5 w-5 text-cosmic-teal mr-2 mt-0.5 shrink-0" />
-                        <span>{feature}</span>
+                        <span className="text-sm">{feature}</span>
                       </li>
                     ))}
                   </ul>
+                  
                   <Button
                     asChild
                     className={`w-full ${
-                      plan.popular
+                      plan.highlighted
                         ? "bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
                         : "bg-transparent border border-cosmic-teal text-cosmic-teal hover:bg-cosmic-teal/10"
                     }`}
                   >
-                    <Link href="/dashboard">{plan.cta}</Link>
+                    <Link href={plan.id === UserTier.ENTERPRISE ? "/contact" : "/dashboard"}>
+                      {plan.ctaText}
+                    </Link>
                   </Button>
                 </div>
               ))}

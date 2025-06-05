@@ -123,6 +123,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full"
+                  suppressHydrationWarning
                 />
               </div>
               <div className="space-y-2">
@@ -135,6 +136,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="w-full"
+                  suppressHydrationWarning
                 />
               </div>
               <Button
@@ -165,6 +167,7 @@ export default function LoginPage() {
                   onChange={(e) => setSignUpEmail(e.target.value)}
                   required
                   className="w-full"
+                  suppressHydrationWarning
                 />
               </div>
               <div className="space-y-2">
@@ -177,6 +180,7 @@ export default function LoginPage() {
                   onChange={(e) => setSignUpPassword(e.target.value)}
                   required
                   className="w-full"
+                  suppressHydrationWarning
                 />
               </div>
               <Button
