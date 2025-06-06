@@ -68,6 +68,12 @@ ENABLE_ANALYTICS=false
 # Mock services for development
 ENABLE_MOCK_SERVICES=true
 
+# ===== SOUNDCHARTS API CONFIGURATION =====
+# Soundcharts API credentials for Scout agent
+SOUNDCHARTS_APP_ID=PATCHLINE_A2F4F819
+SOUNDCHARTS_API_KEY=d8e39c775adc8797
+SOUNDCHARTS_API_URL=https://customer.api.soundcharts.com
+
 # ===== AWS AMPLIFY CONFIGURATION =====
 # These are automatically set by Amplify, but can be overridden for local development
 AWS_APP_ID=d40rmftf5h7p7

@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Filter, Download, BarChart2, Plus } from "lucide-react"
+import { Search, Filter, Download, BarChart2, Plus, RefreshCw, AlertCircle } from "lucide-react"
 import { AgentHeader } from "@/components/agents/agent-header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArtistDiscoveryList } from "@/components/agents/scout/artist-discovery-list"
@@ -11,154 +11,166 @@ import { WatchlistView } from "@/components/agents/scout/watchlist-view"
 import { AnalyticsView } from "@/components/agents/scout/analytics-view"
 import { ArtistDetailDrawer } from "@/components/agents/scout/artist-detail-drawer"
 import { handoff } from "@/lib/agent-bridge"
+import { soundchartsClient } from "@/lib/services/soundcharts-client"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { motion, AnimatePresence } from "framer-motion"
+import { useDebounce } from "@/hooks/use-debounce"
 
 export default function ScoutAgentPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedArtist, setSelectedArtist] = useState(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [pageBlurred, setPageBlurred] = useState(false)
+  
+  // Data states
+  const [artists, setArtists] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  
+  // Watchlist stored in localStorage
+  const [watchlist, setWatchlist] = useState<Set<string>>(new Set())
+  
+  // Debounced search term for API calls
+  const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
-  // Sample artists data
-  const [artists, setArtists] = useState([
-    {
-      id: "artist-1",
-      name: "Cosmic Waves",
-      track: "Nebula Dreams",
-      genre: "Electronic",
-      growthScore: 87,
-      matchScore: 92,
-      streams: "12.4K",
-      growth: "+156%",
-      image: "/electronic-artist-avatar.png",
-      playlistMatches: ["Late Night Vibes", "Electronic Essentials", "Future Beats"],
-      platforms: ["spotify", "tiktok", "soundcloud"],
-      aiSummary: "Viral on TikTok this week with 3 trending sounds",
-      isWatchlisted: false,
-      monthlyListeners: "5.2K",
-      topMarkets: ["US", "UK", "Germany"],
-      engagement: "High",
-      recentActivity: "Released 2 tracks in the last month",
-      similarArtists: ["Neon Pulse", "Electro Dreams", "Synth Collective"],
-      potentialRevenue: "$1.2K - $3.5K",
-      fanDemographics: {
-        age: "18-24 (65%), 25-34 (25%)",
-        gender: "Male (58%), Female (42%)",
-        locations: "New York, London, Berlin",
-      },
-    },
-    {
-      id: "artist-2",
-      name: "Luna Ray",
-      track: "Midnight Glow",
-      genre: "Indie Pop",
-      growthScore: 82,
-      matchScore: 88,
-      streams: "8.7K",
-      growth: "+124%",
-      image: "/indie-artist-avatar.png",
-      playlistMatches: ["Indie Discoveries", "Chill Vibes"],
-      platforms: ["spotify", "instagram"],
-      aiSummary: "Sound matches Astral Drift on your roster",
-      isWatchlisted: true,
-      monthlyListeners: "3.8K",
-      topMarkets: ["US", "Canada", "Australia"],
-      engagement: "Medium",
-      recentActivity: "Growing Instagram following (+28% this month)",
-      similarArtists: ["Astral Drift", "Indie Waves", "Lunar Echo"],
-      potentialRevenue: "$800 - $2.2K",
-      fanDemographics: {
-        age: "18-24 (45%), 25-34 (40%)",
-        gender: "Female (62%), Male (38%)",
-        locations: "Los Angeles, Toronto, Sydney",
-      },
-    },
-    {
-      id: "artist-3",
-      name: "The Echoes",
-      track: "Distant Memories",
-      genre: "Alternative",
-      growthScore: 79,
-      matchScore: 85,
-      streams: "15.2K",
-      growth: "+98%",
-      image: "/alternative-band-avatar.png",
-      playlistMatches: ["Alternative Hits", "New Rock"],
-      platforms: ["spotify", "youtube", "bandcamp"],
-      aiSummary: "Strong audience overlap with your top artists",
-      isWatchlisted: false,
-      monthlyListeners: "7.5K",
-      topMarkets: ["US", "UK", "Japan"],
-      engagement: "Medium-High",
-      recentActivity: "YouTube views up 45% after latest video",
-      similarArtists: ["Echo Chamber", "The Resonance", "Sound Waves"],
-      potentialRevenue: "$1.5K - $4K",
-      fanDemographics: {
-        age: "18-24 (35%), 25-34 (45%)",
-        gender: "Male (55%), Female (45%)",
-        locations: "Chicago, Manchester, Tokyo",
-      },
-    },
-    {
-      id: "artist-4",
-      name: "Metro Beats",
-      track: "Urban Jungle",
-      genre: "Hip Hop",
-      growthScore: 76,
-      matchScore: 81,
-      streams: "22.8K",
-      growth: "+87%",
-      image: "/hip-hop-producer-avatar.png",
-      playlistMatches: ["Hip Hop Essentials"],
-      platforms: ["spotify", "soundcloud", "tiktok"],
-      aiSummary: "Rapidly growing in NYC streaming market",
-      isWatchlisted: false,
-      monthlyListeners: "10.2K",
-      topMarkets: ["US", "Canada", "France"],
-      engagement: "High",
-      recentActivity: "Trending on TikTok with latest single",
-      similarArtists: ["Urban Flow", "City Rhythm", "Beat Master"],
-      potentialRevenue: "$2K - $5.5K",
-      fanDemographics: {
-        age: "18-24 (55%), 25-34 (35%)",
-        gender: "Male (65%), Female (35%)",
-        locations: "New York, Toronto, Paris",
-      },
-    },
-    {
-      id: "artist-5",
-      name: "Skyline Collective",
-      track: "Higher Ground",
-      genre: "House",
-      growthScore: 74,
-      matchScore: 79,
-      streams: "9.3K",
-      growth: "+112%",
-      image: "/house-dj-avatar.png",
-      playlistMatches: ["House Party", "EDM Workout"],
-      platforms: ["spotify", "beatport", "instagram"],
-      aiSummary: "Featured in 3 influential DJ sets this month",
-      isWatchlisted: false,
-      monthlyListeners: "4.7K",
-      topMarkets: ["US", "UK", "Germany", "Netherlands"],
-      engagement: "Medium",
-      recentActivity: "Released EP on Beatport, reached Top 10 in House",
-      similarArtists: ["Sky High", "House Nation", "Elevation"],
-      potentialRevenue: "$1K - $3K",
-      fanDemographics: {
-        age: "18-24 (40%), 25-34 (45%)",
-        gender: "Male (60%), Female (40%)",
-        locations: "Miami, London, Berlin, Amsterdam",
-      },
-    },
-  ])
+  // Load watchlist from localStorage
+  useEffect(() => {
+    const savedWatchlist = localStorage.getItem('scout-watchlist')
+    if (savedWatchlist) {
+      setWatchlist(new Set(JSON.parse(savedWatchlist)))
+    }
+  }, [])
 
-  const handleWatchlistToggle = (artistId) => {
+  // Save watchlist to localStorage
+  useEffect(() => {
+    localStorage.setItem('scout-watchlist', JSON.stringify(Array.from(watchlist)))
+  }, [watchlist])
+
+  // Fetch trending artists
+  const fetchTrendingArtists = useCallback(async () => {
+    try {
+      setError(null)
+      
+      const response = await soundchartsClient.getTrendingArtists({
+        limit: 20,
+        sort: {
+          platform: 'spotify',
+          metricType: 'followers',
+          period: 'month',
+          sortBy: 'volume',
+          order: 'desc'
+        },
+        filters: [
+          {
+            type: 'careerStage',
+            data: {
+              values: ['emerging', 'mid_level'],
+              operator: 'in'
+            }
+          }
+        ]
+      })
+
+      // Fetch detailed stats for each artist
+      const artistsWithStats = await Promise.all(
+        response.items.slice(0, 10).map(async (item) => {
+          try {
+            const { artist, stats, playlists } = await soundchartsClient.getArtistWithStats(item.artist.uuid)
+            const formatted = soundchartsClient.formatArtistForScout(artist, stats, playlists)
+            return {
+              ...formatted,
+              isWatchlisted: watchlist.has(artist.uuid)
+            }
+          } catch (error) {
+            console.error(`Failed to fetch details for artist ${item.artist.name}:`, error)
+            // Return basic info if detailed fetch fails
+            return soundchartsClient.formatArtistForScout(item.artist)
+          }
+        })
+      )
+
+      setArtists(artistsWithStats)
+    } catch (error) {
+      console.error('Failed to fetch trending artists:', error)
+      setError('Failed to load trending artists. Please try again later.')
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [watchlist])
+
+  // Search artists
+  const searchArtists = useCallback(async (query: string) => {
+    if (!query) {
+      fetchTrendingArtists()
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const response = await soundchartsClient.searchArtists(query, 10)
+      
+      // Fetch detailed stats for search results
+      const artistsWithStats = await Promise.all(
+        response.items.map(async (artist) => {
+          try {
+            const { stats, playlists } = await soundchartsClient.getArtistWithStats(artist.uuid)
+            const formatted = soundchartsClient.formatArtistForScout(artist, stats, playlists)
+            return {
+              ...formatted,
+              isWatchlisted: watchlist.has(artist.uuid)
+            }
+          } catch (error) {
+            console.error(`Failed to fetch details for artist ${artist.name}:`, error)
+            return soundchartsClient.formatArtistForScout(artist)
+          }
+        })
+      )
+
+      setArtists(artistsWithStats)
+    } catch (error) {
+      console.error('Failed to search artists:', error)
+      setError('Failed to search artists. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }, [watchlist])
+
+  // Initial load
+  useEffect(() => {
+    fetchTrendingArtists()
+  }, [fetchTrendingArtists])
+
+  // Search effect
+  useEffect(() => {
+    searchArtists(debouncedSearchTerm)
+  }, [debouncedSearchTerm, searchArtists])
+
+  const handleWatchlistToggle = (artistId: string) => {
+    setWatchlist((prev) => {
+      const newWatchlist = new Set(prev)
+      if (newWatchlist.has(artistId)) {
+        newWatchlist.delete(artistId)
+      } else {
+        newWatchlist.add(artistId)
+      }
+      return newWatchlist
+    })
+    
     setArtists((prev) =>
-      prev.map((artist) => (artist.id === artistId ? { ...artist, isWatchlisted: !artist.isWatchlisted } : artist)),
+      prev.map((artist) => 
+        artist.id === artistId 
+          ? { ...artist, isWatchlisted: !artist.isWatchlisted } 
+          : artist
+      )
     )
   }
 
-  const handleArtistClick = (artist) => {
+  const handleArtistClick = (artist: any) => {
     setSelectedArtist(artist)
     setDrawerOpen(true)
     setPageBlurred(true)
@@ -169,7 +181,7 @@ export default function ScoutAgentPage() {
     setPageBlurred(false)
   }
 
-  const handlePitchToPlaylists = (artist) => {
+  const handlePitchToPlaylists = (artist: any) => {
     handoff("Scout", "Fan", {
       action: "playlist_pitch",
       trackIds: [artist.id],
@@ -178,19 +190,26 @@ export default function ScoutAgentPage() {
     })
   }
 
-  const handleDraftEmail = (artist) => {
+  const handleDraftEmail = (artist: any) => {
     handoff("Scout", "Patchy", {
       action: "draft_email",
       artist: artist,
     })
   }
 
+  const handleRefresh = () => {
+    setRefreshing(true)
+    fetchTrendingArtists()
+  }
+
+  const watchlistedArtists = artists.filter((artist) => artist.isWatchlisted)
+
   return (
     <div className={`space-y-6 transition-all duration-300 ${pageBlurred ? "blur-[2px] brightness-[0.96]" : ""}`}>
       <AgentHeader
         agentName="Scout"
         title="Scout Agent"
-        description="Discover promising unsigned talent based on growth metrics, sound profile, and genre match."
+        description="Discover promising unsigned talent with real-time data from Soundcharts."
       />
 
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
@@ -198,13 +217,24 @@ export default function ScoutAgentPage() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search artists, tracks, or genres..."
+            placeholder="Search artists by name..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            disabled={loading && !refreshing}
           />
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-1"
+            onClick={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} /> 
+            Refresh
+          </Button>
           <Button variant="outline" size="sm" className="gap-1">
             <Filter className="h-4 w-4" /> Filters
           </Button>
@@ -220,13 +250,27 @@ export default function ScoutAgentPage() {
         </div>
       </div>
 
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+        >
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
+
       <Tabs defaultValue="discovery" className="w-full">
         <TabsList className="w-full justify-start mb-6 bg-background/5 p-1">
           <TabsTrigger value="discovery" className="flex-1 max-w-[200px]">
             Discovery
           </TabsTrigger>
           <TabsTrigger value="watchlist" className="flex-1 max-w-[200px]">
-            Watchlist
+            Watchlist ({watchlistedArtists.length})
           </TabsTrigger>
           <TabsTrigger value="analytics" className="flex-1 max-w-[200px]">
             Analytics
@@ -234,18 +278,43 @@ export default function ScoutAgentPage() {
         </TabsList>
 
         <TabsContent value="discovery" className="mt-0">
-          <ArtistDiscoveryList
-            artists={artists}
-            onWatchlistToggle={handleWatchlistToggle}
-            onArtistClick={handleArtistClick}
-            onPitchToPlaylists={handlePitchToPlaylists}
-            onDraftEmail={handleDraftEmail}
-          />
+          {loading && !refreshing ? (
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center space-x-4 p-4">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                  <Skeleton className="h-8 w-24" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key="artist-list"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ArtistDiscoveryList
+                  artists={artists}
+                  onWatchlistToggle={handleWatchlistToggle}
+                  onArtistClick={handleArtistClick}
+                  onPitchToPlaylists={handlePitchToPlaylists}
+                  onDraftEmail={handleDraftEmail}
+                />
+              </motion.div>
+            </AnimatePresence>
+          )}
         </TabsContent>
 
         <TabsContent value="watchlist" className="mt-0">
           <WatchlistView
-            artists={artists.filter((artist) => artist.isWatchlisted)}
+            artists={watchlistedArtists}
             onWatchlistToggle={handleWatchlistToggle}
             onArtistClick={handleArtistClick}
           />
