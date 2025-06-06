@@ -14,18 +14,22 @@ export interface SoundchartsArtist {
   name: string
   type: 'person' | 'group' | 'other'
   gender?: string
-  country?: string
-  genres: string[]
+  countryCode?: string
+  genres?: Array<{
+    root: string
+    sub: string[]
+  }>
   subGenres?: string[]
   careerStage?: 'emerging' | 'mid_level' | 'mainstream' | 'superstar'
   birthDate?: string
-  image?: {
-    small?: string
-    medium?: string
-    large?: string
-  }
+  imageUrl?: string
   isrcCount?: number
   latestReleaseDate?: string
+  slug?: string
+  appUrl?: string
+  biography?: string
+  isni?: string
+  ipi?: string
 }
 
 export interface ArtistStats {
@@ -254,9 +258,9 @@ class SoundchartsService {
     return {
       id: artist.uuid,
       name: artist.name,
-      genre: artist.genres[0] || 'Unknown',
-      genres: artist.genres,
-      image: artist.image?.medium || artist.image?.small || '/placeholder.svg',
+      genre: (artist.genres && artist.genres.length > 0) ? artist.genres[0].root : 'Unknown',
+      genres: artist.genres?.map(g => g.root) || [],
+      image: artist.imageUrl || '/placeholder.svg',
       growthScore: stats?.score?.growth || 0,
       matchScore: stats?.score?.soundcharts || 0,
       streams: spotifyListeners?.value ? 
@@ -266,7 +270,7 @@ class SoundchartsService {
       monthlyListeners: spotifyListeners?.value ? 
         this.formatNumber(spotifyListeners.value) : 'N/A',
       careerStage: artist.careerStage,
-      country: artist.country,
+      country: artist.countryCode,
     }
   }
 

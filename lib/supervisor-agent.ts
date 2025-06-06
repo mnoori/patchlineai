@@ -156,11 +156,26 @@ export class SupervisorAgent {
           let agentResponse = ''
           
           if (response.completion) {
-            for await (const chunk of response.completion) {
-              if (chunk.chunk?.bytes) {
-                agentResponse += new TextDecoder().decode(chunk.chunk.bytes)
+            try {
+              for await (const chunk of response.completion) {
+                if (chunk.chunk?.bytes) {
+                  agentResponse += new TextDecoder().decode(chunk.chunk.bytes)
+                }
+              }
+            } catch (streamError) {
+              console.error('Error reading completion stream:', streamError)
+              // Fallback to any available response data
+              if (response.output?.text) {
+                agentResponse = response.output.text
+              } else {
+                throw new Error('Failed to read agent response')
               }
             }
+          } else if (response.output?.text) {
+            // Fallback if completion stream is not available
+            agentResponse = response.output.text
+          } else {
+            throw new Error('No response from Gmail agent')
           }
           
           // Extract email metadata for traces
@@ -192,6 +207,13 @@ export class SupervisorAgent {
           
         } catch (error) {
           this.addTrace('Gmail Agent failed', 'error', 'Gmail Agent', error instanceof Error ? error.message : 'Unknown error')
+          
+          // Handle specific AWS errors
+          if (error.name === 'DependencyFailedException' || error.$fault === 'client') {
+            console.error('AWS Agent dependency error:', error)
+            return 'The Gmail agent is temporarily unavailable. Please try again in a moment.'
+          }
+          
           throw error
         }
       }
@@ -232,11 +254,20 @@ export class SupervisorAgent {
           let agentResponse = ''
           
           if (response.completion) {
-            for await (const chunk of response.completion) {
-              if (chunk.chunk?.bytes) {
-                agentResponse += new TextDecoder().decode(chunk.chunk.bytes)
+            try {
+              for await (const chunk of response.completion) {
+                if (chunk.chunk?.bytes) {
+                  agentResponse += new TextDecoder().decode(chunk.chunk.bytes)
+                }
               }
+            } catch (streamError) {
+              console.error('Error reading completion stream:', streamError)
+              // Fallback to any available response data
+              throw new Error('Failed to read agent response')
             }
+          } else {
+            // No completion stream available
+            throw new Error('No response from Legal agent')
           }
           
           // Record team->supervisor response
@@ -259,6 +290,13 @@ export class SupervisorAgent {
           
         } catch (error) {
           this.addTrace('Legal Agent failed', 'error', 'Legal Agent', error instanceof Error ? error.message : 'Unknown error')
+          
+          // Handle specific AWS errors
+          if (error.name === 'DependencyFailedException' || error.$fault === 'client') {
+            console.error('AWS Agent dependency error:', error)
+            return 'The Legal agent is temporarily unavailable. Please try again in a moment.'
+          }
+          
           throw error
         }
       }
