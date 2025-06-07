@@ -1,0 +1,223 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Scout Agent Actions API",
+    "version": "1.0.0",
+    "description": "API for Scout Agent to discover and analyze artists using Soundcharts data"
+  },
+  "paths": {
+    "/search-artists": {
+      "post": {
+        "summary": "Search for artists",
+        "description": "Search for artists by name, genre, location, or career stage",
+        "operationId": "searchArtists",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Artist name or search term"
+                  },
+                  "genre": {
+                    "type": "string",
+                    "description": "Filter by genre (optional)"
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "Filter by location/country (optional)"
+                  },
+                  "career_stage": {
+                    "type": "string",
+                    "description": "Filter by career stage: emerging, mid_level, superstar (optional)"
+                  }
+                },
+                "required": ["query"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "artists": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {"type": "string"},
+                          "name": {"type": "string"},
+                          "slug": {"type": "string"},
+                          "image_url": {"type": "string"},
+                          "app_url": {"type": "string"}
+                        }
+                      }
+                    },
+                    "total": {"type": "integer"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-artist-details": {
+      "post": {
+        "summary": "Get artist details",
+        "description": "Get comprehensive information about a specific artist",
+        "operationId": "getArtistDetails",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "artist_id": {
+                    "type": "string",
+                    "description": "Soundcharts artist UUID"
+                  }
+                },
+                "required": ["artist_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "string"},
+                    "name": {"type": "string"},
+                    "slug": {"type": "string"},
+                    "image_url": {"type": "string"},
+                    "country_code": {"type": "string"},
+                    "genres": {"type": "array"},
+                    "biography": {"type": "string"},
+                    "career_stage": {"type": "string"},
+                    "gender": {"type": "string"},
+                    "birth_date": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-artist-stats": {
+      "post": {
+        "summary": "Get artist statistics",
+        "description": "Get streaming and social media statistics for an artist",
+        "operationId": "getArtistStats",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "artist_id": {
+                    "type": "string",
+                    "description": "Soundcharts artist UUID"
+                  },
+                  "platform": {
+                    "type": "string",
+                    "description": "Platform: spotify, tiktok, instagram, youtube",
+                    "default": "spotify"
+                  }
+                },
+                "required": ["artist_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/track-artist": {
+      "post": {
+        "summary": "Track an artist",
+        "description": "Add an artist to the watchlist for ongoing monitoring",
+        "operationId": "trackArtist",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "artist_id": {
+                    "type": "string",
+                    "description": "Soundcharts artist UUID"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "description": "Optional notes about why tracking this artist"
+                  }
+                },
+                "required": ["artist_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/generate-report": {
+      "post": {
+        "summary": "Generate artist report",
+        "description": "Create a comprehensive scouting report for an artist",
+        "operationId": "generateReport",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "artist_id": {
+                    "type": "string",
+                    "description": "Soundcharts artist UUID"
+                  },
+                  "report_type": {
+                    "type": "string",
+                    "description": "Type of report: quick, detailed, investment",
+                    "default": "quick"
+                  }
+                },
+                "required": ["artist_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    }
+  }
+} 

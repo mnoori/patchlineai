@@ -66,8 +66,14 @@ export class SupervisorAgent {
   private description: string
   private memory: ChatMemory
   private teamTools: AgentTool[]
-  private traces: AgentTrace[]
+  private traces: AgentTrace[] = []
+  private userSupervisorMemory: Array<{ role: string; content: string }> = []
+  private supervisorTeamMemory: Record<string, Array<{ role: string; content: string }>> = {}
+  private combinedMemory: Array<{ role: string; content: string; agent?: string }> = []
   
+  // Callback for real-time trace updates
+  public onTrace?: (trace: AgentTrace) => void
+
   constructor() {
     this.name = "Patchline Supervisor"
     this.description = "Coordinates Gmail and Legal agents for music industry professionals"
@@ -79,7 +85,6 @@ export class SupervisorAgent {
       },
       combinedMemory: []
     }
-    this.traces = []
     
     // Initialize team members as tools
     this.teamTools = [
@@ -89,31 +94,75 @@ export class SupervisorAgent {
     ]
   }
 
-  // Add trace helper
-  private addTrace(action: string, status: AgentTrace['status'], agent?: string, details?: string, emailData?: AgentTrace['emailData']) {
-    this.traces.push({
-      timestamp: new Date().toISOString(),
-      action,
-      status,
-      agent,
-      details,
-      emailData
-    })
+  private addTrace(trace: AgentTrace) {
+    this.traces.push(trace)
+    // Call the callback if set
+    if (this.onTrace) {
+      this.onTrace(trace)
+    }
   }
 
   // Extract email metadata from Gmail response
   private extractEmailMetadata(gmailResponse: string): AgentTrace['emailData'] | undefined {
     try {
-      // Look for email patterns in the response
-      const subjectMatch = gmailResponse.match(/Subject:\s*(.+?)(?:\n|$)/i)
-      const fromMatch = gmailResponse.match(/From:\s*(.+?)(?:\n|$)/i)
-      const dateMatch = gmailResponse.match(/Date:\s*(.+?)(?:\n|$)/i)
+      // Look for various email patterns in the response
+      // Pattern 1: Standard email headers
+      const subjectMatch = gmailResponse.match(/Subject:\s*(.+?)(?:\n|$)/i) || 
+                          gmailResponse.match(/subject[:\s]+["']?(.+?)["']?(?:\n|,|$)/i)
+      const fromMatch = gmailResponse.match(/From:\s*(.+?)(?:\n|$)/i) || 
+                       gmailResponse.match(/from[:\s]+["']?(.+?)["']?(?:\n|,|$)/i) ||
+                       gmailResponse.match(/sender[:\s]+["']?(.+?)["']?(?:\n|,|$)/i)
+      const dateMatch = gmailResponse.match(/Date:\s*(.+?)(?:\n|$)/i) || 
+                       gmailResponse.match(/date[:\s]+["']?(.+?)["']?(?:\n|,|$)/i) ||
+                       gmailResponse.match(/sent[:\s]+["']?(.+?)["']?(?:\n|,|$)/i)
+      
+      // Pattern 2: Look for email structure in JSON-like format
+      if (!subjectMatch && !fromMatch) {
+        // Try to find email data in structured format
+        const emailMatch = gmailResponse.match(/email[^{]*{([^}]+)}/i)
+        if (emailMatch) {
+          const emailContent = emailMatch[1]
+          const subjectInContent = emailContent.match(/subject[:\s]+["']?([^"',]+)["']?/i)
+          const fromInContent = emailContent.match(/from[:\s]+["']?([^"',]+)["']?/i)
+          const dateInContent = emailContent.match(/date[:\s]+["']?([^"',]+)["']?/i)
+          
+          if (subjectInContent || fromInContent || dateInContent) {
+            return {
+              subject: subjectInContent?.[1]?.trim(),
+              from: fromInContent?.[1]?.trim(),
+              date: dateInContent?.[1]?.trim()
+            }
+          }
+        }
+      }
+      
+      // Pattern 3: Look for contract-specific patterns
+      if (!subjectMatch) {
+        const contractMatch = gmailResponse.match(/(?:contract|agreement|deal)(?:\s+(?:for|with|from))?\s+["']?([^"'\n]+?)["']?(?:\s+from\s+([^"'\n]+?))?/i)
+        if (contractMatch) {
+          return {
+            subject: contractMatch[1]?.trim() || 'Contract/Agreement',
+            from: contractMatch[2]?.trim() || fromMatch?.[1]?.trim(),
+            date: dateMatch?.[1]?.trim()
+          }
+        }
+      }
       
       if (subjectMatch || fromMatch || dateMatch) {
         return {
           subject: subjectMatch?.[1]?.trim(),
           from: fromMatch?.[1]?.trim(),
           date: dateMatch?.[1]?.trim()
+        }
+      }
+      
+      // Pattern 4: Last resort - look for any email-like content
+      const anyEmailPattern = gmailResponse.match(/(?:email|message|correspondence).*?(?:from|by)\s+([^\s,]+(?:\s+[^\s,]+)?)/i)
+      if (anyEmailPattern) {
+        return {
+          subject: 'Email correspondence',
+          from: anyEmailPattern[1]?.trim(),
+          date: 'Recent'
         }
       }
     } catch (error) {
@@ -135,7 +184,13 @@ export class SupervisorAgent {
       },
       required: ['message'],
       func: async (message: string) => {
-        this.addTrace('Delegating to Gmail Agent', 'delegating', 'Gmail Agent', 'Searching and reading emails...')
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Delegating to Gmail Agent',
+          status: 'delegating',
+          agent: 'Gmail Agent',
+          details: 'Searching and reading emails...'
+        })
         
         // Record supervisor->team communication
         this.memory.supervisorTeamMemory['Gmail Agent'].push({
@@ -152,8 +207,24 @@ export class SupervisorAgent {
             inputText: message,
           })
           
+          this.addTrace({
+            timestamp: new Date().toISOString(),
+            action: 'Connecting to Gmail...',
+            status: 'info',
+            agent: 'Gmail Agent',
+            details: 'Establishing secure connection to your inbox'
+          })
+          
           const response = await agentRuntime.send(command)
           let agentResponse = ''
+          
+          this.addTrace({
+            timestamp: new Date().toISOString(),
+            action: 'Searching emails...',
+            status: 'info',
+            agent: 'Gmail Agent',
+            details: 'Scanning your inbox for relevant messages'
+          })
           
           if (response.completion) {
             try {
@@ -195,18 +266,25 @@ export class SupervisorAgent {
           })
           
           // Add success trace with email metadata
-          this.addTrace(
-            'Gmail Agent completed', 
-            'success', 
-            'Gmail Agent', 
-            emailData ? `Found email: "${emailData.subject}"` : 'Email search completed',
-            emailData
-          )
+          this.addTrace({
+            timestamp: new Date().toISOString(),
+            action: 'Gmail Agent completed',
+            status: 'success',
+            agent: 'Gmail Agent',
+            details: emailData?.subject ? `Found email: "${emailData.subject}"` : emailData?.from ? `Found email from ${emailData.from}` : 'Email search completed',
+            emailData: emailData || undefined
+          })
           
           return agentResponse
           
         } catch (error) {
-          this.addTrace('Gmail Agent failed', 'error', 'Gmail Agent', error instanceof Error ? error.message : 'Unknown error')
+          this.addTrace({
+            timestamp: new Date().toISOString(),
+            action: 'Gmail Agent failed',
+            status: 'error',
+            agent: 'Gmail Agent',
+            details: error instanceof Error ? error.message : 'Unknown error'
+          })
           
           // Handle specific AWS errors
           if (error.name === 'DependencyFailedException' || error.$fault === 'client') {
@@ -233,7 +311,13 @@ export class SupervisorAgent {
       },
       required: ['message'],
       func: async (message: string) => {
-        this.addTrace('Delegating to Legal Agent', 'delegating', 'Legal Agent', 'Analyzing contract terms and legal implications...')
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Delegating to Legal Agent',
+          status: 'delegating',
+          agent: 'Legal Agent',
+          details: 'Analyzing contract terms and legal implications...'
+        })
         
         // Record supervisor->team communication
         this.memory.supervisorTeamMemory['Legal Agent'].push({
@@ -284,12 +368,24 @@ export class SupervisorAgent {
           })
           
           // Add success trace
-          this.addTrace('Legal Agent completed', 'success', 'Legal Agent', 'Contract analysis and risk assessment completed')
+          this.addTrace({
+            timestamp: new Date().toISOString(),
+            action: 'Legal Agent completed',
+            status: 'success',
+            agent: 'Legal Agent',
+            details: 'Contract analysis and risk assessment completed'
+          })
           
           return agentResponse
           
         } catch (error) {
-          this.addTrace('Legal Agent failed', 'error', 'Legal Agent', error instanceof Error ? error.message : 'Unknown error')
+          this.addTrace({
+            timestamp: new Date().toISOString(),
+            action: 'Legal Agent failed',
+            status: 'error',
+            agent: 'Legal Agent',
+            details: error instanceof Error ? error.message : 'Unknown error'
+          })
           
           // Handle specific AWS errors
           if (error.name === 'DependencyFailedException' || error.$fault === 'client') {
@@ -330,7 +426,13 @@ export class SupervisorAgent {
       },
       required: ['messages'],
       func: async (messages: Array<{recipient: string; content: string}>) => {
-        this.addTrace('Parallel agent execution', 'delegating', 'Multiple Agents', `Coordinating ${messages.length} agents simultaneously`)
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Parallel agent execution',
+          status: 'delegating',
+          agent: 'Multiple Agents',
+          details: `Coordinating ${messages.length} agents simultaneously`
+        })
         
         const results = await Promise.all(
           messages.map(async (msg) => {
@@ -350,7 +452,13 @@ export class SupervisorAgent {
         )
         
         const validResults = results.filter(r => r !== null)
-        this.addTrace('Parallel execution completed', 'success', 'Multiple Agents', `${validResults.length} agents completed successfully`)
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Parallel execution completed',
+          status: 'success',
+          agent: 'Multiple Agents',
+          details: `${validResults.length} agents completed successfully`
+        })
         
         return validResults
       }
@@ -362,7 +470,12 @@ export class SupervisorAgent {
     // Clear previous traces for new request
     this.traces = []
     
-    this.addTrace('Request analysis started', 'info', undefined, 'Supervisor analyzing user request and planning workflow')
+    this.addTrace({
+      timestamp: new Date().toISOString(),
+      action: 'Request analysis started',
+      status: 'info',
+      details: 'Supervisor analyzing user request and planning workflow'
+    })
     
     // Add user message to memory
     this.memory.userSupervisorMemory.push({
@@ -430,24 +543,145 @@ User Query: ${userInput}`;
       // Process Nova model response
       const content = responseBody?.output?.message?.content?.[0]?.text || "I could not understand your request."
       
-      this.addTrace('Workflow planning completed', 'success', undefined, 'Email search → Contract extraction → Legal analysis')
+      this.addTrace({
+        timestamp: new Date().toISOString(),
+        action: 'Workflow planning completed',
+        status: 'success',
+        details: 'Analyzing request and determining appropriate agents'
+      })
       
-      // STEP 1: Ask Gmail agent to find the contract email
-      const gmailPrompt = `Search my emails for the most recent contract or legal agreement from ${userInput.includes('Mehdi') ? 'Mehdi' : 'anyone'}.
-Look for emails containing: contract, agreement, terms, license, distribution, publishing, royalty, payment terms.
-Please provide the full email content including the contract text.`
+      // Simple intent routing based on user input
+      const lowerInput = userInput.toLowerCase()
+      
+      // Check if user is asking about contracts/agreements that might be in emails
+      if ((lowerInput.includes('contract') || lowerInput.includes('agreement')) && 
+          (lowerInput.includes('send') || lowerInput.includes('sent') || lowerInput.includes('email') || 
+           lowerInput.includes('mehdi') || lowerInput.includes('ael') || lowerInput.includes('from'))) {
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Multi-agent workflow',
+          status: 'info',
+          details: 'Contract search workflow initiated - checking emails first'
+        })
+        
+        // STEP 1: Ask Gmail agent to find the contract email
+        const gmailPrompt = userInput.includes('mehdi') 
+          ? `Search for emails from Mehdi containing contracts, agreements, or legal documents. Include the full email content.`
+          : userInput.includes('ael')
+          ? `Search for emails from Ael containing contracts, agreements, or legal documents. Include the full email content.`
+          : `Search my emails for contracts or legal agreements based on this query: ${userInput}. Include the full email content.`
+        
+        const gmailResponse = await this.teamTools[0].func(gmailPrompt)
+        
+        if (!gmailResponse || gmailResponse.trim() === '' || gmailResponse.includes('no emails found') || gmailResponse.includes('could not find')) {
+          const noEmailMsg = `I searched for emails matching your query but couldn't find any contracts or agreements${userInput.includes('mehdi') ? ' from Mehdi' : userInput.includes('ael') ? ' from Ael' : ''}. Please check if the sender name is correct or try a different search term.`
+          this.memory.userSupervisorMemory.push({ role: 'assistant', content: noEmailMsg })
+          this.addTrace({
+            timestamp: new Date().toISOString(),
+            action: 'Workflow completed',
+            status: 'error',
+            details: 'No contract emails found'
+          })
+          return noEmailMsg
+        }
+        
+        // STEP 2: Pass the email content to Legal agent for analysis
+        const legalPrompt = `Please analyze the following email content and provide a concise assessment in 50 words focusing on:
+- Risk level (LOW/MODERATE/HIGH)
+- Key terms (compensation, rights, obligations)
+- Any red flags or concerns
+- Recommended action
 
-      const gmailResponse = await this.teamTools[0].func(gmailPrompt)
-
-      if (!gmailResponse || gmailResponse.trim() === '') {
-        const noEmailMsg = 'I could not find any relevant contract emails.'
-        this.memory.userSupervisorMemory.push({ role: 'assistant', content: noEmailMsg })
-        this.addTrace('Workflow completed', 'error', undefined, 'No contract emails found')
-        return noEmailMsg
+EMAIL CONTENT:
+${gmailResponse}`
+        
+        const legalResponse = await this.teamTools[1].func(legalPrompt)
+        
+        // Extract email metadata for preview
+        const emailData = this.extractEmailMetadata(gmailResponse)
+        
+        // Combine results with email preview
+        let combined = `# Contract Analysis Report\n\n`
+        
+        if (emailData) {
+          combined += `## Email Found\n`
+          combined += `**From:** ${emailData.from || 'Unknown'}\n`
+          combined += `**Subject:** ${emailData.subject || 'No subject'}\n`
+          combined += `**Date:** ${emailData.date || 'Unknown date'}\n\n`
+        }
+        
+        combined += `## Legal Assessment (50 words)\n${legalResponse}`
+        
+        this.memory.userSupervisorMemory.push({ role: 'assistant', content: combined })
+        
+        // Add final trace with email data
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Workflow completed successfully',
+          status: 'success',
+          details: 'Contract found and analyzed',
+          emailData: emailData || undefined
+        })
+        
+        return combined
       }
-
-      // STEP 2: Pass the raw email content directly to Legal agent
-      const legalPrompt = `Please analyze the following email content for any contracts or legal agreements. 
+      
+      // Check if it's purely an email query (no contract/legal terms)
+      if ((lowerInput.includes('email') || lowerInput.includes('gmail') || lowerInput.includes('sent') || lowerInput.includes('received')) 
+          && !lowerInput.includes('contract') && !lowerInput.includes('agreement') && !lowerInput.includes('legal')) {
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Routing to Gmail Agent',
+          status: 'info',
+          details: 'Email-only query detected'
+        })
+        const gmailResponse = await this.teamTools[0].func(userInput)
+        this.memory.userSupervisorMemory.push({ role: 'assistant', content: gmailResponse })
+        return gmailResponse
+      }
+      
+      // Check if it's purely a legal query (no email context)
+      if ((lowerInput.includes('contract') || lowerInput.includes('agreement') || lowerInput.includes('legal') || lowerInput.includes('terms'))
+          && !lowerInput.includes('email') && !lowerInput.includes('gmail') && !lowerInput.includes('sent') && !lowerInput.includes('from')) {
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Routing to Legal Agent',
+          status: 'info',
+          details: 'Legal-only query detected'
+        })
+        const legalResponse = await this.teamTools[1].func(userInput)
+        this.memory.userSupervisorMemory.push({ role: 'assistant', content: legalResponse })
+        return legalResponse
+      }
+      
+      // For any other contract/agreement queries, use the multi-agent workflow
+      if (lowerInput.includes('contract') || lowerInput.includes('agreement')) {
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Multi-agent workflow',
+          status: 'info',
+          details: 'Contract analysis workflow initiated'
+        })
+        
+        // STEP 1: Ask Gmail agent to find the contract email
+        const gmailPrompt = `Search my emails for the most recent contract or legal agreement. Look for emails containing: contract, agreement, terms, license, distribution, publishing, royalty, payment terms. Please provide the full email content including the contract text.`
+        
+        const gmailResponse = await this.teamTools[0].func(gmailPrompt)
+        
+        if (!gmailResponse || gmailResponse.trim() === '' || gmailResponse.includes('no emails found') || gmailResponse.includes('could not find')) {
+          const noEmailMsg = 'I could not find any relevant contract emails in your inbox.'
+          this.memory.userSupervisorMemory.push({ role: 'assistant', content: noEmailMsg })
+          this.addTrace({
+            timestamp: new Date().toISOString(),
+            action: 'Workflow completed',
+            status: 'error',
+            details: 'No contract emails found'
+          })
+          return noEmailMsg
+        }
+        
+        // STEP 2: Pass the email content to Legal agent
+        const legalPrompt = `Please analyze the following email content for any contracts or legal agreements. 
 Extract and analyze any contract text you find within this email content.
 
 Provide a structured assessment with:
@@ -457,28 +691,46 @@ Provide a structured assessment with:
 4. INDUSTRY CONTEXT (Comparative Analysis, Market Rate Assessment)
 5. PRACTICAL RECOMMENDATIONS (Negotiation Points, Required Changes, Next Steps)
 
-Format with clear headers, bullet points, and minimal jargon.
-Include numeric values when analyzing financials.
-Note that your analysis is not a substitute for attorney review.
-
 EMAIL CONTENT:
 ${gmailResponse}`
-
-      const legalResponse = await this.teamTools[1].func(legalPrompt)
-
-      // Combine results
-      const combined = `# Contract Analysis Report\n\n${legalResponse}`
-
-      // Record supervisor response
-      this.memory.userSupervisorMemory.push({ role: 'assistant', content: combined })
-
-      this.addTrace('Workflow completed successfully', 'success', undefined, 'Contract analysis report generated and delivered')
-
-      return combined
+        
+        const legalResponse = await this.teamTools[1].func(legalPrompt)
+        
+        // Combine results
+        const combined = `# Contract Analysis Report\n\n${legalResponse}`
+        
+        this.memory.userSupervisorMemory.push({ role: 'assistant', content: combined })
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Workflow completed successfully',
+          status: 'success',
+          details: 'Contract analysis report generated'
+        })
+        
+        return combined
+      }
+      
+      // Default: Let Nova decide based on the prompt
+      this.addTrace({
+        timestamp: new Date().toISOString(),
+        action: 'Using Nova model decision',
+        status: 'info',
+        details: 'Delegating to Nova for complex routing'
+      })
+      
+      // For now, just ask Gmail agent as a fallback
+      const fallbackResponse = await this.teamTools[0].func(userInput)
+      this.memory.userSupervisorMemory.push({ role: 'assistant', content: fallbackResponse })
+      return fallbackResponse
 
     } catch (error: any) {
       console.error('Supervisor error:', error)
-      this.addTrace('Workflow failed', 'error', undefined, error.message)
+      this.addTrace({
+        timestamp: new Date().toISOString(),
+        action: 'Workflow failed',
+        status: 'error',
+        details: error.message
+      })
       throw new Error(`Supervisor orchestration failed: ${error.message}`)
     }
   }

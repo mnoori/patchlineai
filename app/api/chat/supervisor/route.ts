@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SupervisorAgent, type AgentTrace } from '@/lib/supervisor-agent'
 import { CONFIG } from '@/lib/config'
 import { DynamoDBClient, PutItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb'
+import { sendLog } from './stream/route'
 
 console.log('[CONFIG] Running in', CONFIG.ENV === 'production' ? 'PRODUCTION' : 'DEVELOPMENT', 'mode')
 
@@ -18,10 +19,30 @@ const supervisorInstances = new Map<string, SupervisorAgent>()
 
 // Logging helpers
 const log = {
-  info: (msg: string) => console.log(`🔵 [SUPERVISOR] ${msg}`),
-  success: (msg: string) => console.log(`✅ [SUPERVISOR] ${msg}`),
-  error: (msg: string) => console.log(`❌ [SUPERVISOR] ${msg}`),
-  agent: (msg: string) => console.log(`🤖 [SUPERVISOR] ${msg}`),
+  info: (msg: string, sessionId?: string) => {
+    console.log(`🔵 [SUPERVISOR] ${msg}`)
+    if (sessionId) {
+      sendLog(sessionId, { type: 'info', message: msg, timestamp: new Date().toISOString() })
+    }
+  },
+  success: (msg: string, sessionId?: string) => {
+    console.log(`✅ [SUPERVISOR] ${msg}`)
+    if (sessionId) {
+      sendLog(sessionId, { type: 'success', message: msg, timestamp: new Date().toISOString() })
+    }
+  },
+  error: (msg: string, sessionId?: string) => {
+    console.log(`❌ [SUPERVISOR] ${msg}`)
+    if (sessionId) {
+      sendLog(sessionId, { type: 'error', message: msg, timestamp: new Date().toISOString() })
+    }
+  },
+  agent: (msg: string, sessionId?: string) => {
+    console.log(`🤖 [SUPERVISOR] ${msg}`)
+    if (sessionId) {
+      sendLog(sessionId, { type: 'agent', message: msg, timestamp: new Date().toISOString() })
+    }
+  },
 }
 
 export async function POST(request: NextRequest) {
@@ -40,16 +61,25 @@ export async function POST(request: NextRequest) {
     // Extract user ID from the request
     const actualUserId = userId || 'test-user'
     
-    console.log(`🔵 [SUPERVISOR] Processing request from user: ${actualUserId.substring(0, 8)}...`)
-    console.log(`🔵 [SUPERVISOR] Session: ${sessionId}`)
-    console.log(`🔵 [SUPERVISOR] Message: ${message}`)
+    log.info(`Processing request from user: ${actualUserId.substring(0, 8)}...`, sessionId)
+    log.info(`Session: ${sessionId}`, sessionId)
+    log.info(`Message: ${message}`, sessionId)
 
     // Create supervisor agent
-    console.log('🤖 [SUPERVISOR] Creating new SupervisorAgent instance')
+    log.agent('Creating new SupervisorAgent instance', sessionId)
     const supervisor = new SupervisorAgent()
 
+    // Set up trace listener to send real-time updates
+    supervisor.onTrace = (trace: AgentTrace) => {
+      sendLog(sessionId, {
+        type: 'trace',
+        trace,
+        timestamp: new Date().toISOString()
+      })
+    }
+
     // Process the request with the supervisor
-    console.log('🤖 [SUPERVISOR] Delegating to specialized agents...')
+    log.agent('Delegating to specialized agents...', sessionId)
 
     // Process the request and capture agent usage
     const startTime = Date.now()
@@ -66,15 +96,17 @@ export async function POST(request: NextRequest) {
       .filter((agent, index, array) => array.indexOf(agent) === index) // unique agents
     
     // Add final timing trace
-    traces.push({
+    const finalTrace = {
       timestamp: new Date().toISOString(),
       action: 'Response generated',
-      status: 'success',
+      status: 'success' as const,
       details: `All agent tasks completed successfully in ${((endTime - startTime) / 1000).toFixed(1)}s`
-    })
+    }
+    traces.push(finalTrace)
+    sendLog(sessionId, { type: 'trace', trace: finalTrace, timestamp: new Date().toISOString() })
 
     // Log successful response
-    console.log(`✅ [SUPERVISOR] Response generated using: ${agentsUsed.join(', ')}`)
+    log.success(`Response generated using: ${agentsUsed.join(', ')}`, sessionId)
 
     // Store the interaction
     await storeInteraction(sessionId, actualUserId, message, response)
@@ -168,7 +200,13 @@ function extractAgentsUsed(response: string): string[] {
 
 // Store interaction in DynamoDB
 async function storeInteraction(sessionId: string, userId: string, message: string, response: string) {
-  const tableName = CONFIG.ENV === 'production' ? 'SupervisorInteractions-prod' : 'SupervisorInteractions-staging'
+  // Skip storing if in development or table doesn't exist
+  if (CONFIG.ENV !== 'production') {
+    console.log('[SUPERVISOR] Skipping interaction storage in development mode')
+    return
+  }
+  
+  const tableName = 'SupervisorInteractions'
   
   try {
     await dynamoDB.send(new PutItemCommand({
@@ -182,8 +220,13 @@ async function storeInteraction(sessionId: string, userId: string, message: stri
         ttl: { N: Math.floor(Date.now() / 1000 + 30 * 24 * 60 * 60).toString() } // 30 days TTL
       }
     }))
-  } catch (error) {
-    console.error('[SUPERVISOR] Failed to store interaction:', error)
+    console.log('[SUPERVISOR] Interaction stored successfully')
+  } catch (error: any) {
+    if (error.__type === 'com.amazonaws.dynamodb.v20120810#ResourceNotFoundException') {
+      console.log('[SUPERVISOR] SupervisorInteractions table does not exist - skipping storage')
+    } else {
+      console.error('[SUPERVISOR] Failed to store interaction:', error.message || error)
+    }
     // Don't throw - this is non-critical
   }
 }

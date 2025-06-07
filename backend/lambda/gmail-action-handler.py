@@ -86,12 +86,10 @@ def parse_scopes(scopes_data: Union[str, List[str]]) -> List[str]:
     return default_scopes
 
 def get_user_gmail_service(user_id: str):
-    """Get authenticated Gmail service for a user"""
+    """Get Gmail service for a specific user"""
     try:
-        # Get user's tokens from DynamoDB
+        # Get user's credentials from DynamoDB
         table = dynamodb.Table(PLATFORM_CONNECTIONS_TABLE)
-        
-        # Get Gmail connection using get_item with composite key
         response = table.get_item(
             Key={
                 'userId': user_id,
@@ -100,66 +98,36 @@ def get_user_gmail_service(user_id: str):
         )
         
         if 'Item' not in response:
-            raise Exception(f"No Gmail connection found for user {user_id}")
+            raise Exception(f"No Gmail credentials found for user {user_id}")
         
         item = response['Item']
-        logger.info(f"DynamoDB item for user {user_id}: {json.dumps(item, default=str)}")
+        logger.info(f"DynamoDB item for user {user_id}: {json.dumps(item)}")
         
-        # Parse scopes properly
-        scopes_data = item.get('scopes')
-        scopes = parse_scopes(scopes_data)
+        # Parse scopes
+        scopes = parse_scopes(item.get('scopes', ''))
         logger.info(f"Parsed scopes: {scopes}")
         
-        # Get credentials from Secrets Manager
-        creds_data = get_gmail_credentials()
+        # Get OAuth2 credentials
+        client_config = get_gmail_credentials()
         
-        # Create credentials - handle both structures
-        if 'access_token' in creds_data and 'refresh_token' in creds_data:
-            # New flat structure -> always trust secret values (DynamoDB token may be stale)
-            credentials = Credentials(
-                token=creds_data.get('access_token'),
-                refresh_token=creds_data.get('refresh_token'),
-                token_uri=creds_data.get('token_uri', 'https://oauth2.googleapis.com/token'),
-                client_id=creds_data.get('client_id'),
-                client_secret=creds_data.get('client_secret'),
-                scopes=scopes
-            )
-        elif 'web' in creds_data:
-            # Old nested structure - fall back to DynamoDB tokens
-            web_data = creds_data['web']
-            credentials = Credentials(
-                token=item.get('accessToken'),
-                refresh_token=item.get('refreshToken'),
-                token_uri=web_data.get('token_uri', 'https://oauth2.googleapis.com/token'),
-                client_id=web_data.get('client_id'),
-                client_secret=web_data.get('client_secret'),
-                scopes=scopes
-            )
-        else:
-            raise Exception("Invalid credentials structure")
+        # Create credentials from stored tokens
+        credentials = Credentials(
+            token=item.get('accessToken'),
+            refresh_token=item.get('refreshToken'),
+            token_uri=client_config['token_uri'],
+            client_id=client_config['client_id'],
+            client_secret=client_config['client_secret'],
+            scopes=scopes
+        )
         
-        # Refresh if expired
-        if credentials.expired or not credentials.valid:
-            logger.info("Credentials expired or invalid, refreshing...")
-            credentials.refresh(Request())
-            logger.info("Credentials refreshed")
-            
-            # Update secret if we're using flat structure
+        # Check if token needs refresh
+        if credentials.expired and credentials.refresh_token:
             try:
-                if 'access_token' in creds_data and 'refresh_token' in creds_data:
-                    creds_data['access_token'] = credentials.token
-                    if credentials.expiry:
-                        creds_data['expiry'] = credentials.expiry.isoformat()
-                    secrets_manager.update_secret(
-                        SecretId=GMAIL_SECRETS_NAME,
-                        SecretString=json.dumps(creds_data)
-                    )
-                    logger.info("Updated access_token in Secrets Manager")
-            except Exception as ex:
-                logger.warning(f"Failed to update secret: {str(ex)}")
-            
-            # Update tokens in DynamoDB (keep in sync)
-            try:
+                logger.info("Token expired, attempting to refresh...")
+                credentials.refresh(Request())
+                logger.info("Token refreshed successfully")
+                
+                # Update the new access token in DynamoDB
                 table.update_item(
                     Key={'userId': user_id, 'provider': 'gmail'},
                     UpdateExpression='SET accessToken = :token, updatedAt = :updated',
@@ -169,14 +137,38 @@ def get_user_gmail_service(user_id: str):
                     }
                 )
                 logger.info("Updated accessToken in DynamoDB")
-            except Exception as ex:
-                logger.warning(f"Failed to update DynamoDB token: {str(ex)}")
+            except Exception as refresh_error:
+                logger.error(f"Token refresh failed: {str(refresh_error)}")
+                
+                # Check for invalid_grant error
+                if 'invalid_grant' in str(refresh_error):
+                    logger.error("Refresh token is invalid or revoked. User needs to re-authenticate.")
+                    
+                    # Delete the invalid credentials from DynamoDB
+                    try:
+                        table.delete_item(
+                            Key={'userId': user_id, 'provider': 'gmail'}
+                        )
+                        logger.info("Deleted invalid credentials from DynamoDB")
+                    except Exception as delete_error:
+                        logger.error(f"Failed to delete invalid credentials: {str(delete_error)}")
+                    
+                    # Return a specific error that the frontend can handle
+                    raise Exception("GMAIL_AUTH_REQUIRED: Your Gmail connection has expired. Please reconnect your Gmail account.")
+                else:
+                    # Re-raise other errors
+                    raise refresh_error
         
         # Build and return Gmail service
         return build('gmail', 'v1', credentials=credentials)
         
     except Exception as e:
         logger.error(f"Error getting Gmail service: {str(e)}")
+        
+        # Check if it's an auth error that needs user action
+        if "GMAIL_AUTH_REQUIRED" in str(e):
+            raise e  # Re-raise auth errors as-is
+        
         raise
 
 def lambda_handler(event, context):
@@ -365,6 +357,15 @@ def handle_search_emails(user_id: str, request_body: Dict) -> Dict:
         
     except Exception as e:
         logger.error(f"Error searching emails: {str(e)}")
+        
+        # Check if it's an auth error
+        if "GMAIL_AUTH_REQUIRED" in str(e):
+            return create_response(401, {
+                'error': 'Gmail authentication required',
+                'code': 'GMAIL_AUTH_REQUIRED',
+                'message': 'Please reconnect your Gmail account'
+            }, '/search-emails', 'POST')
+        
         return create_response(500, {'error': str(e)}, '/search-emails', 'POST')
 
 def handle_read_email(user_id: str, request_body: Dict) -> Dict:
@@ -574,6 +575,15 @@ def handle_get_email_stats(user_id: str) -> Dict:
         
     except Exception as e:
         logger.error(f"Error getting email stats: {str(e)}")
+        
+        # Check if it's an auth error
+        if "GMAIL_AUTH_REQUIRED" in str(e):
+            return create_response(401, {
+                'error': 'Gmail authentication required',
+                'code': 'GMAIL_AUTH_REQUIRED',
+                'message': 'Please reconnect your Gmail account'
+            }, '/get-email-stats', 'GET')
+        
         return create_response(500, {'error': str(e)}, '/get-email-stats', 'GET')
 
 def extract_email_body(payload: Dict) -> str:

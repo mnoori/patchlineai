@@ -66,23 +66,21 @@ export function SupervisorTraces({ traces, isOpen, onClose }: SupervisorTracesPr
           {emailData.subject && (
             <div className="flex items-start gap-2">
               <span className="font-medium text-muted-foreground min-w-[60px]">Subject:</span>
-              <span className="text-foreground">{emailData.subject}</span>
+              <span className="text-foreground">{emailData.subject || '(No subject)'}</span>
             </div>
           )}
           {emailData.from && (
             <div className="flex items-start gap-2">
               <User className="h-3 w-3 text-muted-foreground mt-0.5" />
               <span className="font-medium text-muted-foreground min-w-[50px]">From:</span>
-              <span className="text-foreground">{emailData.from}</span>
+              <span className="text-foreground">{emailData.from || 'Unknown sender'}</span>
             </div>
           )}
-          {emailData.date && (
-            <div className="flex items-start gap-2">
-              <Calendar className="h-3 w-3 text-muted-foreground mt-0.5" />
-              <span className="font-medium text-muted-foreground min-w-[50px]">Date:</span>
-              <span className="text-foreground">{emailData.date}</span>
-            </div>
-          )}
+          <div className="mt-2 pt-2 border-t">
+            <p className="text-xs text-muted-foreground italic">
+              💡 This appears to be a contract / offer email. I can analyse the terms with the Legal Agent if needed.
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -136,6 +134,9 @@ export function SupervisorTraces({ traces, isOpen, onClose }: SupervisorTracesPr
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
                     <Clock className="h-3 w-3" />
                     {new Date(trace.timestamp).toLocaleTimeString()}
+                    {trace.emailData?.date && (
+                      <span className="ml-2">• Email from {trace.emailData.date}</span>
+                    )}
                   </div>
                 </div>
               </div>

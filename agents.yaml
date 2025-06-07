@@ -30,12 +30,26 @@ legal:
     agent_id: XL4F5TPHXB
     agent_alias_id: TQYPWUONTY
 
+scout:
+  name: PatchlineScoutAgent
+  description: AI talent scout that discovers and analyzes promising artists using Soundcharts data
+  model: claude-4-sonnet
+  prompt: prompts/scout-agent.md
+  action_group:
+    name: ScoutActions
+    lambda: lambda/scout-action-handler
+  knowledge_base: PatchlineScoutKnowledge
+  environment:
+    # To be populated after creation
+    agent_id: TBD
+    agent_alias_id: TBD
+
 supervisor:
   name: PatchlineSupervisorAgent
   description: Multi-agent supervisor that coordinates between Gmail and Legal specialists
   model: claude-4-sonnet
   prompt: prompts/supervisor-agent.md
-  collaborators: [gmail, legal]
+  collaborators: [gmail, legal, scout]
   environment:
     # Current configuration (for reference, not used in script)
     agent_id: TYQSQNB2GI
