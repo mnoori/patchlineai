@@ -44,6 +44,7 @@ import {
   MessageSquare,
   Smartphone,
   Wifi,
+  Wallet,
 } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { motion } from "framer-motion"
@@ -55,10 +56,12 @@ import { Badge } from "@/components/ui/badge"
 import { getTierConfig, getUpgradePath, TIER_CONFIGS } from "@/lib/tier-config"
 import { UpgradeDialog } from "@/components/upgrade-dialog"
 import { useSearchParams } from "next/navigation"
+import { useWeb3Store } from "@/lib/web3-store"
 
 export default function SettingsPage() {
   const { userId } = useCurrentUser()
   const { user, setUser, activateGodMode, deactivateGodMode } = usePermissions()
+  const { settings: web3Settings, toggleWeb3 } = useWeb3Store()
   const searchParams = useSearchParams()
   
   // Check for tab parameter
@@ -1298,10 +1301,9 @@ export default function SettingsPage() {
                           
                           toast.success(`Switched to ${getTierConfig(tier).name} tier`)
                           
-                          // Reload to update UI
-                          setTimeout(() => {
-                            window.location.reload()
-                          }, 500)
+                          // Debug tier persistence
+                          console.log('Tier changed to:', tier, 'Updated user:', updatedUser)
+                          console.log('LocalStorage state:', JSON.parse(localStorage.getItem('patchline-permissions') || '{}'))
                         }
                       }}
                     >
@@ -1312,6 +1314,44 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground mt-4">
                   ⚠️ This is for development testing only. In production, tier changes will be handled through Stripe subscriptions.
                 </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Web3 Portal Toggle */}
+          <motion.div variants={itemVariants}>
+            <Card className="glass-effect border-purple-500/30 hover:border-purple-500/50 transition-all duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-purple-400" />
+                  Portal to Web 3.0
+                </CardTitle>
+                <CardDescription>
+                  Enable crypto wallet connections and blockchain features
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="web3-toggle">Web3 Features</Label>
+                    <p className="text-sm text-muted-foreground max-w-sm">
+                      Connect crypto wallets, receive USDC payments, and mint NFT tickets.
+                    </p>
+                  </div>
+                  <Switch
+                    id="web3-toggle"
+                    checked={web3Settings.enabled}
+                    onCheckedChange={(val) => {
+                      toggleWeb3(val)
+                      toast.success(
+                        val
+                          ? "Web3 enabled! Wallet buttons now available in the navbar."
+                          : "Web3 disabled."
+                      )
+                    }}
+                    className="data-[state=checked]:bg-purple-500"
+                  />
+                </div>
               </CardContent>
             </Card>
           </motion.div>

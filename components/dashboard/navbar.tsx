@@ -47,6 +47,7 @@ import { usePathname } from "next/navigation"
 import { usePermissions } from "@/lib/permissions"
 import { getTierConfig } from "@/lib/tier-config"
 import { Badge } from "@/components/ui/badge"
+import { WalletConnector } from "@/components/web3/wallet-connector"
 
 interface UserInfo {
   fullName: string
@@ -264,6 +265,7 @@ export function DashboardNavbar() {
                   </Button>
                 )}
               </div>
+              <WalletConnector />
               <Button
                 variant="ghost"
                 size="icon"

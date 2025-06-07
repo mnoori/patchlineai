@@ -1,0 +1,73 @@
+# Web3 Environment Variables Template
+# Copy these to your .env.local file and fill in the values
+
+# ===== DYNAMIC SDK CONFIGURATION =====
+# Get your environment ID from https://app.dynamic.xyz/
+NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID=your_dynamic_environment_id_here
+
+# ===== SOLANA CONFIGURATION =====
+# Solana RPC endpoint (use mainnet-beta for production, devnet for testing)
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+# Alternative: https://api.devnet.solana.com for testing
+
+# Solana network (mainnet-beta, devnet, testnet)
+NEXT_PUBLIC_SOLANA_NETWORK=mainnet-beta
+
+# ===== USDC PAYMENT CONFIGURATION =====
+# USDC token mint address (mainnet)
+NEXT_PUBLIC_USDC_MINT=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+# For devnet testing: 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU
+
+# Payment recipient wallet address (your business wallet)
+NEXT_PUBLIC_PAYMENT_RECIPIENT=your_solana_wallet_address_here
+
+# ===== STRIPE CONFIGURATION =====
+# Stripe publishable key for traditional payments
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key_here
+
+# Stripe secret key (server-side only)
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_here
+
+# ===== METAPLEX NFT CONFIGURATION =====
+# NFT collection mint address (optional, for NFT ticketing)
+NEXT_PUBLIC_NFT_COLLECTION_MINT=your_nft_collection_mint_here
+
+# NFT storage configuration (Arweave/IPFS)
+NEXT_PUBLIC_NFT_STORAGE_ENDPOINT=https://arweave.net
+
+# ===== BACKEND CONFIGURATION =====
+# DynamoDB region
+AWS_REGION=us-east-1
+
+# DynamoDB table names
+DYNAMODB_WEB3_WALLETS_TABLE=Web3Wallets
+DYNAMODB_WEB3_TRANSACTIONS_TABLE=Web3Transactions
+DYNAMODB_NFT_TICKETS_TABLE=NFTTickets
+
+# ===== SECURITY CONFIGURATION =====
+# JWT secret for wallet authentication
+JWT_SECRET=your_jwt_secret_here
+
+# API rate limiting
+RATE_LIMIT_REQUESTS_PER_MINUTE=60
+
+# ===== DEVELOPMENT FLAGS =====
+# Enable Web3 features by default (true/false)
+NEXT_PUBLIC_WEB3_ENABLED_DEFAULT=false
+
+# Enable debug logging for Web3 (true/false)
+NEXT_PUBLIC_WEB3_DEBUG=true
+
+# ===== INSTRUCTIONS =====
+# 1. Copy this file to .env.local
+# 2. Sign up at https://app.dynamic.xyz/ and get your environment ID
+# 3. Set up a Solana wallet for receiving payments
+# 4. Configure Stripe for traditional payment fallback
+# 5. Set NEXT_PUBLIC_WEB3_ENABLED_DEFAULT=true to enable by default
+# 6. Run the DynamoDB table creation script: python backend/scripts/create-web3-tables.py
+
+# ===== TESTING CONFIGURATION =====
+# For testing on devnet:
+# NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+# NEXT_PUBLIC_SOLANA_NETWORK=devnet
+# NEXT_PUBLIC_USDC_MINT=4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU 

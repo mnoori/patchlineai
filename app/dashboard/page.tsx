@@ -47,6 +47,9 @@ import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { fetchDashboardData, platformsAPI } from "@/lib/api-client"
 import { usePlatformConnections } from "@/hooks/use-platform-connections"
+import { WalletBalance } from '@/components/web3/wallet-balance'
+import { useWeb3Store } from '@/lib/web3-store'
+import { usePermissions } from '@/lib/permissions'
 
 // Add DollarSign component before DashboardPage
 function DollarSign(props: React.SVGProps<SVGSVGElement>) {
@@ -535,6 +538,9 @@ export default function DashboardPage() {
     engagement: 0,
   })
   const [loadingDashboard, setLoadingDashboard] = useState(true)
+  const { user } = usePermissions()
+  const { settings: web3Settings, getActiveWallet } = useWeb3Store()
+  const hasWallet = !!getActiveWallet()
 
   const [agentAlerts] = useState([
     {
@@ -764,6 +770,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+
       {/* Header - removed Last 30 Days filter */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
@@ -799,6 +806,13 @@ export default function DashboardPage() {
 
       {/* Critical Alert Banner */}
       <CriticalAlertBanner alert={criticalAlert} onDismiss={removeAlert} onAction={handleAlertAction} />
+
+      {/* Web3 Wallet Balance - Show when Web3 is enabled and wallet is connected */}
+      {web3Settings.enabled && hasWallet && (
+        <div className="mb-4">
+          <WalletBalance />
+        </div>
+      )}
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

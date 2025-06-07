@@ -116,4 +116,77 @@ See the `docs/` directory and project root for detailed documentation:
 
 ## License
 
-Copyright © 2023-2024 Patchline Inc. All rights reserved. 
+Copyright © 2023-2024 Patchline Inc. All rights reserved.
+
+# Patchline Web3 Portal
+
+This repository contains the implementation of the Patchline Web3 Portal, which allows users to connect their Phantom wallet and perform crypto transactions.
+
+## Current Implementation
+
+The current implementation includes:
+
+- **Wallet Connection**: Users can connect their Phantom wallet to the application
+- **Wallet Display**: Shows connected wallet address in the navbar with a dropdown
+- **Send/Receive UI**: Modal interfaces for sending and receiving crypto
+- **Balance Display**: UI components for displaying SOL and USDC balances
+
+## Known Issues
+
+1. **Solana RPC Connection**: Browser-side RPC connections are experiencing CORS issues with some providers:
+   - Default Solana mainnet endpoint blocks browser requests with 403 errors
+   - Attempted fallbacks to Ankr, ProjectSerum and Metaplex endpoints
+   - May require server-side proxy implementation for production use
+
+2. **Auth Configuration**: AWS Cognito integration requires proper configuration
+   - Added Amplify configuration import to layout to ensure initialization
+
+## Next Steps
+
+1. **Balance Fetching**: Implement server-side RPC calls to fetch balances reliably
+   - Create a dedicated API route (e.g., `/api/web3/balance?address=<wallet>`) 
+   - Move Solana RPC calls to server-side to avoid CORS issues
+   - Keep the API key secure on the server side
+
+2. **Transaction Handling**: Complete the send functionality
+   - Implement transaction signing and submission
+   - Add transaction status tracking and history
+
+3. **Testing**: Comprehensive testing across different environments
+   - Test with actual wallets on testnet
+   - Verify error handling scenarios
+
+## Environment Variables
+
+For local development, add these variables to your `.env.local` file:
+
+```
+# Web3 Configuration
+NEXT_PUBLIC_SOLANA_RPC=https://rpc.ankr.com/solana 
+SOLANA_RPC_KEY=your_private_key_for_server_only
+
+# Auth Configuration
+NEXT_PUBLIC_USER_POOL_ID=your_cognito_user_pool_id
+NEXT_PUBLIC_USER_POOL_CLIENT_ID=your_cognito_client_id
+NEXT_PUBLIC_AWS_REGION=your_aws_region
+```
+
+## Getting Started
+
+1. Install dependencies:
+   ```
+   npm install
+   ```
+
+2. Run the development server:
+   ```
+   npm run dev
+   ```
+
+3. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Additional Resources
+
+- [Phantom Wallet Documentation](https://docs.phantom.app/)
+- [Solana Web3.js Documentation](https://solana-labs.github.io/solana-web3.js/)
+- [AWS Amplify Documentation](https://docs.amplify.aws/) 

@@ -1,47 +1,39 @@
-import type React from "react"
-import type { Metadata } from "next/dist/lib/metadata/types/metadata-interface"
-import { Inter, Space_Grotesk } from "next/font/google"
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { AwsProvider } from "@/components/aws-provider"
-import { Toaster } from "@/components/ui/sonner"
+'use client'
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-})
+import './globals.css'
+import '@/lib/amplify-config'
+import { Inter } from 'next/font/google'
+import { Toaster } from 'sonner'
+import { Web3Provider } from "@/components/web3/web3-provider"
+import { TierPersistence } from "@/components/tier-persistence"
+import { ThemeProvider } from '@/components/theme-provider'
+import { SendCryptoModal } from '@/components/web3/send-crypto-modal'
+import { ReceiveCryptoModal } from '@/components/web3/receive-crypto-modal'
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-})
-
-export const metadata: Metadata = {
-  title: "Patchline AI - The Invisible Agentic AI Layer for the Music Industry",
-  description:
-    "Patchline connects your data, simplifies your workflows, and gives music professionals time back to create.",
-  generator: 'v0.dev',
-  icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
-  }
-}
+const inter = Inter({ subsets: ['latin'] })
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable} font-sans`}>
-        <AwsProvider>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+      <body className={inter.className} suppressHydrationWarning>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <Web3Provider>
+            <TierPersistence />
             {children}
-            <Toaster />
-          </ThemeProvider>
-        </AwsProvider>
+            <SendCryptoModal />
+            <ReceiveCryptoModal />
+            <Toaster position="top-right" richColors closeButton />
+          </Web3Provider>
+        </ThemeProvider>
       </body>
     </html>
   )
