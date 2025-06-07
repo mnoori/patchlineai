@@ -41,6 +41,16 @@ npx tsx scripts/create-scout-table.ts
 - **Solution**: Implemented Server-Sent Events (SSE) for live streaming
 - **Result**: See agent coordination in real-time in the Supervisor UI
 
+### 5. Email Metadata Display ✅
+- **Problem**: Email preview showed "undefined" for missing subjects/senders
+- **Solution**: Added proper fallbacks and improved metadata extraction
+- **Result**: Email previews now show "(No subject)" or "Unknown sender" when fields are missing
+
+### 6. Streaming Visualization ✅
+- **Problem**: Agent activity indicators disappeared too quickly
+- **Solution**: Enhanced state management to keep bubbles visible for all trace types
+- **Result**: Live status "Agent is working..." now stays visible until task completion
+
 ## 🛠️ Manual Steps Required
 
 ### 1. Create Scout Agent in AWS Bedrock
@@ -122,6 +132,27 @@ If you see authentication errors:
 - **Soundcharts**: 188/200 calls remaining (resets monthly)
 - **AWS Bedrock**: Pay-per-use
 - **Gmail API**: 250 quota units per user per second
+
+## 👥 User Personas
+
+Patchline agents are designed to adapt their tone and recommendations based on three key music industry personas:
+
+### Creator
+- **Who**: Independent artists and producers managing their own careers
+- **Needs**: DIY advice, cost-effective solutions, simple explanations
+- **Example**: Solo artist looking to understand a distribution deal
+
+### Roster
+- **Who**: Labels, managers, and publishers handling multiple artists
+- **Needs**: Portfolio optimization, comparative analysis, prioritization
+- **Example**: A&R manager seeking emerging talent or analyzing multiple contracts
+
+### Enterprise
+- **Who**: Larger companies needing scalable insights and compliance
+- **Needs**: KPIs, compliance checks, systematic workflows
+- **Example**: Major label executive reviewing deal terms across territories
+
+The Supervisor agent and specialist agents (Gmail, Legal, Scout) adapt their responses to match the user's persona context.
 
 ## 🐛 Troubleshooting
 
