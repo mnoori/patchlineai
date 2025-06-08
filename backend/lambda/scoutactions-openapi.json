@@ -1,0 +1,183 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Patchline Scout Agent API",
+    "description": "API for AI talent scout to discover and analyze promising artists using Soundcharts data",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/discover-artists": {
+      "post": {
+        "summary": "Discover new artists based on genre, metrics, and region",
+        "description": "Find emerging artists matching specific criteria",
+        "operationId": "discoverArtists",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "genre": {
+                    "type": "string",
+                    "description": "Music genre to search for (e.g., 'hyperpop', 'afrobeats', 'indie rock')"
+                  },
+                  "region": {
+                    "type": "string",
+                    "description": "Geographic region to focus on (e.g., 'US', 'Europe', 'Latin America')"
+                  },
+                  "min_followers": {
+                    "type": "integer",
+                    "description": "Minimum follower count (e.g., 10000)"
+                  },
+                  "max_followers": {
+                    "type": "integer",
+                    "description": "Maximum follower count (e.g., 100000)"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Maximum number of artists to return",
+                    "default": 5
+                  }
+                },
+                "required": ["genre"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analyze-artist": {
+      "post": {
+        "summary": "Analyze a specific artist's performance and growth metrics",
+        "description": "Get detailed performance analytics for an artist",
+        "operationId": "analyzeArtist",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "artist_name": {
+                    "type": "string",
+                    "description": "Name of the artist to analyze"
+                  },
+                  "platform": {
+                    "type": "string",
+                    "description": "Platform to analyze (spotify, apple_music, soundcloud)",
+                    "default": "spotify"
+                  },
+                  "time_period": {
+                    "type": "string",
+                    "description": "Time period to analyze (30d, 90d, 1y)",
+                    "default": "90d"
+                  }
+                },
+                "required": ["artist_name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artist not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compare-artists": {
+      "post": {
+        "summary": "Compare metrics between multiple artists",
+        "description": "Compare performance data across different artists",
+        "operationId": "compareArtists",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "artist_names": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of artist names to compare"
+                  },
+                  "metrics": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["followers", "monthly_listeners", "playlist_reach", "engagement"]
+                    },
+                    "description": "Specific metrics to compare"
+                  }
+                },
+                "required": ["artist_names"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} 

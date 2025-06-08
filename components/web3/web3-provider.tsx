@@ -34,24 +34,26 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 }
 
 function Web3ProviderInner({ children }: { children: React.ReactNode }) {
-  // Dynamic imports that only load on client when needed
+  // Lazy load providers only when actually needed
   const [providers, setProviders] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
   
   useEffect(() => {
+    let isMounted = true
+    
     async function loadProviders() {
       try {
+        // Only load the essential providers for better performance
         const [
           { DynamicContextProvider },
-          { EthereumWalletConnectors },
           { SolanaWalletConnectors },
           { ConnectionProvider, WalletProvider },
           { WalletModalProvider },
-          { PhantomWalletAdapter, CoinbaseWalletAdapter },
+          { PhantomWalletAdapter },
           { clusterApiUrl }
         ] = await Promise.all([
           import('@dynamic-labs/sdk-react'),
-          import('@dynamic-labs/ethereum'),
           import('@dynamic-labs/solana'),
           import('@solana/wallet-adapter-react'),
           import('@solana/wallet-adapter-react-ui'),
@@ -59,10 +61,13 @@ function Web3ProviderInner({ children }: { children: React.ReactNode }) {
           import('@solana/web3.js')
         ])
 
+        if (!isMounted) return
+
         const endpoint = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta')
+        
+        // Only load essential wallets to reduce bundle size
         const wallets = [
           new PhantomWalletAdapter(),
-          new CoinbaseWalletAdapter(),
         ]
 
         setProviders({
@@ -72,15 +77,27 @@ function Web3ProviderInner({ children }: { children: React.ReactNode }) {
           WalletModalProvider,
           endpoint,
           wallets,
-          connectors: [EthereumWalletConnectors, SolanaWalletConnectors]
+          connectors: [SolanaWalletConnectors] // Only Solana for now
         })
       } catch (error) {
         console.error('Failed to load Web3 providers:', error)
-        setError('Failed to load Web3 providers')
+        if (isMounted) {
+          setError('Failed to load Web3 providers')
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
-    loadProviders()
+    // Add a small delay to prevent blocking the main thread
+    const timeoutId = setTimeout(loadProviders, 100)
+
+    return () => {
+      isMounted = false
+      clearTimeout(timeoutId)
+    }
   }, [])
 
   if (error) {
@@ -88,7 +105,7 @@ function Web3ProviderInner({ children }: { children: React.ReactNode }) {
     return <>{children}</>
   }
 
-  if (!providers) {
+  if (loading || !providers) {
     // Loading state - render children without Web3 context
     return <>{children}</>
   }

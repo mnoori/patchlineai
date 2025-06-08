@@ -90,13 +90,31 @@ if AGENT_TYPE == "LEGAL":
         'knowledge_base_name': 'PatchlineLegalKnowledge',
         'idle_session_ttl': 900,
     }
+elif AGENT_TYPE == "BLOCKCHAIN":
+    AGENT_CONFIG = {
+        'name': 'PatchlineBlockchainAgent',
+        'description': 'Web3 AI assistant for Solana blockchain transactions and crypto payments',
+        'foundation_model': BEDROCK_MODELS['claude-4-sonnet']['inference_profile'],  # Use Claude 4 Sonnet with inference profile
+        'action_group_name': 'BlockchainActions',
+        'knowledge_base_name': 'PatchlineBlockchainKnowledge',
+        'idle_session_ttl': 900,
+    }
 elif AGENT_TYPE == "SUPERVISOR":
     AGENT_CONFIG = {
         'name': 'PatchlineSupervisorAgent',
-        'description': 'Multi-agent supervisor that coordinates between Gmail and Legal specialists',
+        'description': 'Multi-agent supervisor that coordinates between all Patchline specialists',
         'foundation_model': BEDROCK_MODELS['claude-4-sonnet']['inference_profile'],  # Use Claude 4 Sonnet with inference profile
         'action_group_name': None,  # Supervisor doesn't need action groups, only collaborators
         'knowledge_base_name': None,  # Supervisor delegates to other agents
+        'idle_session_ttl': 900,
+    }
+elif AGENT_TYPE == "SCOUT":
+    AGENT_CONFIG = {
+        'name': 'PatchlineScoutAgent',
+        'description': 'AI talent scout that discovers and analyzes promising artists using Soundcharts data',
+        'foundation_model': BEDROCK_MODELS['claude-4-sonnet']['inference_profile'],  # Use Claude 4 Sonnet with inference profile
+        'action_group_name': 'ScoutActions',
+        'knowledge_base_name': 'PatchlineScoutKnowledge',
         'idle_session_ttl': 900,
     }
 else:

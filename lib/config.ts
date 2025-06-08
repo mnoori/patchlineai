@@ -52,6 +52,18 @@ export const CONFIG = {
       NAME: "Legal Agent",
       DESCRIPTION: "Analyzes legal documents & contracts from a music-industry perspective"
     },
+    SCOUT_AGENT: {
+      ID: process.env.BEDROCK_SCOUT_AGENT_ID || 'TBD',
+      ALIAS_ID: process.env.BEDROCK_SCOUT_AGENT_ALIAS_ID || 'TBD',
+      NAME: "Scout Agent",
+      DESCRIPTION: "Discovers and analyzes promising artists using Soundcharts data"
+    },
+    BLOCKCHAIN_AGENT: {
+      ID: process.env.BEDROCK_BLOCKCHAIN_AGENT_ID || 'TEH8TAXFHN',
+      ALIAS_ID: process.env.BEDROCK_BLOCKCHAIN_AGENT_ALIAS_ID || 'WUWJSMHQ8G',
+      NAME: "Blockchain Agent",
+      DESCRIPTION: "Handles Solana transactions and crypto payments"
+    },
     // Future agents can be added here
     // CALENDAR_AGENT: {
     //   ID: process.env.BEDROCK_CALENDAR_AGENT_ID || "",
@@ -62,7 +74,8 @@ export const CONFIG = {
   },
   
   // Current active agent (can be changed to switch agents)
-  ACTIVE_AGENT: "GMAIL_AGENT",
+  // No default active agent - let the system choose based on context
+  ACTIVE_AGENT: "",
   
   // Legacy support - these will use the active agent
   BEDROCK_AGENT_ID: process.env.BEDROCK_AGENT_ID || "C7VZ0QWDSG",
@@ -338,9 +351,24 @@ export const SUPERVISOR_AGENT = {
   region: process.env.AWS_REGION || 'us-east-1'
 };
 
+export const BLOCKCHAIN_AGENT = {
+  agentId: process.env.BEDROCK_BLOCKCHAIN_AGENT_ID || 'TEH8TAXFHN',
+  agentAliasId: process.env.BEDROCK_BLOCKCHAIN_AGENT_ALIAS_ID || 'WUWJSMHQ8G',
+  region: process.env.AWS_REGION || 'us-east-1'
+};
+
+// ADD: Scout agent configuration
+export const SCOUT_AGENT = {
+  agentId: process.env.BEDROCK_SCOUT_AGENT_ID || 'TBD',
+  agentAliasId: process.env.BEDROCK_SCOUT_AGENT_ALIAS_ID || 'TBD',
+  region: process.env.AWS_REGION || 'us-east-1'
+};
+
 // Agent types for UI
 export const AGENT_TYPES = [
   { id: 'gmail', name: 'Gmail Agent', description: 'Email management and communication' },
   { id: 'legal', name: 'Legal Agent', description: 'Contract analysis and legal review' },
+  { id: 'scout', name: 'Scout Agent', description: 'AI talent scouting and artist discovery' },
+  { id: 'blockchain', name: 'Blockchain Agent', description: 'Web3 transactions and crypto payments' },
   { id: 'supervisor', name: 'Supervisor Agent', description: 'Multi-agent coordination and delegation' }
 ];

@@ -1,17 +1,87 @@
 # Web3 Environment Variables Template
-# Copy these to your .env.local file and fill in the values
+# Copy this file to .env.local and fill in your values
 
-# ===== DYNAMIC SDK CONFIGURATION =====
-# Get your environment ID from https://app.dynamic.xyz/
-NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID=your_dynamic_environment_id_here
+# ==========================================
+# CRITICAL: RPC PROVIDER CONFIGURATION
+# ==========================================
+# The public Solana RPC has strict rate limits and will return 403 errors.
+# You MUST use a premium RPC provider for production use.
 
-# ===== SOLANA CONFIGURATION =====
-# Solana RPC endpoint (use mainnet-beta for production, devnet for testing)
+# OPTION 1: Helius (Recommended - Best for Solana)
+# Sign up FREE at: https://helius.dev
+# - Create account
+# - Get API key from dashboard
+# - Free tier includes 100k credits/month
+HELIUS_API_KEY=your-helius-api-key-here
+NEXT_PUBLIC_HELIUS_API_KEY=your-helius-api-key-here
+
+# OPTION 2: Alchemy (Alternative)
+# Sign up at: https://www.alchemy.com
+# Free tier includes 300M compute units/month
+ALCHEMY_API_KEY=your-alchemy-api-key-here
+
+# OPTION 3: QuickNode (Alternative)
+# Sign up at: https://www.quicknode.com
+# Free tier available
+QUICKNODE_API_KEY=your-quicknode-api-key-here
+
+# FALLBACK: Custom RPC endpoint (not recommended for production)
+SOLANA_RPC=https://api.mainnet-beta.solana.com
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
-# Alternative: https://api.devnet.solana.com for testing
 
-# Solana network (mainnet-beta, devnet, testnet)
+# ==========================================
+# DYNAMIC WALLET CONFIGURATION
+# ==========================================
+# Dynamic provides multi-wallet connectivity
+# Sign up at: https://app.dynamic.xyz
+NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID=your-dynamic-environment-id
+
+# ==========================================
+# AWS CONFIGURATION (Required)
+# ==========================================
+# DynamoDB access for storing Web3 data
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+
+# Table names (must match your deployment stage)
+WEB3_WALLETS_TABLE=Web3Wallets-staging
+WEB3_TRANSACTIONS_TABLE=Web3Transactions-staging
+
+# ==========================================
+# SOLANA NETWORK CONFIGURATION
+# ==========================================
+# Network: mainnet-beta, testnet, or devnet
 NEXT_PUBLIC_SOLANA_NETWORK=mainnet-beta
+
+# USDC Token Mint Address (mainnet)
+NEXT_PUBLIC_USDC_MINT_ADDRESS=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+
+# ==========================================
+# OPTIONAL: METAPLEX CONFIGURATION
+# ==========================================
+# For NFT minting capabilities
+METAPLEX_UPLOAD_ENDPOINT=https://api.metaplex.com
+METAPLEX_API_KEY=your-metaplex-api-key
+
+# ==========================================
+# OPTIONAL: SOLANA PAY CONFIGURATION
+# ==========================================
+# For payment request generation
+SOLANA_PAY_LABEL=Your App Name
+SOLANA_PAY_ICON=https://yourapp.com/icon.png
+
+# ==========================================
+# TROUBLESHOOTING 403 ERRORS
+# ==========================================
+# If you see "403: Access forbidden" errors:
+# 1. You're using the public RPC which has rate limits
+# 2. Sign up for Helius (free): https://helius.dev
+# 3. Add your API key above
+# 4. Restart your development server
+#
+# The app will automatically use Helius > Alchemy > QuickNode > Public RPC
+# in that order based on which keys are configured.
 
 # ===== USDC PAYMENT CONFIGURATION =====
 # USDC token mint address (mainnet)

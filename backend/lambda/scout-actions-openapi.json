@@ -1,11 +1,58 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Scout Agent Actions API",
+    "title": "Scout Agent API",
     "version": "1.0.0",
-    "description": "API for Scout Agent to discover and analyze artists using Soundcharts data"
+    "description": "API for the Patchline Scout Agent to find and analyze artists using Soundcharts data."
   },
   "paths": {
+    "/search/artist": {
+      "get": {
+        "summary": "Search for an artist",
+        "description": "Searches for an artist by name on Soundcharts and returns their basic information.",
+        "operationId": "searchArtist",
+        "parameters": [
+          {
+            "name": "artistName",
+            "in": "query",
+            "description": "The name of the artist to search for.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Artist found successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Soundcharts artist ID"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Artist name"
+                    },
+                    "social_links": {
+                      "type": "object",
+                      "description": "Links to social media profiles"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artist not found"
+          }
+        }
+      }
+    },
     "/search-artists": {
       "post": {
         "summary": "Search for artists",

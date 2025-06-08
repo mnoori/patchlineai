@@ -1,64 +1,78 @@
-# Patchline Multi-Agent System Configuration
-# This file serves as the single source of truth for all agent configurations
-# Use generate-agents.ts to create/update agents from this configuration
-
 gmail:
   name: PatchlineEmailAgent
   description: AI assistant for managing emails and communications
-  model: claude-3-7-sonnet  # key from backend/scripts/config.py
+  model: us.anthropic.claude-sonnet-4-20250514-v1:0
   prompt: prompts/gmail-agent.md
   action_group:
     name: GmailActions
-    lambda: lambda/gmail-action-handler
+    lambda: gmail-action-handler
+    api_schema:
+      file: backend/lambda/gmail-actions-openapi.json
+      s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineEmailKnowledge
   environment:
-    # Current configuration (for reference, not used in script)
-    agent_id: C7VZ0QWDSG
-    agent_alias_id: 8XX4RGKW15
-
+    agent_id: EU8KPPQIAB
+    agent_alias_id: IZSVIKKGF5
 legal:
   name: PatchlineLegalAgent
   description: Legal AI assistant specialising in music contracts and rights
-  model: claude-3-7-sonnet
+  model: us.anthropic.claude-3-7-sonnet-20250219-v1:0
   prompt: prompts/legal-agent.md
   action_group:
     name: ContractAnalysis
-    lambda: lambda/legal-action-handler
+    lambda: legal-contract-handler
+    api_schema:
+      file: backend/lambda/contractanalysis-openapi.json
+      s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineLegalKnowledge
   environment:
-    # Current configuration (for reference, not used in script)
-    agent_id: XL4F5TPHXB
-    agent_alias_id: TQYPWUONTY
-
+    agent_id: RSGPIGTXQL
+    agent_alias_id: UJOCCGHTNS
 scout:
   name: PatchlineScoutAgent
-  description: AI talent scout that discovers and analyzes promising artists using Soundcharts data
-  model: claude-4-sonnet
+  description: AI talent scout that discovers and analyzes promising artists using
+    Soundcharts data
+  model: us.anthropic.claude-sonnet-4-20250514-v1:0
   prompt: prompts/scout-agent.md
   action_group:
     name: ScoutActions
-    lambda: lambda/scout-action-handler
+    lambda: scout-action-handler
+    api_schema:
+      file: backend/lambda/scout-actions-openapi.json
+      s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineScoutKnowledge
   environment:
-    # To be populated after creation
-    agent_id: TBD
-    agent_alias_id: TBD
-
+    agent_id: HQ1XQJNQ4U
+    agent_alias_id: 6DZAP2LWSC
+blockchain:
+  name: PatchlineBlockchainAgent
+  description: Web3 AI assistant for Solana blockchain transactions and crypto payments
+  model: us.anthropic.claude-sonnet-4-20250514-v1:0
+  prompt: prompts/blockchain-agent.md
+  action_group:
+    name: BlockchainActions
+    lambda: blockchain-action-handler
+    api_schema:
+      file: backend/lambda/blockchainactions-openapi.json
+      s3_bucket: patchline-agent-schemas
+  knowledge_base: PatchlineBlockchainKnowledge
+  environment:
+    agent_id: LD3CYMNXUI
+    agent_alias_id: XGYAUX2EN8
 supervisor:
   name: PatchlineSupervisorAgent
-  description: Multi-agent supervisor that coordinates between Gmail and Legal specialists
-  model: claude-4-sonnet
+  description: Multi-agent supervisor that coordinates between all Patchline specialists
+  model: us.anthropic.claude-sonnet-4-20250514-v1:0
   prompt: prompts/supervisor-agent.md
-  collaborators: [gmail, legal, scout]
+  collaborators:
+  - gmail
+  - legal
+  - scout
+  - blockchain
   environment:
-    # Current configuration (for reference, not used in script)
-    agent_id: TYQSQNB2GI
-    agent_alias_id: BXHO9QQ40S
-
-# Default agent (used when no specific agent is specified)
+    agent_id: J8TYXLIA5P
+    agent_alias_id: MFZXSV0JPL
 default_agent: supervisor
-
-# Global configuration
 aws_region: us-east-1
 environment: staging
-idle_session_ttl: 900 
+idle_session_ttl: 900

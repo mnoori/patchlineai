@@ -291,6 +291,20 @@ function WalletConnectorInner() {
     setDropdownOpen(false)
   }
 
+  // Listen for transaction success to refresh balances
+  useEffect(() => {
+    const handleTransactionSuccess = () => {
+      if (address) {
+        // Clear current balances and refetch
+        setBalances([])
+        setTimeout(() => fetchBalances(address), 1000) // Small delay for network propagation
+      }
+    }
+
+    window.addEventListener('transaction-success', handleTransactionSuccess)
+    return () => window.removeEventListener('transaction-success', handleTransactionSuccess)
+  }, [address])
+
   const openReceiveModal = () => {
     const event = new CustomEvent('open-receive-modal')
     window.dispatchEvent(event)

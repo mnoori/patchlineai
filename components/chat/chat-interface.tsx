@@ -31,6 +31,8 @@ import { Badge } from "@/components/ui/badge"
 import { DEMO_MODE } from "@/lib/config"
 import { SupervisorTraces } from '@/components/supervisor-traces'
 import { type AgentTrace } from "@/lib/supervisor-agent"
+import { processBlockchainAgentResponse } from "@/components/web3/agent-transaction-bridge"
+import { useWallet } from "@solana/wallet-adapter-react"
 
 type Message = {
   id: string
@@ -72,12 +74,14 @@ const QUICK_COMMANDS = [
   { command: "/schedule", description: "Schedule a release", completion: "help me schedule my next release" },
 ]
 
-// Agent types for Bedrock Agent mode
-const AGENT_TYPES = [
-  { key: "GMAIL_AGENT", label: "Gmail" },
-  { key: "LEGAL_AGENT", label: "Legal" },
-  { key: "SUPERVISOR_AGENT", label: "Supervisor" },
-]
+// Import agent types from source of truth
+import { AGENT_TYPES as CONFIG_AGENT_TYPES } from "@/lib/config"
+
+// Convert to Bedrock Agent mode format
+const AGENT_TYPES = CONFIG_AGENT_TYPES.map(agent => ({
+  key: `${agent.id.toUpperCase()}_AGENT`,
+  label: agent.name.replace(' Agent', '')
+}))
 
 type BedrockModelWithKey = BedrockModel & { key: string }
 
@@ -99,6 +103,9 @@ export function ChatInterface() {
   
   // Get current user
   const { userId } = useCurrentUser()
+
+  // Get wallet for blockchain transactions
+  const { publicKey } = useWallet()
 
   // Get available models for current mode
   const availableModels: BedrockModelWithKey[] = getAvailableModels(mode) as BedrockModelWithKey[]
@@ -500,6 +507,14 @@ export function ChatInterface() {
           // Stop agent working state in real mode
           if (mode === "agent" && !DEMO_MODE) {
             window.dispatchEvent(new CustomEvent("agent-complete"))
+          }
+
+          // Process blockchain agent responses
+          if (mode === "agent" && selectedAgent === "BLOCKCHAIN_AGENT" && publicKey) {
+            const result = processBlockchainAgentResponse(data.response, publicKey.toString())
+            if (result.processed) {
+              console.log("🔗 [BLOCKCHAIN] Transaction prepared, opening Phantom wallet...")
+            }
           }
 
           // Show additional info if email context was used

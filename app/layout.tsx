@@ -31,7 +31,7 @@ export default function RootLayout({
             {children}
             <SendCryptoModal />
             <ReceiveCryptoModal />
-            <Toaster position="top-right" richColors closeButton />
+            <Toaster position="bottom-right" richColors closeButton />
           </Web3Provider>
         </ThemeProvider>
       </body>

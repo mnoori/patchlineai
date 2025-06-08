@@ -1,28 +1,187 @@
+#!/usr/bin/env python3
+"""
+Patchline Scout Action Handler
+Lambda function for artist discovery and analytics operations
+"""
+
 import json
 import os
 import logging
 import boto3
 import requests
-from datetime import datetime
 from typing import Dict, List, Any
+from datetime import datetime
 
 # Configure logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# Environment variables
-SOUNDCHARTS_APP_ID = os.environ.get('SOUNDCHARTS_APP_ID')
-SOUNDCHARTS_API_KEY = os.environ.get('SOUNDCHARTS_API_KEY')
-SOUNDCHARTS_BASE_URL = 'https://customer.api.soundcharts.com'
+# Mock data for development - will be replaced with real APIs in production
+MOCK_ARTISTS_DB = {
+    "hyperpop": [
+        {
+            "name": "Alice Gas",
+            "genre": "hyperpop",
+            "followers": 85000,
+            "region": "US",
+            "growth_rate": 12.3,
+            "spotify_url": "https://open.spotify.com/artist/2ySXEW1ppTaKGYGNUfVnF5"
+        },
+        {
+            "name": "umru",
+            "genre": "hyperpop",
+            "followers": 65000,
+            "region": "US",
+            "growth_rate": 8.7,
+            "spotify_url": "https://open.spotify.com/artist/0FVcxncwxw2OXBrUZCYd2Y"
+        },
+        {
+            "name": "glaive",
+            "genre": "hyperpop",
+            "followers": 520000,
+            "region": "US",
+            "growth_rate": 25.1,
+            "spotify_url": "https://open.spotify.com/artist/0Z8gcpr1V8qYtK1w3zBm7W"
+        },
+        {
+            "name": "ericdoa",
+            "genre": "hyperpop",
+            "followers": 230000,
+            "region": "US",
+            "growth_rate": 15.8,
+            "spotify_url": "https://open.spotify.com/artist/5bjR6xEnFCRaD7QA9VbnN7"
+        },
+        {
+            "name": "dltzk",
+            "genre": "hyperpop",
+            "followers": 95000,
+            "region": "US",
+            "growth_rate": 18.2,
+            "spotify_url": "https://open.spotify.com/artist/1AcQGHqRFvxbXqYa2tgUdh"
+        }
+    ],
+    "afrobeats": [
+        {
+            "name": "Ayra Starr",
+            "genre": "afrobeats",
+            "followers": 1200000,
+            "region": "Nigeria",
+            "growth_rate": 45.2,
+            "spotify_url": "https://open.spotify.com/artist/5pT5c5glujVTCZQgNGOICl"
+        },
+        {
+            "name": "Victony",
+            "genre": "afrobeats",
+            "followers": 450000,
+            "region": "Nigeria",
+            "growth_rate": 38.7,
+            "spotify_url": "https://open.spotify.com/artist/14KydWmDDIcLiZHYSNRtQA"
+        },
+        {
+            "name": "Rema",
+            "genre": "afrobeats",
+            "followers": 3500000,
+            "region": "Nigeria",
+            "growth_rate": 23.1,
+            "spotify_url": "https://open.spotify.com/artist/46pWGuE3dSwY3bMMXGBvVS"
+        }
+    ],
+    "indie rock": [
+        {
+            "name": "Wet Leg",
+            "genre": "indie rock",
+            "followers": 950000,
+            "region": "UK",
+            "growth_rate": 28.3,
+            "spotify_url": "https://open.spotify.com/artist/5vv7l6rLtdDgJPtEn7fNwf"
+        },
+        {
+            "name": "Yard Act",
+            "genre": "indie rock",
+            "followers": 180000,
+            "region": "UK",
+            "growth_rate": 15.2,
+            "spotify_url": "https://open.spotify.com/artist/4WmA5YPu5aQ7Z0X3wlQm5X"
+        },
+        {
+            "name": "Black Country, New Road",
+            "genre": "indie rock",
+            "followers": 310000,
+            "region": "UK",
+            "growth_rate": 17.5,
+            "spotify_url": "https://open.spotify.com/artist/2JlGCHTIrm5AEcrE3UkRQP"
+        }
+    ]
+}
 
-# DynamoDB setup
-dynamodb = boto3.resource('dynamodb')
-WATCHLIST_TABLE = os.environ.get('SCOUT_WATCHLIST_TABLE', 'ScoutWatchlist')
+# Artist analysis mock data
+MOCK_ARTIST_ANALYSIS = {
+    "glaive": {
+        "name": "glaive",
+        "genres": ["hyperpop", "glitchcore", "digicore"],
+        "followers": {
+            "count": 520000,
+            "growth_rate": 25.1
+        },
+        "monthly_listeners": {
+            "count": 1850000,
+            "growth_rate": 32.7
+        },
+        "playlists": {
+            "count": 4200,
+            "editorial_count": 85
+        },
+        "top_tracks": [
+            {
+                "name": "astrid",
+                "streams": 38500000
+            },
+            {
+                "name": "synopsis",
+                "streams": 12700000
+            },
+            {
+                "name": "1984",
+                "streams": 9800000
+            }
+        ]
+    },
+    "Ayra Starr": {
+        "name": "Ayra Starr",
+        "genres": ["afrobeats", "afropop", "nigerian pop"],
+        "followers": {
+            "count": 1200000,
+            "growth_rate": 45.2
+        },
+        "monthly_listeners": {
+            "count": 5600000,
+            "growth_rate": 58.3
+        },
+        "playlists": {
+            "count": 8900,
+            "editorial_count": 125
+        },
+        "top_tracks": [
+            {
+                "name": "Rush",
+                "streams": 170000000
+            },
+            {
+                "name": "Bloody Samaritan",
+                "streams": 65000000
+            },
+            {
+                "name": "Away",
+                "streams": 28000000
+            }
+        ]
+    }
+}
 
 def lambda_handler(event, context):
     """Main Lambda handler for Scout Agent actions"""
     try:
-        logger.info(f"Event: {json.dumps(event)}")
+        logger.info(f"[SCOUT] Event: {json.dumps(event)}")
         
         # Extract action details
         action_group = event.get('actionGroup', '')
@@ -30,276 +189,48 @@ def lambda_handler(event, context):
         http_method = event.get('httpMethod', '')
         request_body = event.get('requestBody', {})
         
-        # Extract user ID from session
+        # Extract user ID
         user_id = extract_user_id(event)
         if not user_id:
             return create_response(400, {'error': 'User ID not found'}, api_path, http_method)
         
+        logger.info(f"[SCOUT] Action: {api_path} | Method: {http_method} | User: {user_id}")
+        
         # Route to appropriate handler
-        if api_path == '/search-artists' and http_method == 'POST':
-            return handle_search_artists(user_id, request_body)
-        elif api_path == '/get-artist-details' and http_method == 'POST':
-            return handle_get_artist_details(user_id, request_body)
-        elif api_path == '/get-artist-stats' and http_method == 'POST':
-            return handle_get_artist_stats(user_id, request_body)
-        elif api_path == '/get-playlist-data' and http_method == 'POST':
-            return handle_get_playlist_data(user_id, request_body)
-        elif api_path == '/track-artist' and http_method == 'POST':
-            return handle_track_artist(user_id, request_body)
-        elif api_path == '/generate-report' and http_method == 'POST':
-            return handle_generate_report(user_id, request_body)
+        if api_path == '/discover-artists' and http_method == 'POST':
+            return handle_discover_artists(user_id, request_body)
+        elif api_path == '/analyze-artist' and http_method == 'POST':
+            return handle_analyze_artist(user_id, request_body)
+        elif api_path == '/compare-artists' and http_method == 'POST':
+            return handle_compare_artists(user_id, request_body)
         else:
+            logger.error(f"[SCOUT] Action not found: {api_path} {http_method}")
             return create_response(404, {'error': 'Action not found'}, api_path, http_method)
             
     except Exception as e:
-        logger.error(f"Lambda handler error: {str(e)}")
-        return create_response(500, {'error': str(e)}, api_path or '/unknown', http_method or 'POST')
+        logger.error(f"[SCOUT] Error in Lambda handler: {str(e)}")
+        return create_response(500, {'error': str(e)}, api_path, http_method)
 
 def extract_user_id(event: Dict) -> str:
-    """Extract user ID from event"""
-    # Check sessionState first
-    if 'sessionState' in event:
-        session_attrs = event['sessionState'].get('sessionAttributes', {})
-        if 'userId' in session_attrs:
-            return session_attrs['userId']
-    
-    # Check direct sessionAttributes
-    if 'sessionAttributes' in event:
-        if 'userId' in event['sessionAttributes']:
-            return event['sessionAttributes']['userId']
-    
-    return None
-
-def soundcharts_request(endpoint: str, method: str = 'GET', params: Dict = None) -> Dict:
-    """Make request to Soundcharts API"""
-    headers = {
-        'x-app-id': SOUNDCHARTS_APP_ID,
-        'x-api-key': SOUNDCHARTS_API_KEY,
-        'Content-Type': 'application/json'
-    }
-    
-    url = f"{SOUNDCHARTS_BASE_URL}{endpoint}"
-    
+    """Extract user ID from session attributes"""
     try:
-        if method == 'GET':
-            response = requests.get(url, headers=headers, params=params)
-        else:
-            response = requests.post(url, headers=headers, json=params)
-        
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Soundcharts API error: {str(e)}")
-        raise Exception(f"Soundcharts API error: {str(e)}")
-
-def handle_search_artists(user_id: str, request_body: Dict) -> Dict:
-    """Search for artists"""
-    try:
-        # Parse request
-        content = parse_request_body(request_body)
-        query = content.get('query', '')
-        genre = content.get('genre', '')
-        location = content.get('location', '')
-        career_stage = content.get('career_stage', '')
-        
-        if not query:
-            return create_response(400, {'error': 'Query is required'}, '/search-artists', 'POST')
-        
-        # Search via Soundcharts
-        endpoint = f"/api/v2/artist/search/{query}"
-        params = {'limit': 10}
-        
-        result = soundcharts_request(endpoint, params=params)
-        
-        # Format response
-        artists = []
-        for item in result.get('items', []):
-            artists.append({
-                'id': item.get('uuid'),
-                'name': item.get('name'),
-                'slug': item.get('slug'),
-                'image_url': item.get('imageUrl'),
-                'app_url': item.get('appUrl')
-            })
-        
-        return create_response(200, {
-            'artists': artists,
-            'total': len(artists)
-        }, '/search-artists', 'POST')
-        
+        # Extract from session state if available
+        session_attributes = event.get('sessionAttributes', {})
+        if session_attributes and 'userId' in session_attributes:
+            return session_attributes['userId']
+            
+        # Fallback to session state
+        session_state = event.get('sessionState', {})
+        if session_state and 'sessionAttributes' in session_state:
+            return session_state['sessionAttributes'].get('userId', '')
+            
+        return ''
     except Exception as e:
-        logger.error(f"Error searching artists: {str(e)}")
-        return create_response(500, {'error': str(e)}, '/search-artists', 'POST')
-
-def handle_get_artist_details(user_id: str, request_body: Dict) -> Dict:
-    """Get detailed artist information"""
-    try:
-        content = parse_request_body(request_body)
-        artist_id = content.get('artist_id', '')
-        
-        if not artist_id:
-            return create_response(400, {'error': 'Artist ID is required'}, '/get-artist-details', 'POST')
-        
-        # Get artist metadata
-        endpoint = f"/api/v2.9/artist/{artist_id}"
-        result = soundcharts_request(endpoint)
-        
-        artist = result.get('object', {})
-        
-        # Format response
-        details = {
-            'id': artist.get('uuid'),
-            'name': artist.get('name'),
-            'slug': artist.get('slug'),
-            'image_url': artist.get('imageUrl'),
-            'country_code': artist.get('countryCode'),
-            'genres': artist.get('genres', []),
-            'biography': artist.get('biography'),
-            'career_stage': artist.get('careerStage'),
-            'gender': artist.get('gender'),
-            'birth_date': artist.get('birthDate')
-        }
-        
-        return create_response(200, details, '/get-artist-details', 'POST')
-        
-    except Exception as e:
-        logger.error(f"Error getting artist details: {str(e)}")
-        return create_response(500, {'error': str(e)}, '/get-artist-details', 'POST')
-
-def handle_get_artist_stats(user_id: str, request_body: Dict) -> Dict:
-    """Get artist statistics (limited in free tier)"""
-    try:
-        content = parse_request_body(request_body)
-        artist_id = content.get('artist_id', '')
-        platform = content.get('platform', 'spotify')
-        
-        if not artist_id:
-            return create_response(400, {'error': 'Artist ID is required'}, '/get-artist-stats', 'POST')
-        
-        # Note: Stats endpoints require paid tier
-        # Return mock data for demo purposes
-        stats = {
-            'artist_id': artist_id,
-            'platform': platform,
-            'monthly_listeners': 'Coming soon',
-            'followers': 'Coming soon',
-            'growth_rate': 'Coming soon',
-            'engagement_rate': 'Coming soon',
-            'note': 'Detailed stats require Soundcharts paid tier'
-        }
-        
-        return create_response(200, stats, '/get-artist-stats', 'POST')
-        
-    except Exception as e:
-        logger.error(f"Error getting artist stats: {str(e)}")
-        return create_response(500, {'error': str(e)}, '/get-artist-stats', 'POST')
-
-def handle_track_artist(user_id: str, request_body: Dict) -> Dict:
-    """Add artist to watchlist"""
-    try:
-        content = parse_request_body(request_body)
-        artist_id = content.get('artist_id', '')
-        notes = content.get('notes', '')
-        
-        if not artist_id:
-            return create_response(400, {'error': 'Artist ID is required'}, '/track-artist', 'POST')
-        
-        # Store in DynamoDB
-        table = dynamodb.Table(WATCHLIST_TABLE)
-        table.put_item(
-            Item={
-                'user_id': user_id,
-                'artist_id': artist_id,
-                'notes': notes,
-                'added_at': datetime.utcnow().isoformat(),
-                'status': 'active'
-            }
-        )
-        
-        return create_response(200, {
-            'message': 'Artist added to watchlist',
-            'artist_id': artist_id
-        }, '/track-artist', 'POST')
-        
-    except Exception as e:
-        logger.error(f"Error tracking artist: {str(e)}")
-        return create_response(500, {'error': str(e)}, '/track-artist', 'POST')
-
-def handle_generate_report(user_id: str, request_body: Dict) -> Dict:
-    """Generate artist report"""
-    try:
-        content = parse_request_body(request_body)
-        artist_id = content.get('artist_id', '')
-        report_type = content.get('report_type', 'quick')
-        
-        if not artist_id:
-            return create_response(400, {'error': 'Artist ID is required'}, '/generate-report', 'POST')
-        
-        # Get artist details
-        endpoint = f"/api/v2.9/artist/{artist_id}"
-        result = soundcharts_request(endpoint)
-        artist = result.get('object', {})
-        
-        # Generate report based on type
-        report = {
-            'artist_name': artist.get('name'),
-            'report_type': report_type,
-            'generated_at': datetime.utcnow().isoformat(),
-            'summary': f"{artist.get('name')} is a {artist.get('careerStage', 'emerging')} artist from {artist.get('countryCode', 'Unknown')}.",
-            'genres': artist.get('genres', []),
-            'career_stage': artist.get('careerStage'),
-            'biography': artist.get('biography', 'No biography available'),
-            'recommendations': generate_recommendations(artist)
-        }
-        
-        return create_response(200, report, '/generate-report', 'POST')
-        
-    except Exception as e:
-        logger.error(f"Error generating report: {str(e)}")
-        return create_response(500, {'error': str(e)}, '/generate-report', 'POST')
-
-def generate_recommendations(artist: Dict) -> List[str]:
-    """Generate recommendations based on artist data"""
-    recommendations = []
-    
-    career_stage = artist.get('careerStage', 'emerging')
-    
-    if career_stage == 'emerging':
-        recommendations.append("Focus on playlist placements to increase discovery")
-        recommendations.append("Consider TikTok marketing campaigns")
-        recommendations.append("Build local fanbase before expanding")
-    elif career_stage == 'mid_level':
-        recommendations.append("Time to consider label partnerships")
-        recommendations.append("Expand touring to new markets")
-        recommendations.append("Invest in professional music videos")
-    elif career_stage == 'superstar':
-        recommendations.append("Maintain momentum with consistent releases")
-        recommendations.append("Explore brand partnerships")
-        recommendations.append("Consider international expansion")
-    
-    return recommendations
-
-def parse_request_body(request_body: Dict) -> Dict:
-    """Parse request body from Bedrock Agent format"""
-    content = request_body.get('content', {})
-    
-    if isinstance(content, dict):
-        app_json = content.get('application/json', {})
-        
-        # Handle Bedrock Agent properties format
-        if 'properties' in app_json and isinstance(app_json['properties'], list):
-            parsed = {}
-            for prop in app_json['properties']:
-                if isinstance(prop, dict) and 'name' in prop:
-                    parsed[prop['name']] = prop.get('value')
-            return parsed
-        else:
-            return app_json
-    
-    return {}
+        logger.error(f"[SCOUT] Error extracting user ID: {str(e)}")
+        return ''
 
 def create_response(status_code: int, body: Dict, api_path: str, http_method: str) -> Dict:
-    """Create response for Bedrock Agent"""
+    """Create formatted response for Bedrock Agent"""
     return {
         'messageVersion': '1.0',
         'response': {
@@ -308,9 +239,116 @@ def create_response(status_code: int, body: Dict, api_path: str, http_method: st
             'httpMethod': http_method,
             'httpStatusCode': status_code,
             'responseBody': {
-                'application/json': {
-                    'body': json.dumps(body)
-                }
+                'contentType': 'application/json',
+                'content': json.dumps(body)
             }
         }
-    } 
+    }
+
+def handle_discover_artists(user_id: str, request_body: Dict) -> Dict:
+    """Handle discovery of new artists based on genre, metrics, and region"""
+    try:
+        body = json.loads(request_body.get('content', '{}'))
+        
+        # Extract parameters
+        genre = body.get('genre', '').lower()
+        region = body.get('region', '')
+        min_followers = body.get('min_followers', 0)
+        max_followers = body.get('max_followers', 10000000)
+        limit = body.get('limit', 5)
+        
+        # Validate parameters
+        if not genre:
+            return create_response(400, {'error': 'Genre is required'}, '/discover-artists', 'POST')
+            
+        # In production, this would call a real API or database
+        # For now, use mock data
+        artists = []
+        if genre in MOCK_ARTISTS_DB:
+            artists = MOCK_ARTISTS_DB[genre]
+            
+        # Apply filters
+        if region:
+            artists = [a for a in artists if region.lower() in a['region'].lower()]
+        artists = [a for a in artists if a['followers'] >= min_followers and a['followers'] <= max_followers]
+        
+        # Apply limit and sort by growth rate
+        artists = sorted(artists, key=lambda x: x['growth_rate'], reverse=True)[:limit]
+        
+        return create_response(200, {'artists': artists}, '/discover-artists', 'POST')
+        
+    except Exception as e:
+        logger.error(f"[SCOUT] Error discovering artists: {str(e)}")
+        return create_response(500, {'error': str(e)}, '/discover-artists', 'POST')
+
+def handle_analyze_artist(user_id: str, request_body: Dict) -> Dict:
+    """Handle analysis of a specific artist's performance and growth metrics"""
+    try:
+        body = json.loads(request_body.get('content', '{}'))
+        
+        # Extract parameters
+        artist_name = body.get('artist_name', '')
+        platform = body.get('platform', 'spotify')
+        time_period = body.get('time_period', '90d')
+        
+        # Validate parameters
+        if not artist_name:
+            return create_response(400, {'error': 'Artist name is required'}, '/analyze-artist', 'POST')
+            
+        # In production, this would call a real API or database
+        # For now, use mock data
+        if artist_name in MOCK_ARTIST_ANALYSIS:
+            return create_response(200, {'artist': MOCK_ARTIST_ANALYSIS[artist_name]}, '/analyze-artist', 'POST')
+        else:
+            return create_response(404, {'error': 'Artist not found'}, '/analyze-artist', 'POST')
+        
+    except Exception as e:
+        logger.error(f"[SCOUT] Error analyzing artist: {str(e)}")
+        return create_response(500, {'error': str(e)}, '/analyze-artist', 'POST')
+
+def handle_compare_artists(user_id: str, request_body: Dict) -> Dict:
+    """Handle comparison between multiple artists"""
+    try:
+        body = json.loads(request_body.get('content', '{}'))
+        
+        # Extract parameters
+        artist_names = body.get('artist_names', [])
+        metrics = body.get('metrics', ['followers', 'monthly_listeners'])
+        
+        # Validate parameters
+        if not artist_names or len(artist_names) < 2:
+            return create_response(400, {'error': 'At least two artist names are required'}, '/compare-artists', 'POST')
+            
+        # In production, this would call a real API or database
+        # For now, use mock data
+        comparison = {}
+        found_artists = []
+        
+        for name in artist_names:
+            if name in MOCK_ARTIST_ANALYSIS:
+                found_artists.append(name)
+                artist_data = MOCK_ARTIST_ANALYSIS[name]
+                comparison[name] = {}
+                
+                for metric in metrics:
+                    if metric == 'followers':
+                        comparison[name]['followers'] = artist_data['followers']
+                    elif metric == 'monthly_listeners':
+                        comparison[name]['monthly_listeners'] = artist_data['monthly_listeners']
+                    elif metric == 'playlist_reach':
+                        comparison[name]['playlist_reach'] = artist_data['playlists']
+        
+        if not comparison:
+            return create_response(404, {'error': 'No artists found'}, '/compare-artists', 'POST')
+            
+        # Generate simple recommendation
+        recommendation = f"Based on growth rates, {found_artists[0]} shows the strongest momentum in the {metrics[0]} metric."
+        
+        return create_response(200, {
+            'comparison': comparison,
+            'recommendation': recommendation
+        }, '/compare-artists', 'POST')
+        
+    except Exception as e:
+        logger.error(f"[SCOUT] Error comparing artists: {str(e)}")
+        return create_response(500, {'error': str(e)}, '/compare-artists', 'POST') 

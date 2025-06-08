@@ -1002,12 +1002,6 @@ trackWeb3Event('nft_ticket_minted', {
    - API response times
    - Wallet connection speed
 
-## Rollout Plan
-
-1. **Phase 1**: Internal testing with team
-2. **Phase 2**: Beta with selected users
-3. **Phase 3**: Gradual rollout to all tiers
-4. **Phase 4**: Marketing launch
 
 ## Support Documentation
 

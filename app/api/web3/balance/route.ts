@@ -13,6 +13,41 @@ interface TokenBalance {
   mint?: string
 }
 
+// In-memory cache for SOL price so we don't call the price API on every request
+let cachedSolPrice: { price: number; fetchedAt: number } | null = null
+
+// Fetch current SOL price (USD) from CoinGecko with 5-minute cache
+async function getSolPrice(): Promise<number> {
+  const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+  const now = Date.now()
+
+  if (cachedSolPrice && now - cachedSolPrice.fetchedAt < CACHE_TTL) {
+    return cachedSolPrice.price
+  }
+
+  try {
+    const res = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd',
+      { next: { revalidate: 300 } } // Hint for Next.js ISR / caching layer
+    )
+
+    if (!res.ok) throw new Error(`Price API error: ${res.status}`)
+
+    const data = (await res.json()) as { solana?: { usd?: number } }
+    const price = data.solana?.usd ?? 0
+
+    if (price > 0) {
+      cachedSolPrice = { price, fetchedAt: now }
+      return price
+    }
+    throw new Error('Invalid price received')
+  } catch (err) {
+    console.warn('[WEB3] Failed to fetch SOL price – falling back to previous/ default', err)
+    // Fallback: use cached value if we have one, otherwise a conservative default
+    return cachedSolPrice?.price ?? 100
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
     // Get address from query parameter
@@ -34,6 +69,9 @@ export async function GET(req: NextRequest) {
     const solBalance = await connection.getBalance(publicKey)
     const solAmount = solBalance / 1e9 // Convert lamports to SOL
 
+    // Get real-time SOL → USD price
+    const solPrice = await getSolPrice()
+
     // Fetch token accounts for SPL tokens (USDC etc)
     const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
       publicKey,
@@ -48,7 +86,7 @@ export async function GET(req: NextRequest) {
     balances.push({
       symbol: 'SOL',
       amount: solAmount,
-      usdValue: solAmount * 115, // Approximate USD value - could fetch real price from an API
+      usdValue: solAmount * solPrice,
       decimals: 9,
       logo: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png',
     })
@@ -74,7 +112,12 @@ export async function GET(req: NextRequest) {
       // Add more token checks here if needed
     }
 
-    return NextResponse.json({ balances })
+    return NextResponse.json({
+      balance: solAmount.toString(),
+      balanceUSD: (solAmount * solPrice).toFixed(2),
+      solPrice,
+      balances,
+    })
   } catch (error: any) {
     console.error('Failed to fetch balances:', error)
     return NextResponse.json(

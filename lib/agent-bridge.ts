@@ -108,6 +108,15 @@ export const AGENT_QUICK_ACTIONS = {
     primary: "Review Contracts",
     automations: ["Check expiring contracts", "Flag risky clauses", "Generate renewals", "Update compliance status"],
   },
+  Blockchain: {
+    primary: "Send SOL Payment",
+    automations: [
+      "Check wallet balance",
+      "Send to Coinbase",
+      "Validate addresses", 
+      "Monitor transactions"
+    ],
+  },
   Marketplace: {
     primary: "Discover Agents",
     automations: ["Check for updates", "Recommend new agents", "Optimize workflows", "Generate usage reports"],

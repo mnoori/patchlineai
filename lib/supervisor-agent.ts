@@ -3,7 +3,7 @@ import {
   InvokeAgentCommand 
 } from '@aws-sdk/client-bedrock-agent-runtime'
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime'
-import { CONFIG, GMAIL_AGENT, LEGAL_AGENT } from './config'
+import { CONFIG, GMAIL_AGENT, LEGAL_AGENT, BLOCKCHAIN_AGENT } from './config'
 import { BEDROCK_MODELS } from './models-config'
 
 // Agent Tool interface based on Agent Squad pattern
