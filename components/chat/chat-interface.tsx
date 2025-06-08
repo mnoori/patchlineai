@@ -31,8 +31,7 @@ import { Badge } from "@/components/ui/badge"
 import { DEMO_MODE } from "@/lib/config"
 import { SupervisorTraces } from '@/components/supervisor-traces'
 import { type AgentTrace } from "@/lib/supervisor-agent"
-import { processBlockchainAgentResponse } from "@/components/web3/agent-transaction-bridge"
-import { useWallet } from "@solana/wallet-adapter-react"
+// Removed wallet imports to prevent flickering - wallet operations handled in blockchain agent
 
 type Message = {
   id: string
@@ -104,8 +103,10 @@ export function ChatInterface() {
   // Get current user
   const { userId } = useCurrentUser()
 
-  // Get wallet for blockchain transactions
-  const { publicKey } = useWallet()
+  // Get wallet for blockchain transactions (only if available)
+  let publicKey = null
+  // Don't access wallet context in chat interface - it causes flickering
+  // Wallet operations should be handled in the blockchain agent
 
   // Get available models for current mode
   const availableModels: BedrockModelWithKey[] = getAvailableModels(mode) as BedrockModelWithKey[]
@@ -509,13 +510,8 @@ export function ChatInterface() {
             window.dispatchEvent(new CustomEvent("agent-complete"))
           }
 
-          // Process blockchain agent responses
-          if (mode === "agent" && selectedAgent === "BLOCKCHAIN_AGENT" && publicKey) {
-            const result = processBlockchainAgentResponse(data.response, publicKey.toString())
-            if (result.processed) {
-              console.log("🔗 [BLOCKCHAIN] Transaction prepared, opening Phantom wallet...")
-            }
-          }
+          // Blockchain agent responses are handled by the agent itself
+          // No need to process them here
 
           // Show additional info if email context was used
           if (data.hasEmailContext) {

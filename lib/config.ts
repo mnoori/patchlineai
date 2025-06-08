@@ -41,26 +41,26 @@ export const CONFIG = {
   // Define multiple agents by name for easy switching
   BEDROCK_AGENTS: {
     GMAIL_AGENT: {
-      ID: process.env.BEDROCK_GMAIL_AGENT_ID || "C7VZ0QWDSG",
-      ALIAS_ID: process.env.BEDROCK_GMAIL_AGENT_ALIAS_ID || "WDGFWL1YCB",
+      ID: process.env.BEDROCK_GMAIL_AGENT_ID || "IAGTE3GFDZ",
+      ALIAS_ID: process.env.BEDROCK_GMAIL_AGENT_ALIAS_ID || "M4DLDCPVGR",
       NAME: "Gmail Agent",
       DESCRIPTION: "Handles email operations via Gmail API"
     },
     LEGAL_AGENT: {
-      ID: process.env.BEDROCK_LEGAL_AGENT_ID || "XL4F5TPHXB",
-      ALIAS_ID: process.env.BEDROCK_LEGAL_AGENT_ALIAS_ID || "EC7EVTWEUQ",
+      ID: process.env.BEDROCK_LEGAL_AGENT_ID || "OL0ZQ2ZQRJ",
+      ALIAS_ID: process.env.BEDROCK_LEGAL_AGENT_ALIAS_ID || "CFYS9BFQYP",
       NAME: "Legal Agent",
       DESCRIPTION: "Analyzes legal documents & contracts from a music-industry perspective"
     },
     SCOUT_AGENT: {
-      ID: process.env.BEDROCK_SCOUT_AGENT_ID || 'TBD',
-      ALIAS_ID: process.env.BEDROCK_SCOUT_AGENT_ALIAS_ID || 'TBD',
+      ID: process.env.BEDROCK_SCOUT_AGENT_ID || 'YRPTSTNYZT',
+      ALIAS_ID: process.env.BEDROCK_SCOUT_AGENT_ALIAS_ID || '7M1GZJ5TU9',
       NAME: "Scout Agent",
       DESCRIPTION: "Discovers and analyzes promising artists using Soundcharts data"
     },
     BLOCKCHAIN_AGENT: {
-      ID: process.env.BEDROCK_BLOCKCHAIN_AGENT_ID || 'TEH8TAXFHN',
-      ALIAS_ID: process.env.BEDROCK_BLOCKCHAIN_AGENT_ALIAS_ID || 'WUWJSMHQ8G',
+      ID: process.env.BEDROCK_BLOCKCHAIN_AGENT_ID || 'BSILBXUVUQ',
+      ALIAS_ID: process.env.BEDROCK_BLOCKCHAIN_AGENT_ALIAS_ID || 'VROEKPWC3P',
       NAME: "Blockchain Agent",
       DESCRIPTION: "Handles Solana transactions and crypto payments"
     },
@@ -78,8 +78,8 @@ export const CONFIG = {
   ACTIVE_AGENT: "",
   
   // Legacy support - these will use the active agent
-  BEDROCK_AGENT_ID: process.env.BEDROCK_AGENT_ID || "C7VZ0QWDSG",
-  BEDROCK_AGENT_ALIAS_ID: process.env.BEDROCK_AGENT_ALIAS_ID || "WDGFWL1YCB",
+  BEDROCK_AGENT_ID: process.env.BEDROCK_AGENT_ID || "IAGTE3GFDZ",
+  BEDROCK_AGENT_ALIAS_ID: process.env.BEDROCK_AGENT_ALIAS_ID || "M4DLDCPVGR",
 
   // DynamoDB Tables
   USERS_TABLE: process.env.USERS_TABLE || "Users-staging",
@@ -334,33 +334,33 @@ if (IS_DEVELOPMENT_MODE) {
 }
 
 export const GMAIL_AGENT = {
-  agentId: process.env.BEDROCK_AGENT_ID || 'C7VZ0QWDSG',
-  agentAliasId: process.env.BEDROCK_AGENT_ALIAS_ID || 'WDGFWL1YCB',
+  agentId: process.env.BEDROCK_AGENT_ID || 'RH5QK3WOWU',
+  agentAliasId: process.env.BEDROCK_AGENT_ALIAS_ID || 'N/A (to be created after collaboration)',
   region: process.env.AWS_REGION || 'us-east-1'
 };
 
 export const LEGAL_AGENT = {
-  agentId: process.env.BEDROCK_LEGAL_AGENT_ID || 'XL4F5TPHXB',
-  agentAliasId: process.env.BEDROCK_LEGAL_AGENT_ALIAS_ID || 'EC7EVTWEUQ',
+  agentId: process.env.BEDROCK_LEGAL_AGENT_ID || 'OL0ZQ2ZQRJ',
+  agentAliasId: process.env.BEDROCK_LEGAL_AGENT_ALIAS_ID || 'CFYS9BFQYP',
   region: process.env.AWS_REGION || 'us-east-1'
 };
 
 export const SUPERVISOR_AGENT = {
-  agentId: process.env.BEDROCK_SUPERVISOR_AGENT_ID || 'TYQSQNB2GI',
-  agentAliasId: process.env.BEDROCK_SUPERVISOR_AGENT_ALIAS_ID || 'BXHO9QQ40S',
+  agentId: process.env.BEDROCK_SUPERVISOR_AGENT_ID || 'GSAFGIBMSQ',
+  agentAliasId: process.env.BEDROCK_SUPERVISOR_AGENT_ALIAS_ID || 'DWFWUTDZMC',
   region: process.env.AWS_REGION || 'us-east-1'
 };
 
 export const BLOCKCHAIN_AGENT = {
-  agentId: process.env.BEDROCK_BLOCKCHAIN_AGENT_ID || 'TEH8TAXFHN',
-  agentAliasId: process.env.BEDROCK_BLOCKCHAIN_AGENT_ALIAS_ID || 'WUWJSMHQ8G',
+  agentId: process.env.BEDROCK_BLOCKCHAIN_AGENT_ID || 'BSILBXUVUQ',
+  agentAliasId: process.env.BEDROCK_BLOCKCHAIN_AGENT_ALIAS_ID || 'VROEKPWC3P',
   region: process.env.AWS_REGION || 'us-east-1'
 };
 
 // ADD: Scout agent configuration
 export const SCOUT_AGENT = {
-  agentId: process.env.BEDROCK_SCOUT_AGENT_ID || 'TBD',
-  agentAliasId: process.env.BEDROCK_SCOUT_AGENT_ALIAS_ID || 'TBD',
+  agentId: process.env.BEDROCK_SCOUT_AGENT_ID || 'YRPTSTNYZT',
+  agentAliasId: process.env.BEDROCK_SCOUT_AGENT_ALIAS_ID || '7M1GZJ5TU9',
   region: process.env.AWS_REGION || 'us-east-1'
 };
 

@@ -31,6 +31,11 @@ def load_env_file():
                     os.environ[key.strip()] = value.strip()
         print("[OK] Environment variables loaded.")
 
+    # Map REGION_AWS -> AWS_REGION for Amplify compatibility
+    if os.environ.get('REGION_AWS') and not os.environ.get('AWS_REGION'):
+        os.environ['AWS_REGION'] = os.environ['REGION_AWS']
+        print("[INFO] REGION_AWS mapped to AWS_REGION for compatibility")
+
 def load_agent_config() -> Dict[str, Any]:
     """Loads agent configurations from agents.yaml and returns the one to be created."""
     agent_type_to_create = os.environ.get('PATCHLINE_AGENT_TYPE')
@@ -99,6 +104,15 @@ def main():
     else:
         print("\nSupervisor agent - skipping action group creation...")
 
+    # If this is a supervisor agent, skip prepare + alias. Collaboration & alias will be added later.
+    is_supervisor = 'collaborators' in config and 'action_group' not in config
+    if is_supervisor:
+        print("\n[INFO] Skipping prepare/alias for supervisor. Will be handled after collaborators are added.")
+        print_summary(agent, {
+            'agentAliasId': 'N/A (to be created after collaboration)'
+        }, role_arn, config)
+        return
+
     # Step 4: Prepare the Agent
     print("\nStep 4: Preparing agent...")
     prepare_agent(agent_id)
@@ -161,20 +175,30 @@ def create_agent(config: Dict[str, Any], role_arn: str) -> Dict[str, Any]:
     try:
         with open(prompt_path, 'r', encoding='utf-8') as f:
             instruction = f.read()
-        print(f"✅ Loaded instructions from {prompt_path}")
+        print("OK. Loaded instructions from file")
     except FileNotFoundError:
         print(f"[ERROR] Instruction file not found: {prompt_path}")
         sys.exit(1)
 
+    # Check if this is a supervisor agent (has collaborators but no action_group)
+    is_supervisor = 'collaborators' in config and 'action_group' not in config
+    
     try:
-        response = bedrock_agent.create_agent(
-            agentName=agent_name,
-            agentResourceRoleArn=role_arn,
-            description=config.get('description', 'A Bedrock agent.'),
-            foundationModel=foundation_model,
-            instruction=instruction,
-            idleSessionTTLInSeconds=config.get('idle_session_ttl', 900)
-        )
+        create_params = {
+            'agentName': agent_name,
+            'agentResourceRoleArn': role_arn,
+            'description': config.get('description', 'A Bedrock agent.'),
+            'foundationModel': foundation_model,
+            'instruction': instruction,
+            'idleSessionTTLInSeconds': config.get('idle_session_ttl', 900)
+        }
+        
+        # For supervisor agents, set collaboration mode during creation
+        if is_supervisor:
+            print(f"[INFO] Creating supervisor agent with SUPERVISOR_ROUTER collaboration mode")
+            create_params['agentCollaboration'] = 'SUPERVISOR_ROUTER'
+        
+        response = bedrock_agent.create_agent(**create_params)
         agent = response['agent']
         print(f"Successfully created agent: {agent['agentId']}")
         time.sleep(2)
@@ -311,12 +335,12 @@ def print_summary(agent: Dict, alias: Dict, role_arn: str, config: Dict):
     print(f"BEDROCK_{agent_type_upper}_AGENT_ALIAS_ID={alias['agentAliasId']}")
 
     if agent_type_upper == 'SUPERVISOR':
-        print(f"\\n# This is the supervisor, so it will be set as the default agent:")
+        print(f"\n# This is the supervisor, so it will be set as the default agent:")
         print(f"BEDROCK_AGENT_ID={agent['agentId']}")
         print(f"BEDROCK_AGENT_ALIAS_ID={alias['agentAliasId']}")
-        print("\\n--- SUPERVISOR AGENT NOTES ---")
+        print("\n--- SUPERVISOR AGENT NOTES ---")
         print("- This is a supervisor agent that coordinates other agents.")
         print("- You must now MANUALLY set up collaborators in the AWS console.")
 
 if __name__ == "__main__":
-    main() 
+    main()

@@ -1,26 +1,7 @@
 #!/usr/bin/env python3
 """
-Enhanced Lambda Management Script for Patchline
-
-Features:
-- Delete existing Lambdas before recreation (optional)
-- Target specific Lambdas (Gmail, Legal, or individual functions)
-- Validate Lambda configuration before deployment
-- Better error handling and progress reporting
-
-Usage:
-  python manage-lambda-functions.py [options]
-
-Options:
-  --recreate           Delete and recreate Lambdas instead of updating
-  --agent=TYPE         Deploy specific agent Lambdas (gmail, legal, all)
-  --function=NAME      Deploy a specific Lambda function by name
-  --check              Validate configurations without deploying
-  --verify             Verify Lambda permissions after deployment
-
-Examples:
-  python manage-lambda-functions.py --recreate --agent=legal
-  python manage-lambda-functions.py --function=gmail-action-handler
+Lambda function management script for all Patchline agents.
+Supports create/update/delete operations for all agent Lambda functions.
 """
 
 import boto3
@@ -30,38 +11,22 @@ import zipfile
 import tempfile
 import subprocess
 import sys
-import argparse
 from pathlib import Path
 import time
-from typing import Dict, List
+import argparse
+from typing import Dict, Optional
 
 # ---------------------------------------------------------------------------
-# ARGUMENT PARSING
+# ENV LOADER
 # ---------------------------------------------------------------------------
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Enhanced Lambda Management for Patchline")
-    parser.add_argument("--recreate", action="store_true", 
-                        help="Delete and recreate Lambdas instead of updating")
-    parser.add_argument("--agent", choices=["gmail", "legal", "blockchain", "scout", "all"],
-                        help="Deploy specific agent Lambdas")
-    parser.add_argument("--function", 
-                        help="Deploy a specific Lambda function by name")
-    parser.add_argument("--check", action="store_true",
-                        help="Validate configurations without deploying")
-    parser.add_argument("--verify", action="store_true",
-                        help="Verify Lambda permissions after deployment")
-    
-    return parser.parse_args()
-
-# ---------------------------------------------------------------------------
-# ENV LOADER (reuse existing project .env.local so no variable duplication)
-# ---------------------------------------------------------------------------
+def get_project_root() -> Path:
+    """Get the project root directory."""
+    return Path(__file__).parent.parent.parent
 
 def load_env_file():
     """Load environment variables from project root .env.local"""
-    project_root = Path(__file__).parent.parent.parent
-    env_file = project_root / '.env.local'
+    env_file = get_project_root() / '.env.local'
     if env_file.exists():
         print(f"[INFO] Loading environment variables from {env_file}...")
         with open(env_file, 'r', encoding='utf-8') as f:
@@ -70,392 +35,360 @@ def load_env_file():
                 if line and not line.startswith('#') and '=' in line:
                     key, value = line.split('=', 1)
                     os.environ[key.strip()] = value.strip()
-        print("[SUCCESS] Environment variables loaded from .env.local")
-    else:
-        print("⚠️ No .env.local file found in project root")
+        print("[OK] Environment variables loaded from .env.local")
 
-    # Normalize variable names for the script
+    # Map REGION_AWS -> AWS_REGION for Amplify compatibility
     if os.environ.get('REGION_AWS') and not os.environ.get('AWS_REGION'):
         os.environ['AWS_REGION'] = os.environ['REGION_AWS']
-    if os.environ.get('ACCESS_KEY_ID') and not os.environ.get('AWS_ACCESS_KEY_ID'):
-        os.environ['AWS_ACCESS_KEY_ID'] = os.environ['ACCESS_KEY_ID']
-    if os.environ.get('SECRET_ACCESS_KEY') and not os.environ.get('AWS_SECRET_ACCESS_KEY'):
-        os.environ['AWS_SECRET_ACCESS_KEY'] = os.environ['SECRET_ACCESS_KEY']
-    if os.environ.get('GOOGLE_CLIENT_ID') and not os.environ.get('GMAIL_CLIENT_ID'):
-        os.environ['GMAIL_CLIENT_ID'] = os.environ['GOOGLE_CLIENT_ID']
-    if os.environ.get('GOOGLE_CLIENT_SECRET') and not os.environ.get('GMAIL_CLIENT_SECRET'):
-        os.environ['GMAIL_CLIENT_SECRET'] = os.environ['GOOGLE_CLIENT_SECRET']
-    if os.environ.get('GOOGLE_REDIRECT_URI') and not os.environ.get('GMAIL_REDIRECT_URI'):
-        os.environ['GMAIL_REDIRECT_URI'] = os.environ['GOOGLE_REDIRECT_URI']
+        print("[INFO] REGION_AWS mapped to AWS_REGION for compatibility")
 
 # ---------------------------------------------------------------------------
-# BASIC CONFIG
+# LAMBDA CONFIGURATIONS
 # ---------------------------------------------------------------------------
 
-# Global variables will be initialized in main()
-REGION = None
-LAMBDA_RUNTIME = None
-LAMBDA_TIMEOUT = None
-LAMBDA_MEMORY = None
+LAMBDA_FUNCTIONS = {
+    'gmail': [
+        {
+            'name': 'gmail-auth-handler',
+            'handler_file': 'gmail-auth-handler.py',
+            'description': 'Gmail OAuth authentication handler'
+        },
+        {
+            'name': 'gmail-action-handler',
+            'handler_file': 'gmail-action-handler.py',
+            'description': 'Gmail action handler for Bedrock agent'
+        }
+    ],
+    'legal': [
+        {
+            'name': 'legal-action-handler',
+            'handler_file': 'legal-action-handler.py',
+            'description': 'Legal contract analysis handler'
+        }
+    ],
+    'blockchain': [
+        {
+            'name': 'blockchain-action-handler',
+            'handler_file': 'blockchain-action-handler.py',
+            'description': 'Blockchain operations handler'
+        }
+    ],
+    'scout': [
+        {
+            'name': 'scout-action-handler',
+            'handler_file': 'scout-action-handler.py',
+            'description': 'Scout music data handler'
+        }
+    ]
+}
+
+# Global AWS clients (initialized in main)
 lambda_client = None
 iam = None
 dynamodb = None
 s3_client = None
 secrets_client = None
-GMAIL_CLIENT_ID = None
-GMAIL_CLIENT_SECRET = None
-GMAIL_REDIRECT_URI = None
-
-# Function mappings by agent type
-LAMBDA_FUNCTIONS = {
-    "gmail": ["gmail-auth-handler", "gmail-action-handler"],
-    "legal": ["legal-contract-handler"],
-    "blockchain": ["blockchain-action-handler"],
-    "scout": ["scout-action-handler"],
-    "all": ["gmail-auth-handler", "gmail-action-handler", "legal-contract-handler", "blockchain-action-handler", "scout-action-handler"]
-}
+REGION = None
 
 # ---------------------------------------------------------------------------
 # IAM ROLE
 # ---------------------------------------------------------------------------
 
-def create_lambda_execution_role() -> str:
-    """Return an IAM role ARN suitable for Lambda execution."""
-    # Check if we should use an existing role from environment
+def get_or_create_lambda_role() -> str:
+    """Get or create IAM role for Lambda execution."""
+    # Check for existing role from environment
     existing_role = os.environ.get('LAMBDA_EXEC_ROLE_ARN')
     if existing_role:
-        print(f"[INFO] Using existing Lambda execution role from LAMBDA_EXEC_ROLE_ARN: {existing_role}")
+        print(f"[INFO] Using existing Lambda execution role: {existing_role}")
         return existing_role
 
     role_name = 'PatchlineLambdaExecutionRole'
 
+    try:
+        role = iam.get_role(RoleName=role_name)
+        print(f"[INFO] Using existing IAM role: {role['Role']['Arn']}")
+        return role['Role']['Arn']
+    except iam.exceptions.NoSuchEntityException:
+        pass
+
+    # Create new role
     trust_policy = {
         "Version": "2012-10-17",
         "Statement": [
             {
                 "Effect": "Allow",
                 "Principal": {"Service": "lambda.amazonaws.com"},
-                "Action": "sts:AssumeRole",
+                "Action": "sts:AssumeRole"
             }
-        ],
+        ]
     }
 
-    try:
-        resp = iam.create_role(
-            RoleName=role_name,
-            AssumeRolePolicyDocument=json.dumps(trust_policy),
-            Description='Execution role for Patchline Lambda functions',
-        )
-        role_arn = resp['Role']['Arn']
-        print(f"[SUCCESS] Created IAM role: {role_arn}")
-    except iam.exceptions.EntityAlreadyExistsException:
-        role_arn = iam.get_role(RoleName=role_name)['Role']['Arn']
-        print(f"[INFO] Re-using existing IAM role: {role_arn}")
+    response = iam.create_role(
+        RoleName=role_name,
+        AssumeRolePolicyDocument=json.dumps(trust_policy),
+        Description='Execution role for Patchline Lambda functions'
+    )
+    role_arn = response['Role']['Arn']
+    print(f"[SUCCESS] Created IAM role: {role_arn}")
 
-    # Attach basic and service policies (idempotent)
+    # Attach policies
     policies = [
         'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
         'arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess',
         'arn:aws:iam::aws:policy/SecretsManagerReadWrite',
         'arn:aws:iam::aws:policy/AmazonS3FullAccess',
+        'arn:aws:iam::aws:policy/AmazonBedrockFullAccess'
     ]
-    for p in policies:
+    
+    for policy in policies:
         try:
-            iam.attach_role_policy(RoleName=role_name, PolicyArn=p)
+            iam.attach_role_policy(RoleName=role_name, PolicyArn=policy)
         except Exception:
             pass
 
-    print("[INFO] Waiting for IAM role propagation ...")
+    print("[INFO] Waiting for IAM role propagation...")
     time.sleep(10)
     return role_arn
 
 # ---------------------------------------------------------------------------
-# LAMBDA MANAGEMENT
+# DEPLOYMENT PACKAGE
 # ---------------------------------------------------------------------------
 
-def delete_lambda(function_name: str) -> bool:
-    """Delete a Lambda function if it exists."""
-    try:
-        lambda_client.get_function(FunctionName=function_name)
-        lambda_client.delete_function(FunctionName=function_name)
-        print(f"[INFO] Deleted Lambda function: {function_name}")
-        # Add a short delay to ensure AWS registers the deletion
-        time.sleep(3)
-        return True
-    except lambda_client.exceptions.ResourceNotFoundException:
-        print(f"[INFO] Lambda function doesn't exist: {function_name}")
-        return False
-    except Exception as e:
-        print(f"[ERROR] Error deleting Lambda function {function_name}: {str(e)}")
-        return False
-
-def list_lambdas() -> List[str]:
-    """List all Lambda functions with the Patchline prefix."""
-    try:
-        functions = []
-        paginator = lambda_client.get_paginator('list_functions')
-        for page in paginator.paginate():
-            for fn in page['Functions']:
-                name = fn['FunctionName']
-                if any(name.startswith(p) for p in ['gmail-', 'legal-', 'blockchain-', 'scout-']):
-                    functions.append(name)
-        return functions
-    except Exception as e:
-        print(f"[ERROR] Error listing Lambda functions: {str(e)}")
-        return []
-
-# ---------------------------------------------------------------------------
-# ZIP PACKAGE CREATION
-# ---------------------------------------------------------------------------
-
-def create_deployment_package(function_name: str, source_filename: str) -> bytes:
-    """Package the Lambda function code + dependencies and return bytes."""
-    lambda_src_dir = Path(__file__).parent.parent / 'lambda'
-    source_path = lambda_src_dir / source_filename
+def create_deployment_package(function_name: str, handler_file: str) -> bytes:
+    """Create deployment package with Lambda code and dependencies."""
+    lambda_src_dir = get_project_root() / 'backend' / 'lambda'
+    source_path = lambda_src_dir / handler_file
+    
     if not source_path.exists():
         raise FileNotFoundError(f"Lambda source not found: {source_path}")
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir)
-
+        
         # Copy handler as index.py
         (tmp_path / 'index.py').write_text(source_path.read_text(encoding='utf-8'))
-
-        # Install dependencies
+        
+        # Install dependencies if requirements.txt exists
         req_file = lambda_src_dir / 'requirements.txt'
         if req_file.exists():
+            print(f"[INFO] Installing dependencies for {function_name}...")
             subprocess.run([
-                sys.executable,
-                '-m',
-                'pip',
-                'install',
-                '-r',
-                str(req_file),
-                '-t',
-                str(tmp_path),
-                '--quiet',
+                sys.executable, '-m', 'pip', 'install',
+                '-r', str(req_file),
+                '-t', str(tmp_path),
+                '--quiet'
             ], check=True)
-
-        # Zip up
+        
+        # Create zip
         zip_bytes_io = tempfile.SpooledTemporaryFile()
         with zipfile.ZipFile(zip_bytes_io, 'w', zipfile.ZIP_DEFLATED) as zf:
             for file in tmp_path.rglob('*'):
                 if file.is_file():
                     zf.write(file, file.relative_to(tmp_path))
+        
         zip_bytes_io.seek(0)
         return zip_bytes_io.read()
 
 # ---------------------------------------------------------------------------
-# LAMBDA DEPLOY/UPDATE
+# LAMBDA OPERATIONS
 # ---------------------------------------------------------------------------
 
-def deploy_lambda(function_name: str, handler_file: str, role_arn: str, env: Dict[str, str], recreate: bool = False) -> str:
-    """Create or update the Lambda function and return its ARN."""
-    print(f"\n[INFO] Deploying {function_name} ...")
-    
-    # Check if function exists
+def delete_lambda_function(function_name: str) -> bool:
+    """Delete a Lambda function if it exists."""
     try:
-        lambda_client.get_function(FunctionName=function_name)
-        exists = True
+        lambda_client.delete_function(FunctionName=function_name)
+        print(f"[INFO] Deleted Lambda function: {function_name}")
+        return True
     except lambda_client.exceptions.ResourceNotFoundException:
-        exists = False
-    
-    # Delete if recreate flag is set and function exists
-    if recreate and exists:
-        print(f"[INFO] Recreate flag set - deleting existing Lambda: {function_name}")
-        delete_lambda(function_name)
-        exists = False
-    
-    # Create deployment package
-    zip_bytes = create_deployment_package(function_name, handler_file)
+        print(f"[INFO] Lambda function not found: {function_name}")
+        return False
+    except Exception as e:
+        print(f"[ERROR] Failed to delete {function_name}: {str(e)}")
+        return False
 
-    if exists:
-        # Update existing function
-        lambda_client.update_function_code(FunctionName=function_name, ZipFile=zip_bytes)
-        lambda_client.update_function_configuration(
-            FunctionName=function_name,
-            Runtime=LAMBDA_RUNTIME,
-            Role=role_arn,
-            Handler='index.lambda_handler',
-            Timeout=LAMBDA_TIMEOUT,
-            MemorySize=LAMBDA_MEMORY,
-            Environment={'Variables': env},
-        )
-        print("[SUCCESS] Function updated.")
-    else:
-        # Create new function
-        lambda_client.create_function(
-            FunctionName=function_name,
-            Runtime=LAMBDA_RUNTIME,
-            Role=role_arn,
-            Handler='index.lambda_handler',
-            Code={'ZipFile': zip_bytes},
-            Timeout=LAMBDA_TIMEOUT,
-            MemorySize=LAMBDA_MEMORY,
-            Environment={'Variables': env},
-            Description=f'Patchline {function_name}',
-        )
-        print("[SUCCESS] Function created.")
-
-    # Wait for code update to finish
-    lambda_client.get_waiter('function_active').wait(FunctionName=function_name)
-    fn_arn = lambda_client.get_function(FunctionName=function_name)['Configuration']['FunctionArn']
-    
-    # Add resource-based policy for Bedrock to invoke the function
-    if function_name in ['gmail-action-handler', 'legal-contract-handler', 'blockchain-action-handler', 'scout-action-handler']:
-        add_bedrock_invoke_permission(function_name)
-    
-    print(f"[INFO] {function_name} ARN: {fn_arn}")
-    return fn_arn
-
-def add_bedrock_invoke_permission(function_name: str):
-    """Add resource-based policy to allow Bedrock to invoke the Lambda function"""
+def add_bedrock_permission(function_name: str):
+    """Add permission for Bedrock to invoke the Lambda function."""
     try:
-        # Get account ID using STS
-        sts_client = boto3.client('sts')
-        account_id = sts_client.get_caller_identity()['Account']
-        
         lambda_client.add_permission(
             FunctionName=function_name,
             StatementId='AllowBedrockInvoke',
             Action='lambda:InvokeFunction',
-            Principal='bedrock.amazonaws.com',
-            SourceAccount=account_id
+            Principal='bedrock.amazonaws.com'
         )
         print(f"[SUCCESS] Added Bedrock invoke permission to {function_name}")
     except lambda_client.exceptions.ResourceConflictException:
-        print(f"[INFO] Bedrock invoke permission already exists for {function_name}")
+        print(f"[INFO] Bedrock permission already exists for {function_name}")
     except Exception as e:
-        print(f"[ERROR] Failed to add Bedrock permission: {str(e)}")
+        print(f"[WARNING] Could not add Bedrock permission to {function_name}: {str(e)}")
 
-def get_lambda_env_vars(function_name: str) -> Dict[str, str]:
-    """Returns a dictionary of environment variables for a given function."""
+def deploy_lambda_function(function_config: Dict, role_arn: str, env_vars: Dict) -> Optional[str]:
+    """Deploy (create or update) a Lambda function."""
+    function_name = function_config['name']
+    handler_file = function_config['handler_file']
     
-    # Common environment variables for all functions
-    common_env = {
-        'PATCHLINE_AWS_REGION': REGION,
-        'PYTHONIOENCODING': 'utf-8'
-    }
-
-    # Specific environment variables for each function.
-    specific_env = {
-        'gmail-auth-handler': {
-            'GMAIL_CLIENT_ID': GMAIL_CLIENT_ID,
-            'GMAIL_CLIENT_SECRET': GMAIL_CLIENT_SECRET,
-            'GMAIL_REDIRECT_URI': GMAIL_REDIRECT_URI,
-            'DYNAMODB_TABLE': 'PlatformConnections-staging',
-        },
-        'gmail-action-handler': {
-            'PLATFORM_CONNECTIONS_TABLE': 'PlatformConnections-staging',
-            'GMAIL_SECRETS_NAME': 'patchline/gmail-oauth',
-            'KNOWLEDGE_BASE_BUCKET': 'patchline-email-knowledge-base'
-        },
-        'legal-contract-handler': {
-            'CONTRACTS_TABLE': 'Contracts-staging',
-            'KNOWLEDGE_BASE_BUCKET': 'patchline-legal-knowledge-base'
-        },
-        'blockchain-action-handler': {
-            'WALLETS_TABLE': 'Wallets-staging',
-            'TRANSACTIONS_TABLE': 'Transactions-staging',
-            'SOLANA_RPC_URL': os.environ.get('HELIUS_RPC_URL', 'https://api.mainnet-beta.solana.com')
-        },
-        'scout-action-handler': {
-             'ARTISTS_TABLE': 'Artists-staging',
-             'SOUNDCHARTS_API_KEY_SECRET': 'patchline/soundcharts-api-key'
-        }
-    }
+    print(f"[INFO] Deploying {function_name} ...")
     
-    env = common_env.copy()
-    env.update(specific_env.get(function_name, {}))
-    
-    # Lambda environment variables must be strings.
-    return {k: str(v) for k, v in env.items() if v is not None}
-
-def verify_lambda_permissions(function_name: str) -> bool:
-    """Verify that a Lambda function has the necessary permissions for Bedrock."""
     try:
-        policy = lambda_client.get_policy(FunctionName=function_name)
-        policy_json = json.loads(policy['Policy'])
+        # Create deployment package
+        zip_bytes = create_deployment_package(function_name, handler_file)
         
-        # Check for Bedrock permissions
-        for statement in policy_json['Statement']:
-            if (statement['Principal'].get('Service') == 'bedrock.amazonaws.com' and 
-                statement['Action'] == 'lambda:InvokeFunction'):
-                print(f"[SUCCESS] {function_name} has proper Bedrock permissions")
-                return True
-                
-        print(f"[WARNING] {function_name} is missing Bedrock permissions")
-        return False
-    except lambda_client.exceptions.ResourceNotFoundException:
-        print(f"[ERROR] Lambda function not found: {function_name}")
-        return False
+        # Check if function exists
+        try:
+            lambda_client.get_function(FunctionName=function_name)
+            exists = True
+        except lambda_client.exceptions.ResourceNotFoundException:
+            exists = False
+        
+        runtime = os.environ.get('LAMBDA_RUNTIME', 'python3.9')
+        timeout = int(os.environ.get('LAMBDA_TIMEOUT', '300'))
+        memory = int(os.environ.get('LAMBDA_MEMORY', '512'))
+        
+        if exists:
+            # Update existing function
+            lambda_client.update_function_code(
+                FunctionName=function_name,
+                ZipFile=zip_bytes
+            )
+            lambda_client.update_function_configuration(
+                FunctionName=function_name,
+                Runtime=runtime,
+                Role=role_arn,
+                Handler='index.lambda_handler',
+                Timeout=timeout,
+                MemorySize=memory,
+                Environment={'Variables': env_vars}
+            )
+            print(f"[SUCCESS] Function updated.")
+        else:
+            # Create new function
+            lambda_client.create_function(
+                FunctionName=function_name,
+                Runtime=runtime,
+                Role=role_arn,
+                Handler='index.lambda_handler',
+                Code={'ZipFile': zip_bytes},
+                Timeout=timeout,
+                MemorySize=memory,
+                Environment={'Variables': env_vars},
+                Description=function_config.get('description', f'Patchline {function_name}')
+            )
+            print(f"[SUCCESS] Function created.")
+        
+        # Wait for function to be active
+        lambda_client.get_waiter('function_active').wait(FunctionName=function_name)
+        
+        # Add Bedrock permission for action handlers
+        if 'action-handler' in function_name:
+            add_bedrock_permission(function_name)
+        
+        # Get function ARN
+        response = lambda_client.get_function(FunctionName=function_name)
+        arn = response['Configuration']['FunctionArn']
+        print(f"[INFO] {function_name} ARN: {arn}")
+        return arn
+        
     except Exception as e:
-        if 'ResourceNotFoundException' in str(e):
-            print(f"[WARNING] {function_name} has no resource policy")
-            return False
-        print(f"[ERROR] Error checking permissions for {function_name}: {str(e)}")
-        return False
+        print(f"[ERROR] Failed to deploy {function_name}: {str(e)}")
+        return None
 
 # ---------------------------------------------------------------------------
 # SUPPORTING RESOURCES
 # ---------------------------------------------------------------------------
 
-def ensure_dynamodb_table(table_name: str) -> None:
+def ensure_dynamodb_table(table_name: str):
+    """Ensure DynamoDB table exists."""
     try:
+        dynamodb.describe_table(TableName=table_name)
+        print(f"[INFO] DynamoDB table already exists: {table_name}")
+    except dynamodb.exceptions.ResourceNotFoundException:
         dynamodb.create_table(
             TableName=table_name,
             KeySchema=[{'AttributeName': 'userId', 'KeyType': 'HASH'}],
             AttributeDefinitions=[{'AttributeName': 'userId', 'AttributeType': 'S'}],
-            BillingMode='PAY_PER_REQUEST',
+            BillingMode='PAY_PER_REQUEST'
         )
         print(f"[SUCCESS] Created DynamoDB table: {table_name}")
-    except Exception as e:
-        if 'ResourceInUseException' in str(e) or 'Table already exists' in str(e):
-            print(f"[INFO] DynamoDB table already exists: {table_name}")
-        else:
-            print(f"[WARNING] Error creating DynamoDB table: {str(e)}")
+        dynamodb.get_waiter('table_exists').wait(TableName=table_name)
 
-def ensure_s3_bucket(bucket_name: str) -> None:
+def ensure_s3_bucket(bucket_name: str):
+    """Ensure S3 bucket exists."""
     try:
+        s3_client.head_bucket(Bucket=bucket_name)
+        print(f"[INFO] S3 bucket already exists: {bucket_name}")
+    except s3_client.exceptions.NoSuchBucket:
         if REGION == 'us-east-1':
             s3_client.create_bucket(Bucket=bucket_name)
         else:
             s3_client.create_bucket(
                 Bucket=bucket_name,
-                CreateBucketConfiguration={'LocationConstraint': REGION},
+                CreateBucketConfiguration={'LocationConstraint': REGION}
             )
         print(f"[SUCCESS] Created S3 bucket: {bucket_name}")
-    except s3_client.exceptions.BucketAlreadyOwnedByYou:
-        print(f"[INFO] S3 bucket already exists: {bucket_name}")
-    except s3_client.exceptions.BucketAlreadyExists:
-        print(f"[INFO] S3 bucket name taken but owned by another account: {bucket_name}")
 
 def store_gmail_secret():
-    """Store Gmail OAuth credentials in Secrets Manager"""
-    if not all([GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REDIRECT_URI]):
-        print("[WARNING] Skipping Gmail secret creation - credentials not found in environment")
-        return
-        
+    """Store Gmail OAuth credentials in Secrets Manager."""
     secret_name = 'patchline/gmail-oauth'
-    secret_val = {
+    
+    client_id = os.environ.get('GMAIL_CLIENT_ID', os.environ.get('GOOGLE_CLIENT_ID'))
+    client_secret = os.environ.get('GMAIL_CLIENT_SECRET', os.environ.get('GOOGLE_CLIENT_SECRET'))
+    redirect_uri = os.environ.get('GMAIL_REDIRECT_URI', os.environ.get('GOOGLE_REDIRECT_URI'))
+    
+    if not all([client_id, client_secret, redirect_uri]):
+        print("[WARNING] Gmail OAuth credentials not found in environment")
+        return
+    
+    secret_value = {
         'web': {
-            'client_id': GMAIL_CLIENT_ID,
-            'client_secret': GMAIL_CLIENT_SECRET,
-            'redirect_uris': [GMAIL_REDIRECT_URI],
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'redirect_uris': [redirect_uri],
             'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
-            'token_uri': 'https://oauth2.googleapis.com/token',
+            'token_uri': 'https://oauth2.googleapis.com/token'
         }
     }
-
+    
     try:
         secrets_client.create_secret(
             Name=secret_name,
-            SecretString=json.dumps(secret_val),
-            Description='Gmail OAuth credentials for Patchline',
+            SecretString=json.dumps(secret_value),
+            Description='Gmail OAuth credentials for Patchline'
         )
-        print(f"[SUCCESS] Created Secrets Manager secret: {secret_name}")
+        print(f"[SUCCESS] Created secret: {secret_name}")
     except secrets_client.exceptions.ResourceExistsException:
-        secrets_client.update_secret(SecretId=secret_name, SecretString=json.dumps(secret_val))
+        secrets_client.update_secret(
+            SecretId=secret_name,
+            SecretString=json.dumps(secret_value)
+        )
+        print(f"[INFO] Updated existing secret: {secret_name}")
+
+def store_soundcharts_secret():
+    """Store Soundcharts credentials in Secrets Manager."""
+    secret_name = 'patchline/soundcharts-api'
+    
+    soundcharts_id = os.environ.get('SOUNDCHARTS_ID')
+    soundcharts_token = os.environ.get('SOUNDCHARTS_TOKEN')
+    
+    if not soundcharts_id or not soundcharts_token:
+        print("[WARNING] SOUNDCHARTS_ID or SOUNDCHARTS_TOKEN not found in environment")
+        return
+    
+    secret_value = {
+        'id': soundcharts_id,
+        'token': soundcharts_token
+    }
+    
+    try:
+        secrets_client.create_secret(
+            Name=secret_name,
+            SecretString=json.dumps(secret_value),
+            Description='Soundcharts API key for Patchline Scout'
+        )
+        print(f"[SUCCESS] Created secret: {secret_name}")
+    except secrets_client.exceptions.ResourceExistsException:
+        secrets_client.update_secret(
+            SecretId=secret_name,
+            SecretString=json.dumps(secret_value)
+        )
         print(f"[INFO] Updated existing secret: {secret_name}")
 
 # ---------------------------------------------------------------------------
@@ -463,117 +396,94 @@ def store_gmail_secret():
 # ---------------------------------------------------------------------------
 
 def main():
-    args = parse_arguments()
+    """Main function."""
+    parser = argparse.ArgumentParser(description='Manage Lambda functions for Patchline agents')
+    parser.add_argument('--agent', choices=['gmail', 'legal', 'blockchain', 'scout', 'all'],
+                        default='all', help='Which agent Lambda functions to manage')
+    parser.add_argument('--recreate', action='store_true',
+                        help='Delete and recreate Lambda functions')
+    parser.add_argument('--delete', action='store_true',
+                        help='Delete Lambda functions without recreating')
     
-    # Print mode
-    if args.check:
-        print("\n[INFO] CHECK MODE: Will validate configuration without deploying")
-    if args.recreate:
-        print("\n[INFO] RECREATE MODE: Will delete and recreate Lambda functions")
-        
-    # Ensure environment variables are loaded first
+    args = parser.parse_args()
+    
+    # Load environment
     load_env_file()
-
-    # Ensure our AWS region is set
+    
+    # Initialize globals
     global REGION, lambda_client, iam, dynamodb, s3_client, secrets_client
-    global LAMBDA_RUNTIME, LAMBDA_TIMEOUT, LAMBDA_MEMORY
-    global GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REDIRECT_URI
-
+    
     REGION = os.environ.get('AWS_REGION', 'us-east-1')
     print(f"[INFO] AWS Region: {REGION}")
-
-    # Set up AWS clients
+    
+    # Initialize AWS clients
     lambda_client = boto3.client('lambda', region_name=REGION)
     iam = boto3.client('iam', region_name=REGION)
     dynamodb = boto3.client('dynamodb', region_name=REGION)
     s3_client = boto3.client('s3', region_name=REGION)
     secrets_client = boto3.client('secretsmanager', region_name=REGION)
-
-    # Set additional Lambda configs
-    LAMBDA_RUNTIME = os.environ.get('LAMBDA_RUNTIME', 'python3.9')
-    LAMBDA_TIMEOUT = int(os.environ.get('LAMBDA_TIMEOUT', '30'))
-    LAMBDA_MEMORY = int(os.environ.get('LAMBDA_MEMORY', '256'))
-    print(f"[INFO] Lambda Config: {LAMBDA_RUNTIME}, {LAMBDA_TIMEOUT}s timeout, {LAMBDA_MEMORY}MB memory")
-
-    # Gmail OAuth credentials
-    GMAIL_CLIENT_ID = os.environ.get('GMAIL_CLIENT_ID')
-    GMAIL_CLIENT_SECRET = os.environ.get('GMAIL_CLIENT_SECRET')
-    GMAIL_REDIRECT_URI = os.environ.get('GMAIL_REDIRECT_URI')
-
-    # If in check mode, just list the current Lambdas and exit
-    if args.check:
-        print("\n[INFO] Current Lambda functions:")
-        for fn in list_lambdas():
-            try:
-                config = lambda_client.get_function(FunctionName=fn)['Configuration']
-                print(f"  - {fn}")
-                print(f"    - Runtime: {config['Runtime']}")
-                print(f"    - Memory: {config['MemorySize']}MB")
-                print(f"    - Timeout: {config['Timeout']}s")
-                print(f"    - Last Modified: {config['LastModified']}")
-                
-                # Check permissions
-                has_permissions = verify_lambda_permissions(fn)
-                if not has_permissions and fn in ['gmail-action-handler', 'legal-contract-handler']:
-                    print(f"    [WARNING] Missing Bedrock permissions")
-                    
-            except Exception as e:
-                print(f"  - {fn} - Error getting details: {str(e)}")
-        
-        print("\n[SUCCESS] Check complete!")
-        return
-
-    # Need execution role for Lambda
-    role_arn = create_lambda_execution_role()
     
-    # Determine which functions to deploy
-    functions_to_deploy = []
-    if args.function:
-        functions_to_deploy.append(args.function)
-    elif args.agent:
-        agent_type = args.agent.lower()
-        if agent_type in LAMBDA_FUNCTIONS:
-            functions_to_deploy = LAMBDA_FUNCTIONS[agent_type]
-        else:
-            print(f"[ERROR] Unknown agent type: {agent_type}")
-            return
+    # Get or create IAM role
+    role_arn = get_or_create_lambda_role()
+    
+    # Common environment variables for Lambda functions
+    env_vars = {
+        'PATCHLINE_AWS_REGION': REGION,
+        'PATCHLINE_DDB_TABLE': 'PatchlineTokens',
+        'PATCHLINE_S3_BUCKET': f'patchline-files-{REGION}',
+        'PATCHLINE_SECRETS_ID': 'patchline/gmail-oauth',
+        'SOUNDCHARTS_SECRET_ID': 'patchline/soundcharts-api'
+    }
+    
+    # Determine which agents to process
+    if args.agent == 'all':
+        agents_to_process = list(LAMBDA_FUNCTIONS.keys())
     else:
-        # Default to all if no specific agent/function is provided
-        functions_to_deploy = LAMBDA_FUNCTIONS['all']
-
-    print(f"\n[INFO] Will deploy the following Lambda functions: {', '.join(functions_to_deploy)}")
-
-    # Ensure supporting resources are ready
-    ensure_dynamodb_table('PatchlineTokens')
-    ensure_s3_bucket(f'patchline-files-{REGION}')
-    store_gmail_secret()
-
-    # Deploy each function
-    for function_name in functions_to_deploy:
-        try:
-            handler_file = f"{function_name}.py"
-            env_vars = get_lambda_env_vars(function_name)
-            deploy_lambda(function_name, handler_file, role_arn, env_vars, args.recreate)
-        except FileNotFoundError as e:
-            print(f"[ERROR] Error: {str(e)}")
-            print(f"   Make sure {handler_file} exists in the backend/lambda directory")
-        except Exception as e:
-            print(f"[ERROR] Error deploying {function_name}: {str(e)}")
+        agents_to_process = [args.agent]
     
-    # Verify permissions if requested
-    if args.verify:
-        print("\n[INFO] Verifying Lambda permissions post-deployment...")
-        all_verified = True
-        for fn in functions_to_deploy:
-            if not verify_lambda_permissions(fn):
-                all_verified = False
-        if all_verified:
-            print("[SUCCESS] All deployed functions have necessary permissions.")
-        else:
-            print("[WARNING] Some functions may be missing permissions.")
-
-    print("\n[SUCCESS] Lambda deployment complete!")
-
+    print(f"[INFO] Processing agents: {', '.join(agents_to_process)}")
+    
+    # Create supporting resources
+    ensure_dynamodb_table(env_vars['PATCHLINE_DDB_TABLE'])
+    ensure_s3_bucket(env_vars['PATCHLINE_S3_BUCKET'])
+    
+    # Store secrets if needed
+    if 'gmail' in agents_to_process:
+        store_gmail_secret()
+    if 'scout' in agents_to_process:
+        store_soundcharts_secret()
+    
+    # Track failed functions
+    failed_functions = []
+    
+    # Process each agent's Lambda functions
+    for agent in agents_to_process:
+        print(f"\n[INFO] Processing {agent} agent Lambda functions...")
+        
+        for func_config in LAMBDA_FUNCTIONS.get(agent, []):
+            function_name = func_config['name']
+            
+            # Delete if requested
+            if args.delete or args.recreate:
+                print(f"[INFO] Recreate flag set - deleting existing Lambda: {function_name}")
+                delete_lambda_function(function_name)
+                time.sleep(2)
+            
+            # Deploy unless delete-only
+            if not args.delete:
+                arn = deploy_lambda_function(func_config, role_arn, env_vars)
+                if not arn:
+                    failed_functions.append(function_name)
+    
+    # Final status
+    if failed_functions:
+        print(f"\n[ERROR] Failed to deploy {len(failed_functions)} functions:")
+        for func in failed_functions:
+            print(f"   - {func}")
+        print("\n[ERROR] Lambda deployment failed! Stopping here.")
+        sys.exit(1)
+    else:
+        print("\n[SUCCESS] Lambda deployment complete!")
 
 if __name__ == '__main__':
-    main() 
+    main()

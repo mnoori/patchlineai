@@ -3,7 +3,7 @@ import {
   InvokeAgentCommand 
 } from '@aws-sdk/client-bedrock-agent-runtime'
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime'
-import { CONFIG, GMAIL_AGENT, LEGAL_AGENT, BLOCKCHAIN_AGENT } from './config'
+import { CONFIG, GMAIL_AGENT, LEGAL_AGENT, BLOCKCHAIN_AGENT, SUPERVISOR_AGENT } from './config'
 import { BEDROCK_MODELS } from './models-config'
 
 // Agent Tool interface based on Agent Squad pattern
@@ -236,16 +236,10 @@ export class SupervisorAgent {
             } catch (streamError) {
               console.error('Error reading completion stream:', streamError)
               // Fallback to any available response data
-              if (response.output?.text) {
-                agentResponse = response.output.text
-              } else {
-                throw new Error('Failed to read agent response')
-              }
+              throw new Error('Failed to read agent response')
             }
-          } else if (response.output?.text) {
-            // Fallback if completion stream is not available
-            agentResponse = response.output.text
           } else {
+            // No completion stream available
             throw new Error('No response from Gmail agent')
           }
           
@@ -287,7 +281,7 @@ export class SupervisorAgent {
           })
           
           // Handle specific AWS errors
-          if (error.name === 'DependencyFailedException' || error.$fault === 'client') {
+          if (error instanceof Error && (error.name === 'DependencyFailedException' || (error as any).$fault === 'client')) {
             console.error('AWS Agent dependency error:', error)
             return 'The Gmail agent is temporarily unavailable. Please try again in a moment.'
           }
@@ -388,7 +382,7 @@ export class SupervisorAgent {
           })
           
           // Handle specific AWS errors
-          if (error.name === 'DependencyFailedException' || error.$fault === 'client') {
+          if (error instanceof Error && (error.name === 'DependencyFailedException' || (error as any).$fault === 'client')) {
             console.error('AWS Agent dependency error:', error)
             return 'The Legal agent is temporarily unavailable. Please try again in a moment.'
           }
@@ -514,44 +508,33 @@ IMPORTANT:
 User Query: ${userInput}`;
 
     try {
-      // Use Nova model for supervisor coordination
-      const command = new InvokeModelCommand({
-        modelId: "amazon.nova-micro-v1:0",
-        contentType: "application/json",
-        accept: "application/json",
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: [{ text: supervisorPrompt }]
-            }
-          ],
-          system: [{ 
-            text: "You are a supervisor agent that coordinates between specialized agents. Always delegate tasks to the appropriate agents and synthesize their responses." 
-          }],
-          inferenceConfig: { 
-            max_new_tokens: 2048,
-            temperature: 0.7,
-            top_p: 0.9
-          }
-        })
-      })
-
-      const response = await bedrockRuntime.send(command)
-      const responseBody = JSON.parse(new TextDecoder().decode(response.body))
-      
-      // Process Nova model response
-      const content = responseBody?.output?.message?.content?.[0]?.text || "I could not understand your request."
-      
-      this.addTrace({
-        timestamp: new Date().toISOString(),
-        action: 'Workflow planning completed',
-        status: 'success',
-        details: 'Analyzing request and determining appropriate agents'
-      })
-      
       // Simple intent routing based on user input
       const lowerInput = userInput.toLowerCase()
+      
+      // Check for simple greetings or general queries that don't need delegation
+      const greetingPatterns = ['hey', 'hi', 'hello', 'good morning', 'good afternoon', 'good evening', 'how are you', 'what\'s up', 'sup']
+      const isGreeting = greetingPatterns.some(pattern => lowerInput.includes(pattern) && lowerInput.length < 20)
+      
+      if (isGreeting) {
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Direct response',
+          status: 'success',
+          details: 'Greeting detected - responding directly'
+        })
+        
+        const greetingResponse = `Hello! I'm Patchy, your AI supervisor coordinating between specialized agents. I can help you with:
+
+• **Email Management** - Search, read, draft, and send emails through our Gmail Agent
+• **Legal Analysis** - Review contracts and legal documents with our Legal Agent
+• **Blockchain Operations** - Handle crypto transactions via our Blockchain Agent
+• **Artist Discovery** - Find promising talent using our Scout Agent
+
+What would you like help with today?`
+        
+        this.memory.userSupervisorMemory.push({ role: 'assistant', content: greetingResponse })
+        return greetingResponse
+      }
       
       // Check if user is asking about contracts/agreements that might be in emails
       if ((lowerInput.includes('contract') || lowerInput.includes('agreement')) && 
@@ -654,74 +637,17 @@ ${gmailResponse}`
         return legalResponse
       }
       
-      // For any other contract/agreement queries, use the multi-agent workflow
-      if (lowerInput.includes('contract') || lowerInput.includes('agreement')) {
-        this.addTrace({
-          timestamp: new Date().toISOString(),
-          action: 'Multi-agent workflow',
-          status: 'info',
-          details: 'Contract analysis workflow initiated'
-        })
-        
-        // STEP 1: Ask Gmail agent to find the contract email
-        const gmailPrompt = `Search my emails for the most recent contract or legal agreement. Look for emails containing: contract, agreement, terms, license, distribution, publishing, royalty, payment terms. Please provide the full email content including the contract text.`
-        
-        const gmailResponse = await this.teamTools[0].func(gmailPrompt)
-        
-        if (!gmailResponse || gmailResponse.trim() === '' || gmailResponse.includes('no emails found') || gmailResponse.includes('could not find')) {
-          const noEmailMsg = 'I could not find any relevant contract emails in your inbox.'
-          this.memory.userSupervisorMemory.push({ role: 'assistant', content: noEmailMsg })
-          this.addTrace({
-            timestamp: new Date().toISOString(),
-            action: 'Workflow completed',
-            status: 'error',
-            details: 'No contract emails found'
-          })
-          return noEmailMsg
-        }
-        
-        // STEP 2: Pass the email content to Legal agent
-        const legalPrompt = `Please analyze the following email content for any contracts or legal agreements. 
-Extract and analyze any contract text you find within this email content.
-
-Provide a structured assessment with:
-1. EXECUTIVE SUMMARY (Risk Level: LOW/MODERATE/HIGH, Key Points, Action Items)
-2. KEY TERMS BREAKDOWN (Compensation, Rights, Territory/Duration, Exclusivity, Obligations)
-3. RED FLAGS & CONCERNS (Missing Protections, Unusual Terms, Ambiguities, Unfavorable Clauses)
-4. INDUSTRY CONTEXT (Comparative Analysis, Market Rate Assessment)
-5. PRACTICAL RECOMMENDATIONS (Negotiation Points, Required Changes, Next Steps)
-
-EMAIL CONTENT:
-${gmailResponse}`
-        
-        const legalResponse = await this.teamTools[1].func(legalPrompt)
-        
-        // Combine results
-        const combined = `# Contract Analysis Report\n\n${legalResponse}`
-        
-        this.memory.userSupervisorMemory.push({ role: 'assistant', content: combined })
-        this.addTrace({
-          timestamp: new Date().toISOString(),
-          action: 'Workflow completed successfully',
-          status: 'success',
-          details: 'Contract analysis report generated'
-        })
-        
-        return combined
-      }
-      
-      // Default: Let Nova decide based on the prompt
+      // For complex queries that don't match simple routing, use the supervisor agent itself.
       this.addTrace({
         timestamp: new Date().toISOString(),
-        action: 'Using Nova model decision',
+        action: 'Using Supervisor Agent for Complex Routing',
         status: 'info',
-        details: 'Delegating to Nova for complex routing'
-      })
-      
-      // For now, just ask Gmail agent as a fallback
-      const fallbackResponse = await this.teamTools[0].func(userInput)
-      this.memory.userSupervisorMemory.push({ role: 'assistant', content: fallbackResponse })
-      return fallbackResponse
+        details: 'No simple route matched. Delegating to the main supervisor agent for advanced reasoning.'
+      });
+
+      const supervisorResponse = await this.invokeSupervisorAgent(userInput, sessionId);
+      this.memory.userSupervisorMemory.push({ role: 'assistant', content: supervisorResponse });
+      return supervisorResponse;
 
     } catch (error: any) {
       console.error('Supervisor error:', error)
@@ -734,35 +660,53 @@ ${gmailResponse}`
       throw new Error(`Supervisor orchestration failed: ${error.message}`)
     }
   }
+  
+  private async invokeSupervisorAgent(userInput: string, sessionId: string): Promise<string> {
+    const command = new InvokeAgentCommand({
+      agentId: SUPERVISOR_AGENT.agentId,
+      agentAliasId: SUPERVISOR_AGENT.agentAliasId,
+      sessionId: sessionId,
+      inputText: userInput,
+    });
+  
+    const response = await agentRuntime.send(command);
+    let agentResponse = '';
+  
+    if (response.completion) {
+      for await (const chunk of response.completion) {
+        if (chunk.chunk?.bytes) {
+          agentResponse += new TextDecoder().decode(chunk.chunk.bytes);
+        }
+      }
+    } else {
+      throw new Error('No response completion stream from Supervisor agent');
+    }
+  
+    return agentResponse;
+  }
 
-  // Get traces
+  // --------------------- Helper methods ---------------------
+
   getTraces(): AgentTrace[] {
     return this.traces
   }
 
-  // Build tools prompt for the supervisor
   private buildToolsPrompt(): string {
-    return this.teamTools.map(tool => 
-      `- ${tool.name}: ${tool.description}`
-    ).join('\n')
+    return this.teamTools.map(tool => `- ${tool.name}: ${tool.description}`).join('\n')
   }
 
-  // Build memory context
   private buildMemoryContext(): string {
     if (this.memory.combinedMemory.length === 0) {
       return "This is the start of our conversation."
     }
     
-    return `<agents_memory>
-${this.memory.combinedMemory.map(msg => 
-  msg.agent 
-    ? `${msg.role === 'user' ? 'User' : `[${msg.agent}]`}: ${msg.content}`
-    : `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
-).join('\n')}
-</agents_memory>`
+    return `<agents_memory>\n${this.memory.combinedMemory.map(msg => 
+      msg.agent 
+        ? `${msg.role === 'user' ? 'User' : `[${msg.agent}]`}: ${msg.content}`
+        : `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+    ).join('\n')}\n</agents_memory>`
   }
 
-  // Format tools for Claude/Bedrock
   private formatToolsForClaude() {
     return this.teamTools.map(tool => ({
       name: tool.name,
@@ -775,12 +719,10 @@ ${this.memory.combinedMemory.map(msg =>
     }))
   }
 
-  // Get conversation memory
   getMemory(): ChatMemory {
     return this.memory
   }
 
-  // Clear memory
   clearMemory(): void {
     this.memory = {
       userSupervisorMemory: [],
@@ -792,4 +734,4 @@ ${this.memory.combinedMemory.map(msg =>
     }
     this.traces = []
   }
-} 
+}

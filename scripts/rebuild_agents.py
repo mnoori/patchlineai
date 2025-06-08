@@ -17,7 +17,9 @@ def run_aws_command(command):
     try:
         # Ensure command list elements are all strings
         cmd_str = [str(c) for c in command]
-        result = subprocess.run(cmd_str, capture_output=True, text=True, check=True, encoding='utf-8')
+        # Use cp1252 encoding on Windows to handle special characters
+        encoding = 'cp1252' if sys.platform == 'win32' else 'utf-8'
+        result = subprocess.run(cmd_str, capture_output=True, text=True, check=True, encoding=encoding, errors='replace')
         return json.loads(result.stdout)
     except subprocess.CalledProcessError as e:
         print(f"Error running AWS command: {' '.join(command)}")
@@ -410,32 +412,26 @@ def main():
             yaml.dump(config, f, default_flow_style=False, sort_keys=False)
         print(f"\nUpdated {agents_config_path} with new agent IDs.")
     
-    # Step 5: Update .env.local (only for successful agents)
+    # Step 5: Run sync script to update .env.local AND lib/config.ts
     if agent_ids:
-        env_file_path = Path('.env.local')
-        if env_file_path.exists():
-            env_vars = {}
-            with open(env_file_path, 'r') as f:
-                for line in f:
-                    if '=' in line and not line.strip().startswith('#'):
-                        key, value = line.strip().split('=', 1)
-                        env_vars[key.strip()] = value.strip()
-            
-            for agent_type, ids in agent_ids.items():
-                key_base = f'BEDROCK_{agent_type.upper()}'
-                # Set the specific env var for each agent type
-                env_vars[f'{key_base}_AGENT_ID'] = ids['agent_id']
-                env_vars[f'{key_base}_AGENT_ALIAS_ID'] = ids['alias_id']
-
-                # If the current agent is the supervisor, also set it as the default agent
-                if agent_type == 'supervisor':
-                    env_vars['BEDROCK_AGENT_ID'] = ids['agent_id']
-                    env_vars['BEDROCK_AGENT_ALIAS_ID'] = ids['alias_id']
-            
-            with open(env_file_path, 'w') as f:
-                for key, value in env_vars.items():
-                    f.write(f"{key}={value}\n")
-            print(f"Updated {env_file_path} with new agent IDs.")
+        print("\n--- Syncing agent IDs to .env.local and lib/config.ts ---")
+        sync_script = Path("scripts/sync-env-from-yaml.py")
+        if sync_script.exists():
+            try:
+                result = subprocess.run(
+                    ["python", str(sync_script)],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                    encoding='cp1252' if sys.platform == 'win32' else 'utf-8',
+                    errors='replace'
+                )
+                print(result.stdout)
+            except subprocess.CalledProcessError as e:
+                print(f"[ERROR] Failed to sync environment: {e}")
+                print(f"Stderr: {e.stderr}")
+        else:
+            print(f"[ERROR] Sync script not found at {sync_script}")
     
     # Step 6: HONEST STATUS REPORTING
     print("\n" + "="*60)
@@ -460,14 +456,74 @@ def main():
         supervisor_id = agent_ids['supervisor']['agent_id']
         supervisor_config = config['supervisor']
 
-        # Enable collaboration on the supervisor before associating
-        if enable_supervisor_collaboration(supervisor_id, supervisor_config):
+        # Supervisor already created with SUPERVISOR_ROUTER mode, just need to add collaborators
+        if True:  # Always proceed since supervisor is created with collaboration enabled
             print("\n--- Waiting for agents to be fully ready before setting up collaborations ---")
             time.sleep(10)
             
             if setup_collaborations():
                 collaboration_success = True
-                print("\n🎉 COLLABORATION SETUP SUCCESSFUL!")
+                print("\n[SUCCESS] COLLABORATION SETUP SUCCESSFUL!")
+                
+                # Now we need to prepare the supervisor and create its alias
+                print("\n--- Preparing supervisor agent and creating alias ---")
+                try:
+                    # Prepare the supervisor
+                    subprocess.run(
+                        ["aws", "bedrock-agent", "prepare-agent", "--agent-id", supervisor_id],
+                        capture_output=True, text=True, check=True,
+                        encoding='cp1252' if sys.platform == 'win32' else 'utf-8',
+                        errors='replace'
+                    )
+                    
+                    # Wait for preparation
+                    print("Waiting for supervisor preparation...")
+                    time.sleep(10)
+                    
+                    # Create alias
+                    result = subprocess.run(
+                        ["aws", "bedrock-agent", "create-agent-alias", 
+                         "--agent-id", supervisor_id,
+                         "--agent-alias-name", "live"],
+                        capture_output=True, text=True, check=True,
+                        encoding='cp1252' if sys.platform == 'win32' else 'utf-8',
+                        errors='replace'
+                    )
+                    
+                    # Parse alias ID from result
+                    alias_data = json.loads(result.stdout)
+                    alias_id = alias_data['agentAlias']['agentAliasId']
+                    
+                    # Update the config and env with the alias ID
+                    agent_ids['supervisor']['alias_id'] = alias_id
+                    config['supervisor']['environment']['agent_alias_id'] = alias_id
+                    
+                    # Save updated config
+                    with open(agents_config_path, 'w') as f:
+                        yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+                    
+                    # Update .env.local
+                    env_file_path = Path('.env.local')
+                    if env_file_path.exists():
+                        env_vars = {}
+                        with open(env_file_path, 'r') as f:
+                            for line in f:
+                                if '=' in line and not line.strip().startswith('#'):
+                                    key, value = line.strip().split('=', 1)
+                                    env_vars[key.strip()] = value.strip()
+                        
+                        env_vars['BEDROCK_SUPERVISOR_AGENT_ALIAS_ID'] = alias_id
+                        env_vars['BEDROCK_AGENT_ALIAS_ID'] = alias_id
+                        
+                        with open(env_file_path, 'w') as f:
+                            for key, value in env_vars.items():
+                                f.write(f"{key}={value}\n")
+                    
+                    print(f"[SUCCESS] Supervisor prepared and alias created: {alias_id}")
+                    
+                except Exception as e:
+                    print(f"[ERROR] Failed to prepare supervisor or create alias: {str(e)}")
+                    collaboration_success = False
             else:
                 print("\n[ERROR] COLLABORATION SETUP FAILED!")
                 print("You may need to set up collaborations manually in the AWS console.")
@@ -537,4 +593,4 @@ def print_manual_collaboration_instructions(agent_ids, agent_names):
     print("5. Test the supervisor agent to ensure collaborations are working correctly.")
 
 if __name__ == "__main__":
-    main() 
+    main()

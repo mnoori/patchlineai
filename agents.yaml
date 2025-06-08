@@ -11,8 +11,8 @@ gmail:
       s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineEmailKnowledge
   environment:
-    agent_id: EU8KPPQIAB
-    agent_alias_id: IZSVIKKGF5
+    agent_id: 2X5IXYPR9C
+    agent_alias_id: 9W9I1MFHAE
 legal:
   name: PatchlineLegalAgent
   description: Legal AI assistant specialising in music contracts and rights
@@ -20,14 +20,14 @@ legal:
   prompt: prompts/legal-agent.md
   action_group:
     name: ContractAnalysis
-    lambda: legal-contract-handler
+    lambda: legal-action-handler
     api_schema:
-      file: backend/lambda/contractanalysis-openapi.json
+      file: backend/lambda/legal-actions-openapi.json
       s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineLegalKnowledge
   environment:
-    agent_id: RSGPIGTXQL
-    agent_alias_id: UJOCCGHTNS
+    agent_id: IFG9MC5ORA
+    agent_alias_id: ED2AJTY2HF
 scout:
   name: PatchlineScoutAgent
   description: AI talent scout that discovers and analyzes promising artists using
@@ -42,8 +42,8 @@ scout:
       s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineScoutKnowledge
   environment:
-    agent_id: HQ1XQJNQ4U
-    agent_alias_id: 6DZAP2LWSC
+    agent_id: 1R8VKEVBK2
+    agent_alias_id: PFSXQHBTUJ
 blockchain:
   name: PatchlineBlockchainAgent
   description: Web3 AI assistant for Solana blockchain transactions and crypto payments
@@ -53,12 +53,12 @@ blockchain:
     name: BlockchainActions
     lambda: blockchain-action-handler
     api_schema:
-      file: backend/lambda/blockchainactions-openapi.json
+      file: backend/lambda/blockchain-actions-openapi.json
       s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineBlockchainKnowledge
   environment:
-    agent_id: LD3CYMNXUI
-    agent_alias_id: XGYAUX2EN8
+    agent_id: OO7395LRBY
+    agent_alias_id: 4756GPGRAJ
 supervisor:
   name: PatchlineSupervisorAgent
   description: Multi-agent supervisor that coordinates between all Patchline specialists
@@ -70,8 +70,8 @@ supervisor:
   - scout
   - blockchain
   environment:
-    agent_id: J8TYXLIA5P
-    agent_alias_id: MFZXSV0JPL
+    agent_id: RH5QK3WOWU
+    agent_alias_id: ILHZGPX3JJ
 default_agent: supervisor
 aws_region: us-east-1
 environment: staging
