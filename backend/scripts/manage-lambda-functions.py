@@ -15,6 +15,8 @@ from pathlib import Path
 import time
 import argparse
 from typing import Dict, Optional
+from botocore.exceptions import ClientError
+import yaml
 
 # ---------------------------------------------------------------------------
 # ENV LOADER
@@ -206,22 +208,53 @@ def delete_lambda_function(function_name: str) -> bool:
         print(f"[ERROR] Failed to delete {function_name}: {str(e)}")
         return False
 
-def add_bedrock_permission(function_name: str):
-    """Add permission for Bedrock to invoke the Lambda function."""
+def add_agent_permission(function_name: str, agent_id: str, region: str, account_id: str):
+    """Add permission for a specific Bedrock agent to invoke the Lambda function."""
+    statement_id = f"bedrock-agent-invoke-{agent_id}"
+    source_arn = f"arn:aws:bedrock:{region}:{account_id}:agent/{agent_id}"
+
+    # First, try to remove any existing permission with the same statement ID
+    try:
+        lambda_client.remove_permission(
+            FunctionName=function_name,
+            StatementId=statement_id
+        )
+        print(f"[INFO] Removed existing permission '{statement_id}' from {function_name} before re-applying.")
+    except ClientError as e:
+        if e.response["Error"]["Code"] != "ResourceNotFoundException":
+            print(f"[WARNING] Could not remove old permission for {function_name} (it may not have existed): {e}")
+
+    # Now, add the fresh permission
     try:
         lambda_client.add_permission(
             FunctionName=function_name,
-            StatementId='AllowBedrockInvoke',
+            StatementId=statement_id,
+            Action='lambda:InvokeFunction',
+            Principal='bedrock.amazonaws.com',
+            SourceArn=source_arn
+        )
+        print(f"[SUCCESS] Successfully granted agent {agent_id} permission to invoke {function_name}")
+    except ClientError as e:
+        print(f"[ERROR] FATAL: Could not add permission for agent {agent_id} to invoke {function_name}: {e}")
+        raise
+
+    # Also ensure a generic wildcard permission exists so any Bedrock agent in this account can invoke
+    wildcard_statement = 'bedrock-agent-invoke-any'
+    try:
+        lambda_client.add_permission(
+            FunctionName=function_name,
+            StatementId=wildcard_statement,
             Action='lambda:InvokeFunction',
             Principal='bedrock.amazonaws.com'
         )
-        print(f"[SUCCESS] Added Bedrock invoke permission to {function_name}")
-    except lambda_client.exceptions.ResourceConflictException:
-        print(f"[INFO] Bedrock permission already exists for {function_name}")
-    except Exception as e:
-        print(f"[WARNING] Could not add Bedrock permission to {function_name}: {str(e)}")
+        print(f"[SUCCESS] Added wildcard Bedrock permission to {function_name}")
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'ResourceConflictException':
+            print(f"[INFO] Wildcard permission already exists on {function_name}")
+        else:
+            print(f"[WARNING] Could not add wildcard permission: {e}")
 
-def deploy_lambda_function(function_config: Dict, role_arn: str, env_vars: Dict) -> Optional[str]:
+def deploy_lambda_function(function_config: Dict, role_arn: str, env_vars: Dict, agent_id: str, region: str, account_id: str) -> Optional[str]:
     """Deploy (create or update) a Lambda function."""
     function_name = function_config['name']
     handler_file = function_config['handler_file']
@@ -244,21 +277,35 @@ def deploy_lambda_function(function_config: Dict, role_arn: str, env_vars: Dict)
         memory = int(os.environ.get('LAMBDA_MEMORY', '512'))
         
         if exists:
-            # Update existing function
-            lambda_client.update_function_code(
-                FunctionName=function_name,
-                ZipFile=zip_bytes
-            )
-            lambda_client.update_function_configuration(
-                FunctionName=function_name,
-                Runtime=runtime,
-                Role=role_arn,
-                Handler='index.lambda_handler',
-                Timeout=timeout,
-                MemorySize=memory,
-                Environment={'Variables': env_vars}
-            )
-            print(f"[SUCCESS] Function updated.")
+            # Update existing function with simple retry loop in case another update is still in progress
+            max_attempts = 6
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    lambda_client.update_function_code(
+                        FunctionName=function_name,
+                        ZipFile=zip_bytes
+                    )
+                    lambda_client.update_function_configuration(
+                        FunctionName=function_name,
+                        Runtime=runtime,
+                        Role=role_arn,
+                        Handler='index.lambda_handler',
+                        Timeout=timeout,
+                        MemorySize=memory,
+                        Environment={'Variables': env_vars}
+                    )
+                    print(f"[SUCCESS] Function updated.")
+                    break
+                except ClientError as e:
+                    if e.response['Error']['Code'] == 'ResourceConflictException':
+                        wait_time = 10 * attempt
+                        print(f"[INFO] Update in progress for {function_name}. Waiting {wait_time}s (attempt {attempt}/{max_attempts})...")
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        raise
+            else:
+                print(f"[ERROR] Could not update {function_name} after multiple attempts – skipping.")
         else:
             # Create new function
             lambda_client.create_function(
@@ -275,11 +322,12 @@ def deploy_lambda_function(function_config: Dict, role_arn: str, env_vars: Dict)
             print(f"[SUCCESS] Function created.")
         
         # Wait for function to be active
-        lambda_client.get_waiter('function_active').wait(FunctionName=function_name)
+        waiter = lambda_client.get_waiter('function_active_v2')
+        waiter.wait(FunctionName=function_name)
         
-        # Add Bedrock permission for action handlers
+        # Add Bedrock permission for action handlers, using the specific agent_id
         if 'action-handler' in function_name:
-            add_bedrock_permission(function_name)
+            add_agent_permission(function_name, agent_id, region, account_id)
         
         # Get function ARN
         response = lambda_client.get_function(FunctionName=function_name)
@@ -426,6 +474,28 @@ def main():
     # Get or create IAM role
     role_arn = get_or_create_lambda_role()
     
+    # Get AWS Account ID for ARN construction
+    try:
+        account_id = boto3.client('sts').get_caller_identity().get('Account')
+        print(f"[INFO] AWS Account ID: {account_id}")
+    except Exception as e:
+        print(f"[ERROR] Could not determine AWS Account ID. Please set AWS_ACCOUNT_ID env var. Error: {e}")
+        sys.exit(1)
+
+    # Load agents.yaml to map agent types to agent IDs
+    try:
+        with open(get_project_root() / 'agents.yaml', 'r') as f:
+            agents_config = yaml.safe_load(f)
+        agent_id_map = {
+            agent_type: conf.get("environment", {}).get("agent_id")
+            for agent_type, conf in agents_config.items()
+            if isinstance(conf, dict) and "environment" in conf
+        }
+        print(f"[INFO] Loaded agent IDs: {agent_id_map}")
+    except Exception as e:
+        print(f"[ERROR] Could not load or parse agents.yaml. Error: {e}")
+        sys.exit(1)
+
     # Common environment variables for Lambda functions
     env_vars = {
         'PATCHLINE_AWS_REGION': REGION,
@@ -457,10 +527,16 @@ def main():
     failed_functions = []
     
     # Process each agent's Lambda functions
-    for agent in agents_to_process:
-        print(f"\n[INFO] Processing {agent} agent Lambda functions...")
+    for agent_type in agents_to_process:
+        print(f"\n[INFO] Processing {agent_type} agent Lambda functions...")
         
-        for func_config in LAMBDA_FUNCTIONS.get(agent, []):
+        agent_id = agent_id_map.get(agent_type)
+        if not agent_id:
+            print(f"[WARNING] No agent_id found for agent_type '{agent_type}' in agents.yaml. Cannot set permissions.")
+            # We can still deploy the lambda, but permissions will be missing.
+            # Or we can decide to skip. For now, let's continue but log a clear warning.
+        
+        for func_config in LAMBDA_FUNCTIONS.get(agent_type, []):
             function_name = func_config['name']
             
             # Delete if requested
@@ -471,7 +547,14 @@ def main():
             
             # Deploy unless delete-only
             if not args.delete:
-                arn = deploy_lambda_function(func_config, role_arn, env_vars)
+                if not agent_id:
+                    print(f"[ERROR] Cannot deploy {function_name} because agent_id for {agent_type} is missing.")
+                    failed_functions.append(function_name)
+                    continue
+
+                arn = deploy_lambda_function(
+                    func_config, role_arn, env_vars, agent_id, REGION, account_id
+                )
                 if not arn:
                     failed_functions.append(function_name)
     

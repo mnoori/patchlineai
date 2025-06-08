@@ -41,26 +41,26 @@ export const CONFIG = {
   // Define multiple agents by name for easy switching
   BEDROCK_AGENTS: {
     GMAIL_AGENT: {
-      ID: process.env.BEDROCK_GMAIL_AGENT_ID || "IAGTE3GFDZ",
-      ALIAS_ID: process.env.BEDROCK_GMAIL_AGENT_ALIAS_ID || "M4DLDCPVGR",
+      ID: process.env.BEDROCK_GMAIL_AGENT_ID || "2X5IXYPR9C",
+      ALIAS_ID: process.env.BEDROCK_GMAIL_AGENT_ALIAS_ID || "9W9I1MFHAE",
       NAME: "Gmail Agent",
       DESCRIPTION: "Handles email operations via Gmail API"
     },
     LEGAL_AGENT: {
-      ID: process.env.BEDROCK_LEGAL_AGENT_ID || "OL0ZQ2ZQRJ",
-      ALIAS_ID: process.env.BEDROCK_LEGAL_AGENT_ALIAS_ID || "CFYS9BFQYP",
+      ID: process.env.BEDROCK_LEGAL_AGENT_ID || "IFG9MC5ORA",
+      ALIAS_ID: process.env.BEDROCK_LEGAL_AGENT_ALIAS_ID || "ED2AJTY2HF",
       NAME: "Legal Agent",
       DESCRIPTION: "Analyzes legal documents & contracts from a music-industry perspective"
     },
     SCOUT_AGENT: {
-      ID: process.env.BEDROCK_SCOUT_AGENT_ID || 'YRPTSTNYZT',
-      ALIAS_ID: process.env.BEDROCK_SCOUT_AGENT_ALIAS_ID || '7M1GZJ5TU9',
+      ID: process.env.BEDROCK_SCOUT_AGENT_ID || '1R8VKEVBK2',
+      ALIAS_ID: process.env.BEDROCK_SCOUT_AGENT_ALIAS_ID || 'PFSXQHBTUJ',
       NAME: "Scout Agent",
       DESCRIPTION: "Discovers and analyzes promising artists using Soundcharts data"
     },
     BLOCKCHAIN_AGENT: {
-      ID: process.env.BEDROCK_BLOCKCHAIN_AGENT_ID || 'BSILBXUVUQ',
-      ALIAS_ID: process.env.BEDROCK_BLOCKCHAIN_AGENT_ALIAS_ID || 'VROEKPWC3P',
+      ID: process.env.BEDROCK_BLOCKCHAIN_AGENT_ID || 'OO7395LRBY',
+      ALIAS_ID: process.env.BEDROCK_BLOCKCHAIN_AGENT_ALIAS_ID || '4756GPGRAJ',
       NAME: "Blockchain Agent",
       DESCRIPTION: "Handles Solana transactions and crypto payments"
     },
@@ -334,33 +334,33 @@ if (IS_DEVELOPMENT_MODE) {
 }
 
 export const GMAIL_AGENT = {
-  agentId: process.env.BEDROCK_AGENT_ID || 'RH5QK3WOWU',
-  agentAliasId: process.env.BEDROCK_AGENT_ALIAS_ID || 'N/A (to be created after collaboration)',
+  agentId: process.env.BEDROCK_GMAIL_AGENT_ID || '2X5IXYPR9C',
+  agentAliasId: process.env.BEDROCK_GMAIL_AGENT_ALIAS_ID || '9W9I1MFHAE',
   region: process.env.AWS_REGION || 'us-east-1'
 };
 
 export const LEGAL_AGENT = {
-  agentId: process.env.BEDROCK_LEGAL_AGENT_ID || 'OL0ZQ2ZQRJ',
-  agentAliasId: process.env.BEDROCK_LEGAL_AGENT_ALIAS_ID || 'CFYS9BFQYP',
+  agentId: process.env.BEDROCK_LEGAL_AGENT_ID || 'IFG9MC5ORA',
+  agentAliasId: process.env.BEDROCK_LEGAL_AGENT_ALIAS_ID || 'ED2AJTY2HF',
   region: process.env.AWS_REGION || 'us-east-1'
 };
 
 export const SUPERVISOR_AGENT = {
-  agentId: process.env.BEDROCK_SUPERVISOR_AGENT_ID || 'GSAFGIBMSQ',
-  agentAliasId: process.env.BEDROCK_SUPERVISOR_AGENT_ALIAS_ID || 'DWFWUTDZMC',
+  agentId: process.env.BEDROCK_SUPERVISOR_AGENT_ID || 'RH5QK3WOWU',
+  agentAliasId: process.env.BEDROCK_SUPERVISOR_AGENT_ALIAS_ID || 'ILHZGPX3JJ',
   region: process.env.AWS_REGION || 'us-east-1'
 };
 
 export const BLOCKCHAIN_AGENT = {
-  agentId: process.env.BEDROCK_BLOCKCHAIN_AGENT_ID || 'BSILBXUVUQ',
-  agentAliasId: process.env.BEDROCK_BLOCKCHAIN_AGENT_ALIAS_ID || 'VROEKPWC3P',
+  agentId: process.env.BEDROCK_BLOCKCHAIN_AGENT_ID || 'OO7395LRBY',
+  agentAliasId: process.env.BEDROCK_BLOCKCHAIN_AGENT_ALIAS_ID || '4756GPGRAJ',
   region: process.env.AWS_REGION || 'us-east-1'
 };
 
 // ADD: Scout agent configuration
 export const SCOUT_AGENT = {
-  agentId: process.env.BEDROCK_SCOUT_AGENT_ID || 'YRPTSTNYZT',
-  agentAliasId: process.env.BEDROCK_SCOUT_AGENT_ALIAS_ID || '7M1GZJ5TU9',
+  agentId: process.env.BEDROCK_SCOUT_AGENT_ID || '1R8VKEVBK2',
+  agentAliasId: process.env.BEDROCK_SCOUT_AGENT_ALIAS_ID || 'PFSXQHBTUJ',
   region: process.env.AWS_REGION || 'us-east-1'
 };
 

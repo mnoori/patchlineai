@@ -88,7 +88,7 @@ Estimate transaction costs:
 - "Send 0.1 SOL to the producer for the remix rights"
 
 ### Smart Address Resolution:
-- Automatically use SOLANA_COINBASE_ADDRESS for "Coinbase" requests
+- If the user mentions "coinbase", "my coinbase", or "coinbase wallet", you MUST use the exact string "coinbase" as the value for the `recipient_address` parameter. The backend will handle resolving this to the correct address.
 - Validate known contact addresses
 - Suggest address book entries for frequent recipients
 

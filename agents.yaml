@@ -11,8 +11,8 @@ gmail:
       s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineEmailKnowledge
   environment:
-    agent_id: 2X5IXYPR9C
-    agent_alias_id: 9W9I1MFHAE
+    agent_id: YOMXXWPSSQ
+    agent_alias_id: R1HKL8PJCD
 legal:
   name: PatchlineLegalAgent
   description: Legal AI assistant specialising in music contracts and rights
@@ -26,8 +26,8 @@ legal:
       s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineLegalKnowledge
   environment:
-    agent_id: IFG9MC5ORA
-    agent_alias_id: ED2AJTY2HF
+    agent_id: SOZZFV6SYD
+    agent_alias_id: ARI2XUDNUA
 scout:
   name: PatchlineScoutAgent
   description: AI talent scout that discovers and analyzes promising artists using
@@ -42,8 +42,8 @@ scout:
       s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineScoutKnowledge
   environment:
-    agent_id: 1R8VKEVBK2
-    agent_alias_id: PFSXQHBTUJ
+    agent_id: W00SGH6WWS
+    agent_alias_id: IYUGGGCHR3
 blockchain:
   name: PatchlineBlockchainAgent
   description: Web3 AI assistant for Solana blockchain transactions and crypto payments
@@ -57,8 +57,8 @@ blockchain:
       s3_bucket: patchline-agent-schemas
   knowledge_base: PatchlineBlockchainKnowledge
   environment:
-    agent_id: OO7395LRBY
-    agent_alias_id: 4756GPGRAJ
+    agent_id: W8H34DMCA5
+    agent_alias_id: V1S221Y9GO
 supervisor:
   name: PatchlineSupervisorAgent
   description: Multi-agent supervisor that coordinates between all Patchline specialists
@@ -70,8 +70,8 @@ supervisor:
   - scout
   - blockchain
   environment:
-    agent_id: RH5QK3WOWU
-    agent_alias_id: ILHZGPX3JJ
+    agent_id: 8VG8LOVLNZ
+    agent_alias_id: 2IEYEEGTHO
 default_agent: supervisor
 aws_region: us-east-1
 environment: staging

@@ -66,6 +66,12 @@
 - [ ] Custom reports and exports
 - [ ] Predictive analytics for career growth
 
+### 9. Codebase Hygiene & Tooling
+- [ ] Consolidate dev scripts into `patchline` CLI wrapper (Typer or Click)
+- [ ] Add pre-commit check to forbid new `*openapi.json` files outside `backend/lambda/`
+- [ ] Weekly CI job with Vulture to surface dead code & open GitHub ticket automatically
+- [ ] Delete contents of `legacy/` once untouched for two sprints
+
 ## Technical Debt
 - [ ] Comprehensive test suite
 - [ ] API documentation with OpenAPI/Swagger
