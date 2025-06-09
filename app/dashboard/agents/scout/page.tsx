@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Filter, Download, BarChart2, Plus, RefreshCw, AlertCircle } from "lucide-react"
+import { Search, Filter, Download, BarChart2, Plus, RefreshCw, AlertCircle, UserPlus } from "lucide-react"
 import { AgentHeader } from "@/components/agents/agent-header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArtistDiscoveryList } from "@/components/agents/scout/artist-discovery-list"
@@ -16,8 +16,17 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { motion, AnimatePresence } from "framer-motion"
 import { useDebounce } from "@/hooks/use-debounce"
+import { ArtistPreferences } from "@/components/onboarding/artist-preferences"
+import { useOnboardingStore } from "@/lib/onboarding-store"
+import { useCurrentUser } from "@/hooks/use-current-user"
+import { artistRosterAPI } from "@/lib/api-client"
+import { toast } from "sonner"
+import { ArtistRosterView } from "@/components/agents/scout/artist-roster-view"
 
 export default function ScoutAgentPage() {
+  const { userId } = useCurrentUser()
+  const { hasCompletedOnboarding, preferences, setPreferences, completeOnboarding, prePopulatedArtists, setPrePopulatedArtists } = useOnboardingStore()
+  
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedArtist, setSelectedArtist] = useState(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -28,6 +37,10 @@ export default function ScoutAgentPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  
+  // Roster state
+  const [roster, setRoster] = useState<any[]>([])
+  const [loadingRoster, setLoadingRoster] = useState(true)
   
   // Watchlist stored in localStorage
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set())
@@ -48,11 +61,100 @@ export default function ScoutAgentPage() {
     localStorage.setItem('scout-watchlist', JSON.stringify(Array.from(watchlist)))
   }, [watchlist])
 
+  // Load roster from API
+  useEffect(() => {
+    async function loadRoster() {
+      if (!userId) return
+      
+      try {
+        setLoadingRoster(true)
+        const response = await artistRosterAPI.getAll(userId) as any
+        setRoster(response.artists || [])
+      } catch (error) {
+        console.error('Failed to load roster:', error)
+      } finally {
+        setLoadingRoster(false)
+      }
+    }
+    
+    loadRoster()
+  }, [userId])
 
+  // Pre-populate artists based on preferences
+  useEffect(() => {
+    async function loadPreferredArtists() {
+      if (!hasCompletedOnboarding || !preferences || prePopulatedArtists.length > 0) return
+      
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // Create search queries based on preferences
+        const queries = preferences.genres.slice(0, 3).map(genre => {
+          // Map genre IDs to search terms
+          const genreMap: Record<string, string> = {
+            'hip-hop': 'hip hop',
+            'r&b': 'R&B',
+            'electronic': 'electronic',
+            'pop': 'pop',
+            'rock': 'rock',
+            'indie': 'indie',
+            'latin': 'latin',
+            'jazz': 'jazz',
+            'country': 'country',
+            'classical': 'classical',
+            'metal': 'metal',
+            'reggae': 'reggae'
+          }
+          return genreMap[genre] || genre
+        })
+        
+        // Search for artists in preferred genres
+        const allArtists: any[] = []
+        for (const query of queries) {
+          try {
+            const response = await soundchartsClient.searchArtists(query, 1)
+            const artistsWithStats = response.items.map((artist: any) => {
+              const formatted = soundchartsClient.formatArtistForScout(artist)
+              return {
+                ...formatted,
+                isWatchlisted: watchlist.has(artist.uuid),
+                matchReason: `Trending in ${query}`
+              }
+            })
+            allArtists.push(...artistsWithStats)
+          } catch (error) {
+            console.error(`Failed to search ${query}:`, error)
+          }
+        }
+        
+        // Remove duplicates and limit to 10
+        const uniqueArtists = Array.from(
+          new Map(allArtists.map(a => [a.id, a])).values()
+        ).slice(0, 10)
+        
+        setArtists(uniqueArtists)
+        setPrePopulatedArtists(uniqueArtists)
+      } catch (error) {
+        console.error('Failed to load preferred artists:', error)
+        setError('Failed to load recommended artists. Please try searching manually.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    if (hasCompletedOnboarding) {
+      loadPreferredArtists()
+    }
+  }, [hasCompletedOnboarding, preferences, prePopulatedArtists.length, setPrePopulatedArtists, watchlist])
 
   // Search artists
   const searchArtists = useCallback(async (query: string) => {
     if (!query) {
+      // If no query and we have pre-populated artists, show them
+      if (prePopulatedArtists.length > 0) {
+        setArtists(prePopulatedArtists)
+      }
       setLoading(false)
       setRefreshing(false)
       return
@@ -101,23 +203,16 @@ export default function ScoutAgentPage() {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [watchlist])
-
-  // Initial load
-  useEffect(() => {
-    // Default artist query to demonstrate functionality while saving quota
-    if (artists.length === 0) {
-      searchArtists('Ice Spice')
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [watchlist, prePopulatedArtists])
 
   // Search effect
   useEffect(() => {
     if (debouncedSearchTerm.trim()) {
       searchArtists(debouncedSearchTerm)
+    } else if (!debouncedSearchTerm && prePopulatedArtists.length > 0 && hasCompletedOnboarding) {
+      setArtists(prePopulatedArtists)
     }
-  }, [debouncedSearchTerm, searchArtists])
+  }, [debouncedSearchTerm, searchArtists, prePopulatedArtists, hasCompletedOnboarding])
 
   const handleWatchlistToggle = (artistId: string) => {
     setWatchlist((prev) => {
@@ -166,14 +261,62 @@ export default function ScoutAgentPage() {
     })
   }
 
+  const handleAddToRoster = async (artist: any) => {
+    if (!userId) {
+      toast.error('Please log in to add artists to your roster')
+      return
+    }
+    
+    try {
+      await artistRosterAPI.add({
+        userId,
+        artistName: artist.name,
+        platform: 'soundcharts',
+        platformArtistId: artist.id,
+        imageUrl: artist.image,
+        genres: [artist.genre],
+        metadata: {
+          country: artist.country,
+          growth: artist.growth,
+          streams: artist.streams,
+          matchScore: artist.matchScore
+        }
+      })
+      
+      // Reload roster
+      const response = await artistRosterAPI.getAll(userId) as any
+      setRoster(response.artists || [])
+      
+      toast.success(`${artist.name} added to your roster!`)
+    } catch (error) {
+      console.error('Failed to add artist to roster:', error)
+      toast.error('Failed to add artist to roster')
+    }
+  }
+
   const handleRefresh = () => {
     setRefreshing(true)
-    // Re-search current term or default
-    const searchQuery = searchTerm.trim() || 'Ice Spice'
-    searchArtists(searchQuery)
+    // Re-search current term or show pre-populated
+    if (searchTerm.trim()) {
+      searchArtists(searchTerm.trim())
+    } else if (prePopulatedArtists.length > 0) {
+      setArtists(prePopulatedArtists)
+      setRefreshing(false)
+    }
+  }
+
+  const handleOnboardingComplete = (prefs: any) => {
+    setPreferences(prefs)
+    completeOnboarding()
+    toast.success('Welcome! We\'re finding artists that match your preferences...')
   }
 
   const watchlistedArtists = artists.filter((artist) => artist.isWatchlisted)
+
+  // Show onboarding if not completed
+  if (!hasCompletedOnboarding) {
+    return <ArtistPreferences onComplete={handleOnboardingComplete} />
+  }
 
   return (
     <div className={`space-y-6 transition-all duration-300 ${pageBlurred ? "blur-[2px] brightness-[0.96]" : ""}`}>
@@ -215,9 +358,15 @@ export default function ScoutAgentPage() {
           <Button variant="outline" size="sm" className="gap-1">
             <Download className="h-4 w-4" /> Export
           </Button>
-          <Button size="sm" className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
-            <Plus className="h-4 w-4" /> Add Artist
-          </Button>
+          {selectedArtist && (
+            <Button 
+              size="sm" 
+              className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+              onClick={() => handleAddToRoster(selectedArtist)}
+            >
+              <UserPlus className="h-4 w-4" /> Add to Roster
+            </Button>
+          )}
         </div>
       </div>
 
@@ -243,8 +392,8 @@ export default function ScoutAgentPage() {
           <TabsTrigger value="watchlist" className="flex-1 max-w-[200px]">
             Watchlist ({watchlistedArtists.length})
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex-1 max-w-[200px]">
-            Analytics
+          <TabsTrigger value="roster" className="flex-1 max-w-[200px]">
+            Roster ({roster.length})
           </TabsTrigger>
         </TabsList>
 
@@ -291,8 +440,18 @@ export default function ScoutAgentPage() {
           />
         </TabsContent>
 
-        <TabsContent value="analytics" className="mt-0">
-          <AnalyticsView />
+        <TabsContent value="roster" className="mt-0">
+          <ArtistRosterView 
+            roster={roster}
+            loading={loadingRoster}
+            onRemoveFromRoster={async (artistId) => {
+              if (!userId) return
+              await artistRosterAPI.remove(userId, artistId)
+              const response = await artistRosterAPI.getAll(userId) as any
+              setRoster(response.artists || [])
+              toast.success('Artist removed from roster')
+            }}
+          />
         </TabsContent>
       </Tabs>
 

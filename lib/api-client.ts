@@ -184,6 +184,49 @@ export const spotifyArtistAPI = {
 }
 
 /**
+ * Artist Roster Management (B2B Feature)
+ */
+export const artistRosterAPI = {
+  async getAll(userId: string) {
+    const response = await fetch(`/api/artist-roster?userId=${userId}`)
+    return handleResponse(response)
+  },
+
+  async add(data: { 
+    userId: string; 
+    artistName: string; 
+    platform?: string;
+    platformArtistId?: string;
+    imageUrl?: string;
+    genres?: string[];
+    metadata?: any;
+  }) {
+    const response = await fetch('/api/artist-roster', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    return handleResponse(response)
+  },
+
+  async update(userId: string, artistId: string, updates: any) {
+    const response = await fetch('/api/artist-roster', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, artistId, updates })
+    })
+    return handleResponse(response)
+  },
+
+  async remove(userId: string, artistId: string) {
+    const response = await fetch(`/api/artist-roster?userId=${userId}&artistId=${artistId}`, {
+      method: 'DELETE'
+    })
+    return handleResponse(response)
+  }
+}
+
+/**
  * Authentication
  */
 export const authAPI = {
