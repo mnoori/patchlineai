@@ -1,0 +1,7 @@
+{
+  "timestamp": "2025-06-09T00:10:45.498038",
+  "agent": "scout-agent",
+  "level": "DEBUG",
+  "message": "Matched /search-artists POST route",
+  "data": {}
+}

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-06-09T00:03:08.501600",
+  "agent": "scout-agent",
+  "level": "DEBUG",
+  "message": "=== HANDLE SEARCH ARTIST START (REAL API) ===",
+  "data": {
+    "user_id": "test-user-1749427381",
+    "parameters": [
+      {
+        "name": "artistName",
+        "type": "string",
+        "value": "hyperpop"
+      }
+    ]
+  }
+}

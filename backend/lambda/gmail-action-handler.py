@@ -11,9 +11,15 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from boto3.dynamodb.types import TypeDeserializer
+from debug_logger import get_logger
+import traceback
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+# Smart debugging - zero overhead in prod
+debug_logger = get_logger('gmail-agent')
 
 # AWS Services
 dynamodb = boto3.resource('dynamodb')
@@ -21,30 +27,48 @@ secrets_manager = boto3.client('secretsmanager')
 s3_client = boto3.client('s3')
 
 # Environment variables
-PLATFORM_CONNECTIONS_TABLE = os.environ.get('PLATFORM_CONNECTIONS_TABLE', 'PlatformConnections-staging')
+PLATFORM_CONNECTIONS_TABLE = os.environ.get('PATCHLINE_DDB_TABLE', 'PlatformConnections-staging')
 GMAIL_SECRETS_NAME = os.environ.get('GMAIL_SECRETS_NAME', 'patchline/gmail-oauth')
 KNOWLEDGE_BASE_BUCKET = os.environ.get('KNOWLEDGE_BASE_BUCKET', 'patchline-email-knowledge-base')
+
+# DynamoDB table for platform connections
+platform_table = dynamodb.Table(PLATFORM_CONNECTIONS_TABLE)
 
 def get_gmail_credentials():
     """Get Gmail OAuth credentials from AWS Secrets Manager"""
     try:
+        logger.info(f"[DEBUG] Getting secret: {GMAIL_SECRETS_NAME}")
         response = secrets_manager.get_secret_value(SecretId=GMAIL_SECRETS_NAME)
-        secret_data = json.loads(response['SecretString'])
+        secret_string = response['SecretString']
+        logger.info(f"[DEBUG] Secret string length: {len(secret_string)}")
+        
+        secret_data = json.loads(secret_string)
+        logger.info(f"[DEBUG] Secret data keys: {list(secret_data.keys())}")
         
         # Handle both flat structure and nested 'web' structure
         if 'access_token' in secret_data and 'refresh_token' in secret_data:
             # New flat structure - return as is
             logger.info("Using flat secret structure")
-            return secret_data
+            result = secret_data
         elif 'web' in secret_data:
             # Old nested structure - return the web part
             logger.info("Using nested web secret structure")
-            return secret_data
+            result = secret_data['web']
+            logger.info(f"[DEBUG] Web section keys: {list(result.keys())}")
+            logger.info(f"[DEBUG] token_uri: {result.get('token_uri', 'MISSING')}")
+            logger.info(f"[DEBUG] client_id: {result.get('client_id', 'MISSING')[:20] if result.get('client_id') else 'MISSING'}")
         else:
+            logger.error(f"[DEBUG] Invalid secret structure. Keys: {list(secret_data.keys())}")
             raise Exception("Invalid secret structure - missing required fields")
+        
+        logger.info(f"[DEBUG] Returning credentials with keys: {list(result.keys())}")
+        return result
             
     except Exception as e:
         logger.error(f"Error retrieving Gmail credentials: {str(e)}")
+        logger.error(f"[DEBUG] Exception type: {type(e).__name__}")
+        import traceback
+        logger.error(f"[DEBUG] Traceback: {traceback.format_exc()}")
         raise
 
 def parse_scopes(scopes_data: Union[str, List[str]]) -> List[str]:
@@ -88,8 +112,12 @@ def parse_scopes(scopes_data: Union[str, List[str]]) -> List[str]:
 def get_user_gmail_service(user_id: str):
     """Get Gmail service for a specific user"""
     try:
+        debug_logger.debug("Starting Gmail service setup", {'user_id': user_id})
+        
         # Get user's credentials from DynamoDB
         table = dynamodb.Table(PLATFORM_CONNECTIONS_TABLE)
+        debug_logger.debug("Querying DynamoDB", {'table': PLATFORM_CONNECTIONS_TABLE, 'user_id': user_id})
+        
         response = table.get_item(
             Key={
                 'userId': user_id,
@@ -97,11 +125,26 @@ def get_user_gmail_service(user_id: str):
             }
         )
         
+        debug_logger.debug("DynamoDB raw response", {'response_keys': list(response.keys())})
+        
         if 'Item' not in response:
+            debug_logger.error("No Gmail credentials found", {'user_id': user_id, 'response': response})
             raise Exception(f"No Gmail credentials found for user {user_id}")
         
-        item = response['Item']
-        logger.info(f"DynamoDB item for user {user_id}: {json.dumps(item)}")
+        debug_logger.debug("Raw DynamoDB item", {'raw_item': str(response['Item'])})
+        
+        # If the DynamoDB client was the low-level client we would need to deserialize.
+        # However boto3.resource already returns native Python types, so just use the item as-is.
+        # Only fall back to explicit deserialization if values are still in AttributeValue dict form.
+        raw_item = response['Item']
+        if all(isinstance(v, dict) and len(v) == 1 for v in raw_item.values()):
+            deserializer = TypeDeserializer()
+            item = {k: deserializer.deserialize(v) for k, v in raw_item.items()}
+        else:
+            item = raw_item
+        
+        debug_logger.debug("Converted DynamoDB item", {'converted_item': item})
+        logger.info(f"DynamoDB item for user {user_id}: {json.dumps(item, default=str)}")
         
         # Parse scopes
         scopes = parse_scopes(item.get('scopes', ''))
@@ -172,137 +215,508 @@ def get_user_gmail_service(user_id: str):
         raise
 
 def lambda_handler(event, context):
-    """Main Lambda handler for Bedrock Agent actions"""
+    """
+    Gmail action handler for Bedrock agent
+    """
     try:
-        # Critical Debug Logging - Track Environment vs Event
-        logger.info(f"[DEBUG] === LAMBDA ENV VARS ===")
-        logger.info(f"[DEBUG] ENV BEDROCK_AGENT_ID: {os.environ.get('BEDROCK_AGENT_ID', 'NOT_SET')}")
-        logger.info(f"[DEBUG] ENV BEDROCK_AGENT_ALIAS_ID: {os.environ.get('BEDROCK_AGENT_ALIAS_ID', 'NOT_SET')}")
+        # Log the incoming event
+        debug_logger.debug("Received event", {"event": event})
         
-        logger.info(f"[DEBUG] === EVENT DATA ===")
-        logger.info(f"Event keys: {list(event.keys())}")
-        logger.info(f"Event: {json.dumps(event)}")
-        
-        # Log agent information for debugging
-        agent_info = event.get('agent', {})
-        logger.info(f"[DEBUG] EVENT Agent ID: {agent_info.get('id', 'NOT_SET')}")
-        logger.info(f"[DEBUG] EVENT Agent Alias: {agent_info.get('alias', 'NOT_SET')}")
-        logger.info(f"[DEBUG] EVENT Agent Name: {agent_info.get('name', 'NOT_SET')}")
-        logger.info(f"[DEBUG] EVENT Agent Version: {agent_info.get('version', 'NOT_SET')}")
-        
-        # Extract action details from Bedrock Agent event
-        action_group = event.get('actionGroup', '')
+        # Extract the API path from the event
         api_path = event.get('apiPath', '')
-        http_method = event.get('httpMethod', '')
-        parameters = event.get('parameters', {})
-        request_body = event.get('requestBody', {})
+        debug_logger.debug("API path", {"api_path": api_path})
         
-        # Log the extracted values
-        logger.info(f"Action Group: {action_group}")
-        logger.info(f"API Path: {api_path}")
-        logger.info(f"HTTP Method: {http_method}")
-        logger.info(f"Request Body: {json.dumps(request_body)}")
-        
-        # ***** CRITICAL FIX - Extract user ID from various potential locations *****
+        # Extract session info
+        session_id = event.get('sessionId', 'unknown')
+        debug_logger.debug("Session info", {"session_id": session_id})
+
+        # Extract user ID from session attributes if available
         user_id = None
+        if 'sessionAttributes' in event and event['sessionAttributes']:
+            user_id = event['sessionAttributes'].get('userId')
         
-        # Method 1: Check directly in sessionState.sessionAttributes first (this is how Bedrock Agents pass session attributes)
-        if 'sessionState' in event:
-            session_state = event.get('sessionState', {})
-            logger.info(f"[DEBUG] Found sessionState: {json.dumps(session_state)}")
-            
-            session_attrs_in_state = session_state.get('sessionAttributes', {})
-            if session_attrs_in_state:
-                user_id = session_attrs_in_state.get('userId')
-                logger.info(f"[DEBUG] Found userId in sessionState.sessionAttributes: {user_id}")
-                
-                # Also log all available attributes for debugging
-                logger.info(f"[DEBUG] All sessionState.sessionAttributes: {json.dumps(session_attrs_in_state)}")
-        
-        # Method 2: Direct sessionAttributes (less common, but check anyway)
-        if not user_id and 'sessionAttributes' in event:
-            session_attributes = event.get('sessionAttributes', {})
-            if session_attributes:
-                user_id = session_attributes.get('userId')
-                logger.info(f"[DEBUG] Found userId in direct sessionAttributes: {user_id}")
-                logger.info(f"[DEBUG] All direct sessionAttributes: {json.dumps(session_attributes)}")
-        
-        # Method 3: Fixed userId for testing if above methods fail
+        # Fallback to hardcoded user ID for testing (remove in production)
         if not user_id:
-            logger.warning("[DEBUG] No userId found in session attributes, checking for hardcoded userId in environment")
-            fallback_user_id = os.environ.get('DEFAULT_USER_ID')
-            if fallback_user_id:
-                logger.warning(f"[DEBUG] Using fallback userId from environment: {fallback_user_id}")
-                user_id = fallback_user_id
-        
-        # Last method: For testing only - if no userId is found anywhere, use a hardcoded test value
-        # REMOVE THIS IN PRODUCTION or set to None
-        if not user_id:
-            # Only use this during testing and debugging
             user_id = "14287408-6011-70b3-5ac6-089f0cafdc10"
-            logger.warning(f"[DEBUG] Using hardcoded test userId as last resort: {user_id}")
+            debug_logger.debug("Using fallback user ID", {"user_id": user_id})
         
-        logger.info(f"Final User ID: {user_id}")
+        debug_logger.debug("User ID", {"user_id": user_id, "session_id": session_id})
         
-        if not user_id:
-            logger.error("User ID not found in any expected location")
-            logger.error(f"Event structure: {json.dumps(event, indent=2)}")
-            return create_response(400, {'error': 'User ID not found in session'}, api_path, http_method)
+        # Check if Gmail is authenticated for this user
+        gmail_connection = check_gmail_authentication(user_id)
         
-        # Route to appropriate handler
-        if api_path == '/search-emails' and http_method == 'POST':
-            return handle_search_emails(user_id, request_body)
-        elif api_path == '/read-email' and http_method == 'POST':
-            return handle_read_email(user_id, request_body)
-        elif api_path == '/draft-email' and http_method == 'POST':
-            return handle_draft_email(user_id, request_body)
-        elif api_path == '/send-email' and http_method == 'POST':
-            return handle_send_email(user_id, request_body)
-        elif api_path == '/list-labels' and http_method == 'GET':
-            return handle_list_labels(user_id)
-        elif api_path == '/get-email-stats' and http_method == 'GET':
-            return handle_get_email_stats(user_id)
+        # If not authenticated, return auth required response
+        if not gmail_connection:
+            debug_logger.error("Gmail not authenticated", {"user_id": user_id, "session_id": session_id})
+            return {
+                "messageVersion": "1.0",
+                "response": {
+                    "actionGroup": "GmailActions",
+                    "apiPath": api_path,
+                    "httpMethod": "POST",
+                    "httpStatusCode": 401,
+                    "responseBody": {
+                        "content": {
+                            "application/json": {
+                                "message": "Gmail authentication required. Please connect your Gmail account in the settings page first.",
+                                "authenticated": False
+                            }
+                        },
+                        "contentType": "application/json"
+                    }
+                }
+            }
+        
+        debug_logger.debug("Gmail authenticated", {
+            "user_id": user_id,
+            "gmail_email": gmail_connection.get('gmailUserEmail', 'unknown'),
+            "session_id": session_id
+        })
+        
+        # Extract request body if present
+        request_body = None
+        if 'requestBody' in event and 'content' in event['requestBody'] and 'application/json' in event['requestBody']['content']:
+            request_body = event['requestBody']['content']['application/json']
+            debug_logger.debug("Request body", {"request_body": request_body})
+        
+        # Route the request based on the API path
+        if api_path == '/check-emails':
+            return handle_get_email_stats(user_id)  # Use real Gmail stats instead of mock
+        elif api_path == '/search-emails':
+            return handle_search_emails(user_id, request_body)  # Use REAL Gmail search
+        elif api_path == '/send-email':
+            return handle_send_email(user_id, request_body)  # Use REAL Gmail send
         else:
-            logger.error(f"Action not found: {api_path} {http_method}")
-            return create_response(404, {'error': 'Action not found'}, api_path, http_method)
+            debug_logger.error("Unknown API path", {"api_path": api_path})
+            return {
+                "messageVersion": "1.0",
+                "response": {
+                    "actionGroup": "GmailActions",
+                    "apiPath": api_path,
+                    "httpMethod": "POST",
+                    "httpStatusCode": 400,
+                    "responseBody": {
+                        "content": {
+                            "application/json": {
+                                "message": f"Unknown API path: {api_path}"
+                            }
+                        },
+                        "contentType": "application/json"
+                    }
+                }
+            }
+        
+    except Exception as e:
+        error_details = {
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }
+        debug_logger.error("Exception in lambda_handler", error_details)
+        
+        return {
+            "messageVersion": "1.0",
+            "response": {
+                "actionGroup": "GmailActions",
+                "apiPath": event.get("apiPath", "/unknown"),
+                "httpMethod": event.get("httpMethod", "POST"),
+                "httpStatusCode": 500,
+                "responseBody": {
+                    "content": {
+                        "application/json": {
+                            "message": f"Internal server error: {str(e)}"
+                        }
+                    },
+                    "contentType": "application/json"
+                }
+            }
+        }
+
+def check_gmail_authentication(user_id):
+    """
+    Check if user has Gmail connection in PlatformConnections-staging table
+    """
+    try:
+        debug_logger.debug("Checking Gmail authentication", {"user_id": user_id})
+        
+        # Query DynamoDB for Gmail connection
+        response = platform_table.get_item(
+            Key={
+                'userId': user_id,
+                'provider': 'gmail'
+            }
+        )
+        
+        # Check if connection exists
+        if 'Item' in response:
+            debug_logger.debug("Gmail connection found", {
+                "user_id": user_id,
+                "gmail_email": response['Item'].get('gmailUserEmail', 'unknown')
+            })
+            return response['Item']
+        else:
+            debug_logger.error("No Gmail connection found", {"user_id": user_id})
+            return None
             
     except Exception as e:
-        logger.error(f"Lambda handler error: {str(e)}")
-        logger.error(f"Error type: {type(e).__name__}")
+        debug_logger.error("Error checking Gmail authentication", {
+            "error": str(e),
+            "error_type": type(e).__name__,
+            "user_id": user_id,
+            "table_name": PLATFORM_CONNECTIONS_TABLE
+        })
         import traceback
-        logger.error(f"Traceback: {traceback.format_exc()}")
-        return create_response(500, {'error': str(e)}, api_path or '/unknown', http_method or 'POST')
+        debug_logger.error("Traceback", {"traceback": traceback.format_exc()})
+        return None
+
+def check_emails(request_body, session_id, user_id, gmail_connection):
+    """
+    Check recent emails for a user
+    """
+    debug_logger.debug("Checking emails", {
+        "session_id": session_id, 
+        "user_id": user_id,
+        "gmail_email": gmail_connection.get('gmailUserEmail', 'unknown')
+    })
+    
+    try:
+        # In a real implementation, this would use the Gmail API with the access token
+        access_token = gmail_connection.get('accessToken', 'unknown')
+        gmail_email = gmail_connection.get('gmailUserEmail', 'unknown')
+        
+        debug_logger.debug("Gmail API call would use", {
+            "access_token_length": len(access_token) if access_token != 'unknown' else 0,
+            "gmail_email": gmail_email
+        })
+        
+        # For now, return a basic mock response 
+        return {
+            "messageVersion": "1.0",
+            "response": {
+                "actionGroup": "GmailActions",
+                "apiPath": "/check-emails",
+                "httpMethod": "POST",
+                "httpStatusCode": 200,
+                "responseBody": {
+                    "content": {
+                        "application/json": {
+                            "message": f"Email check successful for {gmail_email}",
+                            "authenticated": True,
+                            "gmail_email": gmail_email,
+                            "emails": [
+                                {
+                                    "id": "msg_123",
+                                    "subject": "Your Daily Update",
+                                    "sender": "updates@example.com",
+                                    "date": datetime.datetime.now().isoformat(),
+                                    "snippet": "Here's your daily update with the latest news..."
+                                },
+                                {
+                                    "id": "msg_124",
+                                    "subject": "Meeting Reminder",
+                                    "sender": "calendar@example.com",
+                                    "date": datetime.datetime.now().isoformat(),
+                                    "snippet": "Reminder: You have a meeting scheduled for tomorrow..."
+                                }
+                            ]
+                        }
+                    },
+                    "contentType": "application/json"
+                }
+            }
+        }
+        
+    except Exception as e:
+        error_details = {
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+            "session_id": session_id
+        }
+        debug_logger.error("Exception in check_emails", error_details)
+        
+        return {
+            "messageVersion": "1.0",
+            "response": {
+                "actionGroup": "GmailActions",
+                "apiPath": "/check-emails",
+                "httpMethod": "POST",
+                "httpStatusCode": 500,
+                "responseBody": {
+                    "content": {
+                        "application/json": {
+                            "message": f"Error checking emails: {str(e)}"
+                        }
+                    },
+                    "contentType": "application/json"
+                }
+            }
+        }
+
+def search_emails(request_body, session_id, user_id, gmail_connection):
+    """
+    Search emails using query parameters
+    """
+    debug_logger.debug("Searching emails", {
+        "request_body": request_body, 
+        "session_id": session_id, 
+        "user_id": user_id,
+        "gmail_email": gmail_connection.get('gmailUserEmail', 'unknown')
+    })
+    
+    try:
+        # Extract the query from the request body
+        query = None
+        if request_body and 'properties' in request_body:
+            for prop in request_body['properties']:
+                if prop.get('name') == 'query' and 'value' in prop:
+                    query = prop['value']
+        
+        debug_logger.debug("Search query", {"query": query, "session_id": session_id})
+        
+        if not query:
+            debug_logger.error("No query provided", {"session_id": session_id})
+            return {
+                "messageVersion": "1.0",
+                "response": {
+                    "actionGroup": "GmailActions",
+                    "apiPath": "/search-emails",
+                    "httpMethod": "POST",
+                    "httpStatusCode": 400,
+                    "responseBody": {
+                        "content": {
+                            "application/json": {
+                                "message": "No search query provided"
+                            }
+                        },
+                        "contentType": "application/json"
+                    }
+                }
+            }
+        
+        gmail_email = gmail_connection.get('gmailUserEmail', 'unknown')
+        
+        # In a real implementation, this would use the Gmail API to search
+        # For now, return a basic mock response
+        return {
+            "messageVersion": "1.0",
+            "response": {
+                "actionGroup": "GmailActions",
+                "apiPath": "/search-emails",
+                "httpMethod": "POST",
+                "httpStatusCode": 200,
+                "responseBody": {
+                    "content": {
+                        "application/json": {
+                            "message": f"Email search successful for {gmail_email}",
+                            "authenticated": True,
+                            "gmail_email": gmail_email,
+                            "query": query,
+                            "results": [
+                                {
+                                    "id": "msg_126",
+                                    "subject": "Search Results",
+                                    "sender": "search-match@example.com",
+                                    "date": datetime.datetime.now().isoformat(),
+                                    "snippet": f"This email matches your search criteria for '{query}'..."
+                                }
+                            ]
+                        }
+                    },
+                    "contentType": "application/json"
+                }
+            }
+        }
+        
+    except Exception as e:
+        error_details = {
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+            "session_id": session_id
+        }
+        debug_logger.error("Exception in search_emails", error_details)
+        
+        return {
+            "messageVersion": "1.0",
+            "response": {
+                "actionGroup": "GmailActions",
+                "apiPath": "/search-emails",
+                "httpMethod": "POST",
+                "httpStatusCode": 500,
+                "responseBody": {
+                    "content": {
+                        "application/json": {
+                            "message": f"Error searching emails: {str(e)}"
+                        }
+                    },
+                    "contentType": "application/json"
+                }
+            }
+        }
+
+def send_email(request_body, session_id, user_id, gmail_connection):
+    """
+    Send an email
+    """
+    debug_logger.debug("Sending email", {
+        "request_body": request_body, 
+        "session_id": session_id, 
+        "user_id": user_id,
+        "gmail_email": gmail_connection.get('gmailUserEmail', 'unknown')
+    })
+    
+    try:
+        # Extract email details from the request body
+        to_address = None
+        subject = None
+        message = None
+        
+        if request_body and 'properties' in request_body:
+            for prop in request_body['properties']:
+                if prop.get('name') == 'to' and 'value' in prop:
+                    to_address = prop['value']
+                elif prop.get('name') == 'subject' and 'value' in prop:
+                    subject = prop['value']
+                elif prop.get('name') == 'message' and 'value' in prop:
+                    message = prop['value']
+        
+        debug_logger.debug("Email details", {
+            "to": to_address,
+            "subject": subject,
+            "message_length": len(message) if message else 0,
+            "session_id": session_id
+        })
+        
+        # Validate required fields
+        if not all([to_address, subject, message]):
+            missing_fields = []
+            if not to_address:
+                missing_fields.append('to')
+            if not subject:
+                missing_fields.append('subject')
+            if not message:
+                missing_fields.append('message')
+                
+            debug_logger.error("Missing email fields", {
+                "missing_fields": missing_fields,
+                "session_id": session_id
+            })
+            
+            return {
+                "messageVersion": "1.0",
+                "response": {
+                    "actionGroup": "GmailActions",
+                    "apiPath": "/send-email",
+                    "httpMethod": "POST",
+                    "httpStatusCode": 400,
+                    "responseBody": {
+                        "content": {
+                            "application/json": {
+                                "message": f"Missing required fields: {', '.join(missing_fields)}"
+                            }
+                        },
+                        "contentType": "application/json"
+                    }
+                }
+            }
+        
+        gmail_email = gmail_connection.get('gmailUserEmail', 'unknown')
+        
+        # In a real implementation, this would use the Gmail API to send an email
+        # For now, return a success response
+        return {
+            "messageVersion": "1.0",
+            "response": {
+                "actionGroup": "GmailActions",
+                "apiPath": "/send-email",
+                "httpMethod": "POST",
+                "httpStatusCode": 200,
+                "responseBody": {
+                    "content": {
+                        "application/json": {
+                            "message": f"Email sent successfully from {gmail_email}",
+                            "authenticated": True,
+                            "gmail_email": gmail_email,
+                            "to": to_address,
+                            "subject": subject,
+                            "timestamp": datetime.datetime.now().isoformat()
+                        }
+                    },
+                    "contentType": "application/json"
+                }
+            }
+        }
+        
+    except Exception as e:
+        error_details = {
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+            "session_id": session_id
+        }
+        debug_logger.error("Exception in send_email", error_details)
+        
+        return {
+            "messageVersion": "1.0",
+            "response": {
+                "actionGroup": "GmailActions",
+                "apiPath": "/send-email",
+                "httpMethod": "POST",
+                "httpStatusCode": 500,
+                "responseBody": {
+                    "content": {
+                        "application/json": {
+                            "message": f"Error sending email: {str(e)}"
+                        }
+                    },
+                    "contentType": "application/json"
+                }
+            }
+        }
 
 def handle_search_emails(user_id: str, request_body: Dict) -> Dict:
     """Search emails based on query"""
     try:
         service = get_user_gmail_service(user_id)
         # Parse request
-        content = request_body.get('content', {})
         json_content = {}
         
         logger.info(f"[DEBUG] Raw request_body: {json.dumps(request_body)}")
-        logger.info(f"[DEBUG] Content type: {type(content)}, Content: {json.dumps(content) if isinstance(content, dict) else str(content)}")
         
-        if isinstance(content, dict):
-            app_json = content.get('application/json', {})
-            logger.info(f"[DEBUG] app_json: {json.dumps(app_json)}")
+        # Check if properties are directly in request_body (Bedrock sends it this way)
+        if 'properties' in request_body and isinstance(request_body['properties'], list):
+            try:
+                props_list = request_body['properties']
+                logger.info(f"[DEBUG] Found properties list in request_body: {json.dumps(props_list)}")
+                # convert list of {name,value} into dict
+                json_content = {p['name']: p.get('value') for p in props_list if isinstance(p, dict) and 'name' in p}
+                logger.info(f"[DEBUG] Converted properties to dict: {json.dumps(json_content)}")
+            except Exception as ex:
+                logger.warning(f"Failed to parse properties list: {str(ex)}")
+        
+        # Only check nested structure if we didn't find properties in request_body
+        if not json_content:
+            # Fallback to check nested content structure
+            content = request_body.get('content', {})
+            logger.info(f"[DEBUG] Content type: {type(content)}, Content: {json.dumps(content) if isinstance(content, dict) else str(content)}")
             
-            # Bedrock Agent sends parameters as list under "properties"
-            if 'properties' in app_json and isinstance(app_json['properties'], list):
-                try:
-                    props_list = app_json['properties']
-                    logger.info(f"[DEBUG] Found properties list: {json.dumps(props_list)}")
-                    # convert list of {name,value} into dict
-                    json_content = {p['name']: p.get('value') for p in props_list if isinstance(p, dict) and 'name' in p}
-                    logger.info(f"[DEBUG] Converted properties to dict: {json.dumps(json_content)}")
-                except Exception as ex:
-                    logger.warning(f"Failed to parse properties list: {str(ex)}")
-            else:
-                # Fallback to direct JSON content
-                json_content = app_json
-                logger.info(f"[DEBUG] Using direct json_content: {json.dumps(json_content)}")
-
+            if isinstance(content, dict):
+                app_json = content.get('application/json', {})
+                logger.info(f"[DEBUG] app_json: {json.dumps(app_json)}")
+                
+                # Check if properties in app_json
+                if 'properties' in app_json and isinstance(app_json['properties'], list):
+                    try:
+                        props_list = app_json['properties']
+                        logger.info(f"[DEBUG] Found properties list in app_json: {json.dumps(props_list)}")
+                        # convert list of {name,value} into dict
+                        json_content = {p['name']: p.get('value') for p in props_list if isinstance(p, dict) and 'name' in p}
+                        logger.info(f"[DEBUG] Converted properties to dict: {json.dumps(json_content)}")
+                    except Exception as ex:
+                        logger.warning(f"Failed to parse properties list: {str(ex)}")
+                else:
+                    # Fallback to direct JSON content
+                    json_content = app_json
+                    logger.info(f"[DEBUG] Using direct json_content: {json.dumps(json_content)}")
+        
+        # json_content now has our parsed data
         query = (json_content.get('query') or '').strip()
         max_results = int(json_content.get('maxResults', 10))
         
@@ -656,7 +1070,7 @@ def store_email_in_knowledge_base(user_id: str, email_id: str, email_data: Dict)
 
 def create_response(status_code: int, body: Dict, api_path: str, http_method: str = 'POST') -> Dict:
     """Create response for Bedrock Agent that mirrors the incoming request path & method"""
-    return {
+    response = {
         'messageVersion': '1.0',
         'response': {
             'actionGroup': 'GmailActions',
@@ -669,4 +1083,14 @@ def create_response(status_code: int, body: Dict, api_path: str, http_method: st
                 }
             }
         }
-    } 
+    }
+    
+    debug_logger.debug("Creating Gmail response", {
+        'status_code': status_code,
+        'api_path': api_path,
+        'http_method': http_method,
+        'body': body,
+        'full_response': response
+    })
+    
+    return response 

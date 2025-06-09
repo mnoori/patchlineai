@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-06-09T00:03:08.579005",
+  "agent": "scout-agent",
+  "level": "ERROR",
+  "message": "Artist not found anywhere",
+  "data": {
+    "searched_artist": "hyperpop",
+    "checked_soundcharts": false,
+    "checked_mock": true
+  }
+}

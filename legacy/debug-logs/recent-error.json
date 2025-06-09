@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-06-09T00:06:33.054389",
+  "agent": "scout-agent",
+  "level": "ERROR",
+  "message": "Artist not found anywhere",
+  "data": {
+    "searched_artist": "Anyma",
+    "checked_soundcharts": false,
+    "checked_mock": true
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-06-09T03:15:44.409004",
+  "agent": "blockchain-agent",
+  "level": "DEBUG",
+  "message": "Creating response",
+  "data": {
+    "status_code": 200,
+    "api_path": "/send-sol-payment",
+    "http_method": "POST",
+    "body": {
+      "action": "prepare_transaction",
+      "transaction_data": {
+        "wallet": "3Pe8uEGq2gbgYHXG9DnQ5RL45DNDvf7dnjKcGTj2eVuJ",
+        "recipient": "BUX7s2ef2htTGb2KKoPHWkmzxPj4nTWMWRg5GbZvfAqK",
+        "amount_sol": "0.01",
+        "amount_usd": "1.52",
+        "memo": "Transfer to Coinbase",
+        "estimated_fee_sol": "0.000005",
+        "estimated_fee_usd": "0.0008",
+        "sol_price": "151.7"
+      },
+      "security_checks": {
+        "address_valid": true,
+        "amount_within_limits": true,
+        "sufficient_balance_check_required": true
+      },
+      "confirmation_message": "\nTRANSACTION REVIEW:\n- From: 3Pe8uEGq...GTj2eVuJ\n- To: BUX7s2ef...GbZvfAqK (Coinbase Address)\n- Amount: 0.01 SOL (~$1.52 USD)\n- Network Fee: ~0.000005 SOL (~$0.0008 USD)\n- Purpose: Transfer to Coinbase\n\nWARNING: Please confirm you want to proceed with this transaction.\nClick \"CONFIRM\" to execute or \"CANCEL\" to abort.\n"
+    }
+  }
+}
