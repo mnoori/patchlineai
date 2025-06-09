@@ -170,6 +170,15 @@ def create_deployment_package(function_name: str, handler_file: str) -> bytes:
         # Copy handler as index.py
         (tmp_path / 'index.py').write_text(source_path.read_text(encoding='utf-8'))
         
+        # Only copy essential shared files (like debug_logger.py)
+        essential_files = ['debug_logger.py']  # Add other shared modules here if needed
+        for filename in essential_files:
+            py_file = lambda_src_dir / filename
+            if py_file.exists() and py_file.name != handler_file:
+                dest_file = tmp_path / py_file.name
+                dest_file.write_text(py_file.read_text(encoding='utf-8'))
+                print(f"[INFO] Including essential file: {py_file.name}")
+        
         # Install dependencies if requirements.txt exists
         req_file = lambda_src_dir / 'requirements.txt'
         if req_file.exists():
@@ -498,11 +507,18 @@ def main():
 
     # Common environment variables for Lambda functions
     env_vars = {
-        'PATCHLINE_AWS_REGION': REGION,
-        'PATCHLINE_DDB_TABLE': 'PatchlineTokens',
-        'PATCHLINE_S3_BUCKET': f'patchline-files-{REGION}',
+                    'PATCHLINE_AWS_REGION': REGION,
+            # Use PlatformConnections-staging as the unified table for all platform integrations
+            'PATCHLINE_DDB_TABLE': 'PlatformConnections-staging',
+            'PATCHLINE_S3_BUCKET': f'patchline-files-{REGION}',
+            'DEBUG_MODE': 'dev',  # Enable debug logging
         'PATCHLINE_SECRETS_ID': 'patchline/gmail-oauth',
-        'SOUNDCHARTS_SECRET_ID': 'patchline/soundcharts-api'
+        'SOUNDCHARTS_SECRET_ID': 'patchline/soundcharts-api',
+        # Web3 tables for blockchain agent
+        'WEB3_WALLETS_TABLE': 'Web3Wallets-staging',
+        'WEB3_TRANSACTIONS_TABLE': 'Web3Transactions-staging',
+        # Solana addresses
+        'SOLANA_COINBASE_ADDRESS': 'BUX7s2ef2htTGb2KKoPHWkmzxPj4nTWMWRg5GbZvfAqK'  # Example Coinbase address
     }
     
     # Determine which agents to process
@@ -516,6 +532,11 @@ def main():
     # Create supporting resources
     ensure_dynamodb_table(env_vars['PATCHLINE_DDB_TABLE'])
     ensure_s3_bucket(env_vars['PATCHLINE_S3_BUCKET'])
+    
+    # Create Web3 tables for blockchain agent if needed
+    if 'blockchain' in agents_to_process:
+        ensure_dynamodb_table('Web3Wallets-staging')
+        ensure_dynamodb_table('Web3Transactions-staging')
     
     # Store secrets if needed
     if 'gmail' in agents_to_process:
