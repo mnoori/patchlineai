@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb"
 import { CONFIG } from "@/lib/config"
+import { cache } from "@/lib/cache"
 
 // API to search for user's artist profile on Spotify
 const PLATFORM_CONNECTIONS_TABLE = process.env.PLATFORM_CONNECTIONS_TABLE || "PlatformConnections-staging"
@@ -20,27 +21,47 @@ const dynamoClient = new DynamoDBClient({
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
 
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const userId = searchParams.get('userId');
+
+  if (!userId) {
+    return NextResponse.json({ error: "Missing userId parameter" }, { status: 400 });
+  }
+
+  const cacheKey = `spotify-artist-search:${userId}`;
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    console.log(`[CACHE HIT] Serving from cache: ${cacheKey}`);
+    return NextResponse.json(cachedData);
+  }
+  console.log(`[CACHE MISS] No cache for: ${cacheKey}`);
+  
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
-    
-    if (!userId) {
-      return NextResponse.json({ error: "Missing userId parameter" }, { status: 400 })
-    }
+    // In parallel, check for a stored artist profile and the user's Spotify connection
+    const [artistProfileResult, spotifyConnectionResult] = await Promise.all([
+      docClient.send(
+        new QueryCommand({
+          TableName: PLATFORM_CONNECTIONS_TABLE,
+          KeyConditionExpression: "userId = :uid AND provider = :prov",
+          ExpressionAttributeValues: {
+            ":uid": userId,
+            ":prov": "spotify-artist-profile",
+          },
+        })
+      ),
+      docClient.send(
+        new QueryCommand({
+          TableName: PLATFORM_CONNECTIONS_TABLE,
+          KeyConditionExpression: "userId = :uid AND provider = :prov",
+          ExpressionAttributeValues: {
+            ":uid": userId,
+            ":prov": "spotify",
+          },
+        })
+      )
+    ]);
 
-    // First, check if we have stored artist profile data
-    const artistProfileResult = await docClient.send(
-      new QueryCommand({
-        TableName: PLATFORM_CONNECTIONS_TABLE,
-        KeyConditionExpression: "userId = :uid AND provider = :prov",
-        ExpressionAttributeValues: {
-          ":uid": userId,
-          ":prov": "spotify-artist-profile",
-        },
-      })
-    )
-
-    // If we have stored artist profile, return it immediately
+    // If we have a stored artist profile, return it immediately
     if (artistProfileResult.Items && artistProfileResult.Items.length > 0) {
       const storedProfile = artistProfileResult.Items[0]
       console.log("Found stored artist profile:", storedProfile.artistName, storedProfile.artistId)
@@ -60,23 +81,12 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Retrieve Spotify token for user
-    const result = await docClient.send(
-      new QueryCommand({
-        TableName: PLATFORM_CONNECTIONS_TABLE,
-        KeyConditionExpression: "userId = :uid AND provider = :prov",
-        ExpressionAttributeValues: {
-          ":uid": userId,
-          ":prov": "spotify",
-        },
-      })
-    )
-
-    if (!result.Items || result.Items.length === 0) {
+    // Retrieve Spotify token for user from the parallel query result
+    if (!spotifyConnectionResult.Items || spotifyConnectionResult.Items.length === 0) {
       return NextResponse.json({ error: "Spotify not connected" }, { status: 400 })
     }
 
-    const item = result.Items[0]
+    const item = spotifyConnectionResult.Items[0]
     const accessToken = item.accessToken
     if (!accessToken) {
       return NextResponse.json({ error: "Missing access token" }, { status: 400 })
@@ -153,7 +163,7 @@ export async function GET(request: NextRequest) {
     // DO NOT automatically store matched artists - this should only be done explicitly by the user
     // through the artist profile configuration in settings
 
-    return NextResponse.json({ 
+    const finalResponseData = { 
       userProfile: {
         id: profile.id,
         display_name: profile.display_name,
@@ -162,7 +172,13 @@ export async function GET(request: NextRequest) {
       searchResults: artists,
       matchedArtist: matchedArtist,
       knownArtistId: knownArtistId
-    })
+    };
+
+    // Cache the final result for 1 hour
+    cache.set(cacheKey, finalResponseData, 3600);
+    console.log(`[CACHE SET] Caching result for: ${cacheKey}`);
+
+    return NextResponse.json(finalResponseData);
   } catch (err) {
     console.error("Error searching for artist:", err)
     return NextResponse.json({ error: "Server error" }, { status: 500 })

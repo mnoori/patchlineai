@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // API Configuration
-const SOUNDCHARTS_APP_ID = process.env.SOUNDCHARTS_ID || 'PATCHLINE_A2F4F819'
-const SOUNDCHARTS_API_KEY = process.env.SOUNDCHARTS_TOKEN || 'd8e39c775adc8797'
+const SOUNDCHARTS_APP_ID = process.env.SOUNDCHARTS_ID
+const SOUNDCHARTS_API_KEY = process.env.SOUNDCHARTS_TOKEN
 const SOUNDCHARTS_API_URL = process.env.SOUNDCHARTS_API_URL || 'https://customer.api.soundcharts.com'
 
 // CORS headers for client-side requests
@@ -28,6 +28,12 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    if (!SOUNDCHARTS_APP_ID || !SOUNDCHARTS_API_KEY) {
+      const errorMessage = 'Soundcharts API credentials are not configured on the server.'
+      console.error(errorMessage)
+      return NextResponse.json({ error: errorMessage }, { status: 500 })
+    }
+
     // Build the full URL with query parameters
     const url = new URL(`${SOUNDCHARTS_API_URL}${endpoint}`)
     
@@ -38,37 +44,48 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        'x-app-id': SOUNDCHARTS_APP_ID,
-        'x-api-key': SOUNDCHARTS_API_KEY,
-        'Content-Type': 'application/json',
-      },
-    })
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 15000) // 15-second timeout
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Soundcharts API error:', response.status, errorText)
-      return NextResponse.json(
-        { error: `Soundcharts API error: ${response.status}`, details: errorText },
-        { status: response.status, headers: corsHeaders }
-      )
-    }
+    try {
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'x-app-id': SOUNDCHARTS_APP_ID,
+          'x-api-key': SOUNDCHARTS_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal,
+      })
 
-    const data = await response.json()
-    
-    // Get remaining quota from response headers
-    const quotaRemaining = response.headers.get('x-quota-remaining')
-    
-    return NextResponse.json(data, { 
-      headers: {
-        ...corsHeaders,
-        'X-Quota-Remaining': quotaRemaining || 'unknown'
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Soundcharts API error:', response.status, errorText)
+        return NextResponse.json(
+          { error: `Soundcharts API error: ${response.status}`, details: errorText },
+          { status: response.status, headers: corsHeaders }
+        )
       }
-    })
+
+      const data = await response.json()
+      
+      // Get remaining quota from response headers
+      const quotaRemaining = response.headers.get('x-quota-remaining')
+      
+      return NextResponse.json(data, { 
+        headers: {
+          ...corsHeaders,
+          'X-Quota-Remaining': quotaRemaining || 'unknown'
+        }
+      })
+    } finally {
+      clearTimeout(timeoutId)
+    }
   } catch (error) {
     console.error('Soundcharts proxy error:', error)
+    if (error instanceof Error && error.name === 'AbortError') {
+      return NextResponse.json({ error: 'Request to Soundcharts API timed out' }, { status: 504 })
+    }
     return NextResponse.json(
       { error: 'Failed to fetch from Soundcharts API', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500, headers: corsHeaders }
@@ -88,6 +105,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!SOUNDCHARTS_APP_ID || !SOUNDCHARTS_API_KEY) {
+      const errorMessage = 'Soundcharts API credentials are not configured on the server.'
+      console.error(errorMessage)
+      return NextResponse.json({ error: errorMessage }, { status: 500 })
+    }
+
     const body = await request.json()
 
     // Build the full URL with query parameters
@@ -100,38 +123,49 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    const response = await fetch(url.toString(), {
-      method: 'POST',
-      headers: {
-        'x-app-id': SOUNDCHARTS_APP_ID,
-        'x-api-key': SOUNDCHARTS_API_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    })
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 15000) // 15-second timeout
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Soundcharts API error:', response.status, errorText)
-      return NextResponse.json(
-        { error: `Soundcharts API error: ${response.status}`, details: errorText },
-        { status: response.status, headers: corsHeaders }
-      )
-    }
+    try {
+      const response = await fetch(url.toString(), {
+        method: 'POST',
+        headers: {
+          'x-app-id': SOUNDCHARTS_APP_ID,
+          'x-api-key': SOUNDCHARTS_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      })
 
-    const data = await response.json()
-    
-    // Get remaining quota from response headers
-    const quotaRemaining = response.headers.get('x-quota-remaining')
-    
-    return NextResponse.json(data, { 
-      headers: {
-        ...corsHeaders,
-        'X-Quota-Remaining': quotaRemaining || 'unknown'
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Soundcharts API error:', response.status, errorText)
+        return NextResponse.json(
+          { error: `Soundcharts API error: ${response.status}`, details: errorText },
+          { status: response.status, headers: corsHeaders }
+        )
       }
-    })
+
+      const data = await response.json()
+      
+      // Get remaining quota from response headers
+      const quotaRemaining = response.headers.get('x-quota-remaining')
+      
+      return NextResponse.json(data, { 
+        headers: {
+          ...corsHeaders,
+          'X-Quota-Remaining': quotaRemaining || 'unknown'
+        }
+      })
+    } finally {
+      clearTimeout(timeoutId)
+    }
   } catch (error) {
     console.error('Soundcharts proxy error:', error)
+    if (error instanceof Error && error.name === 'AbortError') {
+      return NextResponse.json({ error: 'Request to Soundcharts API timed out' }, { status: 504 })
+    }
     return NextResponse.json(
       { error: 'Failed to fetch from Soundcharts API', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500, headers: corsHeaders }

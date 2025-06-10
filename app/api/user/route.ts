@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server"
+import { getDocumentClient } from "@/lib/aws/shared-dynamodb-client"
+import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb"
+import { cache } from "@/lib/cache"
 
 // Check if we're in an environment that supports AWS SDK
 const isAwsSupported = () => {
@@ -91,33 +94,53 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Missing userId" }, { status: 400 })
   }
 
-  // If AWS is not supported, return mock data immediately
-  if (!ddbClient) {
+  // Check cache first
+  const cacheKey = `user:${userId}`
+  const cachedData = cache.get(cacheKey)
+  if (cachedData) {
+    console.log(`[CACHE HIT] ${cacheKey}`)
+    return NextResponse.json(cachedData)
+  }
+
+  // Get shared document client
+  const docClient = await getDocumentClient()
+  
+  // If AWS is not available, return mock data immediately
+  if (!docClient) {
     console.log(`[API /user GET] Using mock data for userId: ${userId}`)
-    return NextResponse.json(generateMockUser(userId))
+    const mockUser = generateMockUser(userId)
+    cache.set(cacheKey, mockUser, 300) // Cache for 5 minutes
+    return NextResponse.json(mockUser)
   }
 
   try {
-    const result = await ddbClient.send(
-      new GetItemCommand({
+    const result = await docClient.send(
+      new GetCommand({
         TableName: USERS_TABLE,
-        Key: marshall({ userId }),
-      }),
+        Key: { userId },
+      })
     )
 
     if (!result.Item) {
       // Return mock user if not found
-      return NextResponse.json(generateMockUser(userId))
+      const mockUser = generateMockUser(userId)
+      cache.set(cacheKey, mockUser, 300) // Cache for 5 minutes
+      return NextResponse.json(mockUser)
     }
 
-    const user = unmarshall(result.Item)
-    return NextResponse.json(user)
+    // Cache the real user data
+    cache.set(cacheKey, result.Item, 300) // Cache for 5 minutes
+    console.log(`[CACHE SET] ${cacheKey}`)
+    
+    return NextResponse.json(result.Item)
   } catch (error: any) {
     console.error("Error fetching user:", error)
 
     // Return mock data on any error
     console.log(`[API /user GET] Returning mock data due to error for userId: ${userId}`)
-    return NextResponse.json(generateMockUser(userId))
+    const mockUser = generateMockUser(userId)
+    cache.set(cacheKey, mockUser, 60) // Cache error response for 1 minute
+    return NextResponse.json(mockUser)
   }
 }
 
@@ -130,8 +153,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing userId" }, { status: 400 })
     }
 
+    // Invalidate cache on update
+    const cacheKey = `user:${userId}`
+    cache.del(cacheKey)
+
+    // Get shared document client
+    const docClient = await getDocumentClient()
+    
     // If AWS is not supported, return mock success
-    if (!ddbClient) {
+    if (!docClient) {
       console.log(`[API /user POST] Using mock response for userId: ${userId}`)
       return NextResponse.json({
         success: true,
@@ -148,12 +178,15 @@ export async function POST(req: Request) {
       ...(userData.createdAt ? {} : { createdAt: timestamp }),
     }
 
-    await ddbClient.send(
-      new PutItemCommand({
+    await docClient.send(
+      new PutCommand({
         TableName: USERS_TABLE,
-        Item: marshall(userToSave),
-      }),
+        Item: userToSave,
+      })
     )
+
+    // Update cache with new data
+    cache.set(cacheKey, userToSave, 300)
 
     return NextResponse.json({ success: true, user: userToSave })
   } catch (error: any) {

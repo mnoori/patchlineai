@@ -1,27 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb'
+import { getDynamoDBClient } from '@/lib/aws/shared-dynamodb-client'
+import { QueryCommand } from '@aws-sdk/client-dynamodb'
+import { cache } from '@/lib/cache'
 import { CONFIG } from '@/lib/config'
 
-const dynamoDB = new DynamoDBClient({
-  region: CONFIG.AWS_REGION,
-  // Only provide credentials explicitly if they are set (e.g., during local development)
-  credentials:
-    CONFIG.AWS_ACCESS_KEY_ID && CONFIG.AWS_SECRET_ACCESS_KEY
-      ? {
-          accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
-          secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
-          ...(CONFIG.AWS_SESSION_TOKEN && { sessionToken: CONFIG.AWS_SESSION_TOKEN }),
-        }
-      : undefined, // In production (Lambda), rely on the IAM role attached to the function
-})
-
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
+  const { searchParams } = new URL(request.url)
+  const userId = searchParams.get('userId')
 
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+  if (!userId) {
+    return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+  }
+
+  try {
+    // Check cache first
+    const cacheKey = `embeds:${userId}`
+    const cachedData = cache.get(cacheKey)
+    if (cachedData) {
+      console.log(`[CACHE HIT] ${cacheKey}`)
+      return NextResponse.json(cachedData)
+    }
+
+    // Get shared DynamoDB client
+    const dynamoDB = await getDynamoDBClient()
+    
+    // If AWS is not available, return empty embeds
+    if (!dynamoDB) {
+      console.log(`[API /embeds] AWS not available, returning empty embeds for userId: ${userId}`)
+      const emptyResponse = { embeds: [] }
+      cache.set(cacheKey, emptyResponse, 300) // Cache for 5 minutes
+      return NextResponse.json(emptyResponse)
     }
 
     // Determine environment
@@ -56,9 +64,21 @@ export async function GET(request: NextRequest) {
 
     console.log(`[API /embeds] Found ${embeds.length} embeds for user ${userId}`)
 
-    return NextResponse.json({ embeds })
+    const responseData = { embeds }
+    
+    // Cache the result
+    cache.set(cacheKey, responseData, 300) // Cache for 5 minutes
+    console.log(`[CACHE SET] ${cacheKey}`)
+
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error('[API /embeds] Error fetching embeds:', error)
+    
+    // Cache empty response on error to prevent repeated failures
+    const cacheKey = `embeds:${userId}`
+    const errorResponse = { embeds: [] }
+    cache.set(cacheKey, errorResponse, 60) // Cache error for 1 minute
+    
     return NextResponse.json(
       { error: 'Failed to fetch embeds' },
       { status: 500 }

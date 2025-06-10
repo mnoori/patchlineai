@@ -47,7 +47,10 @@ import { usePathname } from "next/navigation"
 import { usePermissions } from "@/lib/permissions"
 import { getTierConfig } from "@/lib/tier-config"
 import { Badge } from "@/components/ui/badge"
-import { WalletConnector } from "@/components/web3/wallet-connector"
+import { WalletLoader } from "@/components/web3/wallet-loader"
+import { MainNav } from "@/components/dashboard/main-nav"
+import { Search as DashboardSearch } from "@/components/dashboard/search"
+import { UserNav } from "@/components/dashboard/user-nav"
 
 interface UserInfo {
   fullName: string
@@ -267,7 +270,7 @@ export function DashboardNavbar() {
                   </Button>
                 )}
               </div>
-              <WalletConnector />
+              <WalletLoader />
               <Button
                 variant="ghost"
                 size="icon"

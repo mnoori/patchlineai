@@ -50,7 +50,8 @@ export async function GET(request: NextRequest) {
     console.error('[Preferences] Error fetching preferences:', error)
     
     // If table doesn't exist, return null preferences (not an error)
-    if (error instanceof Error && error.message.includes('ResourceNotFoundException')) {
+    if (error instanceof Error && error.name === 'ResourceNotFoundException') {
+      console.log(`[Preferences] Table ${TABLE_NAME} not found, returning null preferences.`)
       return NextResponse.json({ preferences: null })
     }
     
@@ -100,8 +101,8 @@ export async function POST(request: NextRequest) {
     console.error('[Preferences] Error saving preferences:', error)
     
     // If table doesn't exist, still return success (will use localStorage fallback)
-    if (error instanceof Error && error.message.includes('ResourceNotFoundException')) {
-      console.warn('[Preferences] Table does not exist, preferences not persisted to DynamoDB')
+    if (error instanceof Error && error.name === 'ResourceNotFoundException') {
+      console.warn(`[Preferences] Table ${TABLE_NAME} not found, preferences not persisted to DynamoDB`)
       return NextResponse.json({ 
         success: true, 
         message: 'Preferences saved locally only',

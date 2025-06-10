@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server"
+import { getDocumentClient } from "@/lib/aws/shared-dynamodb-client"
+import { GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb"
+import { cache } from "@/lib/cache"
 
 // Check if we're in an environment that supports AWS SDK
 const isAwsSupported = () => {
@@ -102,42 +105,53 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Missing userId" }, { status: 400 })
   }
 
+  // Check cache first
+  const cacheKey = `platforms:${userId}`
+  const cachedData = cache.get(cacheKey)
+  if (cachedData) {
+    console.log(`[CACHE HIT] ${cacheKey}`)
+    return NextResponse.json(cachedData)
+  }
+
   console.log(`[API /platforms GET] Received request for userId: ${userId}, using table: ${USERS_TABLE}`)
 
-  // If AWS is not supported, return mock data immediately
-  if (!ddbClient) {
+  // Get shared document client
+  const docClient = await getDocumentClient()
+  
+  // If AWS is not available, return mock data immediately
+  if (!docClient) {
     console.log(`[API /platforms GET] Using mock data for userId: ${userId}`)
-    return NextResponse.json(generateMockPlatforms(userId))
+    const mockData = generateMockPlatforms(userId)
+    cache.set(cacheKey, mockData, 300) // Cache for 5 minutes
+    return NextResponse.json(mockData)
   }
 
   try {
     console.log(`[API /platforms GET] Attempting to get user from table: ${USERS_TABLE} for userId: ${userId}`)
     
-    // Get user data from Users table
-    const userResult = await ddbClient.send(
-      new GetItemCommand({
-        TableName: USERS_TABLE,
-        Key: marshall({ userId }),
-      }),
-    )
-
-    // Get platform connections from PlatformConnections table
-    console.log(`[API /platforms GET] Querying platform connections from table: ${PLATFORM_CONNECTIONS_TABLE}`)
-    const connectionsResult = await ddbClient.send(
-      new QueryCommand({
-        TableName: PLATFORM_CONNECTIONS_TABLE,
-        KeyConditionExpression: "userId = :userId",
-        ExpressionAttributeValues: marshall({
-          ":userId": userId
+    // Run both queries in parallel for better performance
+    const [userResult, connectionsResult] = await Promise.all([
+      docClient.send(
+        new GetCommand({
+          TableName: USERS_TABLE,
+          Key: { userId },
         })
-      })
-    )
+      ),
+      docClient.send(
+        new QueryCommand({
+          TableName: PLATFORM_CONNECTIONS_TABLE,
+          KeyConditionExpression: "userId = :userId",
+          ExpressionAttributeValues: {
+            ":userId": userId
+          }
+        })
+      )
+    ])
 
     // Start with user's platform data (legacy format)
     let platforms: Record<string, any> = {}
     if (userResult.Item) {
-      const user = unmarshall(userResult.Item)
-      platforms = user.platforms || {}
+      platforms = userResult.Item.platforms || {}
       console.log(`[API /platforms GET] Found existing platforms for userId: ${userId}`, platforms)
     }
 
@@ -145,8 +159,7 @@ export async function GET(req: Request) {
     if (connectionsResult.Items && connectionsResult.Items.length > 0) {
       console.log(`[API /platforms GET] Found ${connectionsResult.Items.length} platform connections`)
       
-      connectionsResult.Items.forEach((item: any) => {
-        const connection = unmarshall(item)
+      connectionsResult.Items.forEach((connection: any) => {
         platforms[connection.provider] = {
           connected: true,
           accessToken: connection.accessToken,
@@ -160,13 +173,21 @@ export async function GET(req: Request) {
     }
 
     console.log(`[API /platforms GET] Returning platforms for userId: ${userId}`, platforms)
-    return NextResponse.json({ platforms })
+    const responseData = { platforms }
+    
+    // Cache the result
+    cache.set(cacheKey, responseData, 300) // Cache for 5 minutes
+    console.log(`[CACHE SET] ${cacheKey}`)
+    
+    return NextResponse.json(responseData)
   } catch (error: any) {
     console.error(`[API /platforms GET] Error fetching platforms for userId: ${userId}:`, error)
 
     // Return mock data on any error
     console.log(`[API /platforms GET] Returning mock data due to error for userId: ${userId}`)
-    return NextResponse.json(generateMockPlatforms(userId))
+    const mockData = generateMockPlatforms(userId)
+    cache.set(cacheKey, mockData, 60) // Cache error response for 1 minute
+    return NextResponse.json(mockData)
   }
 }
 
@@ -178,8 +199,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields: userId, platform, platformData" }, { status: 400 })
     }
 
+    // Invalidate cache on update
+    const cacheKey = `platforms:${userId}`
+    cache.del(cacheKey)
+
+    // Get shared document client
+    const docClient = await getDocumentClient()
+    
     // If AWS is not supported, return mock success
-    if (!ddbClient) {
+    if (!docClient) {
       console.log(`[API /platforms POST] Using mock response for userId: ${userId}`)
       return NextResponse.json({
         success: true,
@@ -190,14 +218,14 @@ export async function POST(req: Request) {
     }
 
     // Get current user data
-    const getUserResult = await ddbClient.send(
-      new GetItemCommand({
+    const getUserResult = await docClient.send(
+      new GetCommand({
         TableName: USERS_TABLE,
-        Key: marshall({ userId }),
-      }),
+        Key: { userId },
+      })
     )
 
-    const currentUser = getUserResult.Item ? unmarshall(getUserResult.Item) : { userId }
+    const currentUser = getUserResult.Item || { userId }
     const currentPlatforms = currentUser.platforms || {}
 
     // Update platforms
@@ -210,15 +238,15 @@ export async function POST(req: Request) {
     }
 
     // Save updated user
-    await ddbClient.send(
-      new PutItemCommand({
+    await docClient.send(
+      new PutCommand({
         TableName: USERS_TABLE,
-        Item: marshall({
+        Item: {
           ...currentUser,
           platforms: updatedPlatforms,
           updatedAt: new Date().toISOString(),
-        }),
-      }),
+        },
+      })
     )
 
     return NextResponse.json({ success: true, platform })
