@@ -18,9 +18,6 @@ import {
   Radio,
   Headphones,
   Mic2,
-  Guitar,
-  Piano,
-  Drum,
   Music2,
   Music3,
   Music4
@@ -42,15 +39,15 @@ export interface UserPreferences {
 const GENRES = [
   { id: "hip-hop", label: "Hip Hop", icon: Mic2 },
   { id: "pop", label: "Pop", icon: Radio },
-  { id: "rock", label: "Rock", icon: Guitar },
+  { id: "rock", label: "Rock", icon: Music4 },
   { id: "electronic", label: "Electronic", icon: Headphones },
   { id: "r&b", label: "R&B", icon: Music },
   { id: "indie", label: "Indie", icon: Music2 },
   { id: "latin", label: "Latin", icon: Music3 },
-  { id: "jazz", label: "Jazz", icon: Piano },
+  { id: "jazz", label: "Jazz", icon: Music2 },
   { id: "country", label: "Country", icon: Music4 },
-  { id: "classical", label: "Classical", icon: Piano },
-  { id: "metal", label: "Metal", icon: Drum },
+  { id: "classical", label: "Classical", icon: Music3 },
+  { id: "metal", label: "Metal", icon: Zap },
   { id: "reggae", label: "Reggae", icon: Music }
 ]
 
