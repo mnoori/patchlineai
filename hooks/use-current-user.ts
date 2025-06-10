@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { getCurrentUser } from "aws-amplify/auth"
+import { getCurrentUser } from "@aws-amplify/auth"
 import { shouldBypassAuth, MOCK_USER } from "@/lib/config"
 
 interface UserData {

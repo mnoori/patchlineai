@@ -13,6 +13,7 @@ import urllib.parse
 from typing import Dict, List, Any
 from datetime import datetime
 from debug_logger import get_logger
+import uuid
 
 # Configure logging
 logger = logging.getLogger()
@@ -53,6 +54,39 @@ else:
     })
 
 SOUNDCHARTS_API_BASE = 'https://customer.api.soundcharts.com'  # Correct Soundcharts API URL
+
+# DynamoDB client for interaction tracking
+dynamodb = boto3.resource('dynamodb', region_name=os.environ.get('PATCHLINE_AWS_REGION', 'us-east-1'))
+INTERACTIONS_TABLE = os.environ.get('USER_INTERACTIONS_TABLE', 'UserInteractions-staging')
+
+def track_interaction(user_id: str, action: str, metadata: Dict = None):
+    """Track user interactions in DynamoDB"""
+    try:
+        table = dynamodb.Table(INTERACTIONS_TABLE)
+        
+        interaction = {
+            'interactionId': str(uuid.uuid4()),
+            'userId': user_id,
+            'timestamp': datetime.now().isoformat(),
+            'action': f'scout_api_{action.replace("/", "_")}',
+            'agent': 'scout',
+            'metadata': metadata or {},
+            'ttl': int((datetime.now().timestamp()) + (90 * 24 * 60 * 60))  # 90 days TTL
+        }
+        
+        table.put_item(Item=interaction)
+        debug_logger.debug("Tracked user interaction", {
+            'userId': user_id,
+            'action': interaction['action']
+        })
+        
+    except Exception as e:
+        # Don't fail the request if tracking fails
+        debug_logger.error("Failed to track interaction", {
+            'error': str(e),
+            'userId': user_id,
+            'action': action
+        })
 
 # Mock data for development - will be replaced with real APIs in production
 MOCK_ARTISTS_DB = {
@@ -275,6 +309,9 @@ def lambda_handler(event, context):
         if not user_id:
             debug_logger.error("No user ID found in event", {'event': event})
             return create_response(400, {'error': 'User ID not found'}, api_path, http_method)
+        
+        # Track the API interaction
+        track_interaction(user_id, api_path, request_body)
         
         logger.info(f"[SCOUT] Action: {api_path} | Method: {http_method} | User: {user_id}")
         

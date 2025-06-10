@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // API Configuration
-const SOUNDCHARTS_APP_ID = process.env.SOUNDCHARTS_APP_ID || 'PATCHLINE_A2F4F819'
-const SOUNDCHARTS_API_KEY = process.env.SOUNDCHARTS_API_KEY || 'd8e39c775adc8797'
+const SOUNDCHARTS_APP_ID = process.env.SOUNDCHARTS_ID || 'PATCHLINE_A2F4F819'
+const SOUNDCHARTS_API_KEY = process.env.SOUNDCHARTS_TOKEN || 'd8e39c775adc8797'
 const SOUNDCHARTS_API_URL = process.env.SOUNDCHARTS_API_URL || 'https://customer.api.soundcharts.com'
 
 // CORS headers for client-side requests

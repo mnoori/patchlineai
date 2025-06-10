@@ -121,6 +121,200 @@ class SoundchartsClient {
     }
   }
 
+  // Get artists by user preferences (Scout Agent specific)
+  async getArtistsByPreferences(preferences: {
+    genres: string[]
+    markets?: string[]
+    careerStages?: string[]
+    sortBy?: 'monthly_listeners' | 'followers' | 'score'
+    limit?: number
+  }): Promise<SoundchartsArtist[]> {
+    const { genres, markets, careerStages, sortBy = 'monthly_listeners', limit = 15 } = preferences
+
+    console.log('🔍 Getting artists by preferences:', preferences)
+
+    // Genre keywords that are more likely to return relevant artists
+    const genreKeywords: Record<string, string[]> = {
+      'Pop': ['pop star', 'pop music', 'mainstream', 'top 40'],
+      'Hip-Hop': ['rapper', 'hip hop', 'rap', 'trap'],
+      'Electronic': ['dj', 'edm', 'electronic music', 'house'],
+      'Rock': ['rock band', 'rock music', 'alternative', 'indie rock'],
+      'R&B': ['r&b', 'rnb', 'soul', 'rhythm and blues'],
+      'Country': ['country music', 'nashville', 'country singer'],
+      'Latin': ['latin music', 'reggaeton', 'latin pop', 'spanish'],
+      'Alternative': ['alternative', 'indie', 'alt rock'],
+      'Indie': ['indie', 'independent', 'indie pop'],
+      'Jazz': ['jazz', 'jazz music', 'bebop', 'smooth jazz'],
+      'Classical': ['classical', 'orchestra', 'symphony'],
+      'Metal': ['metal', 'heavy metal', 'rock metal'],
+      'Reggae': ['reggae', 'dancehall', 'jamaica'],
+      'Blues': ['blues', 'blues music', 'rhythm blues'],
+      'Folk': ['folk', 'acoustic', 'folk music'],
+      'Soul': ['soul', 'soul music', 'motown'],
+      'Funk': ['funk', 'funk music', 'groove'],
+      'Punk': ['punk', 'punk rock', 'pop punk'],
+      'World': ['world music', 'ethnic', 'global'],
+      'Gospel': ['gospel', 'christian', 'worship']
+    }
+
+    try {
+      // First try the trending artists API with filters
+      const filters: Array<{
+        type: 'genre' | 'careerStage' | 'country' | 'metric'
+        data: {
+          values?: string[]
+          operator?: 'in' | 'not_in'
+          min?: string
+          max?: string
+          platform?: string
+          metricType?: string
+        }
+      }> = []
+
+      if (genres.length > 0) {
+        const mappedGenres = genres.map(g => g.toLowerCase())
+        filters.push({
+          type: 'genre',
+          data: {
+            values: mappedGenres,
+            operator: 'in'
+          }
+        })
+      }
+
+      if (careerStages && careerStages.length > 0) {
+        filters.push({
+          type: 'careerStage',
+          data: {
+            values: careerStages,
+            operator: 'in'
+          }
+        })
+      }
+
+      if (markets && markets.length > 0) {
+        filters.push({
+          type: 'country',
+          data: {
+            values: markets,
+            operator: 'in'
+          }
+        })
+      }
+
+      try {
+        const response = await this.getTrendingArtists({
+          sort: {
+            platform: sortBy === 'score' ? 'soundcharts' : 'spotify',
+            metricType: sortBy === 'score' ? 'score' : sortBy,
+            sortBy: 'total',
+            order: 'desc'
+          },
+          filters,
+          limit
+        })
+
+        if (response.items && response.items.length > 0) {
+          console.log('✅ Got artists from trending API:', response.items.length)
+          return response.items.map(item => item.artist).slice(0, limit)
+        }
+      } catch (trendingError) {
+        console.warn('Trending API not available (403), using search fallback')
+      }
+
+      // Fallback: Use search with genre-related keywords
+      console.log('🔄 Using search fallback with genre keywords')
+      const allArtists: SoundchartsArtist[] = []
+      const searchPromises: Promise<{ items: SoundchartsArtist[] }>[] = []
+
+      for (const genre of genres) {
+        const keywords = genreKeywords[genre] || [genre.toLowerCase()]
+        
+        // Search with multiple keywords per genre
+        for (const keyword of keywords.slice(0, 2)) { // Use first 2 keywords per genre
+          searchPromises.push(
+            this.searchArtists(keyword, Math.ceil(limit / genres.length / 2))
+              .catch(err => {
+                console.warn(`Search failed for "${keyword}":`, err)
+                return { items: [] }
+              })
+          )
+        }
+      }
+
+      const searchResults = await Promise.all(searchPromises)
+      
+      // Collect all artists
+      for (const result of searchResults) {
+        if (result.items) {
+          allArtists.push(...result.items)
+        }
+      }
+
+      // Remove duplicates by UUID
+      const uniqueArtists = allArtists.filter((artist, index, self) => 
+        index === self.findIndex(a => a.uuid === artist.uuid)
+      )
+
+      // Filter by markets if specified (basic filter)
+      let filteredArtists = uniqueArtists
+      if (markets && markets.length > 0) {
+        filteredArtists = uniqueArtists.filter(artist => 
+          !artist.countryCode || markets.includes(artist.countryCode)
+        )
+      }
+
+      // Filter by career stage if available
+      if (careerStages && careerStages.length > 0) {
+        filteredArtists = filteredArtists.filter(artist => 
+          !artist.careerStage || careerStages.includes(artist.careerStage)
+        )
+      }
+
+      // If we still don't have enough artists, do a broader search
+      if (filteredArtists.length < 5) {
+        console.log('🔍 Not enough artists, doing broader search...')
+        
+        // Try searching for trending/popular terms
+        const broadSearches = [
+          'trending', 'viral', 'new music', 'rising', 'breakthrough'
+        ]
+        
+        const broadPromises = broadSearches.slice(0, 3).map(term =>
+          this.searchArtists(term, 5)
+            .catch(() => ({ items: [] }))
+        )
+        
+        const broadResults = await Promise.all(broadPromises)
+        for (const result of broadResults) {
+          if (result.items) {
+            filteredArtists.push(...result.items)
+          }
+        }
+        
+        // Remove new duplicates
+        filteredArtists = filteredArtists.filter((artist, index, self) => 
+          index === self.findIndex(a => a.uuid === artist.uuid)
+        )
+      }
+
+      console.log(`✅ Found ${filteredArtists.length} artists after filtering`)
+      return filteredArtists.slice(0, limit)
+
+    } catch (error) {
+      console.error('Failed to get artists by preferences:', error)
+      
+      // Last resort: return some trending/viral artists
+      try {
+        const fallbackSearch = await this.searchArtists('trending music', limit)
+        return fallbackSearch.items || []
+      } catch (fallbackError) {
+        console.error('Even fallback search failed:', fallbackError)
+        return []
+      }
+    }
+  }
+
   // Get trending artists with filters
   async getTrendingArtists(params: ArtistSearchParams): Promise<{
     items: Array<{

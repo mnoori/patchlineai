@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reset Scout Preferences</title>
+</head>
+<body>
+  <h1>Reset Scout Preferences</h1>
+  <button onclick="resetPreferences()">Click to Reset</button>
+  <p id="status"></p>
+  
+  <script>
+    function resetPreferences() {
+      // Clear the onboarding data
+      localStorage.removeItem('patchline-onboarding');
+      localStorage.removeItem('scout-onboarding');
+      localStorage.removeItem('scout-watchlist');
+      localStorage.removeItem('user-interactions');
+      
+      document.getElementById('status').textContent = '✅ Preferences cleared! Reload the scout page to see fresh onboarding.';
+    }
+  </script>
+</body>
+</html> 

@@ -15,7 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, Settings, User } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { signOut, getCurrentUser } from "aws-amplify/auth"
+import { signOut, getCurrentUser } from "@aws-amplify/auth"
 
 export function AuthButton() {
   const router = useRouter()

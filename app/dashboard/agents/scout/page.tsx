@@ -26,6 +26,17 @@ import { toast } from "sonner"
 import { ArtistRosterView } from "@/components/agents/scout/artist-roster-view"
 import { trackUserInteraction } from "@/lib/interaction-tracker"
 import { useSearchParams } from 'next/navigation'
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export default function ScoutAgentPage() {
   const { userId } = useCurrentUser()
@@ -53,6 +64,8 @@ export default function ScoutAgentPage() {
   // Debounced search term for API calls
   const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
+  const [showResetDialog, setShowResetDialog] = useState(false)
+
   // Track page view
   useEffect(() => {
     if (userId) {
@@ -77,24 +90,45 @@ export default function ScoutAgentPage() {
     localStorage.setItem('scout-watchlist', JSON.stringify(Array.from(watchlist)))
   }, [watchlist])
 
-  // Load roster from API
+  // Load roster on mount
   useEffect(() => {
     async function loadRoster() {
       if (!userId) return
       
       try {
-        setLoadingRoster(true)
         const response = await artistRosterAPI.getAll(userId) as any
         setRoster(response.artists || [])
       } catch (error) {
         console.error('Failed to load roster:', error)
-      } finally {
-        setLoadingRoster(false)
+        setRoster([])
       }
     }
     
     loadRoster()
   }, [userId])
+
+  // Load preferences from DynamoDB on mount
+  useEffect(() => {
+    async function loadSavedPreferences() {
+      if (!userId || preferences) return // Don't load if already have preferences
+      
+      try {
+        const response = await fetch(`/api/user-preferences?userId=${userId}&agentId=scout`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.preferences) {
+            console.log('📥 Loaded saved preferences:', data.preferences)
+            setPreferences(data.preferences)
+            completeOnboarding() // Mark onboarding as complete if we have saved preferences
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load preferences:', error)
+      }
+    }
+    
+    loadSavedPreferences()
+  }, [userId, preferences, completeOnboarding])
 
   // Pre-populate artists based on preferences
   useEffect(() => {
@@ -114,54 +148,51 @@ export default function ScoutAgentPage() {
           })
         }
         
-        // Create search queries based on preferences - IMPROVED TO LOAD MORE ARTISTS
-        const queries = preferences.genres.slice(0, 3).map(genre => {
-          // Map genre IDs to search terms
-          const genreMap: Record<string, string> = {
-            'hip-hop': 'hip hop',
-            'r&b': 'R&B',
-            'electronic': 'electronic',
-            'pop': 'pop',
-            'rock': 'rock',
-            'indie': 'indie',
-            'latin': 'latin',
-            'jazz': 'jazz',
-            'country': 'country',
-            'classical': 'classical',
-            'metal': 'metal',
-            'reggae': 'reggae'
-          }
-          return genreMap[genre] || genre
-        })
+        // Use real Soundcharts API with user preferences
+        console.log('🎵 Loading artists based on your preferences...', preferences)
         
-        // Search for artists in preferred genres - FETCH MORE RESULTS
-        const allArtists: any[] = []
-        for (const query of queries) {
-          try {
-            const response = await soundchartsClient.searchArtists(query, 5) // Increased from 1 to 5
-            const artistsWithStats = response.items.map((artist: any) => {
-              const formatted = soundchartsClient.formatArtistForScout(artist)
-              return {
-                ...formatted,
-                isWatchlisted: watchlist.has(artist.uuid),
-                matchReason: `Trending in ${query}`,
-                // Add growth score if not present
-                growthScore: formatted.growthScore || Math.floor(Math.random() * 30 + 70)
+        const artists = await soundchartsClient.getArtistsByPreferences({
+          genres: preferences.genres,
+          markets: preferences.markets,
+          careerStages: preferences.careerStage,
+          sortBy: 'monthly_listeners',
+          limit: 20
+        })
+
+        if (artists.length > 0) {
+          console.log('✅ Got real artists from Soundcharts:', artists.length)
+          
+          const formattedArtists = await Promise.all(
+            artists.slice(0, 15).map(async (artist) => {
+              try {
+                const formatted = soundchartsClient.formatArtistForScout(artist)
+                return {
+                  ...formatted,
+                  isWatchlisted: watchlist.has(artist.uuid || formatted.id)
+                }
+              } catch (error) {
+                console.error(`Failed to format artist ${artist.name}:`, error)
+                return null
               }
             })
-            allArtists.push(...artistsWithStats)
-          } catch (error) {
-            console.error(`Failed to search ${query}:`, error)
+          )
+
+          const validArtists = formattedArtists.filter(Boolean)
+          if (validArtists.length > 0) {
+            setArtists(validArtists)
+            setPrePopulatedArtists(validArtists)
+            
+            toast.success(`Found ${validArtists.length} artists matching your preferences!`, {
+              icon: <Sparkles className="h-4 w-4" />,
+              duration: 3000,
+            })
+            return
           }
         }
+
+        // If no artists found, show helpful message
+        setError(`No artists found yet. Try searching for specific artists or adjusting your preferences.`)
         
-        // Remove duplicates and limit to 15 (increased from 10)
-        const uniqueArtists = Array.from(
-          new Map(allArtists.map(a => [a.id, a])).values()
-        ).slice(0, 15)
-        
-        setArtists(uniqueArtists)
-        setPrePopulatedArtists(uniqueArtists)
       } catch (error) {
         console.error('Failed to load preferred artists:', error)
         setError('Failed to load recommended artists. Please try searching manually.')
@@ -170,10 +201,10 @@ export default function ScoutAgentPage() {
       }
     }
     
-    if (hasCompletedOnboarding) {
+    if (hasCompletedOnboarding && preferences) {
       loadPreferredArtists()
     }
-  }, [hasCompletedOnboarding, preferences, prePopulatedArtists.length, setPrePopulatedArtists, watchlist, userId])
+  }, [hasCompletedOnboarding, preferences, prePopulatedArtists.length, watchlist, userId])
 
   // Search artists
   const searchArtists = useCallback(async (query: string) => {
@@ -221,7 +252,7 @@ export default function ScoutAgentPage() {
               name: artist.name,
               genre: artist.genres?.[0]?.root || 'Unknown',
               country: artist.countryCode || 'Unknown',
-              image: artist.imageUrl || '/placeholder-artist.jpg',
+              image: artist.imageUrl || '/placeholder.svg',
               growth: '+12.5%',
               streams: '25K',
               matchScore: 75,
@@ -252,7 +283,8 @@ export default function ScoutAgentPage() {
     }
   }, [debouncedSearchTerm, searchArtists, prePopulatedArtists, hasCompletedOnboarding])
 
-  const handleWatchlistToggle = (artistId: string) => {
+  const handleWatchlistToggle = useCallback((artistId: string) => {
+    // Update watchlist state
     setWatchlist((prev) => {
       const newWatchlist = new Set(prev)
       if (newWatchlist.has(artistId)) {
@@ -263,6 +295,7 @@ export default function ScoutAgentPage() {
       return newWatchlist
     })
     
+    // Optimistically update only the specific artist to prevent flickering
     setArtists((prev) =>
       prev.map((artist) => 
         artist.id === artistId 
@@ -270,7 +303,31 @@ export default function ScoutAgentPage() {
           : artist
       )
     )
-  }
+    
+    // Also update pre-populated artists
+    const updatedPrePopulated = prePopulatedArtists.map((artist) => 
+      artist.id === artistId 
+        ? { ...artist, isWatchlisted: !artist.isWatchlisted } 
+        : artist
+    )
+    setPrePopulatedArtists(updatedPrePopulated)
+    
+    // Track watchlist action
+    if (userId) {
+      const artist = artists.find(a => a.id === artistId)
+      if (artist) {
+        trackUserInteraction({
+          userId,
+          action: watchlist.has(artistId) ? 'remove_from_watchlist' : 'add_to_watchlist',
+          metadata: { 
+            artistId, 
+            artistName: artist.name,
+            genre: artist.genre
+          }
+        })
+      }
+    }
+  }, [watchlist, userId, artists, prePopulatedArtists])
 
   const handleArtistClick = (artist: any) => {
     setSelectedArtist(artist)
@@ -314,18 +371,19 @@ export default function ScoutAgentPage() {
       return
     }
     
+    // Check if artist is already in roster
+    const isAlreadyInRoster = roster.some(rosterArtist => 
+      rosterArtist.platformArtistId === artist.id || 
+      rosterArtist.artistName === artist.name
+    )
+    
+    if (isAlreadyInRoster) {
+      toast.info(`${artist.name} is already in your roster!`)
+      return
+    }
+    
     try {
-      // Track add to roster action
-      trackUserInteraction({
-        userId,
-        action: 'add_to_roster',
-        metadata: { 
-          artistId: artist.id, 
-          artistName: artist.name,
-          genre: artist.genre
-        }
-      })
-      
+      // Add to roster first
       await artistRosterAPI.add({
         userId,
         artistName: artist.name,
@@ -341,7 +399,20 @@ export default function ScoutAgentPage() {
         }
       })
       
-      // Reload roster
+      // Track add to roster action (after successful add)
+      await trackUserInteraction({
+        userId,
+        action: 'add_to_roster',
+        metadata: { 
+          artistId: artist.id, 
+          artistName: artist.name,
+          genre: artist.genre,
+          platform: 'soundcharts',
+          addedAt: new Date().toISOString()
+        }
+      })
+      
+      // Reload roster to show the new addition
       const response = await artistRosterAPI.getAll(userId) as any
       setRoster(response.artists || [])
       
@@ -354,7 +425,13 @@ export default function ScoutAgentPage() {
       handleCloseDrawer()
     } catch (error) {
       console.error('Failed to add artist to roster:', error)
-      toast.error('Failed to add artist to roster')
+      
+      // Check if it's a duplicate error
+      if (error instanceof Error && error.message.includes('already in roster')) {
+        toast.info(`${artist.name} is already in your roster!`)
+      } else {
+        toast.error('Failed to add artist to roster')
+      }
     }
   }
 
@@ -369,12 +446,28 @@ export default function ScoutAgentPage() {
     }
   }
 
-  const handleOnboardingComplete = (prefs: any) => {
+  const handleOnboardingComplete = async (prefs: any) => {
     setPreferences(prefs)
     completeOnboarding()
     
-    // Track onboarding completion
+    // Save preferences to DynamoDB
     if (userId) {
+      try {
+        await fetch('/api/user-preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            agentId: 'scout',
+            preferences: prefs
+          })
+        })
+        console.log('💾 Saved preferences to database')
+      } catch (error) {
+        console.error('Failed to save preferences:', error)
+      }
+      
+      // Track onboarding completion
       trackUserInteraction({
         userId,
         action: 'complete_scout_onboarding',
@@ -393,19 +486,87 @@ export default function ScoutAgentPage() {
   // Check for reset parameter - MOVED BEFORE CONDITIONAL RETURNS
   useEffect(() => {
     if (searchParams.get('reset') === 'true') {
+      const performReset = async () => {
+        resetOnboarding()
+        // Clear all related localStorage items
+        localStorage.removeItem('patchline-onboarding')
+        localStorage.removeItem('scout-onboarding')
+        localStorage.removeItem('scout-watchlist')
+        localStorage.removeItem('user-interactions')
+        setArtists([])
+        setWatchlist(new Set())
+        setPreferences(null)
+        
+        // Clear the roster from DynamoDB
+        if (userId && roster.length > 0) {
+          try {
+            await Promise.all(
+              roster.map(artist => 
+                artistRosterAPI.remove(userId, artist.artistId)
+              )
+            )
+            setRoster([])
+          } catch (error) {
+            console.error('Error clearing roster during URL reset:', error)
+          }
+        }
+        
+        toast.success('Preferences reset! Starting fresh...', {
+          icon: <RotateCcw className="h-4 w-4" />,
+        })
+        // Remove the reset parameter from URL
+        window.history.replaceState({}, '', '/dashboard/agents/scout')
+      }
+      
+      performReset()
+    }
+  }, [searchParams, resetOnboarding, userId, roster])
+
+  const handleResetConfirm = async () => {
+    try {
       resetOnboarding()
-      // Clear all related localStorage items
       localStorage.removeItem('patchline-onboarding')
       localStorage.removeItem('scout-onboarding')
       localStorage.removeItem('scout-watchlist')
       localStorage.removeItem('user-interactions')
-      toast.success('Preferences reset! Starting fresh...', {
+      setArtists([])
+      setWatchlist(new Set())
+      setPreferences(null)
+      
+      // Clear the roster from DynamoDB
+      if (userId && roster.length > 0) {
+        await Promise.all(
+          roster.map(artist => 
+            artistRosterAPI.remove(userId, artist.artistId)
+          )
+        )
+        setRoster([])
+      }
+      
+      // Track the reset action
+      if (userId) {
+        trackUserInteraction({
+          userId,
+          action: 'reset_scout_preferences',
+          metadata: { 
+            resetAt: new Date().toISOString(),
+            previousPreferences: preferences,
+            clearedRosterCount: roster.length
+          }
+        })
+      }
+      
+      toast.success('All Scout preferences and data have been reset!', {
         icon: <RotateCcw className="h-4 w-4" />,
+        duration: 4000,
       })
-      // Remove the reset parameter from URL
-      window.history.replaceState({}, '', '/dashboard/agents/scout')
+      setShowResetDialog(false)
+    } catch (error) {
+      console.error('Error during reset:', error)
+      toast.error('Reset completed, but some data may not have been cleared')
+      setShowResetDialog(false)
     }
-  }, [searchParams, resetOnboarding])
+  }
 
   // Show onboarding if not completed
   if (!hasCompletedOnboarding) {
@@ -457,18 +618,7 @@ export default function ScoutAgentPage() {
             variant="outline" 
             size="sm" 
             className="gap-1 border-red-500/20 hover:border-red-500/50 hover:bg-red-500/10 text-red-500 transition-all duration-300"
-            onClick={() => {
-              resetOnboarding()
-              localStorage.removeItem('patchline-onboarding')
-              localStorage.removeItem('scout-onboarding')
-              localStorage.removeItem('scout-watchlist')
-              localStorage.removeItem('user-interactions')
-              setArtists([])
-              setWatchlist(new Set())
-              toast.success('Preferences reset! Refresh to start over.', {
-                icon: <RotateCcw className="h-4 w-4" />,
-              })
-            }}
+            onClick={() => setShowResetDialog(true)}
           >
             <RotateCcw className="h-4 w-4" /> 
             Reset
@@ -584,7 +734,41 @@ export default function ScoutAgentPage() {
         onPitchToPlaylists={handlePitchToPlaylists}
         onDraftEmail={handleDraftEmail}
         onAddToRoster={handleAddToRoster}
+        roster={roster}
       />
+
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent className="glass-effect border-white/10 bg-black/40 backdrop-blur-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white flex items-center gap-2">
+              <RotateCcw className="h-5 w-5 text-red-500" />
+              Reset Scout Preferences
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-white/70">
+              This will permanently delete all your Scout data including:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Genre and market preferences</li>
+                <li>Watchlisted artists</li>
+                <li>Artist roster</li>
+                <li>Interaction history</li>
+              </ul>
+              <br />
+              <strong className="text-red-400">This action cannot be undone.</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-white/10 hover:border-white/20 bg-transparent text-white">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleResetConfirm}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Yes, Reset Everything
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

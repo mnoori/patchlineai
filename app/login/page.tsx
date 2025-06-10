@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Logo } from "@/components/logo"
 import { toast } from "sonner"
-import { signIn, signUp, confirmSignUp, getCurrentUser } from "aws-amplify/auth"
+import { signIn, signUp, confirmSignUp, getCurrentUser } from "@aws-amplify/auth"
 
 export default function LoginPage() {
   const router = useRouter()

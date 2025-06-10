@@ -40,7 +40,7 @@ import {
 } from "lucide-react"
 import { Logo } from "@/components/logo"
 import { cn } from "@/lib/utils"
-import { signOut } from "aws-amplify/auth"
+import { signOut } from "@aws-amplify/auth"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { motion, AnimatePresence } from "framer-motion"
 import { usePathname } from "next/navigation"
@@ -52,6 +52,7 @@ import { WalletConnector } from "@/components/web3/wallet-connector"
 interface UserInfo {
   fullName: string
   email: string
+  profilePicture?: string
 }
 
 // Mobile navigation items (same as sidebar)
@@ -129,7 +130,7 @@ export function DashboardNavbar() {
   const [showSearch, setShowSearch] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const [userInfo, setUserInfo] = useState<UserInfo>({ fullName: "", email: "" })
+  const [userInfo, setUserInfo] = useState<UserInfo>({ fullName: "", email: "", profilePicture: "" })
   const { userId } = useCurrentUser()
   const [unreadNotifications, setUnreadNotifications] = useState(3)
   const pathname = usePathname()
@@ -146,6 +147,7 @@ export function DashboardNavbar() {
           setUserInfo({
             fullName: data.fullName || "Music Professional",
             email: data.email || "user@patchline.com",
+            profilePicture: data.profilePicture || "",
           })
         }
       } catch (err) {
@@ -289,6 +291,16 @@ export function DashboardNavbar() {
                   )}
                 </Button>
               </div>
+              <Link href="/dashboard">
+                <Button
+                  variant="ghost"
+                  className="text-cosmic-teal hover:bg-cosmic-teal/10 font-medium"
+                  size="sm"
+                >
+                  <LayoutDashboard className="h-4 w-4 mr-1" />
+                  Dashboard
+                </Button>
+              </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -296,8 +308,8 @@ export function DashboardNavbar() {
                     className="relative h-8 w-8 rounded-full border-2 border-transparent hover:border-cosmic-teal/50 transition-all duration-200"
                   >
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/music-label-owner-avatar.png" alt="User" />
-                      <AvatarFallback>
+                      <AvatarImage src={userInfo.profilePicture} alt={userInfo.fullName} />
+                      <AvatarFallback className="bg-gradient-to-br from-cosmic-teal to-purple-400 text-white">
                         {userInfo.fullName
                           .split(" ")
                           .map((n) => n[0])
@@ -316,8 +328,8 @@ export function DashboardNavbar() {
                     <div className="flex items-center justify-start gap-2 p-2 mb-1">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cosmic-teal/20">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src="/music-label-owner-avatar.png" alt="User" />
-                          <AvatarFallback>
+                          <AvatarImage src={userInfo.profilePicture} alt={userInfo.fullName} />
+                          <AvatarFallback className="bg-gradient-to-br from-cosmic-teal to-purple-400 text-white">
                             {userInfo.fullName
                               .split(" ")
                               .map((n) => n[0])
@@ -338,15 +350,6 @@ export function DashboardNavbar() {
                     </div>
                   </motion.div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    asChild
-                    className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-cosmic-teal/20 focus:bg-cosmic-teal/20"
-                  >
-                    <Link href="/dashboard">
-                      <Zap className="mr-2 h-4 w-4 text-cosmic-teal" />
-                      <span>Dashboard</span>
-                    </Link>
-                  </DropdownMenuItem>
                   <DropdownMenuItem
                     asChild
                     className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-cosmic-teal/20 focus:bg-cosmic-teal/20"

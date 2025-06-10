@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef } from 'react'
-import { getCurrentUser } from 'aws-amplify/auth'
+import { getCurrentUser } from '@aws-amplify/auth'
 import { usePermissions, UserTier } from '@/lib/permissions'
 
 export function useAuthSync() {
