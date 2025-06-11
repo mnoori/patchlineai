@@ -26,7 +26,16 @@ const nextConfig = {
   },
   
   // Webpack optimizations
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
+    // Development-specific optimizations
+    if (dev) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+        ignored: ['**/node_modules', '**/.git', '**/.next'],
+      }
+    }
+    
     // Reduce bundle size
     config.optimization = {
       ...config.optimization,
@@ -70,8 +79,8 @@ const nextConfig = {
   
   // Experimental features to improve performance
   experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['@aws-amplify/auth', 'aws-amplify', 'lucide-react', 'framer-motion'],
+    optimizeCss: false, // Disabled for dev performance
+    optimizePackageImports: ['@aws-amplify/auth', 'aws-amplify', 'framer-motion'],
     typedRoutes: false,
   },
   

@@ -2,62 +2,7 @@ import { NextResponse } from "next/server"
 import { getDocumentClient } from "@/lib/aws/shared-dynamodb-client"
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb"
 import { cache } from "@/lib/cache"
-
-// Check if we're in an environment that supports AWS SDK
-const isAwsSupported = () => {
-  try {
-    return (
-      typeof process !== "undefined" &&
-      process.env &&
-      (process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID) &&
-      (process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY) &&
-      typeof require !== "undefined"
-    )
-  } catch {
-    return false
-  }
-}
-
-// Only import AWS SDK if supported
-let DynamoDBClient: any, GetItemCommand: any, PutItemCommand: any, marshall: any, unmarshall: any
-let ddbClient: any = null
-
-if (isAwsSupported()) {
-  try {
-    const dynamodb = require("@aws-sdk/client-dynamodb")
-    const util = require("@aws-sdk/util-dynamodb")
-
-    DynamoDBClient = dynamodb.DynamoDBClient
-    GetItemCommand = dynamodb.GetItemCommand
-    PutItemCommand = dynamodb.PutItemCommand
-    marshall = util.marshall
-    unmarshall = util.unmarshall
-
-    const REGION = process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1"
-    const ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID
-    const SECRET_KEY = process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY
-    const SESSION_TOKEN = process.env.AWS_SESSION_TOKEN
-
-    ddbClient = new DynamoDBClient({
-      region: REGION,
-      credentials:
-        ACCESS_KEY && SECRET_KEY
-          ? {
-              accessKeyId: ACCESS_KEY,
-              secretAccessKey: SECRET_KEY,
-              ...(SESSION_TOKEN && { sessionToken: SESSION_TOKEN }),
-            }
-          : undefined,
-    })
-
-    console.log("[API /user] AWS SDK initialized successfully")
-  } catch (error) {
-    console.log("[API /user] Failed to initialize AWS SDK, will use mock data:", error.message)
-    ddbClient = null
-  }
-} else {
-  console.log("[API /user] AWS not supported in this environment, using mock data")
-}
+import { PerformanceMonitor } from "@/lib/performance-monitor"
 
 const USERS_TABLE = process.env.USERS_TABLE || process.env.NEXT_PUBLIC_USERS_TABLE || "Users-staging"
 
@@ -87,33 +32,35 @@ const generateMockUser = (userId: string) => ({
 })
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const userId = searchParams.get("userId")
-
-  if (!userId) {
-    return NextResponse.json({ error: "Missing userId" }, { status: 400 })
-  }
-
-  // Check cache first
-  const cacheKey = `user:${userId}`
-  const cachedData = cache.get(cacheKey)
-  if (cachedData) {
-    console.log(`[CACHE HIT] ${cacheKey}`)
-    return NextResponse.json(cachedData)
-  }
-
-  // Get shared document client
-  const docClient = await getDocumentClient()
+  const stopTimer = PerformanceMonitor.start('api:user')
   
-  // If AWS is not available, return mock data immediately
-  if (!docClient) {
-    console.log(`[API /user GET] Using mock data for userId: ${userId}`)
-    const mockUser = generateMockUser(userId)
-    cache.set(cacheKey, mockUser, 300) // Cache for 5 minutes
-    return NextResponse.json(mockUser)
-  }
-
   try {
+    const { searchParams } = new URL(req.url)
+    const userId = searchParams.get("userId")
+
+    if (!userId) {
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 })
+    }
+
+    // Check cache first
+    const cacheKey = `user:${userId}`
+    const cachedData = cache.get(cacheKey)
+    if (cachedData) {
+      console.log(`[CACHE HIT] ${cacheKey}`)
+      return NextResponse.json(cachedData)
+    }
+
+    // Get shared document client
+    const docClient = await getDocumentClient()
+    
+    // If AWS is not available, return mock data immediately
+    if (!docClient) {
+      console.log(`[API /user GET] Using mock data for userId: ${userId}`)
+      const mockUser = generateMockUser(userId)
+      cache.set(cacheKey, mockUser, 300) // Cache for 5 minutes
+      return NextResponse.json(mockUser)
+    }
+
     const result = await docClient.send(
       new GetCommand({
         TableName: USERS_TABLE,
@@ -137,10 +84,14 @@ export async function GET(req: Request) {
     console.error("Error fetching user:", error)
 
     // Return mock data on any error
+    const { searchParams } = new URL(req.url)
+    const userId = searchParams.get("userId") || 'unknown'
     console.log(`[API /user GET] Returning mock data due to error for userId: ${userId}`)
     const mockUser = generateMockUser(userId)
-    cache.set(cacheKey, mockUser, 60) // Cache error response for 1 minute
+    cache.set(`user:${userId}`, mockUser, 60) // Cache error response for 1 minute
     return NextResponse.json(mockUser)
+  } finally {
+    stopTimer()
   }
 }
 

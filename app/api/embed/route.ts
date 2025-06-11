@@ -1,62 +1,8 @@
 import { NextResponse } from "next/server"
 import { v4 as uuidv4 } from "uuid"
-
-// Check if we're in an environment that supports AWS SDK
-const isAwsSupported = () => {
-  try {
-    // Check if we have the required environment variables and filesystem access
-    return (
-      typeof process !== "undefined" &&
-      process.env &&
-      (process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID) &&
-      (process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY) &&
-      typeof require !== "undefined"
-    )
-  } catch {
-    return false
-  }
-}
-
-// Only import AWS SDK if supported
-let DynamoDBClient: any, PutItemCommand: any, QueryCommand: any, marshall: any, unmarshall: any
-let ddbClient: any = null
-
-if (isAwsSupported()) {
-  try {
-    const dynamodb = require("@aws-sdk/client-dynamodb")
-    const util = require("@aws-sdk/util-dynamodb")
-
-    DynamoDBClient = dynamodb.DynamoDBClient
-    PutItemCommand = dynamodb.PutItemCommand
-    QueryCommand = dynamodb.QueryCommand
-    marshall = util.marshall
-    unmarshall = util.unmarshall
-
-    const REGION = process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1"
-    const ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID
-    const SECRET_KEY = process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY
-    const SESSION_TOKEN = process.env.AWS_SESSION_TOKEN
-
-    ddbClient = new DynamoDBClient({
-      region: REGION,
-      credentials:
-        ACCESS_KEY && SECRET_KEY
-          ? {
-              accessKeyId: ACCESS_KEY,
-              secretAccessKey: SECRET_KEY,
-              ...(SESSION_TOKEN && { sessionToken: SESSION_TOKEN }),
-            }
-          : undefined,
-    })
-
-    console.log("[API /embed] AWS SDK initialized successfully")
-  } catch (error) {
-    console.log("[API /embed] Failed to initialize AWS SDK, will use mock data:", error.message)
-    ddbClient = null
-  }
-} else {
-  console.log("[API /embed] AWS not supported in this environment, using mock data")
-}
+import { getDocumentClient } from "@/lib/aws/shared-dynamodb-client"
+import { PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb"
+import { cache } from "@/lib/cache"
 
 const EMBEDS_TABLE = process.env.EMBEDS_TABLE || process.env.NEXT_PUBLIC_EMBEDS_TABLE || "Embeds-staging"
 
@@ -109,49 +55,68 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Missing userId" }, { status: 400 })
   }
 
-  // If AWS is not supported, return mock data immediately
-  if (!ddbClient) {
+  // Check cache first
+  const cacheKey = `embed:${userId}`
+  const cachedData = cache.get(cacheKey)
+  if (cachedData) {
+    console.log(`[CACHE HIT] ${cacheKey}`)
+    return NextResponse.json(cachedData)
+  }
+
+  // Get shared document client
+  const docClient = await getDocumentClient()
+  
+  // If AWS is not available, return mock data immediately
+  if (!docClient) {
     console.log(`[API /embed GET] Using mock data for userId: ${userId}`)
     const mockEmbeds = generateMockEmbeds(userId)
-    return NextResponse.json({
+    const response = {
       embeds: mockEmbeds,
       mockData: true,
       message: "Using mock data - AWS not available",
-    })
+    }
+    cache.set(cacheKey, response, 300) // Cache for 5 minutes
+    return NextResponse.json(response)
   }
 
   try {
     console.log(`[API /embed GET] Querying embeds from table: ${EMBEDS_TABLE} for userId: ${userId}`)
-    const result = await ddbClient.send(
+    const result = await docClient.send(
       new QueryCommand({
         TableName: EMBEDS_TABLE,
         KeyConditionExpression: "userId = :userId",
-        ExpressionAttributeValues: marshall({
+        ExpressionAttributeValues: {
           ":userId": userId,
-        }),
-      }),
+        },
+      })
     )
 
     if (!result.Items || result.Items.length === 0) {
       console.log(`[API /embed GET] No embeds found for userId: ${userId}`)
-      return NextResponse.json({ embeds: [] })
+      const response = { embeds: [] }
+      cache.set(cacheKey, response, 300) // Cache empty result for 5 minutes
+      return NextResponse.json(response)
     }
 
-    const embeds = result.Items.map((item) => unmarshall(item))
-    console.log(`[API /embed GET] Found ${embeds.length} embeds for userId: ${userId}`)
-    return NextResponse.json({ embeds })
+    console.log(`[API /embed GET] Found ${result.Items.length} embeds for userId: ${userId}`)
+    const response = { embeds: result.Items }
+    cache.set(cacheKey, response, 300) // Cache for 5 minutes
+    console.log(`[CACHE SET] ${cacheKey}`)
+    return NextResponse.json(response)
   } catch (error: any) {
     console.error(`[API /embed GET] Error fetching embeds for userId: ${userId}:`, error)
 
     // Return mock data on any error
     console.log(`[API /embed GET] Returning mock data due to error for userId: ${userId}`)
     const mockEmbeds = generateMockEmbeds(userId)
-    return NextResponse.json({
+    const response = {
       embeds: mockEmbeds,
       mockData: true,
       error: "AWS error, using mock data",
       details: error.message,
-    })
+    }
+    cache.set(cacheKey, response, 60) // Cache error response for 1 minute
+    return NextResponse.json(response)
   }
 }
 
@@ -174,8 +139,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields: platform, url" }, { status: 400 })
     }
 
+    // Invalidate cache on update
+    const cacheKey = `embed:${userId}`
+    cache.del(cacheKey)
+    cache.del(`embeds:${userId}`) // Also invalidate the embeds (plural) cache
+
+    // Get shared document client
+    const docClient = await getDocumentClient()
+    
     // If AWS is not supported, return mock success
-    if (!ddbClient) {
+    if (!docClient) {
       console.log(`[API /embed POST] Using mock response for userId: ${userId}`)
       const mockEmbedId = uuidv4()
       const mockEmbed = {
@@ -204,7 +177,7 @@ export async function POST(req: Request) {
 
     // Check for duplicates
     try {
-      const existingEmbedsResult = await ddbClient.send(
+      const existingEmbedsResult = await docClient.send(
         new QueryCommand({
           TableName: EMBEDS_TABLE,
           KeyConditionExpression: "userId = :userId",
@@ -213,14 +186,14 @@ export async function POST(req: Request) {
             "#u": "url",
           },
           ExpressionAttributeValues: {
-            ":userId": { S: userId },
-            ":uval": { S: url },
+            ":userId": userId,
+            ":uval": url,
           },
-        }),
+        })
       )
 
       if (existingEmbedsResult.Items && existingEmbedsResult.Items.length > 0) {
-        const existingEmbed = unmarshall(existingEmbedsResult.Items[0])
+        const existingEmbed = existingEmbedsResult.Items[0]
         console.log(`[API /embed POST] Embed with URL already exists: ${url}`)
         return NextResponse.json({
           success: true,
@@ -249,11 +222,11 @@ export async function POST(req: Request) {
     }
 
     console.log(`[API /embed POST] Creating new embed with ID: ${embedId}`)
-    await ddbClient.send(
-      new PutItemCommand({
+    await docClient.send(
+      new PutCommand({
         TableName: EMBEDS_TABLE,
-        Item: marshall(newEmbed),
-      }),
+        Item: newEmbed,
+      })
     )
 
     console.log(`[API /embed POST] Successfully created embed: ${embedId}`)

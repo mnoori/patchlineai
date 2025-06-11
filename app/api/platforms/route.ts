@@ -3,63 +3,6 @@ import { getDocumentClient } from "@/lib/aws/shared-dynamodb-client"
 import { GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb"
 import { cache } from "@/lib/cache"
 
-// Check if we're in an environment that supports AWS SDK
-const isAwsSupported = () => {
-  try {
-    return (
-      typeof process !== "undefined" &&
-      process.env &&
-      (process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID) &&
-      (process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY) &&
-      typeof require !== "undefined"
-    )
-  } catch {
-    return false
-  }
-}
-
-// Only import AWS SDK if supported
-let DynamoDBClient: any, GetItemCommand: any, PutItemCommand: any, QueryCommand: any, marshall: any, unmarshall: any
-let ddbClient: any = null
-
-if (isAwsSupported()) {
-  try {
-    const dynamodb = require("@aws-sdk/client-dynamodb")
-    const util = require("@aws-sdk/util-dynamodb")
-
-    DynamoDBClient = dynamodb.DynamoDBClient
-    GetItemCommand = dynamodb.GetItemCommand
-    PutItemCommand = dynamodb.PutItemCommand
-    QueryCommand = dynamodb.QueryCommand
-    marshall = util.marshall
-    unmarshall = util.unmarshall
-
-    const REGION = process.env.AWS_REGION || process.env.REGION_AWS || "us-east-1"
-    const ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID
-    const SECRET_KEY = process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY
-    const SESSION_TOKEN = process.env.AWS_SESSION_TOKEN
-
-    ddbClient = new DynamoDBClient({
-      region: REGION,
-      credentials:
-        ACCESS_KEY && SECRET_KEY
-          ? {
-              accessKeyId: ACCESS_KEY,
-              secretAccessKey: SECRET_KEY,
-              ...(SESSION_TOKEN && { sessionToken: SESSION_TOKEN }),
-            }
-          : undefined,
-    })
-
-    console.log("[API /platforms] AWS SDK initialized successfully")
-  } catch (error) {
-    console.log("[API /platforms] Failed to initialize AWS SDK, will use mock data:", error instanceof Error ? error.message : String(error))
-    ddbClient = null
-  }
-} else {
-  console.log("[API /platforms] AWS not supported in this environment, using mock data")
-}
-
 const USERS_TABLE = process.env.USERS_TABLE || process.env.NEXT_PUBLIC_USERS_TABLE || "Users-staging"
 const PLATFORM_CONNECTIONS_TABLE = process.env.PLATFORM_CONNECTIONS_TABLE || "PlatformConnections-staging"
 
