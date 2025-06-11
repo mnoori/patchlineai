@@ -1,0 +1,40 @@
+# Revelator API Configuration
+# Copy this to .env.local and fill in your credentials
+
+# Revelator API Base URL (usually doesn't need to be changed)
+REVELATOR_API_URL=https://api.revelator.com
+
+# Your Revelator OAuth2 credentials
+# Get these from your Revelator account dashboard
+REVELATOR_CLIENT_ID=your_revelator_client_id_here
+REVELATOR_CLIENT_SECRET=your_revelator_client_secret_here
+
+# Enterprise ID (if you have an enterprise account)
+# Leave empty for individual accounts
+REVELATOR_ENTERPRISE_ID=
+
+# Feature flag to enable/disable Revelator integration
+# Set to 'true' to use real data, 'false' for mock data
+ENABLE_REVELATOR=false
+
+# Cache configuration
+REVELATOR_CACHE_TTL=300  # Cache time-to-live in seconds (5 minutes)
+
+# Webhook configuration (for future use)
+REVELATOR_WEBHOOK_SECRET=your_webhook_secret_here
+
+# API Rate Limiting
+REVELATOR_MAX_REQUESTS_PER_MINUTE=60
+
+# File upload settings
+REVELATOR_MAX_FILE_SIZE_MB=500  # Max file size for audio uploads
+REVELATOR_ALLOWED_AUDIO_FORMATS=wav,flac,mp3,m4a
+REVELATOR_ALLOWED_IMAGE_FORMATS=jpg,jpeg,png,tiff
+
+# Analytics settings
+REVELATOR_ANALYTICS_DEFAULT_PERIOD_DAYS=30
+REVELATOR_ANALYTICS_CACHE_DURATION_MINUTES=60
+
+# Development/Testing
+REVELATOR_DEBUG_MODE=false  # Set to true for detailed API logging
+REVELATOR_USE_SANDBOX=false  # Use sandbox environment for testing 
