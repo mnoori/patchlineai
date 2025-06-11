@@ -3,8 +3,21 @@
  * Maps Revelator API data to Patchline UI components
  */
 
-import { getRevelatorClient, type RevelatorRelease, type RevelatorTrack, type RevelatorAnalytics } from '@/lib/revelator-api'
-import { dynamoDBClient } from '@/lib/dynamodb-client'
+// TODO: Implement Revelator API client
+// import { getRevelatorClient, type RevelatorRelease, type RevelatorTrack, type RevelatorAnalytics } from '@/lib/revelator-api'
+// import { dynamoDBClient } from '@/lib/dynamodb-client'
+
+// Temporary types until Revelator API is implemented
+type RevelatorRelease = any
+type RevelatorTrack = any
+type RevelatorAnalytics = any
+const getRevelatorClient = () => ({ 
+  getAllReleases: async () => ({ releases: [] }),
+  getAnalytics: async (params: any) => [],
+  getDistributionStatus: async (releaseId: string) => ({ stores: [] }),
+  validateRelease: async (releaseId: string) => ({ valid: true, errors: [] })
+})
+const dynamoDBClient = {}
 
 // UI-specific types that map to your components
 export interface CatalogTrack {

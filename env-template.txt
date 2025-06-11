@@ -36,4 +36,15 @@ JWT_SECRET=your_jwt_secret_here
 ENV=development
 
 # AI Configuration
-BEDROCK_MODEL_ID=amazon.nova-micro-v1:0 
+BEDROCK_MODEL_ID=amazon.nova-micro-v1:0
+
+# Nova Canvas Configuration
+# Set to 'true' to enable real image generation
+ENABLE_NOVA_CANVAS=false
+
+# S3 Configuration for Image Storage
+# Set to 'true' to enable S3 upload (otherwise uses base64 data URLs)
+ENABLE_S3_UPLOAD=false
+S3_IMAGE_BUCKET=patchline-content-images
+# Optional: CloudFront CDN URL for faster image delivery
+CLOUDFRONT_URL= 

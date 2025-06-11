@@ -15,6 +15,7 @@ import type { ContentPrompt } from "@/lib/blog-types"
 import { BEDROCK_MODELS } from "@/lib/bedrock-client"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { ImageGenerator } from "@/components/content/image-generation/image-generator"
 
 // Define a type for our session storage form state
 interface FormSessionState {
@@ -55,6 +56,7 @@ export function ContentCreatorForm({
   const [generatedPrompt, setGeneratedPrompt] = useState("")
   const [editablePrompt, setEditablePrompt] = useState("")
   const [hasGeneratedOnce, setHasGeneratedOnce] = useState(false)
+  const [featuredImage, setFeaturedImage] = useState("")
 
   // Flag to track if we've initialized from session storage
   const [initializedFromSession, setInitializedFromSession] = useState(false)
@@ -434,6 +436,36 @@ Your content should follow proper markdown formatting with headers, lists, and e
                   </div>
                 </TabsContent>
               </Tabs>
+
+              {/* Image Generation for Blog */}
+              {prompt.topic && (
+                <div className="space-y-4 pt-4">
+                  <ImageGenerator
+                    contentType="blog"
+                    contentData={{
+                      title: prompt.topic,
+                      topic: prompt.topic,
+                      keywords: keywords.split(',').map(k => k.trim()).filter(Boolean),
+                      tone: prompt.tone
+                    }}
+                    onImageGenerated={(imageUrl) => {
+                      setFeaturedImage(imageUrl)
+                      toast.success('Featured image selected for your blog post!')
+                    }}
+                  />
+                  
+                  {featuredImage && (
+                    <div className="mt-4">
+                      <Label>Selected Featured Image</Label>
+                      <img 
+                        src={featuredImage} 
+                        alt="Featured" 
+                        className="w-full max-w-md rounded-lg border mt-2"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
               {currentStep === 1 ? (
                 <Button type="button" onClick={() => handleNext(2)} disabled={!prompt.topic} className="min-w-[140px]">

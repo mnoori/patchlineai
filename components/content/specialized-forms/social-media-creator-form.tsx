@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
-import { Loader2, Share2, Instagram, Twitter, Calendar, Send, Smartphone } from "lucide-react"
+import { Loader2, Share2, Instagram, Twitter, Calendar, Send, Smartphone, ImageIcon } from "lucide-react"
 import type { EnhancedContentPrompt } from "@/lib/content-types"
+import { ImageGenerator } from "@/components/content/image-generation/image-generator"
+import { toast } from "sonner"
 
 interface SocialMediaCreatorFormProps {
   onContentGenerated?: (draftId: string) => void
@@ -27,6 +29,7 @@ export function SocialMediaCreatorForm({
   onStepChange = () => {},
 }: SocialMediaCreatorFormProps) {
   const [isGenerating, setIsGenerating] = useState(false)
+  const [generatedImage, setGeneratedImage] = useState<string>("")
   const [prompt, setPrompt] = useState<EnhancedContentPrompt>({
     topic: "",
     contentType: "social",
@@ -292,6 +295,38 @@ Format the response as a comprehensive social media package ready for posting.
 
               <Separator />
 
+              {/* Image Generation */}
+              {prompt.topic && (
+                <div className="space-y-4">
+                  <ImageGenerator
+                    contentType="social"
+                    contentData={{
+                      title: prompt.topic,
+                      topic: prompt.topic,
+                      keywords: prompt.includeHashtags ? ["music", "artist", prompt.platform || "social"] : [],
+                      tone: prompt.postTone
+                    }}
+                    onImageGenerated={(imageUrl) => {
+                      setGeneratedImage(imageUrl)
+                      toast.success('Image selected for your post!')
+                    }}
+                  />
+                  
+                  {generatedImage && (
+                    <div className="mt-4">
+                      <Label>Selected Image for Post</Label>
+                      <img 
+                        src={generatedImage} 
+                        alt="Generated social media image" 
+                        className="w-full rounded-lg border mt-2"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <Separator />
+
               {/* Agent Actions Info */}
               <div className="p-4 border rounded-lg bg-muted/30">
                 <h3 className="font-semibold mb-2 flex items-center gap-2">
@@ -357,8 +392,12 @@ Format the response as a comprehensive social media package ready for posting.
                       </div>
                     </div>
                   </div>
-                  <div className="aspect-square bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 flex items-center justify-center">
-                    <p className="text-sm text-muted-foreground">Your content image</p>
+                  <div className="aspect-square bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 flex items-center justify-center overflow-hidden">
+                    {generatedImage ? (
+                      <img src={generatedImage} alt="Post visual" className="w-full h-full object-cover" />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Your content image</p>
+                    )}
                   </div>
                   <div className="p-4">
                     <p className="text-sm">
@@ -389,6 +428,11 @@ Format the response as a comprehensive social media package ready for posting.
                         {prompt.includeHashtags && (
                           <p className="text-sm text-blue-600 mt-2">#music #newrelease #artist</p>
                         )}
+                        {generatedImage && (
+                          <div className="mt-3 rounded-lg overflow-hidden">
+                            <img src={generatedImage} alt="Post visual" className="w-full h-48 object-cover" />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -397,9 +441,13 @@ Format the response as a comprehensive social media package ready for posting.
 
               {prompt.platform === "tiktok" && (
                 <div className="bg-black rounded-lg shadow-lg max-w-sm mx-auto aspect-[9/16] relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center">
-                    <p className="text-white text-sm text-center">Your TikTok video preview</p>
-                  </div>
+                  {generatedImage ? (
+                    <img src={generatedImage} alt="TikTok background" className="absolute inset-0 w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center">
+                      <p className="text-white text-sm text-center">Your TikTok video preview</p>
+                    </div>
+                  )}
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
                     <p className="text-white text-sm">
                       {prompt.topic || "Your TikTok description will appear here..."}
