@@ -11,7 +11,7 @@ import { ContentCreatorForm } from "../../../components/content-creator-form"
 import { cn } from "@/lib/utils"
 import type { ContentDraft, ContentPrompt } from "@/lib/blog-types"
 import { EPKCreatorForm } from "../../../components/content/specialized-forms/epk-creator-form"
-import { SocialMediaCreatorForm } from "../../../components/content/specialized-forms/social-media-creator-form"
+import { EnhancedSocialMediaCreator } from "../../../components/content/specialized-forms/enhanced-social-media-creator"
 import { ShortVideoCreatorForm } from "../../../components/content/specialized-forms/short-video-creator-form"
 import { MusicVideoCreatorForm } from "../../../components/content/specialized-forms/music-video-creator-form"
 
@@ -187,30 +187,39 @@ export default function ContentPage() {
               ) : selectedContentType === "epk" ? (
                 <EPKCreatorForm
                   onContentGenerated={handleContentGenerated}
-                  initialPrompt={selectedPrompt}
+                  initialPrompt={selectedPrompt ? {
+                    ...selectedPrompt,
+                    contentType: "epk" as ContentType,
+                    topic: selectedPrompt.topic || ""
+                  } : null}
                   currentStep={currentStep - 1}
                   onStepChange={(step) => setCurrentStep(step + 1)}
                 />
               ) : selectedContentType === "social" ? (
-                <SocialMediaCreatorForm
+                <EnhancedSocialMediaCreator
                   onContentGenerated={handleContentGenerated}
-                  initialPrompt={selectedPrompt}
+                  initialPrompt={selectedPrompt ? {
+                    ...selectedPrompt,
+                    contentType: "social" as ContentType,
+                    topic: selectedPrompt.topic || ""
+                  } : null}
                   currentStep={currentStep - 1}
                   onStepChange={(step) => setCurrentStep(step + 1)}
                 />
               ) : selectedContentType === "short-video" ? (
                 <ShortVideoCreatorForm
                   onContentGenerated={handleContentGenerated}
-                  initialPrompt={selectedPrompt}
+                  initialPrompt={selectedPrompt ? {
+                    ...selectedPrompt,
+                    contentType: "short-video" as ContentType,
+                    topic: selectedPrompt.topic || ""
+                  } : null}
                   currentStep={currentStep - 1}
                   onStepChange={(step) => setCurrentStep(step + 1)}
                 />
               ) : selectedContentType === "music-video" ? (
                 <MusicVideoCreatorForm
                   onContentGenerated={handleContentGenerated}
-                  initialPrompt={selectedPrompt}
-                  currentStep={currentStep - 1}
-                  onStepChange={(step) => setCurrentStep(step + 1)}
                 />
               ) : null}
             </div>
