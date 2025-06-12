@@ -102,7 +102,7 @@ const pulseGlowStyle = `
     pointer-events: all;
   }
 
-  /* Patchy's activity card - Clean slide animation */
+      /* Aria's activity card - Clean slide animation */
   .activity-card {
     position: fixed;
     top: 100px;
@@ -665,7 +665,7 @@ export function SidebarWithChat() {
     }
   }, [DEMO_MODE, isAgentWorking])
 
-  // Patchy's suggestions (when not working)
+          // Aria's suggestions (when not working)
   const suggestions = [
     "Analyzing your catalog for optimization opportunities...",
     "Scanning streaming platforms for playlist placements...",
@@ -985,7 +985,7 @@ export function SidebarWithChat() {
             </nav>
           </div>
 
-          {/* Patchy Chat Button */}
+          {/* Aria Chat Button */}
           <div className="sticky bottom-0 p-2 border-t border-border bg-background/95 backdrop-blur-sm">
             <button
               onClick={toggleChat}

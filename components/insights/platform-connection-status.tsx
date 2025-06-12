@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
+
 interface Platform {
   id: string
   name: string
@@ -167,11 +168,11 @@ export function PlatformConnectionStatus({ platforms }: PlatformConnectionStatus
 
           <div className="p-3 border rounded-md bg-cosmic-teal/5 border-cosmic-teal/20">
             <div className="flex items-center gap-2 mb-1">
-              <Badge className="bg-cosmic-teal text-primary-foreground">Patchy Tip</Badge>
+              <Badge className="bg-cosmic-teal text-primary-foreground">Aria Tip</Badge>
               <h4 className="text-sm font-medium">More connections = better insights</h4>
             </div>
             <p className="text-xs text-muted-foreground">
-              Connect all your platforms to get the most comprehensive view of your music performance. This helps Patchy
+              Connect all your platforms to get the most comprehensive view of your music performance. This helps Aria
               generate more accurate recommendations.
             </p>
           </div>

@@ -251,7 +251,7 @@ def create_new_agent(clients, model_name='nova-micro'):
     schema_url = upload_openapi_schema(clients['s3'], region)
     
     # Agent instruction
-    instruction = """You are Patchy, an AI assistant that helps music industry professionals manage their emails and communications. 
+    instruction = """You are {{agentName}}, an AI assistant that helps music industry professionals manage their emails and communications. 
 
 You have access to their Gmail account and can:
 - Search and read emails

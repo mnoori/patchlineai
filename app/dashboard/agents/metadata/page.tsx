@@ -90,7 +90,7 @@ function AgentSettings() {
               </div>
               <div className="flex justify-between items-center">
                 <div>
-                  <div className="font-medium">Alert Patchy</div>
+                  <div className="font-medium">Alert Aria</div>
                   <div className="text-sm text-muted-foreground">Notify in chat on each run</div>
                 </div>
                 <Switch defaultChecked />

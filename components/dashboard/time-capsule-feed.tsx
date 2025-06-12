@@ -67,7 +67,7 @@ export function TimeCapsuleFeed() {
         type: "legal",
         title: "Auto-renewed distribution agreement with SoundWave",
         description:
-          "Your distribution agreement with SoundWave was set to expire in 3 days. Based on your preferences, Patchy automatically generated and sent a renewal agreement.",
+          "Your distribution agreement with SoundWave was set to expire in 3 days. Based on your preferences, Aria automatically generated and sent a renewal agreement.",
         time: "Yesterday",
         icon: <FileText className="h-4 w-4 text-cosmic-teal" />,
         agent: "Legal Agent",

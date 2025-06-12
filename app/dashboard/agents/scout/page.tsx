@@ -359,7 +359,7 @@ export default function ScoutAgentPage() {
   }
 
   const handleDraftEmail = (artist: any) => {
-    handoff("Scout", "Patchy", {
+            handoff("Scout", "Aria", {
       action: "draft_email",
       artist: artist,
     })

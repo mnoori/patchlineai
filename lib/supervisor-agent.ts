@@ -5,6 +5,7 @@ import {
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime'
 import { CONFIG, GMAIL_AGENT, LEGAL_AGENT, BLOCKCHAIN_AGENT, SUPERVISOR_AGENT } from './config'
 import { BEDROCK_MODELS } from './models-config'
+import { agentName } from './agent-utils'
 
 // Agent Tool interface based on Agent Squad pattern
 interface AgentTool {
@@ -75,7 +76,7 @@ export class SupervisorAgent {
   public onTrace?: (trace: AgentTrace) => void
 
   constructor() {
-    this.name = "Patchline Supervisor"
+    this.name = `${agentName()} Supervisor`
     this.description = "Coordinates Gmail and Legal agents for music industry professionals"
     this.memory = {
       userSupervisorMemory: [],
@@ -523,7 +524,7 @@ User Query: ${userInput}`;
           details: 'Greeting detected - responding directly'
         })
         
-        const greetingResponse = `Hello! I'm Aria, your AI supervisor coordinating between specialized agents. I can help you with:
+        const greetingResponse = `Hello! I'm ${agentName()}, your AI supervisor coordinating between specialized agents. I can help you with:
 
 • **Email Management** - Search, read, draft, and send emails through our Gmail Agent
 • **Legal Analysis** - Review contracts and legal documents with our Legal Agent

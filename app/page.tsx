@@ -26,7 +26,7 @@ export default function Home() {
               </h1>
               <p className="text-xl md:text-2xl text-muted-foreground mb-6">
                 A full-stack, AI-first platform with specialized agents, Patchline connects your data, simplifies your
-                workflows, and gives music professionals time back. Powered by <span className="text-amber-400 font-semibold">Aria</span>, 
+                workflows, and gives music professionals time back. Powered by <span className="bg-gradient-to-r from-purple-400 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent font-semibold">Aria</span>, 
                 our flagship agentic orchestrator.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -57,7 +57,7 @@ export default function Home() {
                   Flagship Product
                 </Badge>
                 <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                  Meet <span className="text-amber-400">Aria</span> - Your Agentic Record Label
+                  Meet <span className="bg-gradient-to-r from-purple-400 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">Aria</span> - Your Agentic Record Label
                 </h2>
                 <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
                   Aria is our most advanced offering - an AI-first infrastructure that orchestrates all your agents 

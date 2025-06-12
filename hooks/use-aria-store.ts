@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import type React from "react"
-import type { AgentTrace } from '@/app/api/chat/supervisor/route'
+import type { AgentTrace } from '@/lib/supervisor-agent'
 
 type Message = {
   id: string

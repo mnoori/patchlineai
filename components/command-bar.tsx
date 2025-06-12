@@ -113,7 +113,7 @@ export function CommandBar() {
             <Mail className="mr-2 h-4 w-4" />
             <span>Compose Email</span>
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => console.log("Chat with Patchy"))}>
+          <CommandItem onSelect={() => runCommand(() => console.log("Chat with Aria"))}>
             <MessageSquare className="mr-2 h-4 w-4" />
                             <span>Chat with Aria</span>
           </CommandItem>

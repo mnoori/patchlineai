@@ -205,7 +205,7 @@ export function ContractDashboard() {
   }
 
   const handleDraftRenewal = (contractId: string) => {
-    handoff("Legal", "Patchy", { action: "draft_renewal", contractId })
+          handoff("Legal", "Aria", { action: "draft_renewal", contractId })
   }
 
   const handleSyncClearance = (contractId: string) => {

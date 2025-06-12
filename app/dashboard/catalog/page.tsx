@@ -1599,7 +1599,7 @@ export default function CatalogPage() {
         )}
       </div>
 
-      {/* Mobile Patchy Chat Button - Fixed floating button */}
+                  {/* Mobile Aria Chat Button - Fixed floating button */}
       <div className="xl:hidden">
         <Button
           onClick={() => setIsMobileAgentOpen(true)}
@@ -1610,7 +1610,7 @@ export default function CatalogPage() {
         </Button>
       </div>
 
-      {/* Mobile Patchy Chat Modal */}
+                  {/* Mobile Aria Chat Modal */}
       <Sheet open={isMobileAgentOpen} onOpenChange={setIsMobileAgentOpen}>
         <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
           <SheetHeader>
@@ -1618,7 +1618,7 @@ export default function CatalogPage() {
               <Zap className="h-5 w-5 text-cosmic-teal" />
               Agent Assist
             </SheetTitle>
-            <SheetDescription>Patchy's recommendations</SheetDescription>
+                          <SheetDescription>Aria's recommendations</SheetDescription>
           </SheetHeader>
           
           <div className="mt-6 space-y-4">
@@ -1643,7 +1643,7 @@ export default function CatalogPage() {
 
             <div className="pt-2">
               <div className="relative">
-                <Input placeholder="Ask Patchy..." className="pr-10" />
+                <Input placeholder="Ask Aria..." className="pr-10" />
                 <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-full aspect-square">
                   <Zap className="h-4 w-4 text-cosmic-teal" />
                 </Button>

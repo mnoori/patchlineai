@@ -79,7 +79,7 @@ export function ArtistDiscoveryGrid({
 
   const handleDraftEmail = (artist: Artist) => {
     showTaskProgress(`Drafting intro email for ${artist.name}`)
-    handoff("Scout", "Patchy", {
+            handoff("Scout", "Aria", {
       action: "draft_email",
       artist: artist,
     })

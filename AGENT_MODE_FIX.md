@@ -88,13 +88,13 @@ curl -H "x-debug-token: patchline-debug-2025" https://www.patchline.ai/api/debug
 
 ### 4. Verify in UI
 1. Go to https://www.patchline.ai/dashboard
-2. Open Patchy chat
+2. Open Aria chat
 3. Switch to Agent mode
 4. Send a message like "Check my emails"
 5. Verify:
    - Agent activity logs appear in real-time
    - Logs continue showing for 10 seconds after completion
-   - Logs then transition back to Patchy's suggestions
+   - Logs then transition back to Aria's suggestions
 
 ## Troubleshooting
 

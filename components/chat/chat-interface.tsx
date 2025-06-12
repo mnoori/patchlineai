@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge"
 import { DEMO_MODE } from "@/lib/config"
 import { SupervisorTraces } from '@/components/supervisor-traces'
 import { type AgentTrace } from "@/lib/supervisor-agent"
+import { agentName, agentGradient } from "@/lib/agent-utils"
 // Removed wallet imports to prevent flickering - wallet operations handled in blockchain agent
 
 type Message = {
@@ -642,9 +643,9 @@ export function ChatInterface() {
       <div className="flex items-center justify-between p-4 border-b border-border/50 bg-background/80 backdrop-blur-sm">
         <div className="flex items-center space-x-2">
           <TRSCableLogo className="h-5 w-5 text-cosmic-teal" />
-                                <span className="font-semibold tracking-wide text-amber-400">Aria</span>
+                                <span className={agentGradient()}>{agentName()}</span>
           {DEMO_MODE && (
-            <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/30">
+            <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-500 border-purple-500/30">
               Demo Mode
             </Badge>
           )}
@@ -663,7 +664,7 @@ export function ChatInterface() {
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cosmic-teal/20 to-cosmic-pink/20 flex items-center justify-center mb-4">
               <TRSCableLogo className="h-6 w-6 text-cosmic-teal" />
             </div>
-                          <p className="text-sm text-muted-foreground max-w-[280px]">Start a conversation with Aria</p>
+                          <p className="text-sm text-muted-foreground max-w-[280px]">Start a conversation with {agentName()}</p>
           </div>
         ) : (
           <>

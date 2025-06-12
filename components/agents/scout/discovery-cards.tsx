@@ -54,7 +54,7 @@ export function DiscoveryCards({ artists, onWatchlistToggle }: DiscoveryCardsPro
 
   const handleDraftEmail = (artist: Artist) => {
     showTaskProgress(`Drafting intro email for ${artist.name}`)
-    // In real app, this would open Patchy chat with pre-filled prompt
+            // In real app, this would open Aria chat with pre-filled prompt
   }
 
   const handleWatchlistToggle = (artist: Artist) => {

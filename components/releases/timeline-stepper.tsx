@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import type { TimelineStep } from "@/lib/mock/release"
 import { cn } from "@/lib/utils"
 
+
 const iconMap = {
   Upload,
   FileText,
@@ -155,7 +156,7 @@ export function TimelineStepper({ steps, onStepClick, onTaskComplete }: Timeline
                       <div className="mt-6 p-3 bg-sky-900/60 border-l-2 border-cyan-500 rounded-r-md">
                         <div className="flex items-center gap-2 mb-2">
                           <Sparkles className="h-4 w-4 text-cyan-400" />
-                          <span className="text-sm font-medium text-cyan-300">Patchy can help</span>
+                          <span className="text-sm font-medium text-cyan-300">Aria can help</span>
                         </div>
                         <p className="text-xs text-cyan-100 mb-3">Generate alternative artwork sizes automatically</p>
                         <Button size="sm" className="bg-cyan-500 hover:bg-cyan-600 text-black">

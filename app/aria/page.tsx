@@ -19,7 +19,7 @@ export default function AriaPage() {
                 Introducing Aria
               </Badge>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                The World's First <span className="text-amber-400">Agentic Record Label</span>
+                The World's First <span className="bg-gradient-to-r from-purple-400 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">Agentic Record Label</span>
               </h1>
               <p className="text-xl md:text-2xl text-muted-foreground mb-6">
                 An AI-first, full-stack infrastructure that automates label operations while you maintain 
@@ -41,7 +41,7 @@ export default function AriaPage() {
         <section className="py-12">
           <div className="container">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8 text-center">What is <span className="text-amber-400">Aria</span>?</h2>
+              <h2 className="text-3xl font-bold mb-8 text-center">What is <span className="bg-gradient-to-r from-purple-400 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">Aria</span>?</h2>
               <div className="prose prose-lg mx-auto text-center">
                 <p className="text-muted-foreground">
                   Aria is Patchline's flagship agentic record label system. It orchestrates a team of specialized 
@@ -87,7 +87,7 @@ export default function AriaPage() {
         <section className="py-12 bg-cosmic-space/50">
           <div className="container">
             <div className="max-w-5xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8 text-center">How <span className="text-amber-400">Aria</span> Works</h2>
+              <h2 className="text-3xl font-bold mb-8 text-center">How <span className="bg-gradient-to-r from-purple-400 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">Aria</span> Works</h2>
               
               <div className="space-y-8">
                 <div className="glass-effect rounded-xl p-6 md:p-8">
@@ -190,7 +190,7 @@ export default function AriaPage() {
         <section className="py-12">
           <div className="container">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8 text-center">Why Choose <span className="text-amber-400">Aria</span>?</h2>
+              <h2 className="text-3xl font-bold mb-8 text-center">Why Choose <span className="bg-gradient-to-r from-purple-400 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">Aria</span>?</h2>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
@@ -261,7 +261,7 @@ export default function AriaPage() {
                 Ready to Launch Your Agentic Label?
               </h2>
               <p className="text-xl text-muted-foreground mb-6">
-                Join the future of record labels. Let <span className="text-amber-400 font-semibold">Aria</span> handle 
+                Join the future of record labels. Let <span className="bg-gradient-to-r from-purple-400 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent font-semibold">Aria</span> handle 
                 the operations while you shape the vision.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
