@@ -24,7 +24,11 @@ import {
   ChevronRight,
   X as XIcon,
   Music,
-  Hash
+  Hash,
+  Type,
+  Zap,
+  Eye,
+  RefreshCw
 } from "lucide-react"
 import type { EnhancedContentPrompt } from "@/lib/content-types"
 import { toast } from "sonner"
@@ -51,7 +55,7 @@ const PLATFORMS = [
     description: 'Square posts, stories & reels'
   },
   {
-    id: 'x',
+    id: 'twitter',
     name: 'X',
     icon: XIcon,
     color: 'from-black to-gray-800 dark:from-white dark:to-gray-200',
@@ -66,7 +70,7 @@ const PLATFORMS = [
     aspectRatio: { width: 1080, height: 1920 },
     description: 'Short-form video content'
   }
-]
+] as const
 
 export function EnhancedSocialMediaCreator({
   onContentGenerated,
@@ -75,12 +79,15 @@ export function EnhancedSocialMediaCreator({
   onStepChange = () => {},
 }: EnhancedSocialMediaCreatorProps) {
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isGeneratingText, setIsGeneratingText] = useState(false)
   const [generatedImages, setGeneratedImages] = useState<string[]>([])
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<'generate' | 'upload' | 'album'>('generate')
   const [suggestedPrompts, setSuggestedPrompts] = useState<DynamicPrompt[]>([])
   const [selectedPromptTemplate, setSelectedPromptTemplate] = useState<DynamicPrompt | null>(null)
+  const [generatedCaption, setGeneratedCaption] = useState<string>("")
+  const [showGenerateButton, setShowGenerateButton] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   
   const [prompt, setPrompt] = useState<EnhancedContentPrompt>({
@@ -148,6 +155,16 @@ export function EnhancedSocialMediaCreator({
     setSuggestedPrompts(suggestions)
   }, [prompt.platform, prompt.postTone, albumCoverOptions.genre])
 
+  // Auto-generate caption when topic changes
+  useEffect(() => {
+    if (prompt.topic && prompt.topic.length > 3) {
+      const debounceTimer = setTimeout(() => {
+        handleGenerateCaption()
+      }, 1000)
+      return () => clearTimeout(debounceTimer)
+    }
+  }, [prompt.topic, prompt.platform, prompt.postTone, prompt.includeHashtags, prompt.includeEmojis])
+
   // Persist form state
   useEffect(() => {
     const saveState = async () => {
@@ -173,6 +190,44 @@ export function EnhancedSocialMediaCreator({
     saveImages()
   }, [generatedImages, selectedImageIndex])
 
+  const handleGenerateCaption = async () => {
+    if (!prompt.topic?.trim()) return
+    
+    setIsGeneratingText(true)
+    try {
+      const response = await fetch('/api/content/generate-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: prompt.topic,
+          platform: prompt.platform,
+          tone: prompt.postTone,
+          targetAudience: prompt.targetAudience,
+          includeHashtags: prompt.includeHashtags,
+          includeEmojis: prompt.includeEmojis,
+          contentType: 'social'
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setGeneratedCaption(data.caption)
+      }
+    } catch (error) {
+      console.error('Caption generation error:', error)
+      // Fallback to basic caption
+      setGeneratedCaption(generateFallbackCaption())
+    } finally {
+      setIsGeneratingText(false)
+    }
+  }
+
+  const generateFallbackCaption = () => {
+    const emojis = prompt.includeEmojis ? " 🎵✨" : ""
+    const hashtags = prompt.includeHashtags ? "\n\n#music #newrelease #artist" : ""
+    return `${prompt.topic}${emojis}${hashtags}`
+  }
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files) return
@@ -195,6 +250,7 @@ export function EnhancedSocialMediaCreator({
 
   const handleGenerateFromTemplate = async (template: DynamicPrompt) => {
     setSelectedPromptTemplate(template)
+    setShowGenerateButton(true)
     
     // Auto-fill variables with smart defaults
     const variables: Record<string, string> = {}
@@ -215,11 +271,17 @@ export function EnhancedSocialMediaCreator({
     })
 
     const filledPrompt = fillPromptTemplate(template.template, variables)
-    await handleGenerateImages(filledPrompt)
+    setPrompt(prev => ({ ...prev, topic: filledPrompt }))
+    
+    // Show generate button prominently
+    toast.info("Template selected! Click Generate to create your content.", {
+      duration: 3000,
+    })
   }
 
   const handleGenerateImages = async (customPrompt?: string) => {
     setIsGenerating(true)
+    setShowGenerateButton(false)
 
     try {
       const platform = PLATFORMS.find(p => p.id === prompt.platform)!
@@ -314,7 +376,7 @@ export function EnhancedSocialMediaCreator({
                 </div>
                 <div>
                   <CardTitle>Social Media Creator</CardTitle>
-                  <CardDescription>Create engaging posts with AI-powered visuals</CardDescription>
+                  <CardDescription>Create engaging posts with AI-powered visuals and captions</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -328,7 +390,7 @@ export function EnhancedSocialMediaCreator({
                       <button
                         key={platform.id}
                         type="button"
-                        onClick={() => setPrompt({ ...prompt, platform: platform.id as any })}
+                        onClick={() => setPrompt({ ...prompt, platform: platform.id as "instagram" | "twitter" | "tiktok" })}
                         className={cn(
                           "flex-1 p-3 rounded-lg border-2 transition-all",
                           prompt.platform === platform.id
@@ -343,7 +405,7 @@ export function EnhancedSocialMediaCreator({
                           )}>
                             <platform.icon className={cn(
                               "h-5 w-5",
-                              platform.id === 'x' ? "text-black dark:text-white" : "text-white"
+                              platform.id === 'twitter' ? "text-black dark:text-white" : "text-white"
                             )} />
                           </div>
                           <div className="text-center">
@@ -369,34 +431,54 @@ export function EnhancedSocialMediaCreator({
                   <TabsContent value="generate" className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="topic">Post Topic *</Label>
-                      <Input
-                        id="topic"
-                        placeholder="e.g., New single release announcement"
-                        value={prompt.topic}
-                        onChange={(e) => setPrompt({ ...prompt, topic: e.target.value })}
-                        required
-                      />
+                      <div className="relative">
+                        <Input
+                          id="topic"
+                          placeholder="e.g., New single release announcement"
+                          value={prompt.topic}
+                          onChange={(e) => setPrompt({ ...prompt, topic: e.target.value })}
+                          required
+                        />
+                        {isGeneratingText && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 className="h-4 w-4 animate-spin text-teal-500" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        <Type className="inline h-3 w-3 mr-1" />
+                        AI will generate your caption automatically
+                      </p>
                     </div>
 
                     {/* Smart Prompt Suggestions */}
                     {suggestedPrompts.length > 0 && (
                       <div className="space-y-2">
                         <Label>Suggested Templates</Label>
-                        <ScrollArea className="h-32 rounded-md border p-2">
-                          <div className="space-y-2">
-                            {suggestedPrompts.map(template => (
-                              <button
-                                key={template.id}
-                                type="button"
-                                onClick={() => handleGenerateFromTemplate(template)}
-                                className="w-full text-left p-2 rounded hover:bg-muted transition-colors"
-                              >
-                                <p className="font-medium text-sm">{template.name}</p>
-                                <p className="text-xs text-muted-foreground">{template.description}</p>
-                              </button>
-                            ))}
-                          </div>
-                        </ScrollArea>
+                        <div className="space-y-2">
+                          {suggestedPrompts.slice(0, 2).map(template => (
+                            <Card
+                              key={template.id}
+                              className={cn(
+                                "cursor-pointer transition-all hover:shadow-md",
+                                selectedPromptTemplate?.id === template.id
+                                  ? "ring-2 ring-teal-500 bg-teal-50 dark:bg-teal-950"
+                                  : "hover:bg-muted/50"
+                              )}
+                              onClick={() => handleGenerateFromTemplate(template)}
+                            >
+                              <CardContent className="p-3">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="font-medium text-sm">{template.name}</p>
+                                    <p className="text-xs text-muted-foreground">{template.description}</p>
+                                  </div>
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </TabsContent>
@@ -588,7 +670,12 @@ export function EnhancedSocialMediaCreator({
                 <Button
                   type="submit"
                   disabled={isGenerating || (!prompt.topic?.trim() && activeTab === 'generate' && uploadedPhotos.length === 0)}
-                  className="w-full bg-teal-500 hover:bg-teal-600"
+                  className={cn(
+                    "w-full transition-all duration-300",
+                    showGenerateButton 
+                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg animate-pulse" 
+                      : "bg-teal-500 hover:bg-teal-600"
+                  )}
                 >
                   {isGenerating ? (
                     <>
@@ -597,7 +684,7 @@ export function EnhancedSocialMediaCreator({
                     </>
                   ) : (
                     <>
-                      <Send className="mr-2 h-4 w-4" />
+                      <Zap className="mr-2 h-4 w-4" />
                       Generate Content
                     </>
                   )}
@@ -607,27 +694,41 @@ export function EnhancedSocialMediaCreator({
           </Card>
         </div>
 
-        {/* Sticky Live Preview - 1 column */}
-        <div className="lg:sticky lg:top-20 h-fit">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Smartphone className="h-5 w-5 text-teal-500" />
-                <CardTitle className="text-base">Live Preview</CardTitle>
+        {/* Dynamic Live Preview - 1 column - Now sticky and properly sized */}
+        <div className="lg:sticky lg:top-6 h-fit">
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-teal-500" />
+                  <CardTitle className="text-base">Live Preview</CardTitle>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleGenerateCaption}
+                  disabled={isGeneratingText || !prompt.topic}
+                  className="h-8 px-2"
+                >
+                  <RefreshCw className={cn("h-3 w-3", isGeneratingText && "animate-spin")} />
+                </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="aspect-square bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg p-4">
-                {/* Platform-specific preview */}
+            <CardContent className="p-0">
+              <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
+                {/* Platform-specific preview with proper aspect ratios */}
                 {prompt.platform === 'instagram' && (
-                  <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg h-full flex flex-col">
+                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg max-w-sm mx-auto">
                     <div className="p-3 border-b flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-purple-500" />
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center">
+                        <Music className="h-4 w-4 text-white" />
+                      </div>
                       <div className="flex-1">
                         <p className="font-semibold text-sm">your_artist_name</p>
+                        <p className="text-xs text-muted-foreground">Music Artist</p>
                       </div>
                     </div>
-                    <div className="flex-1 bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                    <div className="aspect-square bg-slate-100 dark:bg-slate-700 relative overflow-hidden">
                       {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
                         <img 
                           src={generatedImages[selectedImageIndex]} 
@@ -635,36 +736,54 @@ export function EnhancedSocialMediaCreator({
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <ImageIcon className="h-16 w-16 text-muted-foreground" />
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="text-center">
+                            <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                            <p className="text-sm text-muted-foreground">Your image will appear here</p>
+                          </div>
+                        </div>
                       )}
                     </div>
                     <div className="p-3">
-                      <p className="text-sm line-clamp-3">
-                        {prompt.topic || "Your post caption..."}
-                        {prompt.includeEmojis && " 🎵✨"}
-                      </p>
-                      {prompt.includeHashtags && (
-                        <p className="text-xs text-blue-600 mt-1">#music #newrelease</p>
-                      )}
+                      <div className="space-y-2">
+                        {isGeneratingText ? (
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-3 w-3 animate-spin text-teal-500" />
+                            <span className="text-xs text-muted-foreground">Generating caption...</span>
+                          </div>
+                        ) : (
+                          <p className="text-sm leading-relaxed">
+                            {generatedCaption || prompt.topic || "Your post caption will appear here..."}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {prompt.platform === 'x' && (
-                  <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg h-full p-4">
+                {prompt.platform === 'twitter' && (
+                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg max-w-sm mx-auto p-4">
                     <div className="flex gap-3">
-                      <div className="w-10 h-10 rounded-full bg-black dark:bg-white" />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-1">
+                      <div className="w-10 h-10 rounded-full bg-black dark:bg-white flex items-center justify-center">
+                        <Music className="h-5 w-5 text-white dark:text-black" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1 mb-1">
                           <p className="font-semibold text-sm">Artist Name</p>
                           <p className="text-xs text-muted-foreground">@handle</p>
                         </div>
-                        <p className="text-sm mt-1">
-                          {prompt.topic || "Your post..."}
-                          {prompt.includeEmojis && " 🎵"}
-                        </p>
+                        {isGeneratingText ? (
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-3 w-3 animate-spin text-teal-500" />
+                            <span className="text-xs text-muted-foreground">Generating...</span>
+                          </div>
+                        ) : (
+                          <p className="text-sm leading-relaxed">
+                            {generatedCaption || prompt.topic || "Your post will appear here..."}
+                          </p>
+                        )}
                         {selectedImageIndex !== null && generatedImages[selectedImageIndex] && (
-                          <div className="mt-2 rounded-lg overflow-hidden">
+                          <div className="mt-3 rounded-lg overflow-hidden border">
                             <img 
                               src={generatedImages[selectedImageIndex]} 
                               alt="Preview" 
@@ -672,32 +791,37 @@ export function EnhancedSocialMediaCreator({
                             />
                           </div>
                         )}
-                        {prompt.includeHashtags && (
-                          <p className="text-xs text-blue-600 mt-2">#music #artist</p>
-                        )}
                       </div>
                     </div>
                   </div>
                 )}
 
                 {prompt.platform === 'tiktok' && (
-                  <div className="bg-black rounded-lg h-full relative overflow-hidden">
+                  <div className="bg-black rounded-xl max-w-[200px] mx-auto aspect-[9/16] relative overflow-hidden">
                     {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
                       <img 
                         src={generatedImages[selectedImageIndex]} 
                         alt="Preview" 
-                        className="absolute inset-0 w-full h-full object-cover opacity-70"
+                        className="absolute inset-0 w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-purple-500/20" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center">
+                        <div className="text-center">
+                          <Music className="h-8 w-8 text-white mx-auto mb-2" />
+                          <p className="text-white text-xs">Your video preview</p>
+                        </div>
+                      </div>
                     )}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                      <p className="text-white text-sm">
-                        {prompt.topic || "Your TikTok caption..."}
-                        {prompt.includeEmojis && " 🎵✨"}
-                      </p>
-                      {prompt.includeHashtags && (
-                        <p className="text-white text-xs mt-1">#fyp #music</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
+                      {isGeneratingText ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-3 w-3 animate-spin text-white" />
+                          <span className="text-xs text-white/70">Generating...</span>
+                        </div>
+                      ) : (
+                        <p className="text-white text-xs leading-relaxed">
+                          {generatedCaption || prompt.topic || "Your TikTok caption..."}
+                        </p>
                       )}
                     </div>
                   </div>
