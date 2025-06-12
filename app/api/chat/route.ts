@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       try {
         const bedrockClient = new BedrockClientDirect(
           modelId || CONFIG.BEDROCK_MODEL_ID,
-          "You are Patchy, a helpful AI assistant for musicians and music industry professionals. Be friendly, knowledgeable, and supportive."
+          "You are Aria, a helpful AI assistant for musicians and music industry professionals. Be friendly, knowledgeable, and supportive."
         )
         
         const response = await bedrockClient.generateResponse(message)

@@ -1563,7 +1563,7 @@ export default function CatalogPage() {
                     <ChevronRightIcon className="h-4 w-4" />
                   </Button>
                 </div>
-                <CardDescription>Patchy's recommendations</CardDescription>
+                <CardDescription>Aria's recommendations</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {anomalies.map((anomaly, index) => (
@@ -1587,7 +1587,7 @@ export default function CatalogPage() {
 
                 <div className="pt-2">
                   <div className="relative">
-                    <Input placeholder="Ask Patchy..." className="pr-10" />
+                    <Input placeholder="Ask Aria..." className="pr-10" />
                     <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-full aspect-square">
                       <Zap className="h-4 w-4 text-cosmic-teal" />
                     </Button>

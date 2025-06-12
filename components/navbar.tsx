@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/logo"
@@ -11,6 +12,7 @@ import { AuthButton } from "@/components/auth-button"
 
 const navItems = [
   { name: "Home", href: "/" },
+  { name: "Aria", href: "/aria", badge: "NEW" },
   { name: "Features", href: "/features" },
   { name: "Pricing", href: "/pricing" },
   { name: "About", href: "/about" },
@@ -38,7 +40,14 @@ export function Navbar() {
                   pathname === item.href ? "text-cosmic-teal" : "text-muted-foreground",
                 )}
               >
-                {item.name}
+                <span className="flex items-center gap-2">
+                  {item.name}
+                  {item.badge && (
+                    <Badge className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/30 text-xs">
+                      {item.badge}
+                    </Badge>
+                  )}
+                </span>
               </Link>
             ))}
           </div>
@@ -69,7 +78,14 @@ export function Navbar() {
               )}
               onClick={() => setMobileMenuOpen(false)}
             >
-              {item.name}
+              <span className="flex items-center gap-2">
+                {item.name}
+                {item.badge && (
+                  <Badge className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/30 text-xs">
+                    {item.badge}
+                  </Badge>
+                )}
+              </span>
             </Link>
           ))}
           <div className="pt-4 flex flex-col space-y-3">

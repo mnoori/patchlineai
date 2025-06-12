@@ -25,7 +25,7 @@ type Message = {
   }
 }
 
-interface PatchyStore {
+interface AriaStore {
   // Chat state
   messages: Message[]
   lastMessage: Message | null
@@ -54,7 +54,7 @@ interface PatchyStore {
   clearAgentLogs: () => void
 }
 
-export const usePatchyStore = create<PatchyStore>((set, get) => ({
+export const useAriaStore = create<AriaStore>((set, get) => ({
   // Initial state
   messages: [],
   lastMessage: null,

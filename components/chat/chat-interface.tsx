@@ -22,7 +22,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { BEDROCK_MODELS, getAvailableModels, getDefaultModel, AGENT_MODEL_NOTE, type BedrockModel } from "@/lib/models-config"
 import { Button } from "@/components/ui/button"
-import { usePatchyStore } from "@/hooks/use-patchy-store"
+import { useAriaStore } from "@/hooks/use-aria-store"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { TRSCableLogo } from "@/components/icons/trs-cable-logo"
 import { Switch } from "@/components/ui/switch"
@@ -98,7 +98,7 @@ export function ChatInterface() {
     addMessage, 
     updateMessage,
     markAsRead,
-  } = usePatchyStore()
+  } = useAriaStore()
   
   // Get current user
   const { userId } = useCurrentUser()
@@ -642,7 +642,7 @@ export function ChatInterface() {
       <div className="flex items-center justify-between p-4 border-b border-border/50 bg-background/80 backdrop-blur-sm">
         <div className="flex items-center space-x-2">
           <TRSCableLogo className="h-5 w-5 text-cosmic-teal" />
-          <span className="font-semibold tracking-wide text-cosmic-teal">Patchy</span>
+                                <span className="font-semibold tracking-wide text-amber-400">Aria</span>
           {DEMO_MODE && (
             <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/30">
               Demo Mode
@@ -663,7 +663,7 @@ export function ChatInterface() {
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cosmic-teal/20 to-cosmic-pink/20 flex items-center justify-center mb-4">
               <TRSCableLogo className="h-6 w-6 text-cosmic-teal" />
             </div>
-            <p className="text-sm text-muted-foreground max-w-[280px]">Start a conversation with Patchy</p>
+                          <p className="text-sm text-muted-foreground max-w-[280px]">Start a conversation with Aria</p>
           </div>
         ) : (
           <>

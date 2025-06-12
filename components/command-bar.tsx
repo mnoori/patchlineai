@@ -115,7 +115,7 @@ export function CommandBar() {
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => console.log("Chat with Patchy"))}>
             <MessageSquare className="mr-2 h-4 w-4" />
-            <span>Chat with Patchy</span>
+                            <span>Chat with Aria</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => console.log("Run agent task"))}>
             <Zap className="mr-2 h-4 w-4" />

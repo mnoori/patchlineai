@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import { ChatInterface } from "../chat/chat-interface"
 import { TRSCableLogo } from "../icons/trs-cable-logo"
-import { usePatchyStore } from "@/hooks/use-patchy-store"
+import { useAriaStore } from "@/hooks/use-aria-store"
 import { Badge } from "@/components/ui/badge"
 import { motion, AnimatePresence } from "framer-motion"
 import { DEMO_MODE } from "@/lib/config"
@@ -419,7 +419,7 @@ export function SidebarWithChat() {
   const [currentLogs, setCurrentLogs] = useState<typeof simulationLogs>([])
   const [isClosing, setIsClosing] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
-  const { unreadCount, setAgentActivity } = usePatchyStore()
+  const { unreadCount, setAgentActivity } = useAriaStore()
   const logsContainerRef = useRef<HTMLDivElement>(null)
   const { hasFeature, getAvailableFeatures } = usePermissions()
 
@@ -868,7 +868,7 @@ export function SidebarWithChat() {
                   <>
                     <div className="dot" />
                     <span style={{ color: '#00f0ff', fontSize: '14px', fontWeight: 500 }}>
-                      Patchy's Suggestions
+                      Aria's Suggestions
                     </span>
                   </>
                 )}
@@ -1014,7 +1014,7 @@ export function SidebarWithChat() {
                     isChatExpanded ? "text-cosmic-teal" : "text-cosmic-teal/80",
                   )}
                 >
-                  Patchy
+                  Aria
                 </span>
               </div>
               {!isChatExpanded && (

@@ -5,7 +5,7 @@ import { KPICard } from "@/components/insights/kpi-card"
 import { RevenueChart } from "@/components/insights/revenue-chart"
 import { AudienceDistribution } from "@/components/insights/audience-distribution"
 import { TopTracksIntelligence } from "@/components/insights/top-tracks-intelligence"
-import { PatchyInsights } from "@/components/insights/patchy-insights"
+import { AriaInsights } from "@/components/insights/aria-insights"
 import { CustomReportBuilder } from "@/components/insights/custom-report-builder"
 import { InsightsDigest } from "@/components/insights/insights-digest"
 import { PlatformIntegrations } from "@/components/insights/platform-integrations"
@@ -279,7 +279,7 @@ const mockData = {
       shareRate: 22,
     },
   ],
-  patchyInsights: [
+      ariaInsights: [
     {
       id: "insight1",
       type: "growth",
@@ -536,7 +536,7 @@ export default function InsightsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <PatchyInsights insights={mockData.patchyInsights as any} />
+                          <AriaInsights insights={mockData.ariaInsights as any} />
         </motion.div>
       </div>
 

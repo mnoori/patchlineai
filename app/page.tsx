@@ -4,7 +4,8 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Waveform } from "@/components/waveform"
 import { AnimatedCounter } from "@/components/animated-counter"
-import { Search, FileText, Users, Database, Sparkles, Zap, Globe, Layers, Music2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Search, FileText, Users, Database, Sparkles, Zap, Globe, Layers, Music2, ArrowRight } from "lucide-react"
 
 export default function Home() {
   return (
@@ -25,11 +26,15 @@ export default function Home() {
               </h1>
               <p className="text-xl md:text-2xl text-muted-foreground mb-6">
                 A full-stack, AI-first platform with specialized agents, Patchline connects your data, simplifies your
-                workflows, and gives music professionals time back.
+                workflows, and gives music professionals time back. Powered by <span className="text-amber-400 font-semibold">Aria</span>, 
+                our flagship agentic orchestrator.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button asChild size="lg" className="px-8 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
-                  <Link href="#">Book a Demo</Link>
+                  <Link href="/aria">Discover Aria</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="px-8">
+                  <Link href="#demo">Watch Demo</Link>
                 </Button>
               </div>
             </div>
@@ -41,6 +46,37 @@ export default function Home() {
           </div>
 
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+        </section>
+
+        {/* Aria Introduction Section */}
+        <section className="py-8">
+          <div className="container">
+            <div className="max-w-4xl mx-auto">
+              <div className="glass-effect rounded-xl p-8 text-center">
+                <Badge className="mb-4 bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/30">
+                  Flagship Product
+                </Badge>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                  Meet <span className="text-amber-400">Aria</span> - Your Agentic Record Label
+                </h2>
+                <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
+                  Aria is our most advanced offering - an AI-first infrastructure that orchestrates all your agents 
+                  to create autonomous label operations. From talent discovery to revenue distribution, 
+                  Aria handles the complex workflows while you maintain creative control.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Button asChild className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                    <Link href="/aria">
+                      Explore Aria <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/dashboard">Try Free</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Problem Statement with Animated Counters */}

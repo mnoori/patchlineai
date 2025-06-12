@@ -23,17 +23,17 @@ interface Insight {
   priority: "high" | "medium" | "low"
 }
 
-interface PatchyInsightsProps {
+interface AriaInsightsProps {
   insights: Insight[]
 }
 
-export function PatchyInsights({ insights }: PatchyInsightsProps) {
+export function AriaInsights({ insights }: AriaInsightsProps) {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "growth":
         return <TrendingUp className="h-5 w-5 text-green-500" />
       case "viral":
-        return <Zap className="h-5 w-5 text-amber-500" />
+        return <Zap className="h-5 w-5 text-purple-500" />
       case "opportunity":
         return <Lightbulb className="h-5 w-5 text-cosmic-teal" />
       default:
@@ -46,7 +46,7 @@ export function PatchyInsights({ insights }: PatchyInsightsProps) {
       case "high":
         return "bg-red-500/20 text-red-500 border-red-500/20"
       case "medium":
-        return "bg-amber-500/20 text-amber-500 border-amber-500/20"
+        return "bg-purple-500/20 text-purple-500 border-purple-500/20"
       case "low":
         return "bg-green-500/20 text-green-500 border-green-500/20"
       default:
@@ -59,7 +59,7 @@ export function PatchyInsights({ insights }: PatchyInsightsProps) {
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-2">
           <Lightbulb className="h-5 w-5 text-cosmic-teal" />
-          <CardTitle className="text-lg font-medium">Patchy's Insights</CardTitle>
+          <CardTitle className="text-lg font-medium">Aria's Insights</CardTitle>
         </div>
         <Badge variant="outline" className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/20">
           AI-Powered
