@@ -356,7 +356,7 @@ export function EnhancedSocialMediaCreator({
 
   const handleReset = () => {
     setFormState({
-      platform: 'instagram',
+      platform: 'instagram-post',
       topic: '',
       caption: '',
       workflowMode: 'template',
@@ -709,7 +709,7 @@ export function EnhancedSocialMediaCreator({
         </div>
 
         {/* Live Preview - 1 column */}
-        <div className="lg:col-span-1 sticky top-20">
+        <div className="lg:col-span-1 lg:fixed lg:top-20 lg:right-8 lg:w-80 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
           <Card className="overflow-hidden">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between mb-3">
