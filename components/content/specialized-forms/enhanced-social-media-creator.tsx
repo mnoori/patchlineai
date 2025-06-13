@@ -396,9 +396,9 @@ export function EnhancedSocialMediaCreator({
 
   return (
     <div className="w-full max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
-        {/* Main Form - 2 columns */}
-        <div className="lg:col-span-2">
+      <div className="space-y-6 lg:pr-[22rem]">
+        {/* Main Form */}
+        <div>
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -708,9 +708,10 @@ export function EnhancedSocialMediaCreator({
           </Card>
         </div>
 
-        {/* Live Preview - 1 column */}
-        <div className="lg:col-span-1 lg:fixed lg:top-20 lg:right-8 lg:w-80 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-          <Card className="overflow-hidden">
+        {/* Live Preview - fixed on large screens */}
+        <div className="hidden lg:block fixed top-20 right-6 w-80 z-30">
+          <div>
+            <Card className="overflow-hidden w-full">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -740,7 +741,7 @@ export function EnhancedSocialMediaCreator({
                 ))}
               </div>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-0 overflow-hidden">
               {/* Dynamic Platform Mock */}
               <div className="bg-muted/50 p-4">
                 <div className="max-w-sm mx-auto">
@@ -870,6 +871,7 @@ export function EnhancedSocialMediaCreator({
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
       </div>
     </div>
