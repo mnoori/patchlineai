@@ -37,41 +37,142 @@ import { cn } from "@/lib/utils"
 import { contentPersistence } from "@/lib/content-persistence"
 import { getPromptSuggestions, fillPromptTemplate, PROMPT_MODIFIERS, type DynamicPrompt } from "@/lib/prompt-library"
 import { getNovaCanvasUtils } from "@/lib/nova-canvas-utils"
+import { Textarea } from "@/components/ui/textarea"
+import { useDebounce } from "@/hooks/use-debounce"
 
 interface EnhancedSocialMediaCreatorProps {
-  onContentGenerated?: (draftId: string) => void
-  initialPrompt?: EnhancedContentPrompt | null
+  onContentGenerated?: (content: {
+    caption: string
+    images: string[]
+    platform: string
+    selectedImageIndex: number | null
+  }) => void
+  initialPrompt?: string
   currentStep?: number
   onStepChange?: (step: number) => void
 }
 
-// Platform configurations with proper branding
+interface FormState {
+  platform: 'instagram-post' | 'instagram-story'
+  topic: string
+  caption: string
+  workflowMode: 'template' | 'custom'
+  selectedTemplate: string | null
+}
+
+// Platform configurations with icons from platform-integrations.tsx
+const PLATFORM_ICONS = {
+  'instagram-post': (
+    <div className="w-10 h-10 rounded-lg bg-pink-600 flex items-center justify-center text-white">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+      </svg>
+    </div>
+  ),
+  'instagram-story': (
+    <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center text-white">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d="M8 12a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+        <path d="M16 12a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+        <path d="M12 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+      </svg>
+    </div>
+  )
+  // TODO: Commented out platforms for future use
+  // twitter: (
+  //   <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center text-white">
+  //     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  //       <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+  //     </svg>
+  //   </div>
+  // ),
+  // tiktok: (
+  //   <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center text-white">
+  //     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+  //       <path d="M19.321 5.562a5.124 5.124 0 0 1-3.414-1.267 5.124 5.124 0 0 1-1.537-2.723H10.5v10.99c0 1.42-1.193 2.56-2.64 2.56-1.45 0-2.64-1.14-2.64-2.56 0-1.42 1.19-2.56 2.64-2.56.287 0 .573.046.84.138v-3.86a6.3 6.3 0 0 0-.84-.057C4.15 6.227 1 9.376 1 13.276c0 3.9 3.15 7.05 7.02 7.05 3.87 0 7.02-3.15 7.02-7.05v-3.995a8.783 8.783 0 0 0 4.282 1.092V6.517a5.234 5.234 0 0 1-1-.955Z" />
+  //     </svg>
+  //   </div>
+  // )
+}
+
+// Platform configurations
 const PLATFORMS = [
   {
-    id: 'instagram',
-    name: 'Instagram',
-    icon: Instagram,
-    color: 'from-pink-500 to-purple-500',
+    id: 'instagram-post',
     aspectRatio: { width: 1080, height: 1080 },
-    description: 'Square posts, stories & reels'
+    description: 'Square posts'
   },
   {
-    id: 'twitter',
-    name: 'X',
-    icon: XIcon,
-    color: 'from-black to-gray-800 dark:from-white dark:to-gray-200',
-    aspectRatio: { width: 1200, height: 675 },
-    description: 'Real-time updates & threads'
-  },
-  {
-    id: 'tiktok',
-    name: 'TikTok',
-    icon: Music,
-    color: 'from-black to-pink-500',
+    id: 'instagram-story',
     aspectRatio: { width: 1080, height: 1920 },
-    description: 'Short-form video content'
+    description: 'Vertical stories'
   }
+  // TODO: Add more platforms as needed
+  // {
+  //   id: 'twitter',
+  //   aspectRatio: { width: 1200, height: 675 },
+  //   description: 'Real-time updates & threads'
+  // },
+  // {
+  //   id: 'tiktok',
+  //   aspectRatio: { width: 1080, height: 1920 },
+  //   description: 'Short-form video content'
+  // }
 ] as const
+
+const CREATIVE_TEMPLATES = [
+  {
+    id: 'new-release',
+    name: 'New Release Announcement',
+    description: 'Eye-catching announcement for your new track',
+    icon: '🎵',
+    captionTemplate: '🎵 NEW MUSIC ALERT! 🎵\n\n"{trackTitle}" by {artistName} is OUT NOW! 🔥\n\nStream it everywhere 🎧'
+  },
+  {
+    id: 'behind-scenes',
+    name: 'Behind the Scenes',
+    description: 'Share your creative process',
+    icon: '🎬',
+    captionTemplate: 'Behind the magic ✨\n\nCreating "{trackTitle}" with {artistName} 🎵\n\n#StudioLife #BehindTheScenes'
+  },
+  {
+    id: 'tour-announcement',
+    name: 'Tour Announcement',
+    description: 'Announce upcoming shows and tours',
+    icon: '🎤',
+    captionTemplate: '🎤 TOUR ANNOUNCEMENT 🎤\n\n{artistName} is hitting the road! 🚌\n\nGet your tickets now 🎫'
+  },
+  {
+    id: 'playlist-feature',
+    name: 'Playlist Feature',
+    description: 'Celebrate playlist additions',
+    icon: '📻',
+    captionTemplate: '🎉 BIG NEWS! 🎉\n\n"{trackTitle}" by {artistName} just got added to {playlistName}! 📻\n\nListen now 🎧'
+  }
+]
 
 export function EnhancedSocialMediaCreator({
   onContentGenerated,
@@ -79,657 +180,362 @@ export function EnhancedSocialMediaCreator({
   currentStep = 1,
   onStepChange = () => {},
 }: EnhancedSocialMediaCreatorProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingText, setIsGeneratingText] = useState(false)
   const [generatedImages, setGeneratedImages] = useState<string[]>([])
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
-  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
-  const [activeTab, setActiveTab] = useState<'generate' | 'upload' | 'album'>('generate')
-  const [suggestedPrompts, setSuggestedPrompts] = useState<DynamicPrompt[]>([])
-  const [selectedPromptTemplate, setSelectedPromptTemplate] = useState<DynamicPrompt | null>(null)
+  const [userPhotos, setUserPhotos] = useState<string[]>([])
   const [generatedCaption, setGeneratedCaption] = useState<string>("")
-  const [showGenerateButton, setShowGenerateButton] = useState(false)
-  const [userPhotos, setUserPhotos] = useState<string[]>([]) // User's profile photos
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [customCaption, setCustomCaption] = useState<string>("")
   
-  const [prompt, setPrompt] = useState<EnhancedContentPrompt>({
-    topic: "",
-    contentType: "social",
-    tone: "enthusiastic",
-    platform: "instagram",
-    postTone: "casual",
-    includeHashtags: true,
-    includeEmojis: true,
-    targetAudience: "music fans",
+  const [formState, setFormState] = useState<FormState>({
+    platform: 'instagram-post',
+    topic: initialPrompt || '',
+    caption: '',
+    workflowMode: 'template',
+    selectedTemplate: null
   })
 
-  const [albumCoverOptions, setAlbumCoverOptions] = useState({
-    style: 'modern' as const,
-    mood: '',
-    genre: '',
-    albumTitle: ''
-  })
+  const debouncedTopic = useDebounce(formState.topic, 500)
 
-  // Predefined creative templates
-  const CREATIVE_TEMPLATES = [
-    {
-      id: 'vibrant-album',
-      name: 'Vibrant Album Cover',
-      description: 'Eye-catching album cover for social media',
-      prompt: 'Create a vibrant, colorful album cover with dynamic energy, abstract shapes, and modern design elements',
-      requiresUserPhoto: true,
-      style: 'vibrant'
-    },
-    {
-      id: 'cinematic-release',
-      name: 'Cinematic Release Teaser',
-      description: 'Dramatic teaser image for upcoming release',
-      prompt: 'Cinematic promotional image with dramatic lighting, moody atmosphere, depth of field, professional photography',
-      requiresUserPhoto: true,
-      style: 'cinematic'
-    },
-    {
-      id: 'minimalist-announcement',
-      name: 'Minimalist Announcement',
-      description: 'Clean, modern design for announcements',
-      prompt: 'Minimalist design with clean lines, plenty of white space, elegant typography, sophisticated color palette',
-      requiresUserPhoto: false,
-      style: 'minimalist'
-    },
-    {
-      id: 'festival-ready',
-      name: 'Festival Vibes',
-      description: 'Energetic design for festival announcements',
-      prompt: 'Festival-inspired design with bright colors, summer vibes, crowd energy, outdoor concert atmosphere',
-      requiresUserPhoto: true,
-      style: 'festival'
-    }
-  ]
-
-  // Load persisted state on mount
+  // Load user photos on mount
   useEffect(() => {
-    const loadPersistedData = async () => {
-      const formState = await contentPersistence.loadFormState('social')
-      if (formState) {
-        setPrompt(prev => ({
-          ...prev,
-          platform: formState.platform || prev.platform,
-          topic: formState.topic || prev.topic,
-          postTone: formState.postTone || prev.postTone,
-          targetAudience: formState.targetAudience || prev.targetAudience,
-          includeHashtags: formState.includeHashtags ?? prev.includeHashtags,
-          includeEmojis: formState.includeEmojis ?? prev.includeEmojis,
-        }))
-      }
-
-      const images = await contentPersistence.loadImages('social')
-      if (images) {
-        setGeneratedImages(images.generated)
-        setSelectedImageIndex(images.selected)
-      }
-
-      // Load user photos from profile or previous uploads
-      const savedUserPhotos = await contentPersistence.loadUserPhotos()
-      if (savedUserPhotos) {
-        setUserPhotos(savedUserPhotos)
-      }
-    }
-
-    loadPersistedData()
+    loadUserPhotos()
   }, [])
 
-  // Apply initial prompt values
-  useEffect(() => {
-    if (initialPrompt) {
-      setPrompt((prev) => ({
-        ...prev,
-        ...initialPrompt,
-      }))
-    }
-  }, [initialPrompt])
-
-  // Get prompt suggestions when platform or topic changes
-  useEffect(() => {
-    const suggestions = getPromptSuggestions({
-      contentType: 'social',
-      platform: prompt.platform,
-      mood: prompt.postTone,
-      genre: albumCoverOptions.genre
-    })
-    setSuggestedPrompts(suggestions)
-  }, [prompt.platform, prompt.postTone, albumCoverOptions.genre])
-
-  // Auto-generate caption when topic changes
-  useEffect(() => {
-    if (prompt.topic && prompt.topic.length > 3) {
-      const debounceTimer = setTimeout(() => {
-        handleGenerateCaption()
-      }, 1000)
-      return () => clearTimeout(debounceTimer)
-    }
-  }, [prompt.topic, prompt.platform, prompt.postTone, prompt.includeHashtags, prompt.includeEmojis])
-
-  // Persist form state
-  useEffect(() => {
-    const saveState = async () => {
-      await contentPersistence.saveFormState('social', {
-        platform: prompt.platform,
-        topic: prompt.topic,
-        postTone: prompt.postTone,
-        targetAudience: prompt.targetAudience,
-        includeHashtags: prompt.includeHashtags,
-        includeEmojis: prompt.includeEmojis,
-      })
-    }
-    saveState()
-  }, [prompt])
-
-  // Persist images
-  useEffect(() => {
-    const saveImages = async () => {
-      if (generatedImages.length > 0) {
-        await contentPersistence.saveImages('social', generatedImages, selectedImageIndex)
+  const loadUserPhotos = async () => {
+    try {
+      const response = await fetch('/api/upload/user-photos')
+      if (response.ok) {
+        const data = await response.json()
+        setUserPhotos(data.photos || [])
       }
+    } catch (error) {
+      console.error('Failed to load user photos:', error)
     }
-    saveImages()
-  }, [generatedImages, selectedImageIndex])
+  }
 
-  const handleGenerateCaption = async () => {
-    if (!prompt.topic?.trim()) return
-    
+  const saveUserPhotos = async (photos: string[]) => {
+    try {
+      await fetch('/api/upload/user-photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photos })
+      })
+    } catch (error) {
+      console.error('Failed to save user photos:', error)
+    }
+  }
+
+  // Generate AI caption when topic changes (custom mode)
+  useEffect(() => {
+    if (debouncedTopic && formState.workflowMode === 'custom') {
+      generateAICaption(debouncedTopic)
+    }
+  }, [debouncedTopic, formState.workflowMode])
+
+  const generateAICaption = async (topic: string) => {
+    if (!topic.trim()) return
+
     setIsGeneratingText(true)
     try {
       const response = await fetch('/api/content/generate-text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          topic: prompt.topic,
-          platform: prompt.platform,
-          tone: prompt.postTone,
-          targetAudience: prompt.targetAudience,
-          includeHashtags: prompt.includeHashtags,
-          includeEmojis: prompt.includeEmojis,
-          contentType: 'social'
+          prompt: topic,
+          platform: formState.platform,
+          type: 'caption',
+          artistName: 'ALGORYX',
+          trackTitle: 'Solitude'
         })
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        setGeneratedCaption(data.caption)
-      }
+      if (!response.ok) throw new Error('Failed to generate caption')
+
+      const data = await response.json()
+      setGeneratedCaption(data.text)
+      setFormState(prev => ({ ...prev, caption: data.text }))
     } catch (error) {
-      console.error('Caption generation error:', error)
-      // Fallback to basic caption
-      setGeneratedCaption(generateFallbackCaption())
+      console.error('Failed to generate caption:', error)
+      toast.error('Failed to generate caption')
     } finally {
       setIsGeneratingText(false)
     }
   }
 
-  const generateFallbackCaption = () => {
-    const emojis = prompt.includeEmojis ? " 🎵✨" : ""
-    const hashtags = prompt.includeHashtags ? "\n\n#music #newrelease #artist" : ""
-    return `${prompt.topic}${emojis}${hashtags}`
-  }
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files) return
-
-    const newPhotos: string[] = []
-    Array.from(files).forEach(file => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          newPhotos.push(e.target.result as string)
-          if (newPhotos.length === files.length) {
-            if (activeTab === 'generate') {
-              // Save as user photos for templates
-              setUserPhotos(prev => [...prev, ...newPhotos])
-              contentPersistence.saveUserPhotos([...userPhotos, ...newPhotos])
-              toast.success('Photo uploaded for personalized templates!')
-            } else {
-              // Regular upload for other tabs
-              setUploadedPhotos(prev => [...prev, ...newPhotos])
-              toast.success(`${files.length} photo(s) uploaded successfully`)
-            }
-          }
-        }
-      }
-      reader.readAsDataURL(file)
-    })
-  }
-
-  const handleTemplateClick = async (template: typeof CREATIVE_TEMPLATES[0]) => {
-    setSelectedPromptTemplate(template as any)
+  const handleTemplateSelect = async (template: typeof CREATIVE_TEMPLATES[0]) => {
+    setFormState(prev => ({ ...prev, selectedTemplate: template.name }))
     
-    // Generate image immediately with template
-    await generateFromTemplate(template)
+    // Generate caption based on template
+    const caption = template.captionTemplate
+      .replace('{artistName}', 'ALGORYX')
+      .replace('{trackTitle}', 'Solitude')
+      .replace('{playlistName}', 'New Music Friday')
+    
+    setGeneratedCaption(caption)
+    setFormState(prev => ({ ...prev, caption: caption }))
   }
 
-  const generateFromTemplate = async (template: typeof CREATIVE_TEMPLATES[0]) => {
+  const handleGenerateImages = async () => {
+    if (!formState.caption && !formState.selectedTemplate && !customCaption) {
+      toast.error('Please select a template or write a caption first')
+      return
+    }
+
     setIsGenerating(true)
-    
     try {
-      let finalPrompt = template.prompt
-      
-      // If template requires user photo and we have one, prepare for background removal
-      if (template.requiresUserPhoto && userPhotos.length > 0) {
-        // Use the first user photo or let them select
-        const userPhoto = userPhotos[0]
-        
-        // Call Nova Canvas with background removal and placement
+      const prompt = formState.workflowMode === 'template' 
+        ? formState.selectedTemplate || formState.topic
+        : customCaption || formState.topic
+
+      // If user has uploaded a photo, use background removal
+      if (userPhotos.length > 0) {
         const response = await fetch('/api/nova-canvas/generate-with-subject', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            subjectImage: userPhoto,
-            backgroundPrompt: template.prompt,
-            style: template.style,
-            removeBackground: true,
-            platform: prompt.platform,
-            options: {
-              size: PLATFORMS.find(p => p.id === prompt.platform)?.aspectRatio,
-              numberOfImages: 3
-            }
-          })
-        })
-
-        if (!response.ok) throw new Error('Failed to generate with user photo')
-        
-        const data = await response.json()
-        setGeneratedImages(data.images)
-        setSelectedImageIndex(0)
-        
-        // Generate caption based on template
-        await generateCaptionForTemplate(template)
-        
-      } else {
-        // Generate without user photo
-        const response = await fetch('/api/nova-canvas/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: finalPrompt,
-            options: {
-              style: template.style,
-              size: PLATFORMS.find(p => p.id === prompt.platform)?.aspectRatio,
-              numberOfImages: 3,
-              contentType: 'social'
-            }
+            subjectImageUrl: userPhotos[0],
+            prompt: prompt,
+            platform: formState.platform,
+            artistName: 'ALGORYX'
           })
         })
 
         if (!response.ok) throw new Error('Failed to generate images')
-        
+
         const data = await response.json()
-        setGeneratedImages(data.images)
-        setSelectedImageIndex(0)
+        setGeneratedImages(data.images || [])
+      } else {
+        // Regular image generation - Mock 3 images for now
+        await new Promise(resolve => setTimeout(resolve, 2000))
         
-        // Generate caption
-        await generateCaptionForTemplate(template)
-      }
-      
-      toast.success('Content generated successfully!')
-    } catch (error) {
-      console.error('Template generation error:', error)
-      toast.error('Failed to generate from template')
-    } finally {
-      setIsGenerating(false)
-    }
-  }
-
-  const generateCaptionForTemplate = async (template: typeof CREATIVE_TEMPLATES[0]) => {
-    setIsGeneratingText(true)
-    
-    try {
-      const response = await fetch('/api/content/generate-text', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic: `${template.name} - ${template.description}`,
-          platform: prompt.platform,
-          tone: prompt.postTone,
-          targetAudience: prompt.targetAudience,
-          includeHashtags: prompt.includeHashtags,
-          includeEmojis: prompt.includeEmojis,
-          contentType: 'social',
-          templateStyle: template.style
-        })
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setGeneratedCaption(data.caption)
-      }
-    } catch (error) {
-      console.error('Caption generation error:', error)
-      setGeneratedCaption(generateFallbackCaption())
-    } finally {
-      setIsGeneratingText(false)
-    }
-  }
-
-  const handleGenerateFromTemplate = async (template: DynamicPrompt) => {
-    // This is now deprecated - we use handleTemplateClick instead
-    setSelectedPromptTemplate(template)
-    await handleGenerateImages(template.template)
-  }
-
-  const handleGenerateImages = async (customPrompt?: string) => {
-    setIsGenerating(true)
-    setShowGenerateButton(false)
-
-    try {
-      const platform = PLATFORMS.find(p => p.id === prompt.platform)!
-      const imagePrompt = customPrompt || prompt.topic || 'Social media content'
-
-      const response = await fetch('/api/nova-canvas/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: imagePrompt,
-          options: {
-            style: 'premium',
-            size: platform.aspectRatio,
-            negativePrompt: 'low quality, blurry, text errors',
-            numberOfImages: 3,
-            contentType: 'social'
-          }
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to generate images')
+        const mockImages = [
+          'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop'
+        ]
+        
+        setGeneratedImages(mockImages)
       }
 
-      const data = await response.json()
-      setGeneratedImages(data.images)
       setSelectedImageIndex(0)
       toast.success('Images generated successfully!')
+      
+      // Auto-scroll to generated content
+      setTimeout(() => {
+        const generatedSection = document.querySelector('[data-generated-content]')
+        if (generatedSection) {
+          generatedSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 100)
     } catch (error) {
-      console.error('Image generation error:', error)
+      console.error('Failed to generate images:', error)
       toast.error('Failed to generate images')
     } finally {
       setIsGenerating(false)
     }
   }
 
-  const handleCreateAlbumCover = async () => {
-    if (!uploadedPhotos.length) {
-      toast.error('Please upload at least one artist photo')
+  const handleCreateDraft = () => {
+    if (selectedImageIndex === null) {
+      toast.error('Please select an image')
       return
     }
 
-    setIsGenerating(true)
+    onContentGenerated?.({
+      caption: formState.workflowMode === 'template' ? generatedCaption : customCaption,
+      images: generatedImages,
+      platform: formState.platform,
+      selectedImageIndex
+    })
+
+    toast.success('Draft created successfully!')
+  }
+
+  const handleReset = () => {
+    setFormState({
+      platform: 'instagram',
+      topic: '',
+      caption: '',
+      workflowMode: 'template',
+      selectedTemplate: null
+    })
+    setGeneratedImages([])
+    setSelectedImageIndex(null)
+    setGeneratedCaption('')
+    setCustomCaption('')
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append('file', file)
+
     try {
-      const utils = getNovaCanvasUtils()
-      const covers = await utils.createAlbumCover({
-        artistPhotos: uploadedPhotos,
-        ...albumCoverOptions
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
       })
-      
-      setGeneratedImages(covers)
-      setSelectedImageIndex(0)
-      toast.success('Album covers created successfully!')
+
+      if (!response.ok) throw new Error('Upload failed')
+
+      const data = await response.json()
+      const newPhotos = [...userPhotos, data.url]
+      setUserPhotos(newPhotos)
+      await saveUserPhotos(newPhotos)
+      toast.success('Photo uploaded successfully!')
     } catch (error) {
-      console.error('Album cover creation error:', error)
-      toast.error('Failed to create album covers')
-    } finally {
-      setIsGenerating(false)
+      console.error('Upload error:', error)
+      toast.error('Failed to upload photo')
     }
   }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!prompt.topic?.trim() && activeTab === 'generate') return
-
-    if (activeTab === 'album') {
-      await handleCreateAlbumCover()
-    } else {
-      await handleGenerateImages()
-    }
-
-    // Simulate content generation
-    setTimeout(() => {
-      if (onContentGenerated) {
-        onContentGenerated("social")
-      }
-    }, 1000)
-  }
-
-  const selectedPlatform = PLATFORMS.find(p => p.id === prompt.platform)!
 
   return (
     <div className="w-full max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
         {/* Main Form - 2 columns */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-teal-500/20">
-                  <Sparkles className="h-5 w-5 text-teal-500" />
-                </div>
-                <div>
-                  <CardTitle>Social Media Creator</CardTitle>
-                  <CardDescription>Create engaging posts with AI-powered visuals and captions</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Compact Platform Selection */}
-                <div className="space-y-3">
-                  <Label>Platform</Label>
-                  <div className="flex gap-2">
-                    {PLATFORMS.map((platform) => (
-                      <button
-                        key={platform.id}
-                        type="button"
-                        onClick={() => setPrompt({ ...prompt, platform: platform.id as "instagram" | "twitter" | "tiktok" })}
-                        className={cn(
-                          "flex-1 p-3 rounded-lg border-2 transition-all",
-                          prompt.platform === platform.id
-                            ? "border-teal-500 bg-teal-500/10"
-                            : "border-muted hover:border-muted-foreground/50"
-                        )}
-                      >
-                        <div className="flex flex-col items-center gap-2">
-                          <div className={cn(
-                            "w-10 h-10 rounded-lg bg-gradient-to-r flex items-center justify-center",
-                            platform.color
-                          )}>
-                            <platform.icon className={cn(
-                              "h-5 w-5",
-                              platform.id === 'twitter' ? "text-black dark:text-white" : "text-white"
-                            )} />
-                          </div>
-                          <div className="text-center">
-                            <p className="font-medium text-sm">{platform.name}</p>
-                            <p className="text-xs text-muted-foreground">{platform.description}</p>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-teal-500/20">
+                    <Sparkles className="h-5 w-5 text-teal-500" />
+                  </div>
+                  <div>
+                    <CardTitle>Social Media Creator</CardTitle>
+                    <CardDescription>Create engaging posts with AI-powered visuals and captions</CardDescription>
                   </div>
                 </div>
-
-                <Separator />
-
-                {/* Image Generation Tabs */}
-                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="generate">AI Generate</TabsTrigger>
-                    <TabsTrigger value="upload">Upload & Edit</TabsTrigger>
-                    <TabsTrigger value="album">Album Cover</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="generate" className="space-y-4">
-                    {/* Creative Templates First */}
-                    <div className="space-y-3">
-                      <Label>Choose a Creative Template</Label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {CREATIVE_TEMPLATES.map(template => (
-                          <Card
-                            key={template.id}
-                            className={cn(
-                              "cursor-pointer transition-all hover:shadow-lg group",
-                              selectedPromptTemplate?.id === template.id
-                                ? "ring-2 ring-teal-500 bg-teal-50 dark:bg-teal-950"
-                                : "hover:border-teal-500/50"
-                            )}
-                            onClick={() => handleTemplateClick(template)}
-                          >
-                            <CardContent className="p-4">
-                              <div className="space-y-2">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <p className="font-semibold text-sm">{template.name}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      {template.description}
-                                    </p>
-                                  </div>
-                                  <div className={cn(
-                                    "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                                    "bg-gradient-to-br from-teal-500/20 to-cyan-500/20",
-                                    "group-hover:from-teal-500/30 group-hover:to-cyan-500/30"
-                                  )}>
-                                    <Sparkles className="h-4 w-4 text-teal-600" />
-                                  </div>
-                                </div>
-                                {template.requiresUserPhoto && userPhotos.length === 0 && (
-                                  <p className="text-xs text-amber-600 dark:text-amber-400">
-                                    📸 Upload your photo for best results
-                                  </p>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="gap-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Reset
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Workflow Selection */}
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Choose Your Workflow</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setFormState(prev => ({ ...prev, workflowMode: 'template' }))}
+                    className={cn(
+                      "p-4 rounded-lg border-2 transition-all text-left",
+                      formState.workflowMode === 'template'
+                        ? "border-teal-500 bg-teal-500/10"
+                        : "border-muted hover:border-teal-500/50"
+                    )}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="h-5 w-5 text-teal-500" />
+                      <span className="font-medium">Use Templates</span>
                     </div>
+                    <p className="text-sm text-muted-foreground">
+                      AI generates both caption and visuals
+                    </p>
+                  </button>
 
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">Or create custom</span>
-                      </div>
+                  <button
+                    onClick={() => setFormState(prev => ({ ...prev, workflowMode: 'custom' }))}
+                    className={cn(
+                      "p-4 rounded-lg border-2 transition-all text-left",
+                      formState.workflowMode === 'custom'
+                        ? "border-teal-500 bg-teal-500/10"
+                        : "border-muted hover:border-teal-500/50"
+                    )}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Type className="h-5 w-5 text-teal-500" />
+                      <span className="font-medium">Custom Caption</span>
                     </div>
+                    <p className="text-sm text-muted-foreground">
+                      You write caption, AI creates visuals
+                    </p>
+                  </button>
+                </div>
+              </div>
 
-                    {/* Custom Topic Input */}
-                    <div className="space-y-2">
-                      <Label htmlFor="topic">Custom Topic</Label>
-                      <div className="relative">
-                        <Input
-                          id="topic"
-                          placeholder="e.g., New single release announcement"
-                          value={prompt.topic}
-                          onChange={(e) => setPrompt({ ...prompt, topic: e.target.value })}
-                        />
-                        {isGeneratingText && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                            <Loader2 className="h-4 w-4 animate-spin text-teal-500" />
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        <Type className="inline h-3 w-3 mr-1" />
-                        AI will generate your caption automatically
-                      </p>
-                    </div>
+              <Separator />
 
-                    {/* User Photo Upload for Templates */}
-                    {userPhotos.length === 0 && (
-                      <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                          <Upload className="h-4 w-4" />
-                          <span>Upload your photo for personalized templates</span>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="mt-2"
-                          onClick={() => fileInputRef.current?.click()}
+              {/* Template Workflow */}
+              {formState.workflowMode === 'template' && (
+                <div className="space-y-6">
+                  {/* Template Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium">Select a Template</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {CREATIVE_TEMPLATES.map((template) => (
+                        <button
+                          key={template.id}
+                          onClick={() => handleTemplateSelect(template)}
+                          className={cn(
+                            "p-4 rounded-lg border-2 transition-all text-left",
+                            formState.selectedTemplate === template.name
+                              ? "border-teal-500 bg-teal-500/10"
+                              : "border-muted hover:border-teal-500/50"
+                          )}
                         >
-                          Choose Photo
-                        </Button>
-                      </div>
-                    )}
-
-                    {/* Show uploaded user photos */}
-                    {userPhotos.length > 0 && (
-                      <div className="space-y-2">
-                        <Label>Your Photos</Label>
-                        <div className="flex gap-2">
-                          {userPhotos.map((photo, idx) => (
-                            <div key={idx} className="relative group">
-                              <img 
-                                src={photo} 
-                                alt={`User ${idx + 1}`} 
-                                className="w-16 h-16 object-cover rounded-lg border-2 border-muted"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const newPhotos = userPhotos.filter((_, i) => i !== idx)
-                                  setUserPhotos(newPhotos)
-                                  contentPersistence.saveUserPhotos(newPhotos)
-                                }}
-                                className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <XIcon className="h-3 w-3 text-white" />
-                              </button>
-                            </div>
-                          ))}
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="h-16 w-16"
-                            onClick={() => fileInputRef.current?.click()}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </TabsContent>
-
-                  <TabsContent value="upload" className="space-y-4">
-                    <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                      <Upload className="h-8 w-8 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Upload photos to enhance or edit
-                      </p>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        Choose Files
-                      </Button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                      />
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-2xl">{template.icon}</span>
+                            <span className="font-medium text-sm">{template.name}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {template.description}
+                          </p>
+                          {userPhotos.length === 0 && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                              📸 Upload your photo for best results
+                            </p>
+                          )}
+                        </button>
+                      ))}
                     </div>
+                  </div>
+
+                  {/* Upload Photo (below templates) */}
+                  <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                    <Upload className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Upload your photo for personalized content
+                    </p>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Choose Photo
+                    </Button>
+                    <Input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
                     
-                    {uploadedPhotos.length > 0 && (
-                      <div className="grid grid-cols-3 gap-2">
-                        {uploadedPhotos.map((photo, idx) => (
+                    {userPhotos.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mt-4">
+                        {userPhotos.map((photo, idx) => (
                           <div key={idx} className="relative group">
                             <img src={photo} alt={`Upload ${idx + 1}`} className="w-full h-24 object-cover rounded" />
                             <button
                               type="button"
-                              onClick={() => setUploadedPhotos(prev => prev.filter((_, i) => i !== idx))}
+                              onClick={() => {
+                                const newPhotos = userPhotos.filter((_, i) => i !== idx)
+                                setUserPhotos(newPhotos)
+                                saveUserPhotos(newPhotos)
+                              }}
                               className="absolute top-1 right-1 p-1 bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                             >
                               <XIcon className="h-3 w-3 text-white" />
@@ -738,325 +544,334 @@ export function EnhancedSocialMediaCreator({
                         ))}
                       </div>
                     )}
-                  </TabsContent>
+                  </div>
 
-                  <TabsContent value="album" className="space-y-4">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label>Album Title</Label>
-                        <Input
-                          placeholder="e.g., Midnight Dreams"
-                          value={albumCoverOptions.albumTitle}
-                          onChange={(e) => setAlbumCoverOptions({...albumCoverOptions, albumTitle: e.target.value})}
-                        />
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Style</Label>
-                          <Select 
-                            value={albumCoverOptions.style} 
-                            onValueChange={(value: any) => setAlbumCoverOptions({...albumCoverOptions, style: value})}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="modern">Modern</SelectItem>
-                              <SelectItem value="vintage">Vintage</SelectItem>
-                              <SelectItem value="minimalist">Minimalist</SelectItem>
-                              <SelectItem value="abstract">Abstract</SelectItem>
-                              <SelectItem value="cinematic">Cinematic</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label>Genre</Label>
-                          <Input
-                            placeholder="e.g., Electronic"
-                            value={albumCoverOptions.genre}
-                            onChange={(e) => setAlbumCoverOptions({...albumCoverOptions, genre: e.target.value})}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Mood</Label>
-                        <Input
-                          placeholder="e.g., Dreamy, energetic"
-                          value={albumCoverOptions.mood}
-                          onChange={(e) => setAlbumCoverOptions({...albumCoverOptions, mood: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-
-                <Separator />
-
-                {/* Content Options */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Post Tone</Label>
-                    <Select
-                      value={prompt.postTone}
-                      onValueChange={(value) => setPrompt({ ...prompt, postTone: value as any })}
+                  {/* Generate Draft Button */}
+                  {formState.selectedTemplate && (
+                    <Button
+                      onClick={handleGenerateImages}
+                      disabled={isGenerating}
+                      className="w-full"
+                      size="lg"
                     >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="casual">Casual</SelectItem>
-                        <SelectItem value="professional">Professional</SelectItem>
-                        <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Generating Images...
+                        </>
+                      ) : (
+                        <>
+                          <ImageIcon className="mr-2 h-4 w-4" />
+                          Generate Draft
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              )}
 
+              {/* Custom Workflow */}
+              {formState.workflowMode === 'custom' && (
+                <div className="space-y-6">
+                  {/* Custom Topic Input */}
                   <div className="space-y-2">
-                    <Label>Target Audience</Label>
+                    <Label htmlFor="topic" className="text-base font-medium">
+                      Custom Topic
+                    </Label>
+                    <Textarea
+                      id="topic"
+                      placeholder="The state of AI in Music Industry"
+                      value={formState.topic}
+                      onChange={(e) => setFormState(prev => ({ ...prev, topic: e.target.value }))}
+                      className="min-h-[100px]"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      <Sparkles className="h-3 w-3 inline mr-1" />
+                      AI will generate your caption automatically
+                    </p>
+                  </div>
+
+                  {/* Upload Photo */}
+                  <div className="p-4 border-2 border-dashed border-muted rounded-lg">
+                    <Label className="text-sm text-muted-foreground mb-2 block">
+                      <Upload className="h-4 w-4 inline mr-2" />
+                      Upload your photo for personalized templates
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Choose Photo
+                    </Button>
                     <Input
-                      placeholder="e.g., Gen Z music fans"
-                      value={prompt.targetAudience || ""}
-                      onChange={(e) => setPrompt({ ...prompt, targetAudience: e.target.value })}
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
                     />
                   </div>
-                </div>
 
-                {/* Compact Options */}
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id="hashtags"
-                      checked={prompt.includeHashtags}
-                      onCheckedChange={(checked) => setPrompt({ ...prompt, includeHashtags: checked })}
-                    />
-                    <Label htmlFor="hashtags" className="text-sm cursor-pointer">
-                      <Hash className="inline h-3 w-3 mr-1" />
-                      Hashtags
+                  {/* Custom Caption Input */}
+                  <div className="space-y-2">
+                    <Label htmlFor="caption" className="text-base font-medium">
+                      Your Caption
                     </Label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id="emojis"
-                      checked={prompt.includeEmojis}
-                      onCheckedChange={(checked) => setPrompt({ ...prompt, includeEmojis: checked })}
+                    <Textarea
+                      id="caption"
+                      placeholder="Write your caption here..."
+                      value={customCaption}
+                      onChange={(e) => setCustomCaption(e.target.value)}
+                      className="min-h-[120px]"
                     />
-                    <Label htmlFor="emojis" className="text-sm cursor-pointer">
-                      <span className="mr-1">😊</span>
-                      Emojis
-                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Write your caption and we'll generate matching visuals
+                    </p>
                   </div>
-                </div>
 
-                {/* Generated Images */}
-                {generatedImages.length > 0 && (
-                  <div className="space-y-3">
-                    <Label>Generated Images</Label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {generatedImages.map((image, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => setSelectedImageIndex(index)}
-                          className={cn(
-                            "relative rounded-lg overflow-hidden border-2 transition-all",
-                            selectedImageIndex === index
-                              ? "border-teal-500 shadow-lg"
-                              : "border-muted hover:border-muted-foreground"
-                          )}
-                        >
-                          <img
-                            src={image}
-                            alt={`Generated ${index + 1}`}
-                            className="w-full h-32 object-cover"
-                          />
-                          {selectedImageIndex === index && (
-                            <div className="absolute inset-0 bg-teal-500/20 flex items-center justify-center">
-                              <Badge className="bg-teal-500 text-white">Selected</Badge>
-                            </div>
-                          )}
-                        </button>
-                      ))}
+                  {/* Generate Images Button */}
+                  <Button
+                    onClick={handleGenerateImages}
+                    disabled={isGenerating || !customCaption.trim()}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating Images...
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="mr-2 h-4 w-4" />
+                        Generate Images
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {/* Generated Content */}
+              {generatedImages.length > 0 && (
+                <div className="space-y-4" data-generated-content>
+                  {/* Generated Caption */}
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium">Generated Caption</Label>
+                    <div className="p-4 bg-muted rounded-lg">
+                      <p className="whitespace-pre-wrap">{generatedCaption}</p>
                     </div>
                   </div>
-                )}
 
-                <Button
-                  type="submit"
-                  disabled={isGenerating || (!prompt.topic?.trim() && activeTab === 'generate' && uploadedPhotos.length === 0)}
-                  className={cn(
-                    "w-full transition-all duration-300",
-                    showGenerateButton 
-                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg" 
-                      : "bg-teal-500 hover:bg-teal-600"
+                  <Label className="text-base font-medium">Generated Images</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {generatedImages.map((image, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedImageIndex(idx)}
+                        className={cn(
+                          "relative aspect-square rounded-lg overflow-hidden border-2 transition-all",
+                          selectedImageIndex === idx
+                            ? "border-teal-500 ring-2 ring-teal-500/20"
+                            : "border-muted hover:border-teal-500/50"
+                        )}
+                      >
+                        <img
+                          src={image}
+                          alt={`Generated ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {selectedImageIndex === idx && (
+                          <div className="absolute inset-0 bg-teal-500/20 flex items-center justify-center">
+                            <Badge className="bg-teal-500 text-white">Selected</Badge>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Schedule Button */}
+                  {selectedImageIndex !== null && (
+                    <Button
+                      onClick={handleCreateDraft}
+                      className="w-full"
+                      size="lg"
+                    >
+                      <Send className="mr-2 h-4 w-4" />
+                      Schedule
+                    </Button>
                   )}
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="mr-2 h-4 w-4" />
-                      Generate Custom Content
-                    </>
-                  )}
-                </Button>
-              </form>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Dynamic Live Preview - 1 column - Now sticky and properly sized */}
-        <div className="lg:sticky lg:top-6 h-fit">
+        {/* Live Preview - 1 column */}
+        <div className="lg:col-span-1 sticky top-20">
           <Card className="overflow-hidden">
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Eye className="h-5 w-5 text-teal-500" />
                   <CardTitle className="text-base">Live Preview</CardTitle>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleGenerateCaption}
-                  disabled={isGeneratingText || !prompt.topic}
-                  className="h-8 px-2"
-                >
-                  <RefreshCw className={cn("h-3 w-3", isGeneratingText && "animate-spin")} />
-                </Button>
+                <Badge variant="secondary" className="text-xs">
+                  {formState.platform === 'instagram-post' ? 'Instagram Post' : 'Instagram Story'}
+                </Badge>
+              </div>
+              
+              {/* Platform Selection in Live View */}
+              <div className="flex gap-2 justify-center">
+                {PLATFORMS.map((platform) => (
+                  <button
+                    key={platform.id}
+                    onClick={() => setFormState(prev => ({ ...prev, platform: platform.id as any }))}
+                    className={cn(
+                      "relative transition-all p-2 rounded-lg border-2 scale-75",
+                      formState.platform === platform.id
+                        ? "border-teal-500 bg-teal-500/10"
+                        : "border-muted hover:border-teal-500/50"
+                    )}
+                  >
+                    {PLATFORM_ICONS[platform.id as keyof typeof PLATFORM_ICONS]}
+                  </button>
+                ))}
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
-                {/* Platform-specific preview with proper aspect ratios */}
-                {prompt.platform === 'instagram' && (
-                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg max-w-sm mx-auto">
-                    <div className="p-3 border-b flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center">
-                        <Music className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-sm">your_artist_name</p>
-                        <p className="text-xs text-muted-foreground">Music Artist</p>
-                      </div>
-                    </div>
-                    <div className="aspect-square bg-slate-100 dark:bg-slate-700 relative overflow-hidden">
-                      {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
-                        <img 
-                          src={generatedImages[selectedImageIndex]} 
-                          alt="Preview" 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="text-center">
-                            <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                            <p className="text-sm text-muted-foreground">Your image will appear here</p>
-                          </div>
+              {/* Dynamic Platform Mock */}
+              <div className="bg-muted/50 p-4">
+                <div className="max-w-sm mx-auto">
+                  {/* Instagram Post Layout */}
+                  {formState.platform === 'instagram-post' && (
+                    <>
+                      {/* Profile Header */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                          A
                         </div>
-                      )}
-                    </div>
-                    <div className="p-3">
+                        <div>
+                          <p className="font-semibold">ALGORYX</p>
+                          <p className="text-xs text-muted-foreground">Music Artist</p>
+                        </div>
+                      </div>
+
+                      {/* Square Image */}
+                      <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden">
+                        {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
+                          <img
+                            src={generatedImages[selectedImageIndex]}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                            <ImageIcon className="h-12 w-12" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Caption */}
                       <div className="space-y-2">
-                        {isGeneratingText ? (
-                          <div className="flex items-center gap-2">
-                            <Loader2 className="h-3 w-3 animate-spin text-teal-500" />
-                            <span className="text-xs text-muted-foreground">Generating caption...</span>
-                          </div>
-                        ) : (
-                          <p className="text-sm leading-relaxed">
-                            {generatedCaption || prompt.topic || "Your post caption will appear here..."}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {prompt.platform === 'twitter' && (
-                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg max-w-sm mx-auto p-4">
-                    <div className="flex gap-3">
-                      <div className="w-10 h-10 rounded-full bg-black dark:bg-white flex items-center justify-center">
-                        <Music className="h-5 w-5 text-white dark:text-black" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1 mb-1">
-                          <p className="font-semibold text-sm">Artist Name</p>
-                          <p className="text-xs text-muted-foreground">@handle</p>
-                        </div>
-                        {isGeneratingText ? (
-                          <div className="flex items-center gap-2">
-                            <Loader2 className="h-3 w-3 animate-spin text-teal-500" />
-                            <span className="text-xs text-muted-foreground">Generating...</span>
-                          </div>
-                        ) : (
-                          <p className="text-sm leading-relaxed">
-                            {generatedCaption || prompt.topic || "Your post will appear here..."}
-                          </p>
-                        )}
-                        {selectedImageIndex !== null && generatedImages[selectedImageIndex] && (
-                          <div className="mt-3 rounded-lg overflow-hidden border">
-                            <img 
-                              src={generatedImages[selectedImageIndex]} 
-                              alt="Preview" 
-                              className="w-full h-32 object-cover"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {prompt.platform === 'tiktok' && (
-                  <div className="bg-black rounded-xl max-w-[200px] mx-auto aspect-[9/16] relative overflow-hidden">
-                    {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
-                      <img 
-                        src={generatedImages[selectedImageIndex]} 
-                        alt="Preview" 
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center">
-                        <div className="text-center">
-                          <Music className="h-8 w-8 text-white mx-auto mb-2" />
-                          <p className="text-white text-xs">Your video preview</p>
-                        </div>
-                      </div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
-                      {isGeneratingText ? (
-                        <div className="flex items-center gap-2">
-                          <Loader2 className="h-3 w-3 animate-spin text-white" />
-                          <span className="text-xs text-white/70">Generating...</span>
-                        </div>
-                      ) : (
-                        <p className="text-white text-xs leading-relaxed">
-                          {generatedCaption || prompt.topic || "Your TikTok caption..."}
+                        <p className="text-sm whitespace-pre-wrap">
+                          {(generatedImages.length > 0 && (formState.workflowMode === 'template' ? generatedCaption : customCaption)) || "Your caption will appear here..."}
                         </p>
-                      )}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Instagram Story Layout - Full View */}
+                  {formState.platform === 'instagram-story' && (
+                    <div className="bg-black rounded-lg overflow-hidden mx-auto max-w-[250px]">
+                      {/* Full Vertical Story */}
+                      <div className="aspect-[9/16] bg-muted relative">
+                        {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
+                          <img
+                            src={generatedImages[selectedImageIndex]}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                            <ImageIcon className="h-16 w-16" />
+                          </div>
+                        )}
+                        
+                        {/* Story UI Elements */}
+                        <div className="absolute top-4 left-4 right-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
+                              A
+                            </div>
+                            <p className="text-white font-semibold text-sm">algoryx_music</p>
+                            <p className="text-white/70 text-xs ml-auto">now</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {/* TODO: Commented out platforms for future use */}
+                  {/* Twitter/X Layout */}
+                  {/* {formState.platform === 'twitter' && (
+                    <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                          A
+                        </div>
+                        <div>
+                          <p className="font-semibold">ALGORYX</p>
+                          <p className="text-xs text-muted-foreground">@algoryx_music</p>
+                        </div>
+                      </div>
+                      <div className="mb-3">
+                        <p className="text-sm whitespace-pre-wrap">
+                          {(generatedImages.length > 0 && (formState.workflowMode === 'template' ? generatedCaption : customCaption)) || "Your tweet will appear here..."}
+                        </p>
+                      </div>
+                      <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+                        {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
+                          <img src={generatedImages[selectedImageIndex]} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                            <ImageIcon className="h-8 w-8" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )} */}
+
+                  {/* TikTok Layout */}
+                  {/* {formState.platform === 'tiktok' && (
+                    <div className="bg-black rounded-lg overflow-hidden max-w-[200px] mx-auto">
+                      <div className="aspect-[9/16] bg-muted relative">
+                        {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
+                          <img src={generatedImages[selectedImageIndex]} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                            <ImageIcon className="h-12 w-12" />
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">A</div>
+                            <p className="text-white font-semibold text-xs">@algoryx_music</p>
+                          </div>
+                          <p className="text-white text-xs line-clamp-3">
+                            {(generatedImages.length > 0 && (formState.workflowMode === 'template' ? generatedCaption : customCaption)) || "Your TikTok caption will appear here..."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )} */}
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
-
-      {/* Add hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple={activeTab !== 'generate'}
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileUpload}
-      />
     </div>
   )
 } 
