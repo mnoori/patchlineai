@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { PlatformIntegrations } from "@/components/insights/platform-integrations"
+import { MCPSettings } from "@/components/mcp/mcp-settings"
+import { AWSMCPDashboard } from "@/components/aws-mcp/aws-mcp-dashboard"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import {
@@ -280,7 +282,7 @@ export default function SettingsPage() {
       </motion.div>
 
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="grid w-full max-w-4xl grid-cols-5 mb-8">
+        <TabsList className="grid w-full max-w-4xl grid-cols-7 mb-8">
           <TabsTrigger
             value="profile"
             className="data-[state=active]:bg-cosmic-teal/20 data-[state=active]:text-cosmic-teal"
@@ -294,6 +296,20 @@ export default function SettingsPage() {
           >
             <Music2 className="h-4 w-4 mr-2" />
             Platforms
+          </TabsTrigger>
+          <TabsTrigger
+            value="mcp"
+            className="data-[state=active]:bg-cosmic-teal/20 data-[state=active]:text-cosmic-teal"
+          >
+            <Zap className="h-4 w-4 mr-2" />
+            MCP
+          </TabsTrigger>
+          <TabsTrigger
+            value="aws-mcp"
+            className="data-[state=active]:bg-cosmic-teal/20 data-[state=active]:text-cosmic-teal"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            AWS MCP
           </TabsTrigger>
           <TabsTrigger
             value="notifications"
@@ -670,6 +686,18 @@ export default function SettingsPage() {
                 </div>
               </CardContent>
             </Card>
+          </motion.div>
+        </TabsContent>
+
+        <TabsContent value="mcp" className="space-y-6">
+          <motion.div variants={itemVariants}>
+            <MCPSettings />
+          </motion.div>
+        </TabsContent>
+
+        <TabsContent value="aws-mcp" className="space-y-6">
+          <motion.div variants={itemVariants}>
+            <AWSMCPDashboard />
           </motion.div>
         </TabsContent>
 
