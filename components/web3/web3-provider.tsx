@@ -5,9 +5,12 @@ import { useWeb3Store } from '@/lib/web3-store'
 
 /*
  Web3Provider – wraps Dynamic + Solana Wallet Adapter providers only when
- the user has enabled Web3 in settings.  This prevents unnecessary bundle
- weight for users who never touch crypto features.
+ the user has enabled Web3 in settings AND the environment flag is enabled.
+ This prevents unnecessary bundle weight for users who never touch crypto features.
 */
+
+// Check environment flag at module level
+const isWeb3EnabledInEnv = process.env.NEXT_PUBLIC_ENABLE_WEB3 === 'true'
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const { settings } = useWeb3Store()
@@ -17,6 +20,11 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     setMounted(true)
   }, [])
 
+  // If Web3 is disabled in environment, always render children without Web3
+  if (!isWeb3EnabledInEnv) {
+    return <>{children}</>
+  }
+
   // SSR safety - render children without Web3 until mounted
   if (!mounted || !settings.enabled) {
     return <>{children}</>
@@ -25,7 +33,6 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   // Check for required environment variables
   if (!process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID) {
     console.warn('Dynamic Environment ID is not set. Web3 features will work with limited functionality.')
-    // Still render children but without Dynamic provider
     return <>{children}</>
   }
 
@@ -34,7 +41,6 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 }
 
 function Web3ProviderInner({ children }: { children: React.ReactNode }) {
-  // Lazy load providers only when actually needed
   const [providers, setProviders] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -44,41 +50,34 @@ function Web3ProviderInner({ children }: { children: React.ReactNode }) {
     
     async function loadProviders() {
       try {
-        // Only load the essential providers for better performance
-        const [
-          { DynamicContextProvider },
-          { SolanaWalletConnectors },
-          { ConnectionProvider, WalletProvider },
-          { WalletModalProvider },
-          { PhantomWalletAdapter },
-          { clusterApiUrl }
-        ] = await Promise.all([
-          import('@dynamic-labs/sdk-react'),
-          import('@dynamic-labs/solana'),
-          import('@solana/wallet-adapter-react'),
-          import('@solana/wallet-adapter-react-ui'),
-          import('@solana/wallet-adapter-wallets'),
-          import('@solana/web3.js')
-        ])
+        console.log('Loading Web3 providers...')
+        
+        // Try to load Dynamic SDK first
+        const dynamicModule = await import('@dynamic-labs/sdk-react').catch((err) => {
+          console.warn('Dynamic SDK not available:', err.message)
+          return null
+        })
+        
+        if (!dynamicModule) {
+          console.warn('Dynamic SDK not available, skipping Web3 initialization')
+          if (isMounted) {
+            setLoading(false)
+          }
+          return
+        }
 
         if (!isMounted) return
 
-        const endpoint = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta')
-        
-        // Only load essential wallets to reduce bundle size
-        const wallets = [
-          new PhantomWalletAdapter(),
-        ]
+        const { DynamicContextProvider } = dynamicModule
 
+        // For now, just use basic Dynamic setup without Solana
+        // This avoids the missing Solana dependencies issue
+        console.log('Setting up basic Dynamic provider (Solana disabled)')
         setProviders({
           DynamicContextProvider,
-          ConnectionProvider,
-          WalletProvider,
-          WalletModalProvider,
-          endpoint,
-          wallets,
-          connectors: [SolanaWalletConnectors] // Only Solana for now
+          hasSolana: false
         })
+
       } catch (error) {
         console.error('Failed to load Web3 providers:', error)
         if (isMounted) {
@@ -106,25 +105,16 @@ function Web3ProviderInner({ children }: { children: React.ReactNode }) {
   }
 
   if (loading || !providers) {
-    // Loading state - render children without Web3 context
     return <>{children}</>
   }
 
-  const {
-    DynamicContextProvider,
-    ConnectionProvider,
-    WalletProvider,
-    WalletModalProvider,
-    endpoint,
-    wallets,
-    connectors
-  } = providers
+  const { DynamicContextProvider } = providers
 
+  // Basic Dynamic setup without Solana (for now)
   return (
     <DynamicContextProvider
       settings={{
         environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID!,
-        walletConnectors: connectors,
         eventsCallbacks: {
           onAuthSuccess: (args: any) => {
             console.log('Dynamic auth success:', args)
@@ -135,13 +125,7 @@ function Web3ProviderInner({ children }: { children: React.ReactNode }) {
         }
       }}
     >
-      <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets} autoConnect={false}>
-          <WalletModalProvider>
-            {children}
-          </WalletModalProvider>
-        </WalletProvider>
-      </ConnectionProvider>
+      {children}
     </DynamicContextProvider>
   )
 } 
