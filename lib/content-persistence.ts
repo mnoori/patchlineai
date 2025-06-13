@@ -255,6 +255,26 @@ class ContentPersistenceService {
       console.error('Failed to clear old data:', error)
     }
   }
+
+  async loadUserPhotos(): Promise<string[] | null> {
+    try {
+      const key = `${this.SESSION_PREFIX}user-photos`
+      const data = sessionStorage.getItem(key)
+      return data ? JSON.parse(data) : null
+    } catch (error) {
+      console.error('Error loading user photos:', error)
+      return null
+    }
+  }
+
+  async saveUserPhotos(photos: string[]): Promise<void> {
+    try {
+      const key = `${this.SESSION_PREFIX}user-photos`
+      sessionStorage.setItem(key, JSON.stringify(photos))
+    } catch (error) {
+      console.error('Error saving user photos:', error)
+    }
+  }
 }
 
 export const contentPersistence = ContentPersistenceService.getInstance() 

@@ -28,7 +28,8 @@ import {
   Type,
   Zap,
   Eye,
-  RefreshCw
+  RefreshCw,
+  Plus
 } from "lucide-react"
 import type { EnhancedContentPrompt } from "@/lib/content-types"
 import { toast } from "sonner"
@@ -88,6 +89,7 @@ export function EnhancedSocialMediaCreator({
   const [selectedPromptTemplate, setSelectedPromptTemplate] = useState<DynamicPrompt | null>(null)
   const [generatedCaption, setGeneratedCaption] = useState<string>("")
   const [showGenerateButton, setShowGenerateButton] = useState(false)
+  const [userPhotos, setUserPhotos] = useState<string[]>([]) // User's profile photos
   const fileInputRef = useRef<HTMLInputElement>(null)
   
   const [prompt, setPrompt] = useState<EnhancedContentPrompt>({
@@ -107,6 +109,42 @@ export function EnhancedSocialMediaCreator({
     genre: '',
     albumTitle: ''
   })
+
+  // Predefined creative templates
+  const CREATIVE_TEMPLATES = [
+    {
+      id: 'vibrant-album',
+      name: 'Vibrant Album Cover',
+      description: 'Eye-catching album cover for social media',
+      prompt: 'Create a vibrant, colorful album cover with dynamic energy, abstract shapes, and modern design elements',
+      requiresUserPhoto: true,
+      style: 'vibrant'
+    },
+    {
+      id: 'cinematic-release',
+      name: 'Cinematic Release Teaser',
+      description: 'Dramatic teaser image for upcoming release',
+      prompt: 'Cinematic promotional image with dramatic lighting, moody atmosphere, depth of field, professional photography',
+      requiresUserPhoto: true,
+      style: 'cinematic'
+    },
+    {
+      id: 'minimalist-announcement',
+      name: 'Minimalist Announcement',
+      description: 'Clean, modern design for announcements',
+      prompt: 'Minimalist design with clean lines, plenty of white space, elegant typography, sophisticated color palette',
+      requiresUserPhoto: false,
+      style: 'minimalist'
+    },
+    {
+      id: 'festival-ready',
+      name: 'Festival Vibes',
+      description: 'Energetic design for festival announcements',
+      prompt: 'Festival-inspired design with bright colors, summer vibes, crowd energy, outdoor concert atmosphere',
+      requiresUserPhoto: true,
+      style: 'festival'
+    }
+  ]
 
   // Load persisted state on mount
   useEffect(() => {
@@ -128,6 +166,12 @@ export function EnhancedSocialMediaCreator({
       if (images) {
         setGeneratedImages(images.generated)
         setSelectedImageIndex(images.selected)
+      }
+
+      // Load user photos from profile or previous uploads
+      const savedUserPhotos = await contentPersistence.loadUserPhotos()
+      if (savedUserPhotos) {
+        setUserPhotos(savedUserPhotos)
       }
     }
 
@@ -239,8 +283,16 @@ export function EnhancedSocialMediaCreator({
         if (e.target?.result) {
           newPhotos.push(e.target.result as string)
           if (newPhotos.length === files.length) {
-            setUploadedPhotos(prev => [...prev, ...newPhotos])
-            toast.success(`${files.length} photo(s) uploaded successfully`)
+            if (activeTab === 'generate') {
+              // Save as user photos for templates
+              setUserPhotos(prev => [...prev, ...newPhotos])
+              contentPersistence.saveUserPhotos([...userPhotos, ...newPhotos])
+              toast.success('Photo uploaded for personalized templates!')
+            } else {
+              // Regular upload for other tabs
+              setUploadedPhotos(prev => [...prev, ...newPhotos])
+              toast.success(`${files.length} photo(s) uploaded successfully`)
+            }
           }
         }
       }
@@ -248,35 +300,120 @@ export function EnhancedSocialMediaCreator({
     })
   }
 
-  const handleGenerateFromTemplate = async (template: DynamicPrompt) => {
-    setSelectedPromptTemplate(template)
-    setShowGenerateButton(true)
+  const handleTemplateClick = async (template: typeof CREATIVE_TEMPLATES[0]) => {
+    setSelectedPromptTemplate(template as any)
     
-    // Auto-fill variables with smart defaults
-    const variables: Record<string, string> = {}
-    template.variables.forEach(variable => {
-      switch (variable) {
-        case 'genre':
-          variables[variable] = albumCoverOptions.genre || 'contemporary'
-          break
-        case 'artistName':
-          variables[variable] = prompt.targetAudience || 'the artist'
-          break
-        case 'mood':
-          variables[variable] = prompt.postTone || 'energetic'
-          break
-        default:
-          variables[variable] = `[${variable}]`
-      }
-    })
+    // Generate image immediately with template
+    await generateFromTemplate(template)
+  }
 
-    const filledPrompt = fillPromptTemplate(template.template, variables)
-    setPrompt(prev => ({ ...prev, topic: filledPrompt }))
+  const generateFromTemplate = async (template: typeof CREATIVE_TEMPLATES[0]) => {
+    setIsGenerating(true)
     
-    // Show generate button prominently
-    toast.info("Template selected! Click Generate to create your content.", {
-      duration: 3000,
-    })
+    try {
+      let finalPrompt = template.prompt
+      
+      // If template requires user photo and we have one, prepare for background removal
+      if (template.requiresUserPhoto && userPhotos.length > 0) {
+        // Use the first user photo or let them select
+        const userPhoto = userPhotos[0]
+        
+        // Call Nova Canvas with background removal and placement
+        const response = await fetch('/api/nova-canvas/generate-with-subject', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subjectImage: userPhoto,
+            backgroundPrompt: template.prompt,
+            style: template.style,
+            removeBackground: true,
+            platform: prompt.platform,
+            options: {
+              size: PLATFORMS.find(p => p.id === prompt.platform)?.aspectRatio,
+              numberOfImages: 3
+            }
+          })
+        })
+
+        if (!response.ok) throw new Error('Failed to generate with user photo')
+        
+        const data = await response.json()
+        setGeneratedImages(data.images)
+        setSelectedImageIndex(0)
+        
+        // Generate caption based on template
+        await generateCaptionForTemplate(template)
+        
+      } else {
+        // Generate without user photo
+        const response = await fetch('/api/nova-canvas/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: finalPrompt,
+            options: {
+              style: template.style,
+              size: PLATFORMS.find(p => p.id === prompt.platform)?.aspectRatio,
+              numberOfImages: 3,
+              contentType: 'social'
+            }
+          })
+        })
+
+        if (!response.ok) throw new Error('Failed to generate images')
+        
+        const data = await response.json()
+        setGeneratedImages(data.images)
+        setSelectedImageIndex(0)
+        
+        // Generate caption
+        await generateCaptionForTemplate(template)
+      }
+      
+      toast.success('Content generated successfully!')
+    } catch (error) {
+      console.error('Template generation error:', error)
+      toast.error('Failed to generate from template')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const generateCaptionForTemplate = async (template: typeof CREATIVE_TEMPLATES[0]) => {
+    setIsGeneratingText(true)
+    
+    try {
+      const response = await fetch('/api/content/generate-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: `${template.name} - ${template.description}`,
+          platform: prompt.platform,
+          tone: prompt.postTone,
+          targetAudience: prompt.targetAudience,
+          includeHashtags: prompt.includeHashtags,
+          includeEmojis: prompt.includeEmojis,
+          contentType: 'social',
+          templateStyle: template.style
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setGeneratedCaption(data.caption)
+      }
+    } catch (error) {
+      console.error('Caption generation error:', error)
+      setGeneratedCaption(generateFallbackCaption())
+    } finally {
+      setIsGeneratingText(false)
+    }
+  }
+
+  const handleGenerateFromTemplate = async (template: DynamicPrompt) => {
+    // This is now deprecated - we use handleTemplateClick instead
+    setSelectedPromptTemplate(template)
+    await handleGenerateImages(template.template)
   }
 
   const handleGenerateImages = async (customPrompt?: string) => {
@@ -429,15 +566,68 @@ export function EnhancedSocialMediaCreator({
                   </TabsList>
 
                   <TabsContent value="generate" className="space-y-4">
+                    {/* Creative Templates First */}
+                    <div className="space-y-3">
+                      <Label>Choose a Creative Template</Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {CREATIVE_TEMPLATES.map(template => (
+                          <Card
+                            key={template.id}
+                            className={cn(
+                              "cursor-pointer transition-all hover:shadow-lg group",
+                              selectedPromptTemplate?.id === template.id
+                                ? "ring-2 ring-teal-500 bg-teal-50 dark:bg-teal-950"
+                                : "hover:border-teal-500/50"
+                            )}
+                            onClick={() => handleTemplateClick(template)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="space-y-2">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <p className="font-semibold text-sm">{template.name}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {template.description}
+                                    </p>
+                                  </div>
+                                  <div className={cn(
+                                    "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                                    "bg-gradient-to-br from-teal-500/20 to-cyan-500/20",
+                                    "group-hover:from-teal-500/30 group-hover:to-cyan-500/30"
+                                  )}>
+                                    <Sparkles className="h-4 w-4 text-teal-600" />
+                                  </div>
+                                </div>
+                                {template.requiresUserPhoto && userPhotos.length === 0 && (
+                                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                                    📸 Upload your photo for best results
+                                  </p>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">Or create custom</span>
+                      </div>
+                    </div>
+
+                    {/* Custom Topic Input */}
                     <div className="space-y-2">
-                      <Label htmlFor="topic">Post Topic *</Label>
+                      <Label htmlFor="topic">Custom Topic</Label>
                       <div className="relative">
                         <Input
                           id="topic"
                           placeholder="e.g., New single release announcement"
                           value={prompt.topic}
                           onChange={(e) => setPrompt({ ...prompt, topic: e.target.value })}
-                          required
                         />
                         {isGeneratingText && (
                           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -451,33 +641,59 @@ export function EnhancedSocialMediaCreator({
                       </p>
                     </div>
 
-                    {/* Smart Prompt Suggestions */}
-                    {suggestedPrompts.length > 0 && (
+                    {/* User Photo Upload for Templates */}
+                    {userPhotos.length === 0 && (
+                      <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                          <Upload className="h-4 w-4" />
+                          <span>Upload your photo for personalized templates</span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Choose Photo
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Show uploaded user photos */}
+                    {userPhotos.length > 0 && (
                       <div className="space-y-2">
-                        <Label>Suggested Templates</Label>
-                        <div className="space-y-2">
-                          {suggestedPrompts.slice(0, 2).map(template => (
-                            <Card
-                              key={template.id}
-                              className={cn(
-                                "cursor-pointer transition-all hover:shadow-md",
-                                selectedPromptTemplate?.id === template.id
-                                  ? "ring-2 ring-teal-500 bg-teal-50 dark:bg-teal-950"
-                                  : "hover:bg-muted/50"
-                              )}
-                              onClick={() => handleGenerateFromTemplate(template)}
-                            >
-                              <CardContent className="p-3">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <p className="font-medium text-sm">{template.name}</p>
-                                    <p className="text-xs text-muted-foreground">{template.description}</p>
-                                  </div>
-                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                </div>
-                              </CardContent>
-                            </Card>
+                        <Label>Your Photos</Label>
+                        <div className="flex gap-2">
+                          {userPhotos.map((photo, idx) => (
+                            <div key={idx} className="relative group">
+                              <img 
+                                src={photo} 
+                                alt={`User ${idx + 1}`} 
+                                className="w-16 h-16 object-cover rounded-lg border-2 border-muted"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newPhotos = userPhotos.filter((_, i) => i !== idx)
+                                  setUserPhotos(newPhotos)
+                                  contentPersistence.saveUserPhotos(newPhotos)
+                                }}
+                                className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <XIcon className="h-3 w-3 text-white" />
+                              </button>
+                            </div>
                           ))}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-16 w-16"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -673,7 +889,7 @@ export function EnhancedSocialMediaCreator({
                   className={cn(
                     "w-full transition-all duration-300",
                     showGenerateButton 
-                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg animate-pulse" 
+                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg" 
                       : "bg-teal-500 hover:bg-teal-600"
                   )}
                 >
@@ -685,7 +901,7 @@ export function EnhancedSocialMediaCreator({
                   ) : (
                     <>
                       <Zap className="mr-2 h-4 w-4" />
-                      Generate Content
+                      Generate Custom Content
                     </>
                   )}
                 </Button>
@@ -831,6 +1047,16 @@ export function EnhancedSocialMediaCreator({
           </Card>
         </div>
       </div>
+
+      {/* Add hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple={activeTab !== 'generate'}
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileUpload}
+      />
     </div>
   )
 } 
