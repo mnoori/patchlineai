@@ -1,62 +1,119 @@
 /**
- * Simple performance monitoring for API routes
+ * Performance monitoring utility for tracking API response times
  */
-export class PerformanceMonitor {
-  private static measurements: Map<string, number[]> = new Map()
-  
-  static start(label: string): () => void {
-    const startTime = performance.now()
+
+interface PerformanceMetric {
+  name: string
+  startTime: number
+  endTime?: number
+  duration?: number
+}
+
+class PerformanceMonitorClass {
+  private metrics: Map<string, PerformanceMetric[]> = new Map()
+  private activeTimers: Map<string, number> = new Map()
+
+  /**
+   * Start timing an operation
+   * @param name - Name of the operation (e.g., 'api:user', 'api:platforms')
+   * @returns Function to stop the timer
+   */
+  start(name: string): () => void {
+    const startTime = Date.now()
+    const timerId = `${name}-${startTime}-${Math.random()}`
+    
+    this.activeTimers.set(timerId, startTime)
     
     return () => {
-      const duration = performance.now() - startTime
+      const endTime = Date.now()
+      const duration = endTime - startTime
       
-      if (!this.measurements.has(label)) {
-        this.measurements.set(label, [])
+      // Remove from active timers
+      this.activeTimers.delete(timerId)
+      
+      // Store metric
+      if (!this.metrics.has(name)) {
+        this.metrics.set(name, [])
       }
       
-      const measurements = this.measurements.get(label)!
-      measurements.push(duration)
+      const metrics = this.metrics.get(name)!
+      metrics.push({
+        name,
+        startTime,
+        endTime,
+        duration
+      })
       
-      // Keep only last 100 measurements
-      if (measurements.length > 100) {
-        measurements.shift()
+      // Keep only last 100 metrics per operation
+      if (metrics.length > 100) {
+        metrics.shift()
       }
       
-      // Log if it's particularly slow
+      // Log slow operations
       if (duration > 1000) {
-        console.warn(`[PERF] Slow operation: ${label} took ${duration.toFixed(0)}ms`)
+        console.warn(`[PERFORMANCE] Slow operation detected: ${name} took ${duration}ms`)
       }
       
       return duration
     }
   }
-  
-  static getStats(label: string) {
-    const measurements = this.measurements.get(label)
-    if (!measurements || measurements.length === 0) {
-      return null
-    }
+
+  /**
+   * Get average duration for an operation
+   */
+  getAverage(name: string): number {
+    const metrics = this.metrics.get(name)
+    if (!metrics || metrics.length === 0) return 0
     
-    const sorted = [...measurements].sort((a, b) => a - b)
-    const avg = measurements.reduce((a, b) => a + b, 0) / measurements.length
-    
-    return {
-      avg: avg.toFixed(0),
-      min: sorted[0].toFixed(0),
-      max: sorted[sorted.length - 1].toFixed(0),
-      p50: sorted[Math.floor(sorted.length * 0.5)].toFixed(0),
-      p95: sorted[Math.floor(sorted.length * 0.95)].toFixed(0),
-      count: measurements.length
-    }
+    const sum = metrics.reduce((acc, m) => acc + (m.duration || 0), 0)
+    return Math.round(sum / metrics.length)
   }
-  
-  static logAllStats() {
-    console.log('[PERF] Performance Statistics:')
-    for (const [label, _] of this.measurements) {
-      const stats = this.getStats(label)
-      if (stats) {
-        console.log(`  ${label}: avg=${stats.avg}ms, p50=${stats.p50}ms, p95=${stats.p95}ms (n=${stats.count})`)
+
+  /**
+   * Get all metrics for an operation
+   */
+  getMetrics(name: string): PerformanceMetric[] {
+    return this.metrics.get(name) || []
+  }
+
+  /**
+   * Get summary of all operations
+   */
+  getSummary(): Record<string, { count: number; average: number; min: number; max: number }> {
+    const summary: Record<string, any> = {}
+    
+    this.metrics.forEach((metrics, name) => {
+      const durations = metrics.map(m => m.duration || 0).filter(d => d > 0)
+      if (durations.length === 0) return
+      
+      summary[name] = {
+        count: durations.length,
+        average: Math.round(durations.reduce((a, b) => a + b, 0) / durations.length),
+        min: Math.min(...durations),
+        max: Math.max(...durations)
       }
-    }
+    })
+    
+    return summary
   }
-} 
+
+  /**
+   * Clear all metrics
+   */
+  clear(): void {
+    this.metrics.clear()
+    this.activeTimers.clear()
+  }
+
+  /**
+   * Log performance summary to console
+   */
+  logSummary(): void {
+    const summary = this.getSummary()
+    console.log('[PERFORMANCE SUMMARY]')
+    console.table(summary)
+  }
+}
+
+// Export singleton instance
+export const PerformanceMonitor = new PerformanceMonitorClass() 

@@ -1,8 +1,10 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -38,7 +40,6 @@ import {
 } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { TimeCapsuleFeed } from "@/components/dashboard/time-capsule-feed"
-import { RevenueLineChart } from "@/components/dashboard/line-chart"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -50,6 +51,7 @@ import { usePlatformConnections } from "@/hooks/use-platform-connections"
 import { WalletBalance } from '@/components/web3/wallet-balance'
 import { useWeb3Store } from '@/lib/web3-store'
 import { usePermissions } from '@/lib/permissions'
+import nextDynamic from 'next/dynamic'
 
 // Add DollarSign component before DashboardPage
 function DollarSign(props: React.SVGProps<SVGSVGElement>) {
@@ -527,6 +529,11 @@ function CriticalAlertBanner({ alert, onDismiss, onAction }: any) {
   )
 }
 
+const RevenueLineChart = nextDynamic(() => import('@/components/dashboard/line-chart').then(m => m.RevenueLineChart), {
+  ssr: false,
+  suspense: true
+})
+
 export default function DashboardPage() {
   const { userId } = useCurrentUser()
   const [lastVisit, setLastVisit] = useState<Date | null>(null)
@@ -684,44 +691,57 @@ export default function DashboardPage() {
       setCriticalAlert(critical)
     }
 
-    // Fetch dashboard data
-    async function loadDashboardData() {
+    // Parallel data loading for better performance
+    const loadAllData = async () => {
+      if (!userId) return
+
       setLoadingDashboard(true)
+      
       try {
-        const data = await fetchDashboardData() as any
-        setDashboardData({
-          revenue: data.revenue || 45231.89,
-          listeners: data.listeners || 2350412,
-          engagement: data.engagement || 3827,
-        })
-      } catch (error) {
-        console.error("Failed to fetch dashboard data:", error)
-        // Use fallback values
-        setDashboardData({
-          revenue: 45231.89,
-          listeners: 2350412,
-          engagement: 3827,
-        })
+        // Execute all data fetching in parallel
+        const [dashboardResult, platformsResult] = await Promise.allSettled([
+          // Dashboard data
+          fetchDashboardData().catch(error => {
+            console.error("Failed to fetch dashboard data:", error)
+            // Return fallback values
+            return {
+              revenue: 45231.89,
+              listeners: 2350412,
+              engagement: 3827,
+            }
+          }),
+          
+          // Platforms data
+          platformsAPI.get(userId).catch(error => {
+            console.error("Failed to fetch platforms:", error)
+            return { platforms: {} }
+          })
+        ])
+
+        // Process dashboard data
+        if (dashboardResult.status === 'fulfilled') {
+          const data = dashboardResult.value as any
+          setDashboardData({
+            revenue: data.revenue || 45231.89,
+            listeners: data.listeners || 2350412,
+            engagement: data.engagement || 3827,
+          })
+        }
+
+        // Process platforms data
+        if (platformsResult.status === 'fulfilled') {
+          const data = platformsResult.value as any
+          // Count number of connected platforms
+          const count = Object.values(data.platforms || {}).filter(Boolean).length
+          setConnectedPlatforms(count)
+        }
       } finally {
         setLoadingDashboard(false)
       }
     }
 
-    loadDashboardData()
-
-    async function fetchPlatforms() {
-      if (!userId) return
-      try {
-        const data = await platformsAPI.get(userId) as any
-        // Count number of connected platforms
-        const count = Object.values(data.platforms || {}).filter(Boolean).length
-        setConnectedPlatforms(count)
-      } catch (error) {
-        console.error("Failed to fetch platforms:", error)
-      }
-    }
-
-    fetchPlatforms()
+    // Start loading immediately
+    loadAllData()
   }, [userId, agentAlertsState])
 
   const removeAlert = (id: number) => {
@@ -995,10 +1015,12 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </div>
-            <RevenueLineChart
-              title=""
-              color={selectedMetric === "revenue" ? "#00E5FF" : selectedMetric === "listeners" ? "#9B6DFF" : "#FF6B6B"}
-            />
+            <Suspense fallback={<div className="h-64 w-full rounded bg-background/10 animate-pulse" />}> 
+              <RevenueLineChart
+                title=""
+                color={selectedMetric === "revenue" ? "#00E5FF" : selectedMetric === "listeners" ? "#9B6DFF" : "#FF6B6B"}
+              />
+            </Suspense>
           </div>
         </div>
 

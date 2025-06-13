@@ -1,7 +1,6 @@
 'use client'
 
 import './globals.css'
-import '@/lib/amplify-config'
 import { Inter } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { TierPersistence } from "@/components/tier-persistence"
@@ -16,9 +15,15 @@ const inter = Inter({ subsets: ['latin'] })
 // Conditionally import Web3 components only if enabled
 const isWeb3Enabled = process.env.NEXT_PUBLIC_ENABLE_WEB3 === 'true'
 
+// Use stub provider when Web3 is disabled to avoid module resolution issues
 const Web3Provider = isWeb3Enabled
-  ? dynamic(() => import('@/components/web3/web3-provider').then(mod => mod.Web3Provider), { ssr: false })
-  : ({ children }: { children: React.ReactNode }) => <>{children}</>
+  ? dynamic(() => import('@/components/web3/web3-provider').then(mod => mod.Web3Provider), { 
+      ssr: false,
+      loading: () => <div style={{ display: 'contents' }}>{null}</div>
+    })
+  : dynamic(() => import('@/components/web3/web3-provider-stub').then(mod => mod.Web3Provider), { 
+      ssr: false 
+    })
 
 const SendCryptoModal = isWeb3Enabled
   ? dynamic(() => import('@/components/web3/send-crypto-modal').then(mod => mod.SendCryptoModal), { ssr: false })
@@ -27,6 +32,9 @@ const SendCryptoModal = isWeb3Enabled
 const ReceiveCryptoModal = isWeb3Enabled
   ? dynamic(() => import('@/components/web3/receive-crypto-modal').then(mod => mod.ReceiveCryptoModal), { ssr: false })
   : () => null
+
+// Lazy Amplify bootstrap (client-side only)
+const AmplifyBootstrap = dynamic(() => import('@/components/amplify-bootstrap').then(m => m.AmplifyBootstrap), { ssr: false })
 
 export default function RootLayout({
   children,
@@ -42,6 +50,8 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+          {/* Initialise Amplify client-side only */}
+          <AmplifyBootstrap />
           <Web3Provider>
             <TierPersistence />
             <RoutePrewarmer />
