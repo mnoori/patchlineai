@@ -202,6 +202,7 @@ export function EnhancedSocialMediaCreator({
   const [imageEditPrompt, setImageEditPrompt] = useState('')
   const [captionEditPrompt, setCaptionEditPrompt] = useState('')
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
+  const [isLivePreviewReady, setIsLivePreviewReady] = useState(false)
   
   const [formState, setFormState] = useState<FormState>({
     platform: 'instagram-post',
@@ -227,6 +228,12 @@ export function EnhancedSocialMediaCreator({
     setGeneratedCaption(firstContent.caption)
     setGeneratedImages(firstContent.images)
     setSelectedImageIndex(0)
+    
+    // Delay showing live preview to prevent jump
+    const timer = setTimeout(() => {
+      setIsLivePreviewReady(true)
+    }, 50)
+    return () => clearTimeout(timer)
   }, [])
 
   const loadUserPhotos = async () => {
@@ -489,453 +496,459 @@ export function EnhancedSocialMediaCreator({
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 relative">
-      {/* Main Content with padding for live preview */}
-      <div className="lg:pr-[22rem]">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+    <div className="w-full max-w-7xl mx-auto px-4">
+      {/* Grid layout: main content + live preview */}
+      <div className="lg:grid lg:grid-cols-[1fr_20rem] lg:gap-4">
+        {/* Main Content */}
+        <div>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.history.back()}
+                    className="gap-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                  <div className="p-2 rounded-lg bg-teal-500/20">
+                    <Sparkles className="h-5 w-5 text-teal-500" />
+                  </div>
+                  <div>
+                    <CardTitle>AI Social Media Creator</CardTitle>
+                    <CardDescription>Create engaging posts with AI-powered visuals and captions</CardDescription>
+                  </div>
+                </div>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  onClick={() => window.history.back()}
+                  onClick={handleReset}
                   className="gap-2"
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back
+                  <RefreshCw className="h-4 w-4" />
+                  Reset
                 </Button>
-                <div className="p-2 rounded-lg bg-teal-500/20">
-                  <Sparkles className="h-5 w-5 text-teal-500" />
-                </div>
-                <div>
-                  <CardTitle>AI Social Media Creator</CardTitle>
-                  <CardDescription>Create engaging posts with AI-powered visuals and captions</CardDescription>
-                </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-                className="gap-2"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Reset
-              </Button>
-            </div>
-            
-            {/* Tab Navigation */}
-            <div className="flex gap-1 p-1 bg-muted rounded-lg mt-4">
-              <button
-                onClick={() => setActiveTab('ready')}
-                className={cn(
-                  "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
-                  activeTab === 'ready'
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                Ready-to-Post
-              </button>
-              <button
-                onClick={() => setActiveTab('specific')}
-                className={cn(
-                  "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
-                  activeTab === 'specific'
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                Create Custom Content
-              </button>
-            </div>
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
-            {/* Ready-to-Post Tab Content */}
-            {activeTab === 'ready' && (
-              <>
-                {/* Pre-generated Content Blocks */}
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {PRE_GENERATED_CONTENT.map((content, index) => (
-                      <Card 
-                        key={content.id}
-                        className={cn(
-                          "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20 hover:border-cosmic-teal/50 group relative overflow-hidden will-change-transform",
-                          hoveredCard === content.id && "ring-2 ring-cosmic-teal/30",
-                          formState.selectedTemplate === content.title && "border-cosmic-teal border-2"
-                        )}
-                        style={{ backfaceVisibility: 'hidden', perspective: '1000px' }}
-                        onMouseEnter={() => setHoveredCard(content.id)}
-                        onMouseLeave={() => setHoveredCard(null)}
-                        onClick={() => {
-                          setFormState(prev => ({ 
-                            ...prev, 
-                            workflowMode: 'template',
-                            selectedTemplate: content.title
-                          }))
-                          setGeneratedCaption(content.caption)
-                          setGeneratedImages(content.images)
-                          setSelectedImageIndex(0)
-                        }}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex -space-x-2 mb-3">
-                            {content.images.slice(0, 3).map((image, idx) => (
-                              <div key={idx} className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
-                                <img src={`${image}&w=100&h=100`} alt="" className="w-full h-full object-cover" />
-                              </div>
-                            ))}
-                          </div>
-                          <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">{content.title}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">{content.subtitle}</p>
-                          <p className="text-xs line-clamp-2">{content.preview}</p>
-                          <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity h-4">
-                            <Sparkles className="h-3 w-3" />
-                            <span>Click to use this content</span>
-                          </div>
-                        </CardContent>
-                        {/* Hover Overlay */}
-                        <div
-                          className={cn(
-                            "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300 pointer-events-none",
-                            hoveredCard === content.id ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Generated Content */}
-                {generatedImages.length > 0 && (
-                  <div className="space-y-4" data-generated-content>
-                    {/* Photo Selection and Editing */}
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-3 gap-2">
-                        {generatedImages.map((image, idx) => (
-                          <div
-                            key={idx}
-                            className={cn(
-                              "relative aspect-square rounded-lg overflow-hidden border-2 transition-all group",
-                              selectedImageIndex === idx
-                                ? "border-teal-500 ring-2 ring-teal-500/20"
-                                : "border-muted hover:border-teal-500/50"
-                            )}
-                          >
-                            <img
-                              src={image}
-                              alt={`Option ${idx + 1}`}
-                              className="w-full h-full object-cover pointer-events-none"
-                            />
-                            {/* Click to select, button to edit */}
-                            <button
-                              onClick={() => setSelectedImageIndex(idx)}
-                              className="absolute inset-0 bg-transparent"
-                              aria-label={`Select image ${idx + 1}`}
-                            />
-                            {/* Edit button */}
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              className="absolute bottom-2 right-2 h-8 px-3 bg-black/80 hover:bg-black/90 text-white border-0"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setEditingImageIndex(idx)
-                                setShowEditDrawer(true)
-                              }}
-                            >
-                              <Edit2 className="h-3 w-3 mr-1" />
-                              Edit
-                            </Button>
-                            {selectedImageIndex === idx && (
-                              <div className="absolute inset-0 ring-2 ring-teal-500 pointer-events-none rounded-lg" />
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Generated Caption */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-base font-medium">Generated Caption</Label>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-2 text-xs"
-                          onClick={async () => {
-                            const prompt = window.prompt('How would you like to modify this caption?', 'Make it more engaging')
-                            if (prompt) {
-                              setIsGeneratingText(true)
-                              try {
-                                const response = await fetch('/api/content/generate-text', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                    prompt: `Modify this caption based on the instruction: "${prompt}"\n\nOriginal caption:\n${generatedCaption}`,
-                                    platform: formState.platform,
-                                    type: 'caption'
-                                  })
-                                })
-                                if (response.ok) {
-                                  const data = await response.json()
-                                  setGeneratedCaption(data.text)
-                                  toast.success('Caption updated!')
-                                }
-                              } catch (error) {
-                                toast.error('Failed to update caption')
-                              } finally {
-                                setIsGeneratingText(false)
-                              }
-                            }
-                          }}
-                          disabled={isGeneratingText}
-                        >
-                          {isGeneratingText ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <Sparkles className="h-3 w-3" />
-                          )}
-                          Edit with AI
-                        </Button>
-                      </div>
-                      <Textarea
-                        value={generatedCaption}
-                        onChange={(e) => {
-                          setGeneratedCaption(e.target.value)
-                          // Auto-resize on change
-                          setTimeout(() => {
-                            const target = e.target as HTMLTextAreaElement;
-                            target.style.height = 'auto';
-                            target.style.height = Math.max(120, target.scrollHeight) + 'px';
-                          }, 0);
-                        }}
-                        className="min-h-[120px] resize-none overflow-hidden"
-                        placeholder="Your caption will appear here..."
-                        style={{ 
-                          height: Math.max(120, generatedCaption.split('\n').length * 24 + 40) + 'px',
-                          minHeight: '120px'
-                        }}
-                        onInput={(e) => {
-                          const target = e.target as HTMLTextAreaElement;
-                          target.style.height = 'auto';
-                          target.style.height = Math.max(120, target.scrollHeight) + 'px';
-                        }}
-                      />
-                    </div>
-
-                    {/* Schedule Button */}
-                    {selectedImageIndex !== null && (
-                      <Button
-                        onClick={handleCreateDraft}
-                        className="w-full"
-                        size="lg"
-                      >
-                        <Send className="mr-2 h-4 w-4" />
-                        Schedule
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Specific Tab Content */}
-            {activeTab === 'specific' && (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Card 
-                    className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
-                    onClick={() => {
-                      setFormState(prev => ({ 
-                        ...prev, 
-                        workflowMode: 'template',
-                        selectedTemplate: 'Event Flyer'
-                      }))
-                      toast.info('Event Flyer template selected - Upload your photos to continue')
-                    }}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <div className="w-10 h-10 rounded-lg bg-purple-500 text-white flex items-center justify-center mx-auto mb-2">
-                        <Calendar className="h-5 w-5" />
-                      </div>
-                      <h5 className="font-medium text-sm">Event Flyer</h5>
-                      <p className="text-xs text-muted-foreground mt-1">Create stunning flyers</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card 
-                    className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
-                    onClick={() => {
-                      setFormState(prev => ({ 
-                        ...prev, 
-                        workflowMode: 'template',
-                        selectedTemplate: 'Artist Photo'
-                      }))
-                      toast.info('Artist Photo template selected - Upload your photos to continue')
-                    }}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <div className="w-10 h-10 rounded-lg bg-pink-500 text-white flex items-center justify-center mx-auto mb-2">
-                        <Camera className="h-5 w-5" />
-                      </div>
-                      <h5 className="font-medium text-sm">Artist Photo</h5>
-                      <p className="text-xs text-muted-foreground mt-1">Professional shots</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card 
-                    className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
-                    onClick={() => {
-                      setFormState(prev => ({ 
-                        ...prev, 
-                        workflowMode: 'template',
-                        selectedTemplate: 'Album Artwork'
-                      }))
-                      toast.info('Album Artwork template selected - Upload your photos to continue')
-                    }}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <div className="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center mx-auto mb-2">
-                        <Music className="h-5 w-5" />
-                      </div>
-                      <h5 className="font-medium text-sm">Album Art</h5>
-                      <p className="text-xs text-muted-foreground mt-1">Eye-catching covers</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card 
-                    className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
-                    onClick={() => {
-                      setFormState(prev => ({ 
-                        ...prev, 
-                        workflowMode: 'custom'
-                      }))
-                    }}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <div className="w-10 h-10 rounded-lg bg-green-500 text-white flex items-center justify-center mx-auto mb-2">
-                        <Type className="h-5 w-5" />
-                      </div>
-                      <h5 className="font-medium text-sm">Quote Card</h5>
-                      <p className="text-xs text-muted-foreground mt-1">Shareable quotes</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Live Preview - fixed position on the right */}
-      <div className="hidden lg:block fixed right-4 w-[20rem] z-20" style={{ top: '6rem' }}>
-        <Card className="h-[calc(100vh-8rem)] flex flex-col overflow-hidden shadow-xl">
-            <CardHeader className="pb-2 pt-3 px-4 flex-shrink-0">
-              {/* Compact Platform Tabs */}
-              <div className="flex gap-1 p-1 bg-muted rounded-lg">
+              
+              {/* Tab Navigation */}
+              <div className="flex gap-1 p-1 bg-muted rounded-lg mt-4">
                 <button
-                  onClick={() => setFormState(prev => ({ ...prev, platform: 'instagram-post' }))}
+                  onClick={() => setActiveTab('ready')}
                   className={cn(
-                    "flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-all",
-                    formState.platform === 'instagram-post'
+                    "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
+                    activeTab === 'ready'
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Post
+                  Ready-to-Post
                 </button>
                 <button
-                  onClick={() => setFormState(prev => ({ ...prev, platform: 'instagram-story' }))}
+                  onClick={() => setActiveTab('specific')}
                   className={cn(
-                    "flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-all",
-                    formState.platform === 'instagram-story'
+                    "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
+                    activeTab === 'specific'
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Story
+                  Create Custom Content
                 </button>
               </div>
             </CardHeader>
-            <CardContent className="p-0 flex-1 overflow-y-auto">
-              {/* Dynamic Platform Mock */}
-              <div className="p-4">
-                <div className="max-w-sm mx-auto">
-                  {/* Instagram Post Layout */}
-                  {formState.platform === 'instagram-post' && (
-                    <div className="bg-muted/30 rounded-lg p-4">
-                      {/* Profile Header */}
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                          A
-                        </div>
-                        <div>
-                          <p className="font-semibold">ALGORYX</p>
-                          <p className="text-xs text-muted-foreground">Music Artist</p>
-                        </div>
-                      </div>
-
-                      {/* Square Image */}
-                      <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden">
-                        {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
-                          <img
-                            src={generatedImages[selectedImageIndex]}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                            <ImageIcon className="h-12 w-12" />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Caption */}
-                      <div className="space-y-2">
-                        <p className="text-sm whitespace-pre-wrap">
-                          {(generatedImages.length > 0 && (formState.workflowMode === 'template' ? generatedCaption : customCaption)) || "Your caption will appear here..."}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Instagram Story Layout - Full View */}
-                  {formState.platform === 'instagram-story' && (
-                    <div className="bg-black rounded-lg overflow-hidden mx-auto w-full max-w-[280px]">
-                      {/* Full Vertical Story */}
-                      <div className="aspect-[9/16] bg-black relative">
-                        {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
-                          <img
-                            src={generatedImages[selectedImageIndex]}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white/50">
-                            <ImageIcon className="h-16 w-16" />
-                          </div>
-                        )}
-                        
-                        {/* Story UI Elements */}
-                        <div className="absolute top-4 left-4 right-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
-                              A
+            
+            <CardContent className="space-y-6">
+              {/* Ready-to-Post Tab Content */}
+              {activeTab === 'ready' && (
+                <>
+                  {/* Pre-generated Content Blocks */}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {PRE_GENERATED_CONTENT.map((content, index) => (
+                        <Card 
+                          key={content.id}
+                          className={cn(
+                            "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20 hover:border-cosmic-teal/50 group relative overflow-hidden will-change-transform",
+                            hoveredCard === content.id && "ring-2 ring-cosmic-teal/30",
+                            formState.selectedTemplate === content.title && "border-cosmic-teal border-2"
+                          )}
+                          style={{ backfaceVisibility: 'hidden', perspective: '1000px' }}
+                          onMouseEnter={() => setHoveredCard(content.id)}
+                          onMouseLeave={() => setHoveredCard(null)}
+                          onClick={() => {
+                            setFormState(prev => ({ 
+                              ...prev, 
+                              workflowMode: 'template',
+                              selectedTemplate: content.title
+                            }))
+                            setGeneratedCaption(content.caption)
+                            setGeneratedImages(content.images)
+                            setSelectedImageIndex(0)
+                          }}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex -space-x-2 mb-3">
+                              {content.images.slice(0, 3).map((image, idx) => (
+                                <div key={idx} className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                                  <img src={`${image}&w=100&h=100`} alt="" className="w-full h-full object-cover" />
+                                </div>
+                              ))}
                             </div>
-                            <p className="text-white font-semibold text-sm">algoryx_music</p>
-                            <p className="text-white/70 text-xs ml-auto">now</p>
-                          </div>
+                            <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">{content.title}</h4>
+                            <p className="text-sm text-muted-foreground mb-2">{content.subtitle}</p>
+                            <p className="text-xs line-clamp-2">{content.preview}</p>
+                            <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity h-4">
+                              <Sparkles className="h-3 w-3" />
+                              <span>Click to use this content</span>
+                            </div>
+                          </CardContent>
+                          {/* Hover Overlay */}
+                          <div
+                            className={cn(
+                              "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300 pointer-events-none",
+                              hoveredCard === content.id ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Generated Content */}
+                  {generatedImages.length > 0 && (
+                    <div className="space-y-4" data-generated-content>
+                      {/* Photo Selection and Editing */}
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-3 gap-2">
+                          {generatedImages.map((image, idx) => (
+                            <div
+                              key={idx}
+                              className={cn(
+                                "relative aspect-square rounded-lg overflow-hidden border-2 transition-all group",
+                                selectedImageIndex === idx
+                                  ? "border-teal-500 ring-2 ring-teal-500/20"
+                                  : "border-muted hover:border-teal-500/50"
+                              )}
+                            >
+                              <img
+                                src={image}
+                                alt={`Option ${idx + 1}`}
+                                className="w-full h-full object-cover pointer-events-none"
+                              />
+                              {/* Click to select, button to edit */}
+                              <button
+                                onClick={() => setSelectedImageIndex(idx)}
+                                className="absolute inset-0 bg-transparent"
+                                aria-label={`Select image ${idx + 1}`}
+                              />
+                              {/* Edit button */}
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                className="absolute bottom-2 right-2 h-8 px-3 bg-black/80 hover:bg-black/90 text-white border-0"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setEditingImageIndex(idx)
+                                  setShowEditDrawer(true)
+                                }}
+                              >
+                                <Edit2 className="h-3 w-3 mr-1" />
+                                Edit
+                              </Button>
+                              {selectedImageIndex === idx && (
+                                <div className="absolute inset-0 ring-2 ring-teal-500 pointer-events-none rounded-lg" />
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
+
+                      {/* Generated Caption */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-base font-medium">Generated Caption</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2 text-xs"
+                            onClick={async () => {
+                              const prompt = window.prompt('How would you like to modify this caption?', 'Make it more engaging')
+                              if (prompt) {
+                                setIsGeneratingText(true)
+                                try {
+                                  const response = await fetch('/api/content/generate-text', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      prompt: `Modify this caption based on the instruction: "${prompt}"\n\nOriginal caption:\n${generatedCaption}`,
+                                      platform: formState.platform,
+                                      type: 'caption'
+                                    })
+                                  })
+                                  if (response.ok) {
+                                    const data = await response.json()
+                                    setGeneratedCaption(data.text)
+                                    toast.success('Caption updated!')
+                                  }
+                                } catch (error) {
+                                  toast.error('Failed to update caption')
+                                } finally {
+                                  setIsGeneratingText(false)
+                                }
+                              }
+                            }}
+                            disabled={isGeneratingText}
+                          >
+                            {isGeneratingText ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Sparkles className="h-3 w-3" />
+                            )}
+                            Edit with AI
+                          </Button>
+                        </div>
+                        <Textarea
+                          value={generatedCaption}
+                          onChange={(e) => {
+                            setGeneratedCaption(e.target.value)
+                            // Auto-resize on change
+                            setTimeout(() => {
+                              const target = e.target as HTMLTextAreaElement;
+                              target.style.height = 'auto';
+                              target.style.height = Math.max(120, target.scrollHeight) + 'px';
+                            }, 0);
+                          }}
+                          className="min-h-[120px] resize-none overflow-hidden"
+                          placeholder="Your caption will appear here..."
+                          style={{ 
+                            height: Math.max(120, generatedCaption.split('\n').length * 24 + 40) + 'px',
+                            minHeight: '120px'
+                          }}
+                          onInput={(e) => {
+                            const target = e.target as HTMLTextAreaElement;
+                            target.style.height = 'auto';
+                            target.style.height = Math.max(120, target.scrollHeight) + 'px';
+                          }}
+                        />
+                      </div>
+
+                      {/* Schedule Button */}
+                      {selectedImageIndex !== null && (
+                        <Button
+                          onClick={handleCreateDraft}
+                          className="w-full"
+                          size="lg"
+                        >
+                          <Send className="mr-2 h-4 w-4" />
+                          Schedule
+                        </Button>
+                      )}
                     </div>
                   )}
+                </>
+              )}
+
+              {/* Specific Tab Content */}
+              {activeTab === 'specific' && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <Card 
+                      className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                      onClick={() => {
+                        setFormState(prev => ({ 
+                          ...prev, 
+                          workflowMode: 'template',
+                          selectedTemplate: 'Event Flyer'
+                        }))
+                        toast.info('Event Flyer template selected - Upload your photos to continue')
+                      }}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <div className="w-10 h-10 rounded-lg bg-purple-500 text-white flex items-center justify-center mx-auto mb-2">
+                          <Calendar className="h-5 w-5" />
+                        </div>
+                        <h5 className="font-medium text-sm">Event Flyer</h5>
+                        <p className="text-xs text-muted-foreground mt-1">Create stunning flyers</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                      onClick={() => {
+                        setFormState(prev => ({ 
+                          ...prev, 
+                          workflowMode: 'template',
+                          selectedTemplate: 'Artist Photo'
+                        }))
+                        toast.info('Artist Photo template selected - Upload your photos to continue')
+                      }}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <div className="w-10 h-10 rounded-lg bg-pink-500 text-white flex items-center justify-center mx-auto mb-2">
+                          <Camera className="h-5 w-5" />
+                        </div>
+                        <h5 className="font-medium text-sm">Artist Photo</h5>
+                        <p className="text-xs text-muted-foreground mt-1">Professional shots</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                      onClick={() => {
+                        setFormState(prev => ({ 
+                          ...prev, 
+                          workflowMode: 'template',
+                          selectedTemplate: 'Album Artwork'
+                        }))
+                        toast.info('Album Artwork template selected - Upload your photos to continue')
+                      }}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <div className="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center mx-auto mb-2">
+                          <Music className="h-5 w-5" />
+                        </div>
+                        <h5 className="font-medium text-sm">Album Art</h5>
+                        <p className="text-xs text-muted-foreground mt-1">Eye-catching covers</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                      onClick={() => {
+                        setFormState(prev => ({ 
+                          ...prev, 
+                          workflowMode: 'custom'
+                        }))
+                      }}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <div className="w-10 h-10 rounded-lg bg-green-500 text-white flex items-center justify-center mx-auto mb-2">
+                          <Type className="h-5 w-5" />
+                        </div>
+                        <h5 className="font-medium text-sm">Quote Card</h5>
+                        <p className="text-xs text-muted-foreground mt-1">Shareable quotes</p>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* Live Preview - sticky */}
+        <div className={cn(
+          "hidden lg:block w-[20rem] sticky top-24 transition-opacity duration-300",
+          isLivePreviewReady ? "opacity-100" : "opacity-0"
+        )}>
+          <Card className="h-[calc(100vh-8rem)] flex flex-col overflow-hidden shadow-xl">
+              <CardHeader className="pb-2 pt-3 px-4 flex-shrink-0">
+                {/* Compact Platform Tabs */}
+                <div className="flex gap-1 p-1 bg-muted rounded-lg">
+                  <button
+                    onClick={() => setFormState(prev => ({ ...prev, platform: 'instagram-post' }))}
+                    className={cn(
+                      "flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-all",
+                      formState.platform === 'instagram-post'
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    Post
+                  </button>
+                  <button
+                    onClick={() => setFormState(prev => ({ ...prev, platform: 'instagram-story' }))}
+                    className={cn(
+                      "flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-all",
+                      formState.platform === 'instagram-story'
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    Story
+                  </button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0 flex-1 overflow-y-auto">
+                {/* Dynamic Platform Mock */}
+                <div className="p-4">
+                  <div className="max-w-sm mx-auto">
+                    {/* Instagram Post Layout */}
+                    {formState.platform === 'instagram-post' && (
+                      <div className="bg-muted/30 rounded-lg p-4">
+                        {/* Profile Header */}
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                            A
+                          </div>
+                          <div>
+                            <p className="font-semibold">ALGORYX</p>
+                            <p className="text-xs text-muted-foreground">Music Artist</p>
+                          </div>
+                        </div>
+
+                        {/* Square Image */}
+                        <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden">
+                          {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
+                            <img
+                              src={generatedImages[selectedImageIndex]}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                              <ImageIcon className="h-12 w-12" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Caption */}
+                        <div className="space-y-2">
+                          <p className="text-sm whitespace-pre-wrap">
+                            {(generatedImages.length > 0 && (formState.workflowMode === 'template' ? generatedCaption : customCaption)) || "Your caption will appear here..."}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Instagram Story Layout - Full View */}
+                    {formState.platform === 'instagram-story' && (
+                      <div className="bg-black rounded-lg overflow-hidden mx-auto w-full max-w-[280px]">
+                        {/* Full Vertical Story */}
+                        <div className="aspect-[9/16] bg-black relative">
+                          {selectedImageIndex !== null && generatedImages[selectedImageIndex] ? (
+                            <img
+                              src={generatedImages[selectedImageIndex]}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white/50">
+                              <ImageIcon className="h-16 w-16" />
+                            </div>
+                          )}
+                          
+                          {/* Story UI Elements */}
+                          <div className="absolute top-4 left-4 right-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
+                                A
+                              </div>
+                              <p className="text-white font-semibold text-sm">algoryx_music</p>
+                              <p className="text-white/70 text-xs ml-auto">now</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+        </div>
       </div>
 
       {/* Edit Sheet - Wide drawer style like legal tab */}

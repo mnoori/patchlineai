@@ -164,6 +164,6 @@
 }
 
 /* Prevent horizontal shift when overlay removes scrollbar */
-html {
-  scrollbar-gutter: stable;
+html, body {
+  scrollbar-gutter: stable both-edges;
 }
