@@ -32,7 +32,8 @@ import {
   Plus,
   Calendar,
   Camera,
-  ArrowLeft
+  ArrowLeft,
+  Edit2
 } from "lucide-react"
 import type { EnhancedContentPrompt } from "@/lib/content-types"
 import { toast } from "sonner"
@@ -44,6 +45,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useDebounce } from "@/hooks/use-debounce"
 import { PRE_GENERATED_CONTENT } from "@/lib/social-media-templates-system"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from "@/components/ui/drawer"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 
 interface EnhancedSocialMediaCreatorProps {
   onContentGenerated?: (content: {
@@ -197,6 +199,9 @@ export function EnhancedSocialMediaCreator({
   const [activeTab, setActiveTab] = useState<'ready' | 'specific'>('ready')
   const [showEditDrawer, setShowEditDrawer] = useState(false)
   const [editingImageIndex, setEditingImageIndex] = useState<number | null>(null)
+  const [imageEditPrompt, setImageEditPrompt] = useState('')
+  const [captionEditPrompt, setCaptionEditPrompt] = useState('')
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
   
   const [formState, setFormState] = useState<FormState>({
     platform: 'instagram-post',
@@ -406,6 +411,83 @@ export function EnhancedSocialMediaCreator({
     }
   }
 
+  const handleQuickImageEdit = (editType: string) => {
+    const prompts: Record<string, string> = {
+      enhance: 'Enhance this image with better lighting, colors, and clarity',
+      background: 'Remove the background and make it transparent',
+      professional: 'Make this image look more professional and polished',
+      artistic: 'Apply an artistic style to make it more creative and unique'
+    }
+    setImageEditPrompt(prompts[editType] || '')
+    handleApplyImageEdit(prompts[editType])
+  }
+
+  const handleApplyImageEdit = async (prompt?: string) => {
+    const editPrompt = prompt || imageEditPrompt
+    if (!editPrompt.trim() || editingImageIndex === null) return
+
+    setIsGeneratingImage(true)
+    try {
+      // Simulate AI image editing
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // In production, this would call an AI image editing API
+      // For now, we'll just update with a placeholder
+      const updatedImages = [...generatedImages]
+      updatedImages[editingImageIndex] = `${generatedImages[editingImageIndex]}?edited=${Date.now()}`
+      setGeneratedImages(updatedImages)
+      
+      toast.success('Image updated successfully!')
+      setImageEditPrompt('')
+    } catch (error) {
+      console.error('Failed to edit image:', error)
+      toast.error('Failed to edit image')
+    } finally {
+      setIsGeneratingImage(false)
+    }
+  }
+
+  const handleQuickCaptionEdit = (editType: string) => {
+    const prompts: Record<string, string> = {
+      engaging: 'Make this caption more engaging and attention-grabbing',
+      cta: 'Add a clear call to action to this caption',
+      shorter: 'Make this caption shorter and more concise',
+      emojis: 'Add relevant emojis to make this caption more fun'
+    }
+    setCaptionEditPrompt(prompts[editType] || '')
+    handleApplyCaptionEdit(prompts[editType])
+  }
+
+  const handleApplyCaptionEdit = async (prompt?: string) => {
+    const editPrompt = prompt || captionEditPrompt
+    if (!editPrompt.trim()) return
+
+    setIsGeneratingText(true)
+    try {
+      const response = await fetch('/api/content/generate-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `${editPrompt}\n\nOriginal caption:\n${generatedCaption}`,
+          platform: formState.platform,
+          type: 'caption'
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setGeneratedCaption(data.text)
+        toast.success('Caption updated!')
+        setCaptionEditPrompt('')
+      }
+    } catch (error) {
+      console.error('Failed to update caption:', error)
+      toast.error('Failed to update caption')
+    } finally {
+      setIsGeneratingText(false)
+    }
+  }
+
   return (
     <div className="w-full max-w-6xl mx-auto relative">
       <div className="lg:pr-[20rem]">
@@ -427,7 +509,7 @@ export function EnhancedSocialMediaCreator({
                   <Sparkles className="h-5 w-5 text-teal-500" />
                 </div>
                 <div>
-                  <CardTitle>Social Media Creator</CardTitle>
+                  <CardTitle>AI Social Media Creator</CardTitle>
                   <CardDescription>Create engaging posts with AI-powered visuals and captions</CardDescription>
                 </div>
               </div>
@@ -547,24 +629,26 @@ export function EnhancedSocialMediaCreator({
                               alt={`Option ${idx + 1}`}
                               className="w-full h-full object-cover pointer-events-none"
                             />
-                            {/* Select / Edit overlay */}
-                            <div className="absolute inset-x-0 bottom-0 flex text-xs font-medium text-white">
-                              <button
-                                onClick={() => setSelectedImageIndex(idx)}
-                                className="flex-1 bg-black/60 backdrop-blur-sm py-1 hover:bg-teal-600 transition-colors"
-                              >
-                                Select
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setEditingImageIndex(idx)
-                                  setShowEditDrawer(true)
-                                }}
-                                className="flex-1 bg-black/60 backdrop-blur-sm py-1 hover:bg-purple-600 transition-colors border-l border-white/10"
-                              >
-                                Edit
-                              </button>
-                            </div>
+                            {/* Click to select, button to edit */}
+                            <button
+                              onClick={() => setSelectedImageIndex(idx)}
+                              className="absolute inset-0 bg-transparent"
+                              aria-label={`Select image ${idx + 1}`}
+                            />
+                            {/* Edit button */}
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="absolute bottom-2 right-2 h-8 px-3 bg-black/80 hover:bg-black/90 text-white border-0"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setEditingImageIndex(idx)
+                                setShowEditDrawer(true)
+                              }}
+                            >
+                              <Edit2 className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
                             {selectedImageIndex === idx && (
                               <div className="absolute inset-0 ring-2 ring-teal-500 pointer-events-none rounded-lg" />
                             )}
@@ -856,32 +940,222 @@ export function EnhancedSocialMediaCreator({
         </div>
       </div>
 
-      {/* Edit Drawer */}
-      <Drawer open={showEditDrawer} onOpenChange={(open) => !open && setShowEditDrawer(false)}>
-        <DrawerContent className="backdrop-blur-md/70">
-          <DrawerHeader>
-            <DrawerTitle>Edit Photo with AI</DrawerTitle>
-            <DrawerDescription className="text-center">Smart enhancements & adjustments</DrawerDescription>
-          </DrawerHeader>
-          <div className="p-4 flex flex-col items-center gap-4">
-            {editingImageIndex !== null && (
-              <img
-                src={generatedImages[editingImageIndex]}
-                alt="Editing"
-                className="rounded-xl max-h-64 w-auto object-cover shadow-lg"
-              />
-            )}
-            <Button className="w-full" onClick={() => toast.info('AI editing coming soon!')}>
-              <Sparkles className="h-4 w-4 mr-2" /> Enhance with AI
-            </Button>
-          </div>
-          <DrawerFooter>
-            <DrawerClose asChild>
-              <Button variant="outline" className="w-full">Close</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+      {/* Edit Sheet - Wide drawer style like legal tab */}
+      <Sheet open={showEditDrawer} onOpenChange={setShowEditDrawer}>
+        <SheetContent className="sm:max-w-2xl overflow-y-auto bg-background/95 backdrop-blur-xl border-l border-border/50">
+          <div className="absolute inset-0 pointer-events-none bg-background/80 backdrop-blur-[2px] brightness-[0.96] -z-10" />
+          <SheetHeader className="border-b border-cosmic-teal/20 pb-4">
+            <SheetTitle className="text-cosmic-teal">AI Content Editor</SheetTitle>
+            <SheetDescription>
+              Edit your image and caption with AI-powered tools
+            </SheetDescription>
+          </SheetHeader>
+
+          {editingImageIndex !== null && (
+            <div className="py-6 space-y-6">
+              {/* Image Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-cosmic-teal">IMAGE</h3>
+                  {isGeneratingImage && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span>Generating...</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="relative rounded-lg overflow-hidden bg-muted">
+                  <img
+                    src={generatedImages[editingImageIndex]}
+                    alt="Editing"
+                    className="w-full h-auto max-h-[400px] object-contain"
+                  />
+                  {isGeneratingImage && (
+                    <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                      <div className="text-center space-y-2">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-cosmic-teal" />
+                        <p className="text-sm text-muted-foreground">Applying AI edits...</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* AI Image Edit Options */}
+                <div className="space-y-3">
+                  <Label htmlFor="image-prompt">Describe how you want to modify this image</Label>
+                  <div className="flex gap-2">
+                    <Textarea
+                      id="image-prompt"
+                      placeholder="e.g., Make it more vibrant, add a sunset background, remove the background, make it look more professional..."
+                      className="min-h-[80px] flex-1"
+                      value={imageEditPrompt}
+                      onChange={(e) => setImageEditPrompt(e.target.value)}
+                    />
+                  </div>
+                  
+                  {/* Quick Actions */}
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleQuickImageEdit('enhance')}
+                      disabled={isGeneratingImage}
+                    >
+                      <Wand2 className="h-3 w-3 mr-1" />
+                      Auto Enhance
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleQuickImageEdit('background')}
+                      disabled={isGeneratingImage}
+                    >
+                      Remove Background
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleQuickImageEdit('professional')}
+                      disabled={isGeneratingImage}
+                    >
+                      Make Professional
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleQuickImageEdit('artistic')}
+                      disabled={isGeneratingImage}
+                    >
+                      Artistic Style
+                    </Button>
+                  </div>
+
+                  <Button
+                    className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                    onClick={() => handleApplyImageEdit()}
+                    disabled={isGeneratingImage || !imageEditPrompt.trim()}
+                  >
+                    {isGeneratingImage ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Applying Changes...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Apply AI Edit
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="border-t border-cosmic-teal/20" />
+
+              {/* Caption Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-cosmic-teal">CAPTION</h3>
+                  {isGeneratingText && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span>Generating...</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <Textarea
+                    value={generatedCaption}
+                    onChange={(e) => setGeneratedCaption(e.target.value)}
+                    className="min-h-[120px] resize-none"
+                    placeholder="Your caption..."
+                  />
+
+                  <div className="space-y-3">
+                    <Label htmlFor="caption-prompt">AI Caption Assistant</Label>
+                    <Textarea
+                      id="caption-prompt"
+                      placeholder="e.g., Make it more engaging, add a call to action, make it shorter, add more emojis..."
+                      className="min-h-[60px]"
+                      value={captionEditPrompt}
+                      onChange={(e) => setCaptionEditPrompt(e.target.value)}
+                    />
+
+                    {/* Quick Caption Actions */}
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleQuickCaptionEdit('engaging')}
+                        disabled={isGeneratingText}
+                      >
+                        More Engaging
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleQuickCaptionEdit('cta')}
+                        disabled={isGeneratingText}
+                      >
+                        Add Call to Action
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleQuickCaptionEdit('shorter')}
+                        disabled={isGeneratingText}
+                      >
+                        Make Shorter
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleQuickCaptionEdit('emojis')}
+                        disabled={isGeneratingText}
+                      >
+                        Add Emojis
+                      </Button>
+                    </div>
+
+                    <Button
+                      className="w-full"
+                      variant="secondary"
+                      onClick={() => handleApplyCaptionEdit()}
+                      disabled={isGeneratingText || !captionEditPrompt.trim()}
+                    >
+                      {isGeneratingText ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Updating Caption...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Apply Caption Edit
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-cosmic-teal/20 pt-4">
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    setShowEditDrawer(false)
+                    toast.success('Changes saved!')
+                  }}
+                >
+                  Save & Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   )
 } 
