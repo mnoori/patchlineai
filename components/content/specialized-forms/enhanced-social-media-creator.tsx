@@ -43,6 +43,7 @@ import { getNovaCanvasUtils } from "@/lib/nova-canvas-utils"
 import { Textarea } from "@/components/ui/textarea"
 import { useDebounce } from "@/hooks/use-debounce"
 import { PRE_GENERATED_CONTENT } from "@/lib/social-media-templates-system"
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from "@/components/ui/drawer"
 
 interface EnhancedSocialMediaCreatorProps {
   onContentGenerated?: (content: {
@@ -474,14 +475,6 @@ export function EnhancedSocialMediaCreator({
               <>
                 {/* Pre-generated Content Blocks */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Ready-to-Post Content</h3>
-                    <Badge variant="secondary" className="bg-green-500/10 text-green-600">
-                      <Sparkles className="h-3 w-3 mr-1" />
-                      AI Generated
-                    </Badge>
-                  </div>
-                  
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {PRE_GENERATED_CONTENT.map((content, index) => (
                       <Card 
@@ -533,34 +526,17 @@ export function EnhancedSocialMediaCreator({
                   </div>
                 </div>
 
-                <Separator />
-
                 {/* Generated Content */}
                 {generatedImages.length > 0 && (
                   <div className="space-y-4" data-generated-content>
                     {/* Photo Selection and Editing */}
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-base font-medium">Select Photo</Label>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-2 text-xs"
-                          onClick={() => {
-                            toast.info('Photo editing coming soon!')
-                          }}
-                        >
-                          <ImageIcon className="h-3 w-3" />
-                          Edit with AI
-                        </Button>
-                      </div>
                       <div className="grid grid-cols-3 gap-2">
                         {generatedImages.map((image, idx) => (
-                          <button
+                          <div
                             key={idx}
-                            onClick={() => setSelectedImageIndex(idx)}
                             className={cn(
-                              "relative aspect-square rounded-lg overflow-hidden border-2 transition-all",
+                              "relative aspect-square rounded-lg overflow-hidden border-2 transition-all group",
                               selectedImageIndex === idx
                                 ? "border-teal-500 ring-2 ring-teal-500/20"
                                 : "border-muted hover:border-teal-500/50"
@@ -569,14 +545,30 @@ export function EnhancedSocialMediaCreator({
                             <img
                               src={image}
                               alt={`Option ${idx + 1}`}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover pointer-events-none"
                             />
+                            {/* Select / Edit overlay */}
+                            <div className="absolute inset-x-0 bottom-0 flex text-xs font-medium text-white">
+                              <button
+                                onClick={() => setSelectedImageIndex(idx)}
+                                className="flex-1 bg-black/60 backdrop-blur-sm py-1 hover:bg-teal-600 transition-colors"
+                              >
+                                Select
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingImageIndex(idx)
+                                  setShowEditDrawer(true)
+                                }}
+                                className="flex-1 bg-black/60 backdrop-blur-sm py-1 hover:bg-purple-600 transition-colors border-l border-white/10"
+                              >
+                                Edit
+                              </button>
+                            </div>
                             {selectedImageIndex === idx && (
-                              <div className="absolute inset-0 bg-teal-500/20 flex items-center justify-center">
-                                <Badge className="bg-teal-500 text-white text-xs">Selected</Badge>
-                              </div>
+                              <div className="absolute inset-0 ring-2 ring-teal-500 pointer-events-none rounded-lg" />
                             )}
-                          </button>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -863,6 +855,33 @@ export function EnhancedSocialMediaCreator({
           </Card>
         </div>
       </div>
+
+      {/* Edit Drawer */}
+      <Drawer open={showEditDrawer} onOpenChange={(open) => !open && setShowEditDrawer(false)}>
+        <DrawerContent className="backdrop-blur-md/70">
+          <DrawerHeader>
+            <DrawerTitle>Edit Photo with AI</DrawerTitle>
+            <DrawerDescription className="text-center">Smart enhancements & adjustments</DrawerDescription>
+          </DrawerHeader>
+          <div className="p-4 flex flex-col items-center gap-4">
+            {editingImageIndex !== null && (
+              <img
+                src={generatedImages[editingImageIndex]}
+                alt="Editing"
+                className="rounded-xl max-h-64 w-auto object-cover shadow-lg"
+              />
+            )}
+            <Button className="w-full" onClick={() => toast.info('AI editing coming soon!')}>
+              <Sparkles className="h-4 w-4 mr-2" /> Enhance with AI
+            </Button>
+          </div>
+          <DrawerFooter>
+            <DrawerClose asChild>
+              <Button variant="outline" className="w-full">Close</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 } 
