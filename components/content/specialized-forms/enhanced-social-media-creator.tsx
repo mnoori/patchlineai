@@ -952,8 +952,15 @@ export function EnhancedSocialMediaCreator({
       </div>
 
       {/* Edit Sheet - Wide drawer style like legal tab */}
+      {showEditDrawer && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" 
+          onClick={() => setShowEditDrawer(false)}
+        />
+      )}
       <Sheet open={showEditDrawer} onOpenChange={setShowEditDrawer} modal={false}>
         <SheetContent className="sm:max-w-2xl overflow-y-auto bg-background/95 backdrop-blur-xl border-l border-border/50" style={{ position: 'fixed' }}>
+          {/* Glassmorphism background overlay */}
           <div className="absolute inset-0 pointer-events-none bg-background/80 backdrop-blur-[2px] brightness-[0.96] -z-10" />
           <SheetHeader className="border-b border-cosmic-teal/20 pb-4">
             <SheetTitle className="text-cosmic-teal">AI Content Editor</SheetTitle>
