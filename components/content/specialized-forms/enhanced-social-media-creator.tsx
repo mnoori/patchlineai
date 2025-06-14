@@ -41,6 +41,7 @@ import { getPromptSuggestions, fillPromptTemplate, PROMPT_MODIFIERS, type Dynami
 import { getNovaCanvasUtils } from "@/lib/nova-canvas-utils"
 import { Textarea } from "@/components/ui/textarea"
 import { useDebounce } from "@/hooks/use-debounce"
+import { PRE_GENERATED_CONTENT } from "@/lib/social-media-templates-system"
 
 interface EnhancedSocialMediaCreatorProps {
   onContentGenerated?: (content: {
@@ -207,17 +208,14 @@ export function EnhancedSocialMediaCreator({
     loadUserPhotos()
     
     // Auto-select the first pre-generated content
+    const firstContent = PRE_GENERATED_CONTENT[0]
     setFormState(prev => ({ 
       ...prev, 
       workflowMode: 'template',
-      selectedTemplate: 'New Release Announcement'
+      selectedTemplate: firstContent.title
     }))
-    setGeneratedCaption(`🎵 NEW MUSIC ALERT! 🎵\n\n"Solitude" by ALGORYX drops TOMORROW! 🔥\n\nThis track is a journey through electronic soundscapes that will transport you to another dimension.\n\nPre-save now and be the first to experience it 🎧\nLink in bio!\n\n#ALGORYX #Solitude #NewMusic #ElectronicMusic #ComingSoon`)
-    setGeneratedImages([
-      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop'
-    ])
+    setGeneratedCaption(firstContent.caption)
+    setGeneratedImages(firstContent.images)
     setSelectedImageIndex(0)
   }, [])
 
@@ -413,7 +411,7 @@ export function EnhancedSocialMediaCreator({
 
   return (
     <div className="w-full max-w-7xl mx-auto">
-      <div className="space-y-6 lg:pr-[22rem]">
+      <div className="space-y-6 lg:pr-[20rem]">
         {/* Main Form */}
         <div>
           <Card>
@@ -451,208 +449,53 @@ export function EnhancedSocialMediaCreator({
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* New Release Block */}
-                  <Card 
-                    className={cn(
-                      "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20 hover:border-cosmic-teal/50 group relative overflow-hidden will-change-transform",
-                      hoveredCard === 'new-release' && "ring-2 ring-cosmic-teal/30"
-                    )}
-                    style={{ backfaceVisibility: 'hidden', perspective: '1000px' }}
-                    onMouseEnter={() => setHoveredCard('new-release')}
-                    onMouseLeave={() => setHoveredCard(null)}
-                    onClick={() => {
-                      setFormState(prev => ({ 
-                        ...prev, 
-                        workflowMode: 'template',
-                        selectedTemplate: 'New Release Announcement'
-                      }))
-                      setGeneratedCaption(`🎵 NEW MUSIC ALERT! 🎵\n\n"Solitude" by ALGORYX drops TOMORROW! 🔥\n\nThis track is a journey through electronic soundscapes that will transport you to another dimension.\n\nPre-save now and be the first to experience it 🎧\nLink in bio!\n\n#ALGORYX #Solitude #NewMusic #ElectronicMusic #ComingSoon`)
-                      setGeneratedImages([
-                        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
-                        'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=400&fit=crop',
-                        'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop'
-                      ])
-                      setSelectedImageIndex(0)
-                    }}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex -space-x-2 mb-3">
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
-                          <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
-                        </div>
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
-                          <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
-                        </div>
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
-                          <img src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
-                        </div>
-                      </div>
-                      <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">New Release: "Solitude"</h4>
-                      <p className="text-sm text-muted-foreground mb-2">Releases Tomorrow</p>
-                      <p className="text-xs line-clamp-2">🎵 NEW MUSIC ALERT! 🎵 "Solitude" by ALGORYX drops TOMORROW! 🔥</p>
-                      <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Sparkles className="h-3 w-3" />
-                        <span>Click to use this content</span>
-                      </div>
-                    </CardContent>
-                    {/* Hover Overlay */}
-                    <div
+                  {PRE_GENERATED_CONTENT.map((content, index) => (
+                    <Card 
+                      key={content.id}
                       className={cn(
-                        "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300 pointer-events-none",
-                        hoveredCard === 'new-release' ? "opacity-100" : "opacity-0"
+                        "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20 hover:border-cosmic-teal/50 group relative overflow-hidden will-change-transform",
+                        hoveredCard === content.id && "ring-2 ring-cosmic-teal/30",
+                        formState.selectedTemplate === content.title && "border-cosmic-teal border-2"
                       )}
-                    />
-                  </Card>
-
-                  {/* Tour Announcement Block */}
-                  <Card 
-                    className={cn(
-                      "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20 hover:border-cosmic-teal/50 group relative overflow-hidden will-change-transform",
-                      hoveredCard === 'tour' && "ring-2 ring-cosmic-teal/30"
-                    )}
-                    style={{ backfaceVisibility: 'hidden', perspective: '1000px' }}
-                    onMouseEnter={() => setHoveredCard('tour')}
-                    onMouseLeave={() => setHoveredCard(null)}
-                    onClick={() => {
-                      setFormState(prev => ({ 
-                        ...prev, 
-                        workflowMode: 'template',
-                        selectedTemplate: 'Tour Announcement'
-                      }))
-                      setGeneratedCaption(`🎤 TOUR ANNOUNCEMENT 🎤\n\nALGORYX Summer Tour 2024 is HERE! 🚌\n\nJoin us for an unforgettable journey across 15 cities:\n📍 Los Angeles - June 5\n📍 San Francisco - June 8\n📍 Seattle - June 12\n...and more!\n\nTickets on sale Friday at 10AM PST 🎫\nDon't miss out!\n\n#ALGORYXTour #SummerTour2024 #LiveMusic`)
-                      setGeneratedImages([
-                        'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&h=400&fit=crop',
-                        'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&h=400&fit=crop',
-                        'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=400&h=400&fit=crop'
-                      ])
-                      setSelectedImageIndex(0)
-                    }}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex -space-x-2 mb-3">
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
-                          <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                      style={{ backfaceVisibility: 'hidden', perspective: '1000px' }}
+                      onMouseEnter={() => setHoveredCard(content.id)}
+                      onMouseLeave={() => setHoveredCard(null)}
+                      onClick={() => {
+                        setFormState(prev => ({ 
+                          ...prev, 
+                          workflowMode: 'template',
+                          selectedTemplate: content.title
+                        }))
+                        setGeneratedCaption(content.caption)
+                        setGeneratedImages(content.images)
+                        setSelectedImageIndex(0)
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex -space-x-2 mb-3">
+                          {content.images.slice(0, 3).map((image, idx) => (
+                            <div key={idx} className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                              <img src={`${image}&w=100&h=100`} alt="" className="w-full h-full object-cover" />
+                            </div>
+                          ))}
                         </div>
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
-                          <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                        <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">{content.title}</h4>
+                        <p className="text-sm text-muted-foreground mb-2">{content.subtitle}</p>
+                        <p className="text-xs line-clamp-2">{content.preview}</p>
+                        <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Sparkles className="h-3 w-3" />
+                          <span>Click to use this content</span>
                         </div>
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
-                          <img src="https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
-                        </div>
-                      </div>
-                      <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">Summer Tour 2024</h4>
-                      <p className="text-sm text-muted-foreground mb-2">June 2024</p>
-                      <p className="text-xs line-clamp-2">🎤 TOUR ANNOUNCEMENT 🎤 ALGORYX Summer Tour 2024 is HERE! 🚌</p>
-                      <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Sparkles className="h-3 w-3" />
-                        <span>Click to use this content</span>
-                      </div>
-                    </CardContent>
-                    {/* Hover Overlay */}
-                    <div
-                      className={cn(
-                        "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300 pointer-events-none",
-                        hoveredCard === 'tour' ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                  </Card>
-
-                  {/* Behind the Scenes Block */}
-                  <Card 
-                    className={cn(
-                      "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20 hover:border-cosmic-teal/50 group relative overflow-hidden will-change-transform",
-                      hoveredCard === 'bts' && "ring-2 ring-cosmic-teal/30"
-                    )}
-                    style={{ backfaceVisibility: 'hidden', perspective: '1000px' }}
-                    onMouseEnter={() => setHoveredCard('bts')}
-                    onMouseLeave={() => setHoveredCard(null)}
-                    onClick={() => {
-                      setFormState(prev => ({ 
-                        ...prev, 
-                        workflowMode: 'template',
-                        selectedTemplate: 'Behind the Scenes'
-                      }))
-                      setGeneratedCaption(`Behind the magic ✨\n\nSpent the last 48 hours in the studio crafting something special for you all. "Echoes" started as a simple melody at 3AM and evolved into something much deeper.\n\nCan't wait to share the full track with you next month 🎵\n\nWhat's your favorite part of the creative process?\n\n#StudioLife #BehindTheScenes #ALGORYX #MusicProduction`)
-                      setGeneratedImages([
-                        'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=400&fit=crop',
-                        'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=400&h=400&fit=crop',
-                        'https://images.unsplash.com/photo-1519508234439-4f23643125c1?w=400&h=400&fit=crop'
-                      ])
-                      setSelectedImageIndex(0)
-                    }}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex -space-x-2 mb-3">
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
-                          <img src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
-                        </div>
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
-                          <img src="https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
-                        </div>
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
-                          <img src="https://images.unsplash.com/photo-1519508234439-4f23643125c1?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
-                        </div>
-                      </div>
-                      <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">Studio Sessions</h4>
-                      <p className="text-sm text-muted-foreground mb-2">Behind the Scenes</p>
-                      <p className="text-xs line-clamp-2">Behind the magic ✨ Spent the last 48 hours in the studio...</p>
-                      <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Sparkles className="h-3 w-3" />
-                        <span>Click to use this content</span>
-                      </div>
-                    </CardContent>
-                    {/* Hover Overlay */}
-                    <div
-                      className={cn(
-                        "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300 pointer-events-none",
-                        hoveredCard === 'bts' ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                  </Card>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Workflow Selection */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Or Create Custom Content</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={() => setFormState(prev => ({ ...prev, workflowMode: 'template' }))}
-                    className={cn(
-                      "p-4 rounded-lg border-2 transition-all text-left",
-                      formState.workflowMode === 'template'
-                        ? "border-teal-500 bg-teal-500/10"
-                        : "border-muted hover:border-teal-500/50"
-                    )}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="h-5 w-5 text-teal-500" />
-                      <span className="font-medium">Use Templates</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      AI generates both caption and visuals
-                    </p>
-                  </button>
-
-                  <button
-                    onClick={() => setFormState(prev => ({ ...prev, workflowMode: 'custom' }))}
-                    className={cn(
-                      "p-4 rounded-lg border-2 transition-all text-left",
-                      formState.workflowMode === 'custom'
-                        ? "border-teal-500 bg-teal-500/10"
-                        : "border-muted hover:border-teal-500/50"
-                    )}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <Type className="h-5 w-5 text-teal-500" />
-                      <span className="font-medium">Custom Caption</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      You write caption, AI creates visuals
-                    </p>
-                  </button>
+                      </CardContent>
+                      {/* Hover Overlay */}
+                      <div
+                        className={cn(
+                          "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300 pointer-events-none",
+                          hoveredCard === content.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </Card>
+                  ))}
                 </div>
               </div>
 
@@ -744,108 +587,7 @@ export function EnhancedSocialMediaCreator({
 
               <Separator />
 
-              {/* Template Workflow */}
-              {formState.workflowMode === 'template' && (
-                <div className="space-y-6">
-                  {/* Template Selection */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-medium">Select a Template</Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {CREATIVE_TEMPLATES.map((template) => (
-                        <button
-                          key={template.id}
-                          onClick={() => handleTemplateSelect(template)}
-                          className={cn(
-                            "p-4 rounded-lg border-2 transition-all text-left",
-                            formState.selectedTemplate === template.name
-                              ? "border-teal-500 bg-teal-500/10"
-                              : "border-muted hover:border-teal-500/50"
-                          )}
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-2xl">{template.icon}</span>
-                            <span className="font-medium text-sm">{template.name}</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {template.description}
-                          </p>
-                          {userPhotos.length === 0 && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
-                              📸 Upload your photo for best results
-                            </p>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
 
-                  {/* Upload Photo (below templates) */}
-                  <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                    <Upload className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Upload your photo for personalized content
-                    </p>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      Choose Photo
-                    </Button>
-                    <Input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                    
-                    {userPhotos.length > 0 && (
-                      <div className="grid grid-cols-3 gap-2 mt-4">
-                        {userPhotos.map((photo, idx) => (
-                          <div key={idx} className="relative group">
-                            <img src={photo} alt={`Upload ${idx + 1}`} className="w-full h-24 object-cover rounded" />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newPhotos = userPhotos.filter((_, i) => i !== idx)
-                                setUserPhotos(newPhotos)
-                                saveUserPhotos(newPhotos)
-                              }}
-                              className="absolute top-1 right-1 p-1 bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <XIcon className="h-3 w-3 text-white" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Generate Draft Button */}
-                  {formState.selectedTemplate && (
-                    <Button
-                      onClick={handleGenerateImages}
-                      disabled={isGenerating}
-                      className="w-full"
-                      size="lg"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Generating Images...
-                        </>
-                      ) : (
-                        <>
-                          <ImageIcon className="mr-2 h-4 w-4" />
-                          Generate Draft
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-              )}
 
               {/* Custom Workflow */}
               {formState.workflowMode === 'custom' && (
@@ -986,7 +728,7 @@ export function EnhancedSocialMediaCreator({
         </div>
 
         {/* Live Preview - fixed on large screens */}
-        <div className="hidden lg:block fixed top-20 right-6 w-80 z-30">
+        <div className="hidden lg:block fixed top-24 right-8 w-80 z-30">
           <div>
             <Card className="overflow-hidden w-full">
             <CardHeader className="pb-3">
