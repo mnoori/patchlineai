@@ -47,6 +47,17 @@ const CONTENT_TYPES = [
     available: true,
   },
   {
+    id: "social-ai" as ContentType,
+    title: "AI Social Media Creator",
+    description: "Transform your photos into stunning social media content with AI",
+    icon: Sparkles,
+    features: ["Google Drive Integration", "AI Background Removal", "Custom Templates"],
+    buttonText: "Create AI Social Content",
+    gradient: "from-cosmic-teal/20 to-purple-500/20",
+    iconColor: "text-cosmic-teal",
+    available: true,
+  },
+  {
     id: "short-video" as ContentType,
     title: "Short Video",
     description: "Brief, impactful videos for social platforms",

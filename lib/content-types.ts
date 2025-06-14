@@ -1,5 +1,5 @@
 // Enhanced content type system for Patchline AI
-export type ContentType = "blog" | "epk" | "social" | "short-video" | "music-video"
+export type ContentType = "blog" | "epk" | "social" | "social-ai" | "short-video" | "music-video"
 
 export interface ContentTypeConfig {
   id: ContentType
@@ -78,6 +78,20 @@ export const CONTENT_TYPES: Record<ContentType, ContentTypeConfig> = {
       "Storyboard and shot sequences",
       "Audio and music recommendations",
       "Text overlays and captions",
+    ],
+  },
+  "social-ai": {
+    id: "social-ai",
+    name: "AI Social Media Creator",
+    description: "Transform your photos into stunning social media content with AI",
+    icon: "Sparkles",
+    color: "cosmic-teal",
+    estimatedTime: "3-5 min",
+    agentSuggestions: [
+      "Google Drive photo integration",
+      "AI background removal and generation",
+      "Custom template styling",
+      "Automated caption generation",
     ],
   },
   "music-video": {
@@ -294,6 +308,48 @@ export const CONTENT_IDEAS: Record<ContentType, ContentIdea[]> = {
       trendingScore: 76,
     },
   ],
+  "social-ai": [
+    {
+      title: "Artist Photo Transformation",
+      excerpt: "Transform your personal photos into professional social media content with AI-generated backgrounds.",
+      image: "/music-industry-ai-blog.png",
+      category: "AI Content Creation",
+      slug: "artist-photo-transformation",
+      contentType: "social-ai",
+      estimatedEngagement: "Very High",
+      trendingScore: 98,
+    },
+    {
+      title: "Album Art Style Social Posts",
+      excerpt: "Create cohesive social media content that matches your album artwork aesthetic.",
+      image: "/music-education-technology.png",
+      category: "Brand Consistency",
+      slug: "album-art-style-posts",
+      contentType: "social-ai",
+      estimatedEngagement: "High",
+      trendingScore: 92,
+    },
+    {
+      title: "Concert Poster Style Content",
+      excerpt: "Generate vintage concert poster-style social media content from your photos.",
+      image: "/ai-ethics-music.png",
+      category: "Vintage Aesthetic",
+      slug: "concert-poster-content",
+      contentType: "social-ai",
+      estimatedEngagement: "High",
+      trendingScore: 89,
+    },
+    {
+      title: "Cyberpunk Artist Visuals",
+      excerpt: "Transform your photos into futuristic cyberpunk-style social media content.",
+      image: "/ai-agent-workflows.png",
+      category: "Futuristic Style",
+      slug: "cyberpunk-artist-visuals",
+      contentType: "social-ai",
+      estimatedEngagement: "Very High",
+      trendingScore: 95,
+    },
+  ],
   "short-video": [
     {
       title: "Music Production Process Timelapse",
@@ -395,6 +451,11 @@ export const CONTENT_TYPE_CONFIG = {
     title: "Social Media",
     icon: "📱",
     description: "Engaging posts for social platforms",
+  },
+  "social-ai": {
+    title: "AI Social Media Creator",
+    icon: "✨",
+    description: "Transform photos into stunning social content with AI",
   },
   "short-video": {
     title: "Short Video",

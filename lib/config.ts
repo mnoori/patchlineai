@@ -140,6 +140,55 @@ export const CONFIG = {
   INSTAGRAM_CLIENT_SECRET: process.env.INSTAGRAM_CLIENT_SECRET || "",
   INSTAGRAM_REDIRECT_URI: process.env.INSTAGRAM_REDIRECT_URI || "http://localhost:3000/api/oauth/instagram/callback",
 
+  // Social Media Workflow Configuration
+  SOCIAL_MEDIA_WORKFLOW: {
+    // Zapier MCP Configuration
+    ZAPIER_MCP_ENDPOINT: process.env.ZAPIER_MCP_ENDPOINT || "http://localhost:3001/mcp",
+    ZAPIER_API_KEY: process.env.ZAPIER_API_KEY || "",
+    
+    // Google Drive Integration
+    GOOGLE_DRIVE_FOLDER_ID: process.env.GOOGLE_DRIVE_FOLDER_ID || "",
+    GOOGLE_DRIVE_MAX_IMAGES: parseInt(process.env.GOOGLE_DRIVE_MAX_IMAGES || "20"),
+    
+    // Image Processing
+    SELECTED_IMAGES_COUNT: 3, // Always select 3 images as per requirements
+    TEMP_S3_BUCKET: process.env.TEMP_S3_BUCKET || "patchline-temp-images",
+    FINAL_S3_BUCKET: process.env.FINAL_S3_BUCKET || "patchline-social-content",
+    
+    // Template Configuration
+    TEMPLATES_S3_BUCKET: process.env.TEMPLATES_S3_BUCKET || "patchline-templates",
+    DEFAULT_TEMPLATES: [
+      {
+        id: "vintage-concert-poster",
+        name: "Vintage Concert Poster",
+        description: "Retro-style concert poster with vintage aesthetics",
+        visualPrompt: "Create a vintage concert poster background with retro typography, distressed textures, and warm color palette",
+        captionPrompt: "Write an exciting announcement about my new single in a vintage, nostalgic tone that captures the essence of classic rock concerts"
+      },
+      {
+        id: "modern-album-art",
+        name: "Modern Album Art",
+        description: "Clean, contemporary album artwork style",
+        visualPrompt: "Create a modern, minimalist album cover background with clean lines, bold colors, and contemporary design elements",
+        captionPrompt: "Write a sleek, modern announcement about my new release that appeals to contemporary music fans and streaming audiences"
+      },
+      {
+        id: "neon-cyberpunk",
+        name: "Neon Cyberpunk",
+        description: "Futuristic cyberpunk aesthetic with neon colors",
+        visualPrompt: "Create a cyberpunk-inspired background with neon lights, futuristic elements, and electric color schemes",
+        captionPrompt: "Write a futuristic, edgy announcement about my new track that captures the energy of electronic and cyberpunk culture"
+      },
+      {
+        id: "acoustic-indie",
+        name: "Acoustic Indie",
+        description: "Warm, organic indie folk aesthetic",
+        visualPrompt: "Create a warm, organic background with natural textures, earth tones, and indie folk aesthetics",
+        captionPrompt: "Write a heartfelt, authentic announcement about my new song that resonates with indie and folk music lovers"
+      }
+    ]
+  },
+
   // Other Configuration
   JWT_SECRET: process.env.JWT_SECRET || "development-jwt-secret-key-change-in-production",
   ENV: process.env.ENV || "development",

@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import type { ContentDraft, ContentPrompt } from "@/lib/blog-types"
 import { EPKCreatorForm } from "../../../components/content/specialized-forms/epk-creator-form"
 import { EnhancedSocialMediaCreator } from "../../../components/content/specialized-forms/enhanced-social-media-creator"
+import { SocialMediaCreator } from "../../../components/content/social-media-creator"
 import { ShortVideoCreatorForm } from "../../../components/content/specialized-forms/short-video-creator-form"
 import { MusicVideoCreatorForm } from "../../../components/content/specialized-forms/music-video-creator-form"
 
@@ -206,6 +207,8 @@ export default function ContentPage() {
                   currentStep={currentStep - 1}
                   onStepChange={(step) => setCurrentStep(step + 1)}
                 />
+              ) : selectedContentType === "social-ai" ? (
+                <SocialMediaCreator />
               ) : selectedContentType === "short-video" ? (
                 <ShortVideoCreatorForm
                   onContentGenerated={handleContentGenerated}

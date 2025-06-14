@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { PlatformIntegrations } from "@/components/insights/platform-integrations"
+import { PlatformIntegrationSettings } from "@/components/platform-integration-settings"
 import { MCPSettings } from "@/components/mcp/mcp-settings"
 import { AWSMCPDashboard } from "@/components/aws-mcp/aws-mcp-dashboard"
 import { toast } from "sonner"
@@ -597,7 +597,7 @@ export default function SettingsPage() {
 
         <TabsContent value="platforms" className="space-y-6">
           <motion.div variants={itemVariants}>
-            <PlatformIntegrations />
+            <PlatformIntegrationSettings />
           </motion.div>
 
           <motion.div variants={itemVariants}>
