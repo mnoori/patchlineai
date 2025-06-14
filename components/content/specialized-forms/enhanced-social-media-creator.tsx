@@ -337,14 +337,6 @@ export function EnhancedSocialMediaCreator({
 
       setSelectedImageIndex(0)
       toast.success('Images generated successfully!')
-      
-      // Auto-scroll to generated content
-      setTimeout(() => {
-        const generatedSection = document.querySelector('[data-generated-content]')
-        if (generatedSection) {
-          generatedSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }
-      }, 100)
     } catch (error) {
       console.error('Failed to generate images:', error)
       toast.error('Failed to generate images')
@@ -410,7 +402,7 @@ export function EnhancedSocialMediaCreator({
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto">
+    <div className="w-full max-w-7xl mx-auto relative">
       <div className="space-y-6 lg:pr-[20rem]">
         {/* Main Form */}
         <div>
@@ -482,7 +474,7 @@ export function EnhancedSocialMediaCreator({
                         <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">{content.title}</h4>
                         <p className="text-sm text-muted-foreground mb-2">{content.subtitle}</p>
                         <p className="text-xs line-clamp-2">{content.preview}</p>
-                        <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity h-4">
                           <Sparkles className="h-3 w-3" />
                           <span>Click to use this content</span>
                         </div>
@@ -587,8 +579,6 @@ export function EnhancedSocialMediaCreator({
 
               <Separator />
 
-
-
               {/* Custom Workflow */}
               {formState.workflowMode === 'custom' && (
                 <div className="space-y-6">
@@ -675,39 +665,86 @@ export function EnhancedSocialMediaCreator({
               {/* Generated Content */}
               {generatedImages.length > 0 && (
                 <div className="space-y-4" data-generated-content>
-                  {/* Generated Caption */}
+                  {/* Generated Images */}
                   <div className="space-y-2">
-                    <Label className="text-base font-medium">Generated Caption</Label>
-                    <div className="p-4 bg-muted rounded-lg">
-                      <p className="whitespace-pre-wrap">{generatedCaption}</p>
+                    <Label className="text-base font-medium">Generated Images</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {generatedImages.map((image, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedImageIndex(idx)}
+                          className={cn(
+                            "relative aspect-square rounded-lg overflow-hidden border-2 transition-all",
+                            selectedImageIndex === idx
+                              ? "border-teal-500 ring-2 ring-teal-500/20"
+                              : "border-muted hover:border-teal-500/50"
+                          )}
+                        >
+                          <img
+                            src={image}
+                            alt={`Generated ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          {selectedImageIndex === idx && (
+                            <div className="absolute inset-0 bg-teal-500/20 flex items-center justify-center">
+                              <Badge className="bg-teal-500 text-white">Selected</Badge>
+                            </div>
+                          )}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  <Label className="text-base font-medium">Generated Images</Label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {generatedImages.map((image, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedImageIndex(idx)}
-                        className={cn(
-                          "relative aspect-square rounded-lg overflow-hidden border-2 transition-all",
-                          selectedImageIndex === idx
-                            ? "border-teal-500 ring-2 ring-teal-500/20"
-                            : "border-muted hover:border-teal-500/50"
-                        )}
+                  {/* Generated Caption */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-base font-medium">Generated Caption</Label>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-2 text-xs"
+                        onClick={async () => {
+                          const prompt = window.prompt('How would you like to modify this caption?', 'Make it more engaging')
+                          if (prompt) {
+                            setIsGeneratingText(true)
+                            try {
+                              const response = await fetch('/api/content/generate-text', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  prompt: `Modify this caption based on the instruction: "${prompt}"\n\nOriginal caption:\n${generatedCaption}`,
+                                  platform: formState.platform,
+                                  type: 'caption'
+                                })
+                              })
+                              if (response.ok) {
+                                const data = await response.json()
+                                setGeneratedCaption(data.text)
+                                toast.success('Caption updated!')
+                              }
+                            } catch (error) {
+                              toast.error('Failed to update caption')
+                            } finally {
+                              setIsGeneratingText(false)
+                            }
+                          }
+                        }}
+                        disabled={isGeneratingText}
                       >
-                        <img
-                          src={image}
-                          alt={`Generated ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        {selectedImageIndex === idx && (
-                          <div className="absolute inset-0 bg-teal-500/20 flex items-center justify-center">
-                            <Badge className="bg-teal-500 text-white">Selected</Badge>
-                          </div>
+                        {isGeneratingText ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3 w-3" />
                         )}
-                      </button>
-                    ))}
+                        Edit with AI
+                      </Button>
+                    </div>
+                    <Textarea
+                      value={generatedCaption}
+                      onChange={(e) => setGeneratedCaption(e.target.value)}
+                      className="min-h-[120px] resize-none"
+                      placeholder="Your caption will appear here..."
+                    />
                   </div>
 
                   {/* Schedule Button */}
@@ -729,38 +766,36 @@ export function EnhancedSocialMediaCreator({
 
         {/* Live Preview - fixed on large screens */}
         <div className="hidden lg:block fixed top-24 right-8 w-80 z-30">
-          <div>
-            <Card className="overflow-hidden w-full">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Eye className="h-5 w-5 text-teal-500" />
-                  <CardTitle className="text-base">Live Preview</CardTitle>
-                </div>
-                <Badge variant="secondary" className="text-xs">
-                  {formState.platform === 'instagram-post' ? 'Instagram Post' : 'Instagram Story'}
-                </Badge>
-              </div>
-              
-              {/* Platform Selection in Live View */}
-              <div className="flex gap-2 justify-center">
-                {PLATFORMS.map((platform) => (
-                  <button
-                    key={platform.id}
-                    onClick={() => setFormState(prev => ({ ...prev, platform: platform.id as any }))}
-                    className={cn(
-                      "relative transition-all p-2 rounded-lg border-2 scale-75",
-                      formState.platform === platform.id
-                        ? "border-teal-500 bg-teal-500/10"
-                        : "border-muted hover:border-teal-500/50"
-                    )}
-                  >
-                    {PLATFORM_ICONS[platform.id as keyof typeof PLATFORM_ICONS]}
-                  </button>
-                ))}
+          <div className="h-[calc(100vh-7rem)] flex flex-col">
+            <Card className="flex-1 flex flex-col overflow-hidden">
+            <CardHeader className="pb-2 pt-3 px-4 flex-shrink-0">
+              {/* Compact Platform Tabs */}
+              <div className="flex gap-1 p-1 bg-muted rounded-lg">
+                <button
+                  onClick={() => setFormState(prev => ({ ...prev, platform: 'instagram-post' }))}
+                  className={cn(
+                    "flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-all",
+                    formState.platform === 'instagram-post'
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Post
+                </button>
+                <button
+                  onClick={() => setFormState(prev => ({ ...prev, platform: 'instagram-story' }))}
+                  className={cn(
+                    "flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-all",
+                    formState.platform === 'instagram-story'
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Story
+                </button>
               </div>
             </CardHeader>
-            <CardContent className="p-0 overflow-hidden">
+            <CardContent className="p-0 flex-1 overflow-y-auto">
               {/* Dynamic Platform Mock */}
               <div className="bg-muted/50 p-4">
                 <div className="max-w-sm mx-auto">
@@ -889,7 +924,7 @@ export function EnhancedSocialMediaCreator({
                 </div>
               </div>
             </CardContent>
-          </Card>
+            </Card>
           </div>
         </div>
       </div>
