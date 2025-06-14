@@ -162,3 +162,8 @@
     box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.1), 0 0 0 0 rgba(255, 42, 109, 0.1);
   }
 }
+
+/* Prevent horizontal shift when overlay removes scrollbar */
+html {
+  scrollbar-gutter: stable;
+}

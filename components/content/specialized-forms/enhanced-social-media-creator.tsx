@@ -491,7 +491,7 @@ export function EnhancedSocialMediaCreator({
   return (
     <div className="w-full max-w-7xl mx-auto px-4 relative">
       {/* Main Content with padding for live preview */}
-      <div className="lg:pr-[24rem]">
+      <div className="lg:pr-[22rem]">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -831,8 +831,8 @@ export function EnhancedSocialMediaCreator({
       </div>
 
       {/* Live Preview - fixed position on the right */}
-      <div className="hidden lg:block fixed right-4 top-24 w-[24rem] z-20">
-        <Card className="max-h-[calc(100vh-7rem)] flex flex-col overflow-hidden shadow-xl">
+      <div className="hidden lg:block fixed right-4 w-[20rem] z-20" style={{ top: '6rem' }}>
+        <Card className="h-[calc(100vh-8rem)] flex flex-col overflow-hidden shadow-xl">
             <CardHeader className="pb-2 pt-3 px-4 flex-shrink-0">
               {/* Compact Platform Tabs */}
               <div className="flex gap-1 p-1 bg-muted rounded-lg">
