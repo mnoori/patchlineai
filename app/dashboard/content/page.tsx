@@ -45,7 +45,14 @@ export default function ContentPage() {
     }
   }, [preserveScroll])
 
-  const handleContentGenerated = (id: string) => {
+  const handleContentGenerated = (
+    data: string | {
+      caption: string
+      images: string[]
+      platform: string
+      selectedImageIndex: number | null
+    },
+  ) => {
     // For demo purposes, use content type as draft ID to show different previews
     const mockDraftId = selectedContentType
     setDraftId(mockDraftId)
@@ -113,7 +120,13 @@ export default function ContentPage() {
   const handleContentTypeChange = (type: ContentType) => {
     setSelectedContentType(type)
     setSelectedPrompt(null)
-    setCurrentStep(1) // Move to idea selection
+    
+    // Skip idea selection for social and social-ai, go directly to creator
+    if (type === 'social' || type === 'social-ai') {
+      setCurrentStep(2) // Go directly to form
+    } else {
+      setCurrentStep(1) // Move to idea selection for other types
+    }
   }
 
   // Navigation functions
@@ -121,7 +134,12 @@ export default function ContentPage() {
     if (currentStep === 1) {
       setCurrentStep(0) // Go back to content type selection
     } else if (currentStep >= 2) {
-      setCurrentStep(1) // Go back to idea selection
+      // For social and social-ai, go directly back to content type selection since idea page is skipped
+      if (selectedContentType === 'social' || selectedContentType === 'social-ai') {
+        setCurrentStep(0)
+      } else {
+        setCurrentStep(1) // Go back to idea selection for other types
+      }
       setSelectedPrompt(null)
       setDraftId("")
     }
@@ -199,11 +217,7 @@ export default function ContentPage() {
               ) : selectedContentType === "social" ? (
                 <EnhancedSocialMediaCreator
                   onContentGenerated={handleContentGenerated}
-                  initialPrompt={selectedPrompt ? {
-                    ...selectedPrompt,
-                    contentType: "social" as ContentType,
-                    topic: selectedPrompt.topic || ""
-                  } : null}
+                  initialPrompt={selectedPrompt?.topic || ""}
                   currentStep={currentStep - 1}
                   onStepChange={(step) => setCurrentStep(step + 1)}
                 />

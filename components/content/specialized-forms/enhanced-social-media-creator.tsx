@@ -29,7 +29,9 @@ import {
   Zap,
   Eye,
   RefreshCw,
-  Plus
+  Plus,
+  Calendar,
+  Camera
 } from "lucide-react"
 import type { EnhancedContentPrompt } from "@/lib/content-types"
 import { toast } from "sonner"
@@ -188,6 +190,7 @@ export function EnhancedSocialMediaCreator({
   const [userPhotos, setUserPhotos] = useState<string[]>([])
   const [generatedCaption, setGeneratedCaption] = useState<string>("")
   const [customCaption, setCustomCaption] = useState<string>("")
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null)
   
   const [formState, setFormState] = useState<FormState>({
     platform: 'instagram-post',
@@ -202,6 +205,20 @@ export function EnhancedSocialMediaCreator({
   // Load user photos on mount
   useEffect(() => {
     loadUserPhotos()
+    
+    // Auto-select the first pre-generated content
+    setFormState(prev => ({ 
+      ...prev, 
+      workflowMode: 'template',
+      selectedTemplate: 'New Release Announcement'
+    }))
+    setGeneratedCaption(`🎵 NEW MUSIC ALERT! 🎵\n\n"Solitude" by ALGORYX drops TOMORROW! 🔥\n\nThis track is a journey through electronic soundscapes that will transport you to another dimension.\n\nPre-save now and be the first to experience it 🎧\nLink in bio!\n\n#ALGORYX #Solitude #NewMusic #ElectronicMusic #ComingSoon`)
+    setGeneratedImages([
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop'
+    ])
+    setSelectedImageIndex(0)
   }, [])
 
   const loadUserPhotos = async () => {
@@ -423,9 +440,183 @@ export function EnhancedSocialMediaCreator({
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Pre-generated Content Blocks */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Ready-to-Post Content</h3>
+                  <Badge variant="secondary" className="bg-green-500/10 text-green-600">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    AI Generated
+                  </Badge>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* New Release Block */}
+                  <Card 
+                    className={cn(
+                      "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20 hover:border-cosmic-teal/50 group relative overflow-hidden will-change-transform",
+                      hoveredCard === 'new-release' && "ring-2 ring-cosmic-teal/30"
+                    )}
+                    style={{ backfaceVisibility: 'hidden', perspective: '1000px' }}
+                    onMouseEnter={() => setHoveredCard('new-release')}
+                    onMouseLeave={() => setHoveredCard(null)}
+                    onClick={() => {
+                      setFormState(prev => ({ 
+                        ...prev, 
+                        workflowMode: 'template',
+                        selectedTemplate: 'New Release Announcement'
+                      }))
+                      setGeneratedCaption(`🎵 NEW MUSIC ALERT! 🎵\n\n"Solitude" by ALGORYX drops TOMORROW! 🔥\n\nThis track is a journey through electronic soundscapes that will transport you to another dimension.\n\nPre-save now and be the first to experience it 🎧\nLink in bio!\n\n#ALGORYX #Solitude #NewMusic #ElectronicMusic #ComingSoon`)
+                      setGeneratedImages([
+                        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
+                        'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=400&fit=crop',
+                        'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop'
+                      ])
+                      setSelectedImageIndex(0)
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex -space-x-2 mb-3">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                          <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                          <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                          <img src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                        </div>
+                      </div>
+                      <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">New Release: "Solitude"</h4>
+                      <p className="text-sm text-muted-foreground mb-2">Releases Tomorrow</p>
+                      <p className="text-xs line-clamp-2">🎵 NEW MUSIC ALERT! 🎵 "Solitude" by ALGORYX drops TOMORROW! 🔥</p>
+                      <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Sparkles className="h-3 w-3" />
+                        <span>Click to use this content</span>
+                      </div>
+                    </CardContent>
+                    {/* Hover Overlay */}
+                    <div
+                      className={cn(
+                        "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300 pointer-events-none",
+                        hoveredCard === 'new-release' ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </Card>
+
+                  {/* Tour Announcement Block */}
+                  <Card 
+                    className={cn(
+                      "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20 hover:border-cosmic-teal/50 group relative overflow-hidden will-change-transform",
+                      hoveredCard === 'tour' && "ring-2 ring-cosmic-teal/30"
+                    )}
+                    style={{ backfaceVisibility: 'hidden', perspective: '1000px' }}
+                    onMouseEnter={() => setHoveredCard('tour')}
+                    onMouseLeave={() => setHoveredCard(null)}
+                    onClick={() => {
+                      setFormState(prev => ({ 
+                        ...prev, 
+                        workflowMode: 'template',
+                        selectedTemplate: 'Tour Announcement'
+                      }))
+                      setGeneratedCaption(`🎤 TOUR ANNOUNCEMENT 🎤\n\nALGORYX Summer Tour 2024 is HERE! 🚌\n\nJoin us for an unforgettable journey across 15 cities:\n📍 Los Angeles - June 5\n📍 San Francisco - June 8\n📍 Seattle - June 12\n...and more!\n\nTickets on sale Friday at 10AM PST 🎫\nDon't miss out!\n\n#ALGORYXTour #SummerTour2024 #LiveMusic`)
+                      setGeneratedImages([
+                        'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&h=400&fit=crop',
+                        'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&h=400&fit=crop',
+                        'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=400&h=400&fit=crop'
+                      ])
+                      setSelectedImageIndex(0)
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex -space-x-2 mb-3">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                          <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                          <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                          <img src="https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                        </div>
+                      </div>
+                      <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">Summer Tour 2024</h4>
+                      <p className="text-sm text-muted-foreground mb-2">June 2024</p>
+                      <p className="text-xs line-clamp-2">🎤 TOUR ANNOUNCEMENT 🎤 ALGORYX Summer Tour 2024 is HERE! 🚌</p>
+                      <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Sparkles className="h-3 w-3" />
+                        <span>Click to use this content</span>
+                      </div>
+                    </CardContent>
+                    {/* Hover Overlay */}
+                    <div
+                      className={cn(
+                        "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300 pointer-events-none",
+                        hoveredCard === 'tour' ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </Card>
+
+                  {/* Behind the Scenes Block */}
+                  <Card 
+                    className={cn(
+                      "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20 hover:border-cosmic-teal/50 group relative overflow-hidden will-change-transform",
+                      hoveredCard === 'bts' && "ring-2 ring-cosmic-teal/30"
+                    )}
+                    style={{ backfaceVisibility: 'hidden', perspective: '1000px' }}
+                    onMouseEnter={() => setHoveredCard('bts')}
+                    onMouseLeave={() => setHoveredCard(null)}
+                    onClick={() => {
+                      setFormState(prev => ({ 
+                        ...prev, 
+                        workflowMode: 'template',
+                        selectedTemplate: 'Behind the Scenes'
+                      }))
+                      setGeneratedCaption(`Behind the magic ✨\n\nSpent the last 48 hours in the studio crafting something special for you all. "Echoes" started as a simple melody at 3AM and evolved into something much deeper.\n\nCan't wait to share the full track with you next month 🎵\n\nWhat's your favorite part of the creative process?\n\n#StudioLife #BehindTheScenes #ALGORYX #MusicProduction`)
+                      setGeneratedImages([
+                        'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=400&fit=crop',
+                        'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=400&h=400&fit=crop',
+                        'https://images.unsplash.com/photo-1519508234439-4f23643125c1?w=400&h=400&fit=crop'
+                      ])
+                      setSelectedImageIndex(0)
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex -space-x-2 mb-3">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                          <img src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                          <img src="https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-background">
+                          <img src="https://images.unsplash.com/photo-1519508234439-4f23643125c1?w=100&h=100&fit=crop" alt="" className="w-full h-full object-cover" />
+                        </div>
+                      </div>
+                      <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">Studio Sessions</h4>
+                      <p className="text-sm text-muted-foreground mb-2">Behind the Scenes</p>
+                      <p className="text-xs line-clamp-2">Behind the magic ✨ Spent the last 48 hours in the studio...</p>
+                      <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Sparkles className="h-3 w-3" />
+                        <span>Click to use this content</span>
+                      </div>
+                    </CardContent>
+                    {/* Hover Overlay */}
+                    <div
+                      className={cn(
+                        "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300 pointer-events-none",
+                        hoveredCard === 'bts' ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </Card>
+                </div>
+              </div>
+
+              <Separator />
+
               {/* Workflow Selection */}
               <div className="space-y-3">
-                <Label className="text-base font-medium">Choose Your Workflow</Label>
+                <Label className="text-base font-medium">Or Create Custom Content</Label>
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => setFormState(prev => ({ ...prev, workflowMode: 'template' }))}
@@ -462,6 +653,92 @@ export function EnhancedSocialMediaCreator({
                       You write caption, AI creates visuals
                     </p>
                   </button>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Task-Specific Templates */}
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Create Specific Content</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Card 
+                    className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                    onClick={() => {
+                      setFormState(prev => ({ 
+                        ...prev, 
+                        workflowMode: 'template',
+                        selectedTemplate: 'Event Flyer'
+                      }))
+                      toast.info('Event Flyer template selected - Upload your photos to continue')
+                    }}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className="w-10 h-10 rounded-lg bg-purple-500 text-white flex items-center justify-center mx-auto mb-2">
+                        <Calendar className="h-5 w-5" />
+                      </div>
+                      <h5 className="font-medium text-sm">Event Flyer</h5>
+                      <p className="text-xs text-muted-foreground mt-1">Create stunning flyers</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card 
+                    className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                    onClick={() => {
+                      setFormState(prev => ({ 
+                        ...prev, 
+                        workflowMode: 'template',
+                        selectedTemplate: 'Artist Photo'
+                      }))
+                      toast.info('Artist Photo template selected - Upload your photos to continue')
+                    }}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className="w-10 h-10 rounded-lg bg-pink-500 text-white flex items-center justify-center mx-auto mb-2">
+                        <Camera className="h-5 w-5" />
+                      </div>
+                      <h5 className="font-medium text-sm">Artist Photo</h5>
+                      <p className="text-xs text-muted-foreground mt-1">Professional shots</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card 
+                    className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                    onClick={() => {
+                      setFormState(prev => ({ 
+                        ...prev, 
+                        workflowMode: 'template',
+                        selectedTemplate: 'Album Artwork'
+                      }))
+                      toast.info('Album Artwork template selected - Upload your photos to continue')
+                    }}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center mx-auto mb-2">
+                        <Music className="h-5 w-5" />
+                      </div>
+                      <h5 className="font-medium text-sm">Album Art</h5>
+                      <p className="text-xs text-muted-foreground mt-1">Eye-catching covers</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card 
+                    className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                    onClick={() => {
+                      setFormState(prev => ({ 
+                        ...prev, 
+                        workflowMode: 'custom'
+                      }))
+                    }}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className="w-10 h-10 rounded-lg bg-green-500 text-white flex items-center justify-center mx-auto mb-2">
+                        <Type className="h-5 w-5" />
+                      </div>
+                      <h5 className="font-medium text-sm">Quote Card</h5>
+                      <p className="text-xs text-muted-foreground mt-1">Shareable quotes</p>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
 

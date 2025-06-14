@@ -38,9 +38,9 @@ const CONTENT_TYPES = [
   {
     id: "social" as ContentType,
     title: "Social Media",
-    description: "Engaging posts for Instagram, Twitter, and TikTok",
+    description: "AI-powered posts with pre-generated content for your releases",
     icon: Share2,
-    features: ["Multi-Platform Posting", "Auto-Scheduling", "Hashtag Optimization"],
+    features: ["Pre-Generated Content", "Google Drive Photos", "Multiple Styles"],
     buttonText: "Create Social Posts",
     gradient: "from-green-500/20 to-teal-500/20",
     iconColor: "text-green-400",
@@ -99,7 +99,7 @@ export function ContentTypeSelector({ selectedType, onTypeChange }: ContentTypeS
 
       {/* Content Type Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-        {CONTENT_TYPES.map((type) => {
+        {CONTENT_TYPES.filter((t) => t.id !== 'social-ai').map((type) => {
           const isSelected = selectedType === type.id
           const Icon = type.icon
 
