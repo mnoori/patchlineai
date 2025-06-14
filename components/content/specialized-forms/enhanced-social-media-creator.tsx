@@ -496,9 +496,9 @@ export function EnhancedSocialMediaCreator({
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4">
+    <div className="w-full max-w-[1600px] mx-auto px-4">
       {/* Grid layout: main content + live preview */}
-      <div className="lg:grid lg:grid-cols-[1fr_20rem] lg:gap-4">
+      <div className="lg:grid lg:grid-cols-[1fr_24rem] lg:gap-4">
         {/* Main Content */}
         <div>
           <Card>
@@ -841,7 +841,7 @@ export function EnhancedSocialMediaCreator({
 
         {/* Live Preview - sticky */}
         <div className={cn(
-          "hidden lg:block w-[20rem] sticky top-24 transition-opacity duration-300",
+          "hidden lg:block w-[24rem] sticky top-24 transition-opacity duration-300",
           isLivePreviewReady ? "opacity-100" : "opacity-0"
         )}>
           <Card className="h-[calc(100vh-8rem)] flex flex-col overflow-hidden shadow-xl">
@@ -952,7 +952,7 @@ export function EnhancedSocialMediaCreator({
       </div>
 
       {/* Edit Sheet - Wide drawer style like legal tab */}
-      <Sheet open={showEditDrawer} onOpenChange={setShowEditDrawer}>
+      <Sheet open={showEditDrawer} onOpenChange={setShowEditDrawer} modal={false}>
         <SheetContent className="sm:max-w-2xl overflow-y-auto bg-background/95 backdrop-blur-xl border-l border-border/50" style={{ position: 'fixed' }}>
           <div className="absolute inset-0 pointer-events-none bg-background/80 backdrop-blur-[2px] brightness-[0.96] -z-10" />
           <SheetHeader className="border-b border-cosmic-teal/20 pb-4">
