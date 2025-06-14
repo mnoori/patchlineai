@@ -147,22 +147,24 @@ export default function ContentPage() {
 
   return (
     <div className="space-y-8 container mx-auto px-4 min-h-[calc(100vh-64px)] overflow-x-hidden">
-      <div className="flex items-center justify-between pt-4 sticky top-0 z-20 bg-background pb-4">
-        <div className="flex items-center gap-4">
-          {/* Back Button */}
-          {currentStep > 0 && (
-            <Button variant="outline" onClick={handleGoBack} className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          )}
+      {selectedContentType !== 'social' || currentStep < 2 ? (
+        <div className="flex items-center justify-between pt-4 sticky top-0 z-20 bg-background pb-4">
+          <div className="flex items-center gap-4">
+            {/* Back Button */}
+            {currentStep > 0 && selectedContentType !== 'social' && (
+              <Button variant="outline" onClick={handleGoBack} className="gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            )}
 
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">AI Content Studio</h1>
-            <p className="text-muted-foreground">Create professional content with AI-powered assistance</p>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">AI Content Studio</h1>
+              <p className="text-muted-foreground">Create professional content with AI-powered assistance</p>
+            </div>
           </div>
         </div>
-      </div>
+      ) : null}
 
       <div className="grid gap-8">
         {/* Content Type Selection - Step 0 */}
