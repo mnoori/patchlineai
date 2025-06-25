@@ -51,6 +51,9 @@ import {
   Brain,
   Loader2,
   ArrowLeft,
+  RefreshCw,
+  Calculator,
+  FileSpreadsheet,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
@@ -58,6 +61,9 @@ import { DocumentViewerSheet } from "../../../components/god-mode/document-viewe
 import { GodModeFeatureSelector, type GodModeFeature } from "../../../components/god-mode/feature-selector"
 import { HRRecruiterDashboard } from "../../../components/god-mode/hr/dashboard"
 import { NewsletterGeneratorDashboard } from "../../../components/god-mode/newsletter/dashboard"
+import { ExpenseReviewTable } from "../../../components/tax-audit/expense-review-table"
+import { TAX_CATEGORIES } from "@/lib/tax-categories"
+import { useToast } from "@/components/ui/use-toast"
 
 // Types
 interface DocumentFile {
@@ -97,30 +103,30 @@ interface ProcessedDocument {
 
 // Document type configuration
 const DOCUMENT_TYPES = {
-  'tax': {
-    label: 'Tax Documents',
-    folder: 'tax-documents',
-    subtypes: ['W2', '1099', 'K1', 'Schedule C', 'Tax Return']
+  'bilt': {
+    label: 'Bilt',
+    folder: 'bilt',
+    icon: FileText
   },
-  'business-expense': {
-    label: 'Business Expenses',
-    folder: 'business-expenses',
-    subtypes: ['Receipt', 'Invoice', 'Bill', 'Statement']
+  'bofa': {
+    label: 'BofA',
+    folder: 'bofa',
+    icon: FileText
   },
-  'banking': {
-    label: 'Banking & Financial',
-    folder: 'banking',
-    subtypes: ['Bank Statement', 'Credit Card Statement', 'Loan Document']
+  'chase-checking': {
+    label: 'Chase Checking',
+    folder: 'chase-checking',
+    icon: FileText
   },
-  'legal': {
-    label: 'Legal Documents',
-    folder: 'legal',
-    subtypes: ['Contract', 'Agreement', 'License', 'Permit']
+  'chase-freedom': {
+    label: 'Chase Freedom',
+    folder: 'chase-freedom',
+    icon: FileText
   },
-  'personal': {
-    label: 'Personal Documents',
-    folder: 'personal',
-    subtypes: ['ID', 'Insurance', 'Medical', 'Other']
+  'chase-sapphire': {
+    label: 'Chase Sapphire',
+    folder: 'chase-sapphire',
+    icon: FileText
   }
 }
 
@@ -191,6 +197,13 @@ export default function GodModePage() {
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false)
   const [duplicateFile, setDuplicateFile] = useState<{ file: File; hash: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Add tax expense state
+  const [taxExpenses, setTaxExpenses] = useState<any[]>([])
+  const [isLoadingExpenses, setIsLoadingExpenses] = useState(false)
+  const [isProcessingExpenses, setIsProcessingExpenses] = useState(false)
+  const [expenseSummary, setExpenseSummary] = useState<any>(null)
+  const { toast } = useToast()
 
   // Load documents from API on component mount
   useEffect(() => {
@@ -301,19 +314,17 @@ export default function GodModePage() {
       try {
         // Generate organized S3 path based on document type
         const documentTypeConfig = DOCUMENT_TYPES[selectedDocumentType as keyof typeof DOCUMENT_TYPES]
-        const folderPath = `${documentTypeConfig.folder}/${new Date().getFullYear()}`
         
-        // Step 1: Get S3 upload URL with organized path
+        // Step 1: Create FormData and upload file
+        const formData = new FormData()
+        formData.append('file', fileObj.file)
+        formData.append('bankType', selectedDocumentType)
+        formData.append('userId', 'default-user')
+        formData.append('description', '')
+        
         const uploadResponse = await fetch('/api/documents/upload', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            filename: fileObj.file.name,
-            userId: 'default-user',
-            contentType: fileObj.file.type,
-            folderPath: folderPath,
-            documentType: selectedDocumentType,
-          })
+          body: formData
         })
 
         if (!uploadResponse.ok) {
@@ -428,7 +439,8 @@ export default function GodModePage() {
           documentId: uploadData.documentId,
           s3Key: uploadData.s3Key,
           bucket: uploadData.bucket,
-          filename: fileObj.file.name
+          filename: fileObj.file.name,
+          documentType: fileObj.documentType
         })
       })
 
@@ -675,6 +687,240 @@ export default function GodModePage() {
 
   const handleBackToFeatures = () => {
     setSelectedFeature(null)
+  }
+
+  // Load tax expenses
+  const loadTaxExpenses = async () => {
+    try {
+      setIsLoadingExpenses(true)
+      const response = await fetch('/api/tax-audit/expenses?userId=default-user')
+      if (response.ok) {
+        const data = await response.json()
+        setTaxExpenses(data.expenses || [])
+        setExpenseSummary(data.summary)
+      }
+    } catch (error) {
+      console.error('Error loading tax expenses:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load tax expenses",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoadingExpenses(false)
+    }
+  }
+
+  // Process documents into expenses
+  const processDocumentExpenses = async (documentId: string) => {
+    try {
+      setIsProcessingExpenses(true)
+      
+      // Get document details to find jobId and bankType
+      const doc = documents.find(d => d.id === documentId)
+      if (!doc) {
+        throw new Error('Document not found')
+      }
+      
+      const response = await fetch('/api/tax-audit/process-expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          documentId, 
+          userId: 'default-user',
+          jobId: doc.textractJobId,
+          bankType: doc.documentType || 'unknown'
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        toast({
+          title: "Success",
+          description: `Processed ${data.expensesExtracted} expenses from document`,
+        })
+        // Reload expenses
+        await loadTaxExpenses()
+      } else {
+        throw new Error('Failed to process expenses')
+      }
+    } catch (error) {
+      console.error('Error processing expenses:', error)
+      toast({
+        title: "Error",
+        description: "Failed to process document expenses",
+        variant: "destructive"
+      })
+    } finally {
+      setIsProcessingExpenses(false)
+    }
+  }
+
+  // Update expense
+  const updateExpense = async (expenseId: string, updates: any) => {
+    try {
+      const response = await fetch('/api/tax-audit/expenses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expenseId, updates })
+      })
+
+      if (response.ok) {
+        await loadTaxExpenses()
+        toast({
+          title: "Success",
+          description: "Expense updated successfully",
+        })
+      }
+    } catch (error) {
+      console.error('Error updating expense:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update expense",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Delete expense
+  const deleteExpense = async (expenseId: string) => {
+    try {
+      const response = await fetch(`/api/tax-audit/expenses?expenseId=${expenseId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        await loadTaxExpenses()
+        toast({
+          title: "Success",
+          description: "Expense deleted successfully",
+        })
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete expense",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Bulk update expenses
+  const bulkUpdateExpenses = async (expenseIds: string[], updates: any) => {
+    try {
+      const response = await fetch('/api/tax-audit/expenses', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expenseIds, updates })
+      })
+
+      if (response.ok) {
+        await loadTaxExpenses()
+        toast({
+          title: "Success",
+          description: `Updated ${expenseIds.length} expenses`,
+        })
+      }
+    } catch (error) {
+      console.error('Error bulk updating expenses:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update expenses",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Bulk delete expenses
+  const bulkDeleteExpenses = async (expenseIds: string[]) => {
+    // For now, delete one by one
+    for (const id of expenseIds) {
+      await deleteExpense(id)
+    }
+  }
+
+  // Load tax expenses when switching to tax-prep tab
+  useEffect(() => {
+    if (activeTab === 'tax-prep' && selectedFeature === 'documents') {
+      loadTaxExpenses()
+    }
+  }, [activeTab, selectedFeature])
+
+  // Export to Excel
+  const exportToExcel = async () => {
+    try {
+      const response = await fetch('/api/tax-audit/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: 'default-user',
+          format: 'excel',
+          includeRejected: false
+        })
+      })
+
+      if (response.ok) {
+        // Get the blob from the response
+        const blob = await response.blob()
+        
+        // Create a download link
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `tax-expenses-${new Date().toISOString().slice(0, 10)}.xlsx`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+        
+        toast({
+          title: "Success",
+          description: "Excel export downloaded successfully",
+        })
+      } else {
+        throw new Error('Failed to generate export')
+      }
+    } catch (error) {
+      console.error('Error exporting to Excel:', error)
+      toast({
+        title: "Error",
+        description: "Failed to generate Excel export",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Generate tax package
+  const generateTaxPackage = async () => {
+    try {
+      const response = await fetch('/api/tax-audit/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: 'default-user',
+          format: 'tax-package',
+          includeRejected: false
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        toast({
+          title: "Success",
+          description: data.message || "Tax package generated successfully",
+        })
+      } else {
+        throw new Error('Failed to generate tax package')
+      }
+    } catch (error) {
+      console.error('Error generating tax package:', error)
+      toast({
+        title: "Error",
+        description: "Failed to generate tax package",
+        variant: "destructive"
+      })
+    }
   }
 
   return (
@@ -1145,32 +1391,193 @@ export default function GodModePage() {
 
             {/* Tax Preparation Tab */}
             <TabsContent value="tax-prep" className="space-y-6">
+              {/* Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="glass-effect">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Business Expenses</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      ${expenseSummary?.totalAmount?.toLocaleString() || '0'}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {expenseSummary?.totalExpenses || 0} total expenses
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-effect">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Media Business</CardTitle>
+                    <Building className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-500">
+                      ${expenseSummary?.businessTypeTotals?.media?.toLocaleString() || '0'}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Target: $105,903
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-effect">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Consulting Business</CardTitle>
+                    <Building className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-purple-500">
+                      ${expenseSummary?.businessTypeTotals?.consulting?.toLocaleString() || '0'}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Target: $44,794
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Actions Bar */}
+              <Card className="glass-effect">
+                <CardContent className="p-4">
+                  <div className="flex flex-col sm:flex-row gap-4 justify-between">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          // Process all completed documents
+                          setIsProcessingExpenses(true)
+                          try {
+                            const completedDocs = documents.filter(doc => doc.status === 'completed')
+                            console.log(`Processing ${completedDocs.length} completed documents`)
+                            
+                            for (const doc of completedDocs) {
+                              await processDocumentExpenses(doc.id)
+                            }
+                            
+                            toast({
+                              title: "Success",
+                              description: `Processed ${completedDocs.length} documents`,
+                            })
+                          } catch (error) {
+                            console.error('Error processing documents:', error)
+                            toast({
+                              title: "Error",
+                              description: "Failed to process some documents",
+                              variant: "destructive"
+                            })
+                          } finally {
+                            setIsProcessingExpenses(false)
+                          }
+                        }}
+                        disabled={isProcessingExpenses}
+                      >
+                        {isProcessingExpenses ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Brain className="h-4 w-4 mr-2" />
+                        )}
+                        Process All Documents
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={loadTaxExpenses}
+                        disabled={isLoadingExpenses}
+                      >
+                        <RefreshCw className={cn("h-4 w-4 mr-2", isLoadingExpenses && "animate-spin")} />
+                        Refresh
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={async () => {
+                          if (confirm('Are you sure you want to delete all tax expense data? This cannot be undone.')) {
+                            try {
+                              const response = await fetch('/api/tax-audit/delete-all?userId=default-user', {
+                                method: 'DELETE'
+                              })
+                              if (response.ok) {
+                                await loadTaxExpenses()
+                                toast({
+                                  title: "Success",
+                                  description: "All tax expense data has been deleted",
+                                })
+                              }
+                            } catch (error) {
+                              toast({
+                                title: "Error",
+                                description: "Failed to delete expense data",
+                                variant: "destructive"
+                              })
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Clear All Data
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
+                        onClick={exportToExcel}
+                      >
+                        <FileSpreadsheet className="h-4 w-4 mr-2" />
+                        Export to Excel
+                      </Button>
+                      <Button 
+                        className="bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 text-black font-semibold"
+                        onClick={generateTaxPackage}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Generate Tax Package
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Schedule C Line Totals */}
+              {expenseSummary?.scheduleCLineTotals && Object.keys(expenseSummary.scheduleCLineTotals).length > 0 && (
+                <Card className="glass-effect">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calculator className="h-5 w-5" />
+                      Schedule C Line Item Totals
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(expenseSummary.scheduleCLineTotals)
+                        .sort(([a], [b]) => a.localeCompare(b))
+                        .map(([line, amount]) => (
+                          <div key={line} className="flex justify-between items-center p-3 rounded-lg bg-muted/20">
+                            <span className="font-medium">{line}</span>
+                            <span className="font-semibold">${(amount as number).toLocaleString()}</span>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Expense Review Table */}
               <Card className="glass-effect">
                 <CardHeader>
-                  <CardTitle>Schedule C Business Expenses</CardTitle>
+                  <CardTitle>Expense Review & Classification</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Review, classify, and approve expenses for your tax audit
+                  </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <p className="text-muted-foreground">
-                      Review and categorize your business expenses for tax preparation.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                        <h3 className="font-semibold text-green-400 mb-2">Patchline AI Business</h3>
-                        <p className="text-2xl font-bold">${patchlineExpenses.reduce((sum, doc) => sum + (doc.extractedData.amount || 0), 0).toLocaleString()}</p>
-                        <p className="text-sm text-muted-foreground">{patchlineExpenses.length} expenses</p>
-                      </div>
-                      <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                        <h3 className="font-semibold text-purple-400 mb-2">Art & Tech Lab</h3>
-                        <p className="text-2xl font-bold">${artLabExpenses.reduce((sum, doc) => sum + (doc.extractedData.amount || 0), 0).toLocaleString()}</p>
-                        <p className="text-sm text-muted-foreground">{artLabExpenses.length} expenses</p>
-                      </div>
+                  {isLoadingExpenses ? (
+                    <div className="flex items-center justify-center h-64">
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
-                    <Button className="w-full bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold">
-                      <Download className="h-4 w-4 mr-2" />
-                      Generate Tax Report
-                    </Button>
-                  </div>
+                  ) : (
+                    <ExpenseReviewTable userId="default-user" />
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

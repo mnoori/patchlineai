@@ -8,6 +8,11 @@ USERS_TABLE=Users-staging
 EMBEDS_TABLE=Embeds-staging
 BLOG_POSTS_TABLE=BlogPosts-staging
 CONTENT_DRAFTS_TABLE=ContentDrafts-staging
+DOCUMENTS_TABLE=Documents-staging
+TAX_EXPENSES_TABLE=TaxExpenses-dev
+
+# S3 Buckets
+DOCUMENTS_BUCKET=patchline-documents-staging
 
 # Platform Integrations
 # Spotify (Client ID is public, but secret should be private)
