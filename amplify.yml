@@ -1,0 +1,71 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        # Install dependencies
+        - npm install -g pnpm
+        - pnpm install
+        
+        # Set production debug mode for zero-overhead logging
+        - echo "Setting production debug mode for zero-overhead logging"
+        - node -e "console.log('DEBUG_MODE=prod')" >> .env.production
+        
+        # Verify AWS credentials are available
+        - echo "Verifying AWS environment..."
+        - node -e "console.log('AWS Region:', process.env.AWS_REGION || 'us-east-1')"
+        
+    build:
+      commands:
+        # Build the application
+        - echo "Building Patchline AI Rebuilding AI Platform..."
+        - pnpm run build
+        
+        # Verify build artifacts
+        - echo "Build completed. Verifying artifacts..."
+        - ls -la .next/
+        
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+      
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
+      - .pnpm-store/**/*
+
+# Environment variables that need to be set in Amplify Console
+# These are documented here for reference but must be configured in the Amplify Console
+# 
+# Required AWS Configuration:
+# - AWS_REGION=us-east-1
+# - AWS_ACCESS_KEY_ID (set in Amplify Console)
+# - AWS_SECRET_ACCESS_KEY (set in Amplify Console)
+#
+# Required Application Configuration:
+# - NEXT_PUBLIC_APP_URL (set to your Amplify app URL)
+# - NEXT_PUBLIC_AWS_REGION=us-east-1
+# - NEXT_PUBLIC_USER_POOL_ID (from AWS Cognito)
+# - NEXT_PUBLIC_USER_POOL_CLIENT_ID (from AWS Cognito)
+# - NEXT_PUBLIC_IDENTITY_POOL_ID (from AWS Cognito)
+#
+# Required API Keys (stored in AWS Secrets Manager):
+# - SOUNDCHARTS_SECRET_ID=patchline/soundcharts-api
+# - GMAIL_CLIENT_SECRET_ID=patchline/gmail-oauth
+# - BLOCKCHAIN_RPC_SECRET_ID=patchline/blockchain-rpc
+#
+# Debug System Configuration:
+# - DEBUG_MODE=prod (for zero-overhead production logging)
+# - S3_DEBUG_BUCKET=patchline-files-us-east-1
+#
+# DynamoDB Tables:
+# - USERS_TABLE=Users-production
+# - EMBEDS_TABLE=Embeds-production
+# - BLOG_POSTS_TABLE=BlogPosts-production
+# - CONTENT_DRAFTS_TABLE=ContentDrafts-production
+#
+# Optional Features:
+# - NEXT_PUBLIC_ENABLE_WEB3=true (enable Web3 portal)
+# - NEXT_PUBLIC_DEMO_MODE=false (disable for production) 
