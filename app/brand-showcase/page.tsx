@@ -225,6 +225,24 @@ export default function BrandShowcasePage() {
                 <p className="font-semibold">Dispersed Bottom</p>
               </div>
             </div>
+            <div className="relative h-64 rounded-lg overflow-hidden bg-background border border-border">
+              <GradientOrbs variant="edge-left" />
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <p className="font-semibold">Edge Left</p>
+              </div>
+            </div>
+            <div className="relative h-64 rounded-lg overflow-hidden bg-background border border-border">
+              <GradientOrbs variant="edge-right" />
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <p className="font-semibold">Edge Right</p>
+              </div>
+            </div>
+            <div className="relative h-64 rounded-lg overflow-hidden bg-background border border-border">
+              <GradientOrbs variant="transition" />
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <p className="font-semibold">Transition</p>
+              </div>
+            </div>
           </div>
         </section>
 

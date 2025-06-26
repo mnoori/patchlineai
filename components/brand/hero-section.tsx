@@ -24,7 +24,7 @@ export function HeroSection({
   logoSize = 'xl'
 }: HeroSectionProps) {
   return (
-    <GradientBackground variant="hero" className={cn('min-h-screen flex items-center justify-center', className)}>
+    <GradientBackground variant="hero" className={cn('min-h-[100vh] flex items-center justify-center', className)}>
       <GradientOrbs />
       
       <div className="container relative z-10 px-6 py-20">

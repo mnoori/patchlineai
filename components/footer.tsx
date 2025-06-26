@@ -1,10 +1,13 @@
 import Link from "next/link"
 import { Logo } from "@/components/logo"
+import { GradientOrbs } from "@/components/brand"
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-background/50 backdrop-blur-sm">
-      <div className="container py-12">
+    <footer className="relative border-t border-white/5 bg-gradient-to-b from-background/50 to-background backdrop-blur-sm overflow-hidden">
+      {/* Very subtle gradient continuation */}
+      <GradientOrbs variant="subtle-bottom" className="opacity-10" />
+      <div className="container py-12 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <Logo className="h-8 w-auto" />

@@ -85,19 +85,46 @@
 /* Brand gradient border */
 .gradient-border {
   position: relative;
+  background: linear-gradient(180deg, 
+    rgba(0, 230, 228, 0.08) 0%, 
+    rgba(0, 104, 255, 0.12) 25%, 
+    rgba(0, 39, 114, 0.15) 50%, 
+    rgba(1, 1, 2, 0.98) 100%
+  );
+  overflow: hidden;
+  box-shadow: 
+    0 0 40px rgba(0, 230, 228, 0.1),
+    0 0 80px rgba(0, 104, 255, 0.05),
+    inset 0 0 20px rgba(0, 230, 228, 0.03);
 }
 
 .gradient-border::before {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: var(--radius);
-  padding: 1px;
-  background: linear-gradient(135deg, var(--brand-cyan), var(--brand-bright-blue), var(--brand-gradient-middle));
+  inset: -2px;
+  border-radius: calc(var(--radius) + 4px);
+  padding: 2px;
+  background: linear-gradient(135deg, 
+    rgba(0, 230, 228, 0.8), 
+    rgba(0, 104, 255, 0.7), 
+    rgba(42, 9, 204, 0.6)
+  );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+}
+
+/* Card gradient background */
+.card-gradient {
+  background: linear-gradient(180deg, 
+    rgba(0, 230, 228, 0.06) 0%, 
+    rgba(0, 104, 255, 0.08) 15%, 
+    rgba(0, 39, 114, 0.12) 35%, 
+    rgba(1, 1, 2, 0.95) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* Glass effect with brand colors */

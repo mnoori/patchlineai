@@ -11,14 +11,10 @@ interface PageGradientProps {
 
 export function PageGradient({ variant = 'hero', className, children }: PageGradientProps) {
   const gradients = {
-    hero: `radial-gradient(ellipse 80% 80% at 50% -20%, ${COLORS.gradient.darkMiddle}33, transparent), 
-           radial-gradient(ellipse 60% 50% at 80% 20%, ${COLORS.primary.deepBlue}22, transparent),
-           radial-gradient(ellipse 70% 70% at 20% 30%, ${COLORS.gradient.darkStart}33, transparent)`,
-    section: `radial-gradient(ellipse 100% 50% at 50% 0%, ${COLORS.gradient.darkMiddle}11, transparent),
-              linear-gradient(180deg, transparent 0%, ${COLORS.ui.background}99 100%)`,
+    hero: `radial-gradient(ellipse 80% 80% at 50% -20%, ${COLORS.gradient.darkMiddle}33, transparent), radial-gradient(ellipse 60% 50% at 80% 20%, ${COLORS.primary.deepBlue}22, transparent), radial-gradient(ellipse 70% 70% at 20% 30%, ${COLORS.gradient.darkStart}33, transparent)`,
+    section: `radial-gradient(ellipse 100% 50% at 50% 0%, ${COLORS.gradient.darkMiddle}11, transparent), linear-gradient(180deg, transparent 0%, ${COLORS.ui.background}99 100%)`,
     subtle: `radial-gradient(ellipse 150% 100% at 50% -50%, ${COLORS.primary.deepBlue}11, transparent)`,
-    vibrant: `radial-gradient(ellipse 80% 60% at 70% -10%, ${COLORS.primary.cyan}11, transparent),
-              radial-gradient(ellipse 60% 40% at 30% 10%, ${COLORS.primary.brightBlue}08, transparent)`
+    vibrant: `radial-gradient(ellipse 80% 60% at 70% -10%, ${COLORS.primary.cyan}11, transparent), radial-gradient(ellipse 60% 40% at 30% 10%, ${COLORS.primary.brightBlue}08, transparent)`
   }
 
   return (

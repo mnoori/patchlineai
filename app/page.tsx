@@ -5,37 +5,34 @@ import { Waveform } from "@/components/waveform"
 import { AnimatedCounter } from "@/components/animated-counter"
 import { Badge } from "@/components/ui/badge"
 import { Search, FileText, Users, Database, Sparkles, Zap, Globe, Layers, Music2, ArrowRight } from "lucide-react"
-import { Button, GradientText, Card, CardHeader, CardTitle, CardDescription, CardContent, PageGradient, GradientOrbs, MeshGradient } from "@/components/brand"
+import { Button, GradientText, Card, CardHeader, CardTitle, CardDescription, CardContent, PageGradient, GradientOrbs, MeshGradient, HeroSection } from "@/components/brand"
 import { AGENTS } from "@/config/agents"
 
 export default function Home() {
   const ariaAgent = AGENTS.aria
   
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="flex-1 pt-16">
-        {/* Hero Section with Gradient Background */}
-        <section className="relative py-20 md:py-32 overflow-hidden">
-          {/* Multi-layered gradient background */}
-          <PageGradient variant="hero" />
-          <GradientOrbs variant="default" />
-          
-          <div className="container relative z-10">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center px-4 py-2 mb-8 rounded-full border border-brand-cyan/20 bg-brand-cyan/10 backdrop-blur-sm text-brand-cyan text-sm font-medium">
-                <Sparkles className="h-4 w-4 mr-2" />
-                <span>Revolutionizing the music industry</span>
-              </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-6 leading-tight">
-                Orchestrate your Music Business with <GradientText>AI Agents</GradientText>
-              </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-3xl mx-auto">
-                A full-stack, AI-first platform with specialized agents, Patchline connects your data, simplifies your
-                workflows, and gives music professionals time back. Powered by{' '}
-                <span className={ariaAgent.gradientClass}>{ariaAgent.displayName}</span>, 
-                our flagship agentic orchestrator.
-              </p>
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="relative -mt-16 min-h-screen flex items-center justify-center">
+          <HeroSection
+            title="Revolutionizing the Music Industry"
+            subtitle="with Intelligent Infrastructure"
+            features={[
+              { title: "Label OS", description: "Smart dashboards for record labels" },
+              { title: "Modular AI Agents", description: "Specialized tools for royalties, metadata, and marketing" },
+              { title: "Real-Time Collaboration", description: "AI tools for artists, managers, and teams to co-create" },
+            ]}
+            showLogo
+            logoSize="xl"
+            className="pt-16"
+          />
+
+          {/* CTA Buttons */}
+          <div className="absolute bottom-20 left-0 right-0 z-20">
+            <div className="container">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
                   <Link href="/contact">Book a Demo</Link>
@@ -46,18 +43,11 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          {/* Subtle waveform visualization */}
-          <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-8 opacity-20">
-            <Waveform barCount={60} className="h-20" />
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent pointer-events-none" />
         </section>
 
-        {/* ARIA Introduction Section with subtle gradient */}
-        <section className="relative py-20 bg-gradient-to-b from-background via-background/98 to-background overflow-hidden">
-          <GradientOrbs variant="subtle" className="opacity-10" />
+        {/* ARIA Introduction Section - RIGHT EDGE */}
+        <section className="relative py-20 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="edge-right" className="opacity-25" />
           <div className="container relative z-10">
             <div className="max-w-4xl mx-auto">
               <Card variant="gradient" className="p-10 text-center backdrop-blur-xl">
@@ -88,8 +78,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Problem Statement - Clean background with subtle accent */}
-        <section className="relative py-20 bg-gradient-to-b from-background via-background to-background/80">
+        {/* Problem Statement - LEFT EDGE */}
+        <section className="relative py-20 bg-gradient-to-b from-background via-background to-background">
           <div className="container relative z-10">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl md:text-4xl font-semibold mb-12 text-center">The Music Industry Challenge</h2>
@@ -124,9 +114,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Solution Overview with subtle gradient orbs */}
-        <section className="relative py-20 overflow-hidden bg-gradient-to-b from-background/80 via-background to-background">
-          <GradientOrbs variant="subtle" className="opacity-30" />
+        {/* Solution Overview - LEFT EDGE */}
+        <section className="relative py-20 overflow-hidden bg-gradient-to-b from-background via-background to-background">
+          <GradientOrbs variant="edge-left" className="opacity-25" />
           <div className="container relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-semibold mb-6">
@@ -179,8 +169,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Core Advantages - Clean transition */}
-        <section className="relative py-20 bg-gradient-to-b from-background via-background/95 to-background">
+        {/* Core Advantages - Transition glow */}
+        <section className="relative py-20 overflow-hidden bg-gradient-to-b from-background via-background to-background">
           <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-semibold mb-6">Core Advantages</h2>
@@ -221,8 +211,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Founder Quote */}
-        <section className="relative py-20">
+        {/* Founder Quote - LEFT EDGE */}
+        <section className="relative py-20 overflow-hidden bg-gradient-to-b from-background via-background to-background">
+          <GradientOrbs variant="edge-left" className="opacity-25" />
           <div className="container relative z-10">
             <div className="max-w-4xl mx-auto">
               <Card variant="glass" className="p-10 text-center backdrop-blur-xl border-white/5">
@@ -237,8 +228,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA Section with gradient */}
-        <section className="relative py-20">
+        {/* CTA Section with gradient - SUBTLE BOTTOM */}
+        <section className="relative py-20 pb-32 bg-gradient-to-b from-background via-background to-background">
           <PageGradient variant="vibrant" className="opacity-30" />
           <GradientOrbs variant="subtle-bottom" />
           <div className="container relative z-10">

@@ -47,7 +47,7 @@ export function GradientOrbs({
   variant = 'default'
 }: { 
   className?: string
-  variant?: 'default' | 'subtle' | 'vibrant' | 'dispersed' | 'subtle-bottom' | 'dispersed-bottom'
+  variant?: 'default' | 'subtle' | 'vibrant' | 'dispersed' | 'subtle-bottom' | 'dispersed-bottom' | 'edge-left' | 'edge-right' | 'transition'
 }) {
   if (variant === 'subtle') {
     return (
@@ -191,6 +191,106 @@ export function GradientOrbs({
               rgba(0, 230, 228, 0.35) 8%, 
               transparent 35%)`,
             opacity: 0.3,
+          }}
+        />
+      </div>
+    )
+  }
+
+  if (variant === 'edge-left') {
+    return (
+      <div className={cn('absolute inset-0 overflow-hidden', className)}>
+        {/* From LEFT EDGE - cyan only gradient, constrained vertically */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 120% 60% at -20% 50%, 
+              rgba(0, 230, 228, 0.7) 0%, 
+              rgba(0, 230, 228, 0.6) 15%, 
+              rgba(0, 230, 228, 0.45) 30%,
+              rgba(0, 230, 228, 0.3) 45%, 
+              rgba(0, 230, 228, 0.15) 60%,
+              transparent 80%)`,
+            opacity: 0.6,
+          }}
+        />
+        {/* Secondary cyan glow for depth, also constrained vertically */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 80% 40% at -10% 50%, 
+              rgba(0, 230, 228, 0.5) 0%, 
+              rgba(0, 230, 228, 0.35) 25%, 
+              rgba(0, 230, 228, 0.2) 45%, 
+              transparent 65%)`,
+            opacity: 0.5,
+          }}
+        />
+      </div>
+    )
+  }
+
+  if (variant === 'edge-right') {
+    return (
+      <div className={cn('absolute inset-0 overflow-hidden', className)}>
+        {/* From RIGHT EDGE - cyan only gradient, constrained vertically */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 120% 60% at 120% 50%, 
+              rgba(0, 230, 228, 0.7) 0%, 
+              rgba(0, 230, 228, 0.6) 15%, 
+              rgba(0, 230, 228, 0.45) 30%,
+              rgba(0, 230, 228, 0.3) 45%, 
+              rgba(0, 230, 228, 0.15) 60%,
+              transparent 80%)`,
+            opacity: 0.6,
+          }}
+        />
+        {/* Secondary cyan glow for depth, also constrained vertically */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 80% 40% at 110% 50%, 
+              rgba(0, 230, 228, 0.5) 0%, 
+              rgba(0, 230, 228, 0.35) 25%, 
+              rgba(0, 230, 228, 0.2) 45%, 
+              transparent 65%)`,
+            opacity: 0.5,
+          }}
+        />
+      </div>
+    )
+  }
+
+  if (variant === 'transition') {
+    return (
+      <div className={cn('absolute inset-0 overflow-hidden', className)}>
+        {/* Soft dispersed glow for seamless transitions */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 120% 40% at 50% 50%, 
+              rgba(0, 230, 228, 0.18) 0%, 
+              rgba(0, 230, 228, 0.12) 25%,
+              rgba(0, 230, 228, 0.06) 50%,
+              transparent 70%)`,
+            opacity: 0.75,
+          }}
+        />
+        {/* Subtle side glows */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(ellipse 90% 40% at 0% 50%, 
+                rgba(0, 230, 228, 0.1) 0%, 
+                transparent 40%),
+              radial-gradient(ellipse 90% 40% at 100% 50%, 
+                rgba(0, 230, 228, 0.1) 0%, 
+                transparent 40%)
+            `,
+            opacity: 0.55,
           }}
         />
       </div>

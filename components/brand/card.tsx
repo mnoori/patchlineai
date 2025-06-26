@@ -9,7 +9,7 @@ const cardVariants = cva(
       variant: {
         default: 'bg-card border border-border',
         glass: 'glass-effect',
-        gradient: 'gradient-border bg-card',
+        gradient: 'gradient-border card-gradient',
         outlined: 'border-2 border-brand-cyan/30 bg-transparent',
         elevated: 'bg-card shadow-xl hover:shadow-2xl',
       },
@@ -40,13 +40,23 @@ export interface CardProps
     VariantProps<typeof cardVariants> {}
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, padding, hover, ...props }, ref) => {
+  ({ className, variant, padding, hover, children, ...props }, ref) => {
+    // Add extra padding for gradient variant to account for border spacing
+    const effectivePadding = variant === 'gradient' && padding !== 'none' 
+      ? padding === 'sm' ? 'md' 
+      : padding === 'md' ? 'lg'
+      : padding === 'lg' ? 'xl'
+      : padding
+      : padding;
+      
     return (
       <div
         ref={ref}
-        className={cn(cardVariants({ variant, padding, hover }), className)}
+        className={cn(cardVariants({ variant, padding: effectivePadding, hover }), className)}
         {...props}
-      />
+      >
+        {children}
+      </div>
     )
   }
 )
