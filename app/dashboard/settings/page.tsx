@@ -47,6 +47,8 @@ import {
   Smartphone,
   Wifi,
   Wallet,
+  X,
+  AlertTriangle,
 } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { motion } from "framer-motion"
@@ -1110,87 +1112,6 @@ export default function SettingsPage() {
             </Card>
           </motion.div>
 
-          {/* God Mode Activation Card */}
-          {user?.tier === UserTier.GOD_MODE && (
-            <motion.div variants={itemVariants}>
-              <Card className="glass-effect border-border/50 hover:border-amber-400/30 transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-amber-400" />
-                    God Mode
-                  </CardTitle>
-                  <CardDescription>Access advanced AI features for power users</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>God Mode Status</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {user.godModeActivated 
-                          ? "God Mode is currently active. You have access to all advanced features."
-                          : "Activate God Mode to unlock document processing, AI HR recruiter, and newsletter generator."}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {user.godModeActivated ? (
-                        <>
-                          <Badge className="bg-amber-400/20 text-amber-400 border-amber-400/30">
-                            <Sparkles className="h-3 w-3 mr-1" />
-                            Active
-                          </Badge>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              deactivateGodMode()
-                              toast.success("God Mode deactivated")
-                              window.location.reload()
-                            }}
-                            className="text-amber-400 hover:bg-amber-400/10 hover:text-amber-400"
-                          >
-                            Deactivate
-                          </Button>
-                        </>
-                      ) : (
-                        <Button
-                          onClick={() => setShowGodModeDialog(true)}
-                          className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
-                        >
-                          <Zap className="h-4 w-4 mr-2" />
-                          Activate God Mode
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  {user.godModeActivated && (
-                    <div className="space-y-2 pt-4 border-t">
-                      <h4 className="text-sm font-medium">Active Features:</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <CheckCircle2 className="h-4 w-4 text-amber-400" />
-                          <span>Document Processing & Tax Prep</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <CheckCircle2 className="h-4 w-4 text-amber-400" />
-                          <span>AI HR Recruiter</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <CheckCircle2 className="h-4 w-4 text-amber-400" />
-                          <span>Newsletter Generator</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <CheckCircle2 className="h-4 w-4 text-amber-400" />
-                          <span>Advanced AI Models</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
           <motion.div variants={itemVariants}>
             <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
               <CardHeader>
@@ -1283,6 +1204,75 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* God Mode Activation Card - DISABLED FOR PRODUCTION */}
+          {user?.tier === UserTier.GOD_MODE && (
+            <motion.div variants={itemVariants}>
+              <Card className="glass-effect border-border/50 hover:border-gray-400/30 transition-all duration-300 opacity-60">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-gray-400" />
+                    God Mode
+                    <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                  </CardTitle>
+                  <CardDescription>Advanced AI features (Currently disabled for production)</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>God Mode Status</Label>
+                      <p className="text-sm text-muted-foreground">
+                        God Mode is currently inactive. This feature is disabled in the production environment for security and stability.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-gray-400/20 text-gray-400 border-gray-400/30">
+                        <X className="h-3 w-3 mr-1" />
+                        Inactive
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled
+                        className="text-gray-400 cursor-not-allowed"
+                      >
+                        <Zap className="h-4 w-4 mr-2" />
+                        Unavailable
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-4 border-t">
+                    <h4 className="text-sm font-medium text-gray-400">Features (Inactive):</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <X className="h-4 w-4 text-gray-400" />
+                        <span>Document Processing & Tax Prep</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <X className="h-4 w-4 text-gray-400" />
+                        <span>AI HR Recruiter</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <X className="h-4 w-4 text-gray-400" />
+                        <span>Newsletter Generator</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <X className="h-4 w-4 text-gray-400" />
+                        <span>Advanced AI Models</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                      <p className="text-xs text-yellow-600">
+                        <AlertTriangle className="h-3 w-3 inline mr-1" />
+                        God Mode features are disabled in production for security and performance optimization.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
         </TabsContent>
 
         <TabsContent value="billing" className="space-y-6">
@@ -1638,83 +1628,6 @@ export default function SettingsPage() {
 
       {/* Upgrade Dialog */}
       <UpgradeDialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog} />
-      
-      {/* God Mode Dialog */}
-      <Dialog open={showGodModeDialog} onOpenChange={setShowGodModeDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-amber-400" />
-              Activate God Mode
-            </DialogTitle>
-            <DialogDescription>
-              Enter your God Mode password to unlock advanced AI features.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="god-mode-password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="god-mode-password"
-                  type="password"
-                  placeholder="Enter God Mode password"
-                  value={godModePassword}
-                  onChange={(e) => setGodModePassword(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleGodModeActivation()
-                    }
-                  }}
-                  className="pl-10"
-                />
-              </div>
-              {godModeError && (
-                <p className="text-sm text-red-500">{godModeError}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                God Mode includes:
-              </p>
-              <ul className="text-sm space-y-1">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3 w-3 text-amber-400" />
-                  Document Processing & Tax Preparation
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3 w-3 text-amber-400" />
-                  AI HR Recruiter with LinkedIn Analysis
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3 w-3 text-amber-400" />
-                  Newsletter Generator with Web Research
-                </li>
-              </ul>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowGodModeDialog(false)
-                setGodModePassword("")
-                setGodModeError("")
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleGodModeActivation}
-              disabled={!godModePassword}
-              className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
-            >
-              Activate
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </motion.div>
   )
 }

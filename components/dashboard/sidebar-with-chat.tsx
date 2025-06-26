@@ -474,16 +474,16 @@ export function SidebarWithChat() {
       items.push(agentSubmenu)
     }
     
-    // God Mode (if available)
-    if (hasFeature(FeatureId.GOD_MODE_ACCESS)) {
-      const godModeFeature = FEATURE_CATALOG[FeatureId.GOD_MODE_ACCESS]
-      items.push({
-        title: godModeFeature.name,
-        href: godModeFeature.route!,
-        icon: featureIcons[FeatureId.GOD_MODE_ACCESS],
-        isGodMode: true
-      })
-    }
+    // God Mode (if available) - DISABLED FOR PRODUCTION
+    // if (hasFeature(FeatureId.GOD_MODE_ACCESS)) {
+    //   const godModeFeature = FEATURE_CATALOG[FeatureId.GOD_MODE_ACCESS]
+    //   items.push({
+    //     title: godModeFeature.name,
+    //     href: godModeFeature.route!,
+    //     icon: featureIcons[FeatureId.GOD_MODE_ACCESS],
+    //     isGodMode: true
+    //   })
+    // }
     
     // Settings and Help (always visible)
     items.push({
