@@ -455,7 +455,7 @@ export function SidebarWithChat() {
     
     // Agent features - grouped under submenu
     const agentFeatures = availableFeatures.filter(f => 
-      FEATURE_CATALOG[f].type === 'agent'
+      FEATURE_CATALOG[f].type === 'agent' && f !== FeatureId.EDUCATION_AGENT
     )
     
     if (agentFeatures.length > 0) {
