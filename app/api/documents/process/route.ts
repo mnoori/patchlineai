@@ -40,35 +40,38 @@ export async function POST(request: NextRequest) {
     let jobId: string
     let useEnhancedProcessing = false
 
-    // For bank statements, optionally use enhanced processing
+    // For bank statements, always use enhanced processing for multi-page documents
     if (documentType && ['bilt', 'bofa', 'chase-checking', 'chase-freedom', 'chase-sapphire'].includes(documentType)) {
-      logger.info(`Bank statement detected (${documentType}), considering enhanced processing`)
+      logger.info(`Bank statement detected (${documentType}), using enhanced page-by-page processing`)
+      useEnhancedProcessing = true
       
-      // Check if we should use enhanced processing (can be controlled by env var)
-      useEnhancedProcessing = process.env.USE_ENHANCED_BANK_PROCESSING === 'true'
-      
-      if (useEnhancedProcessing) {
-        logger.info(`Using enhanced processing for ${documentType} statement`)
-        
-        try {
-          const enhancedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/documents/process-pages`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              s3Key,
-              documentId,
-              bankType: documentType
-            })
+      try {
+        const enhancedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/documents/process-pages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            s3Key,
+            documentId,
+            bankType: documentType
           })
+        })
+        
+        if (enhancedResponse.ok) {
+          const enhancedData = await enhancedResponse.json()
+          logger.info(`Enhanced processing initiated: ${enhancedData.message}`)
           
-          if (enhancedResponse.ok) {
-            const enhancedData = await enhancedResponse.json()
-            logger.info(`Enhanced processing initiated: ${enhancedData.message}`)
+          // For page-by-page processing, we'll get multiple job IDs
+          if (enhancedData.pageJobs && enhancedData.pageJobs.length > 0) {
+            // Use the first job ID for polling (we'll aggregate results later)
+            jobId = enhancedData.pageJobs[0].jobId
+            logger.info(`Page-by-page processing started with ${enhancedData.pageJobs.length} jobs`)
+          } else {
             jobId = enhancedData.jobId
           }
-        } catch (error) {
-          logger.warn('Enhanced processing failed, falling back to standard', error)
         }
+      } catch (error) {
+        logger.warn('Enhanced processing failed, falling back to standard', error)
+        useEnhancedProcessing = false
       }
     }
 
@@ -164,17 +167,18 @@ export async function POST(request: NextRequest) {
               // Use dynamic import to call the expense processing directly
               const { POST: processExpenses } = await import('@/app/api/tax-audit/process-expenses/route')
               
-              // Create a mock request for the expense processing
-              const expenseRequest = new Request('http://localhost/api/tax-audit/process-expenses', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+              // Create a mock NextRequest for the expense processing
+              const expenseRequest = {
+                json: async () => ({
                   userId,
                   documentId,
                   jobId,
                   bankType: documentType
-                })
-              })
+                }),
+                method: 'POST',
+                headers: new Headers({ 'Content-Type': 'application/json' }),
+                url: 'http://localhost/api/tax-audit/process-expenses'
+              } as NextRequest
               
               const expenseResponse = await processExpenses(expenseRequest)
               

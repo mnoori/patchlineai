@@ -486,6 +486,311 @@ function extractChaseExpenses(extractedData: any): ExtractedExpense[] {
   return expenses
 }
 
+// Bilt-specific expense extraction
+function extractBiltExpenses(extractedData: any): ExtractedExpense[] {
+  const expenses: ExtractedExpense[] = []
+  
+  console.log('Bilt extraction - tables found:', extractedData.tables?.length)
+  console.log('Bilt extraction - text length:', extractedData.text?.length)
+  
+  // Bilt credit card statements have specific table structures
+  if (extractedData.tables && extractedData.tables.length > 0) {
+    for (let tableIndex = 0; tableIndex < extractedData.tables.length; tableIndex++) {
+      const table = extractedData.tables[tableIndex]
+      console.log(`Bilt table ${tableIndex + 1} - rows:`, table.rows?.length)
+      
+      if (!table.rows || table.rows.length < 2) continue
+      
+      // Look for transaction tables - Bilt has "Transaction Summary" tables
+      let looksLikeTransactions = false
+      let hasAmountColumn = false
+      
+             // Check first few rows to identify column structure
+       for (let i = 0; i < Math.min(5, table.rows.length); i++) {
+         const row = table.rows[i]
+         if (!row.cells) continue
+         
+         const rowText = row.cells.map((c: any) => c.text || '').join(' ').toLowerCase()
+         
+         // Check for Bilt transaction indicators (more flexible)
+         if (rowText.includes('trans date') || 
+             rowText.includes('post date') || 
+             rowText.includes('transaction') ||
+             rowText.includes('description') ||
+             rowText.includes('reference') ||
+             rowText.includes('amount')) {
+           looksLikeTransactions = true
+         }
+         
+         // Check for amount patterns - look for any dollar amounts
+         row.cells.forEach((cell: any, cellIndex: number) => {
+           const cellText = cell.text || ''
+           if (/^\$[\d,]+\.\d{2}$/.test(cellText.trim()) || 
+               cellText.toLowerCase().includes('amount') ||
+               /^\$\d/.test(cellText.trim())) {
+             hasAmountColumn = true
+             console.log(`Found amount column ${cellIndex} with value: ${cellText}`)
+           }
+         })
+         
+         // Also check if we have date patterns in first column
+         if (row.cells && row.cells.length > 0) {
+           const firstCell = row.cells[0]?.text || ''
+           if (/^\d{2}\/\d{2}$/.test(firstCell.trim())) {
+             looksLikeTransactions = true
+             console.log(`Found date pattern in first column: ${firstCell}`)
+           }
+         }
+       }
+       
+       // Be very aggressive for Bilt - process any table with more than 3 rows
+       // This catches transaction tables that might not have obvious headers
+       if (table.rows.length >= 3) {
+         console.log(`Table ${tableIndex + 1} has ${table.rows.length} rows - processing as potential transactions`)
+         looksLikeTransactions = true
+       }
+       
+       if (!looksLikeTransactions && !hasAmountColumn) {
+         console.log(`Table ${tableIndex + 1} doesn't look like transactions - no dates or amounts found`)
+         continue
+       } else {
+         console.log(`Table ${tableIndex + 1} looks like transactions - processing...`)
+       }
+      
+      // Process rows as transactions
+      for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
+        const row = table.rows[rowIndex]
+        if (!row.cells || row.cells.length < 3) continue
+        
+        const cells = row.cells.map((c: any) => c.text || '')
+        console.log(`Bilt row ${rowIndex}: ${JSON.stringify(cells)}`)
+        
+        // Skip header rows
+        if (cells.some(cell => cell.toLowerCase().includes('trans date') || 
+                               cell.toLowerCase().includes('post date') ||
+                               cell.toLowerCase().includes('description') ||
+                               cell.toLowerCase().includes('amount'))) {
+          console.log('Skipping header row')
+          continue
+        }
+        
+        // Skip empty rows or continuation rows
+        if (cells.every(cell => !cell || cell.trim() === '') ||
+            cells.some(cell => cell.includes('Continued on next page'))) {
+          continue
+        }
+        
+        // Bilt format: Trans Date | Post Date | Reference | Description | Amount
+        // Sometimes: Date | Date | Ref | Ref | Description | Amount
+        
+        let date = null
+        let description = ''
+        let amount = 0
+        
+        // Extract date from first column (be more flexible)
+        if (cells[0] && (/^\d{1,2}\/\d{1,2}$/.test(cells[0].trim()) || 
+                         /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(cells[0].trim()))) {
+          date = parseDate(cells[0])
+        }
+        
+        // If no date in first column, check second column
+        if (!date && cells[1] && (/^\d{1,2}\/\d{1,2}$/.test(cells[1].trim()) || 
+                                 /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(cells[1].trim()))) {
+          date = parseDate(cells[1])
+        }
+        
+        // If no valid date, skip this row
+        if (!date) {
+          console.log(`No valid date found in row: ${JSON.stringify(cells.slice(0, 3))}`)
+          continue
+        }
+        
+                 // Find description - usually the column with merchant/vendor info
+         // Look for the cell that has meaningful text (not dates, not reference numbers)
+         for (let i = 1; i < cells.length - 1; i++) {
+           const cellText = cells[i]
+           if (cellText && cellText.length > 3 && 
+               !/^\d{2}\/\d{2}$/.test(cellText) && // Not a date
+               !/^\d+$/.test(cellText) && // Not just a number (but allow alphanumeric)
+               !cellText.includes('X ') && // Not exchange rate
+               !cellText.includes('QUETZAL') && // Currency info
+               !cellText.includes('PESO') && // Currency info
+               cellText !== '-' && // Not empty marker
+               cellText.trim() !== '') { // Not empty
+             
+             // Prefer cells that look like merchant names (contain letters)
+             if (/[A-Za-z]/.test(cellText)) {
+               // This looks like a description
+               if (!description || cellText.length > description.length) {
+                 description = cellText
+               }
+             }
+           }
+         }
+         
+         // If still no description found, be more lenient
+         if (!description) {
+           for (let i = 1; i < cells.length - 1; i++) {
+             const cellText = cells[i]
+             if (cellText && cellText.length > 2 && 
+                 !/^\d{2}\/\d{2}$/.test(cellText) && // Not a date
+                 cellText !== '-' && 
+                 cellText.trim() !== '') {
+               description = cellText
+               break
+             }
+           }
+         }
+        
+        // Extract amount - check multiple columns from right to left
+        for (let i = cells.length - 1; i >= 2; i--) {
+          const cellText = cells[i]
+          if (cellText && (cellText.includes('$') || 
+                          /^[\d,]+\.\d{2}$/.test(cellText.trim()) ||
+                          /^\$[\d,]+$/.test(cellText.trim()))) {
+            const parsedAmount = parseAmount(cellText)
+            if (parsedAmount > 0) {
+              amount = parsedAmount
+              console.log(`Found Bilt amount in cell ${i}: ${cellText} -> $${amount}`)
+              break
+            }
+          }
+        }
+        
+        // Debug logging for troubleshooting
+        console.log(`Bilt row analysis: date=${date}, description="${description}", amount=${amount}`)
+        
+        // If we have all required fields, create the expense
+        if (date && description && amount > 0) {
+          // For Bilt credit card, ALL positive amounts are expenses (purchases)
+          // Skip obvious credits/refunds
+          const descLower = description.toLowerCase()
+          const isCredit = descLower.includes('credit') || 
+                          descLower.includes('refund') || 
+                          descLower.includes('payment received') ||
+                          descLower.includes('total')
+          
+          if (!isCredit) {
+            expenses.push({
+              lineNumber: expenses.length + 1,
+              date,
+              description: cleanDescription(description),
+              amount,
+              vendor: extractVendorFromDescription(description),
+              transactionType: 'debit' // All purchases are expenses for credit cards
+            })
+            console.log(`✅ Bilt transaction: ${date} - ${description} - $${amount}`)
+          } else {
+            console.log(`⏭️ Skipping credit/refund: ${description}`)
+          }
+        } else {
+          console.log(`❌ Skipping Bilt row - missing data: date=${!!date}, desc=${!!description}, amount=${amount}`)
+        }
+      }
+    }
+  }
+  
+  console.log(`Bilt extraction complete - found ${expenses.length} expenses from tables`)
+
+  // -----------------------------
+  // Fallback: parse transactions from raw text if we still have fewer than 30 rows
+  // -----------------------------
+  if (extractedData.text && expenses.length < 30) {
+    console.log('Attempting Bilt text-based extraction – raw text length:', extractedData.text.length)
+
+    const lines = extractedData.text.split(/\n+/)
+    let lineNumber = expenses.length + 1
+
+    // Regex patterns
+    const dateRegex = /^(\d{1,2})[\/](\d{1,2})(?:[\/](\d{2,4}))?/ // MM/DD or MM/DD/YY/YY
+    const amountRegex = /\$?([\d,]+\.\d{2})$/ // ends with amount
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim()
+      if (line.length < 10) continue // skip very short
+
+      // Must contain an amount at end
+      const amtMatch = line.match(amountRegex)
+      if (!amtMatch) continue
+      const amount = parseFloat(amtMatch[1].replace(/,/g, ''))
+      if (!(amount > 0)) continue
+
+      // Must start with a date
+      const dateMatch = line.match(dateRegex)
+      if (!dateMatch) continue
+
+      const month = dateMatch[1]
+      const day = dateMatch[2]
+      const yearFragment = dateMatch[3]
+      const yearFull = yearFragment ? (yearFragment.length === 2 ? `20${yearFragment}` : yearFragment) : `${new Date().getFullYear()}`
+      const date = `${yearFull}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
+
+      // Description is everything between date and amount
+      const descStart = line.indexOf(dateMatch[0]) + dateMatch[0].length
+      const descEnd = line.lastIndexOf(amtMatch[0])
+      if (descEnd <= descStart) continue
+      let description = line.substring(descStart, descEnd).trim()
+      if (!description || description.length < 3) continue
+
+      // Skip obvious credits/refunds
+      const descLower = description.toLowerCase()
+      if (descLower.includes('credit') || descLower.includes('payment') || descLower.includes('refund')) continue
+
+      expenses.push({
+        lineNumber: lineNumber++,
+        date,
+        description: cleanDescription(description),
+        amount,
+        vendor: extractVendorFromDescription(description),
+        transactionType: 'debit'
+      })
+      console.log(`✅ Bilt TEXT transaction: ${date} - ${description} - $${amount}`)
+    }
+  }
+
+  // If still fewer than 30 expenses, do a global regex scan across the whole text
+  if (expenses.length < 30) {
+    /* eslint-disable @typescript-eslint/no-use-before-define */
+    console.log('Running global regex scan for additional Bilt transactions')
+
+    // Pattern:  MM/DD  <up to 120 chars>  $amount
+    const globalRegex = /(\d{1,2}\/\d{1,2})(?:\/\d{2,4})?\s+([A-Za-z0-9][^$\n]{5,120}?)\s+\$([\d,]+\.\d{2})/g
+    let match: RegExpExecArray | null
+    while ((match = globalRegex.exec(extractedData.text)) !== null) {
+      const dateRaw = match[1]
+      const descRaw = match[2].trim()
+      const amountRaw = match[3]
+
+      // Basic filters
+      if (!/^[A-Za-z].{2,}/.test(descRaw)) continue // description must have letters
+      const descLower = descRaw.toLowerCase()
+      if (descLower.includes('payment') || descLower.includes('credit') || descLower.includes('refund')) continue
+
+      const date = parseDate(dateRaw)
+      const amount = parseFloat(amountRaw.replace(/,/g, ''))
+      if (!date || !(amount > 0)) continue
+
+      // Dedup by date+amount+description
+      if (expenses.some(e => e.date === date && Math.abs(e.amount - amount) < 0.01 && e.description === cleanDescription(descRaw))) {
+        continue
+      }
+
+      expenses.push({
+        lineNumber: expenses.length + 1,
+        date,
+        description: cleanDescription(descRaw),
+        amount,
+        vendor: extractVendorFromDescription(descRaw),
+        transactionType: 'debit'
+      })
+      console.log(`✅ Bilt REGEX transaction: ${date} - ${descRaw} - $${amount}`)
+    }
+  }
+
+  console.log(`Bilt extraction complete - total expenses found: ${expenses.length}`)
+  return expenses
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -573,6 +878,9 @@ export async function POST(request: NextRequest) {
     } else if (bankType === 'chase-checking' || bankType === 'chase-freedom' || bankType === 'chase-sapphire') {
       console.log('Attempting Chase-specific extraction')
       expenses = extractChaseExpenses(extractedData)
+    } else if (bankType === 'bilt') {
+      console.log('Attempting Bilt-specific extraction')
+      expenses = extractBiltExpenses(extractedData)
     }
 
     // If bank-specific extraction didn't find anything, try generic extraction
