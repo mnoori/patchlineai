@@ -1,4 +1,6 @@
 import type { Config } from "tailwindcss"
+import { COLORS, TYPOGRAPHY, RADIUS, ANIMATION } from "./lib/brand"
+import { hexToHSL } from "./lib/brand/utils"
 
 const config = {
   darkMode: ["class"],
@@ -20,10 +22,20 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)"],
-        heading: ["var(--font-space-grotesk)"],
+        sans: [TYPOGRAPHY.fontFamily.primary],
+        heading: [TYPOGRAPHY.fontFamily.heading],
+        mono: [TYPOGRAPHY.fontFamily.mono],
       },
       colors: {
+        // Brand colors
+        brand: {
+          black: COLORS.primary.black,
+          'deep-blue': COLORS.primary.deepBlue,
+          'bright-blue': COLORS.primary.brightBlue,
+          cyan: COLORS.primary.cyan,
+        },
+        gradient: COLORS.gradient,
+        // UI colors using CSS variables for dynamic theming
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -57,19 +69,15 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Custom theme colors
-        cosmic: {
-          teal: "hsl(var(--cosmic-teal))",
-          pink: "hsl(var(--cosmic-pink))",
-          space: "hsl(var(--cosmic-space))",
-          midnight: "#141124",
-        },
       },
       borderRadius: {
+        ...RADIUS,
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontWeight: TYPOGRAPHY.fontWeight,
+      fontSize: TYPOGRAPHY.fontSize,
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -99,13 +107,15 @@ const config = {
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+        "accordion-down": `accordion-down ${ANIMATION.duration.normal} ease-out`,
+        "accordion-up": `accordion-up ${ANIMATION.duration.normal} ease-out`,
         float: "float 6s ease-in-out infinite",
         "pulse-slow": "pulse-slow 4s ease-in-out infinite",
         waveform: "waveform 1.5s ease-in-out infinite",
         shimmer: "shimmer 8s linear infinite",
       },
+      transitionDuration: ANIMATION.duration,
+      transitionTimingFunction: ANIMATION.easing,
     },
   },
   plugins: [require("tailwindcss-animate")],

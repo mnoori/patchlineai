@@ -1,0 +1,55 @@
+/* Helvetica Neue Font Stack with Fallbacks */
+
+/* Regular */
+@font-face {
+  font-family: 'Helvetica Neue';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Helvetica Neue Regular'), local('HelveticaNeue-Regular'), local('Helvetica Neue');
+}
+
+/* Medium */
+@font-face {
+  font-family: 'Helvetica Neue';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: local('Helvetica Neue Medium'), local('HelveticaNeue-Medium');
+}
+
+/* Semibold */
+@font-face {
+  font-family: 'Helvetica Neue';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Helvetica Neue Bold'), local('HelveticaNeue-Bold');
+}
+
+/* Bold */
+@font-face {
+  font-family: 'Helvetica Neue';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Helvetica Neue Bold'), local('HelveticaNeue-Bold');
+}
+
+/* Extrabold */
+@font-face {
+  font-family: 'Helvetica Neue';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: local('Helvetica Neue Heavy'), local('HelveticaNeue-Heavy');
+}
+
+/* CSS Variables for font weights */
+:root {
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+} 

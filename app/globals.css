@@ -1,34 +1,43 @@
+@import './fonts.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 260 90% 5%;
-    --foreground: 0 0% 98%;
-    --card: 260 50% 11%;
+    /* Brand Colors */
+    --brand-black: #010102;
+    --brand-deep-blue: #002772;
+    --brand-bright-blue: #0068FF;
+    --brand-cyan: #00E6E2;
+    
+    /* Gradient Colors */
+    --brand-gradient-start: #70F7EA;
+    --brand-gradient-middle: #2A09CC;
+    --brand-gradient-end: #090030;
+    
+    /* UI Colors - Dark Theme */
+    --background: 0 2% 1%;        /* #010102 */
+    --foreground: 0 0% 98%;       /* #FAFAFA */
+    --card: 0 3% 10%;             /* #1A1A1B */
     --card-foreground: 0 0% 98%;
-    --popover: 260 50% 11%;
+    --popover: 0 3% 10%;
     --popover-foreground: 0 0% 98%;
-    --primary: 184 100% 50%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 260 30% 16%;
+    --primary: 215 100% 50%;      /* #0068FF */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 260 30% 16%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 260 30% 16%;
+    --muted: 0 0% 32%;            /* #525252 */
+    --muted-foreground: 0 0% 65%;
+    --accent: 215 100% 50%;       /* #0068FF */
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 260 30% 16%;
-    --input: 260 30% 16%;
-    --ring: 184 100% 50%;
+    --border: 0 0% 15%;           /* #262626 */
+    --input: 0 0% 15%;
+    --ring: 215 100% 50%;         /* #0068FF */
     --radius: 0.75rem;
-
-    /* Custom colors */
-    --cosmic-teal: 184 100% 50%;
-    --cosmic-pink: 330 100% 50%;
-    --cosmic-space: 260 30% 10%;
   }
 }
 
@@ -49,10 +58,13 @@
   }
 }
 
+/* Brand gradient text */
 .gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-cosmic-teal to-cosmic-pink;
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(to right, var(--brand-gradient-start), var(--brand-gradient-middle));
 }
 
+/* Brand gradient border */
 .gradient-border {
   position: relative;
 }
@@ -63,21 +75,22 @@
   inset: 0;
   border-radius: var(--radius);
   padding: 1px;
-  background: linear-gradient(to right, theme("colors.cosmic.teal"), theme("colors.cosmic.pink"));
+  background: linear-gradient(135deg, var(--brand-cyan), var(--brand-bright-blue), var(--brand-gradient-middle));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
 }
 
+/* Glass effect with brand colors */
 .glass-effect {
-  @apply bg-cosmic-midnight/80 backdrop-blur-md border border-white/10;
+  @apply bg-black/80 backdrop-blur-md border border-white/10;
 }
 
 /* Chat button active state with glow effect */
 .chat-button-active {
-  @apply bg-cosmic-teal/20 text-cosmic-teal border border-cosmic-teal/30;
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 5px rgba(0, 240, 255, 0.1);
+  @apply bg-brand-bright-blue/20 text-brand-bright-blue border border-brand-bright-blue/30;
+  box-shadow: 0 0 15px rgba(0, 104, 255, 0.3), inset 0 0 5px rgba(0, 104, 255, 0.1);
   position: relative;
   overflow: hidden;
 }
@@ -89,9 +102,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, rgba(0, 240, 255, 0.1), rgba(255, 42, 109, 0.05));
+  background: linear-gradient(90deg, var(--brand-bright-blue), var(--brand-cyan));
+  opacity: 0.1;
   z-index: 0;
-  opacity: 0.7;
 }
 
 /* Chat interface transitions */
@@ -138,28 +151,29 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 240, 255, 0.3);
+  background: var(--brand-bright-blue);
+  opacity: 0.3;
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 240, 255, 0.5);
+  opacity: 0.5;
 }
 
-/* Pulsing glow effect for Patchy button */
-.patchy-button-glow {
+/* Pulsing glow effect for brand button */
+.brand-button-glow {
   animation: pulse-glow 3s ease-in-out infinite;
 }
 
 @keyframes pulse-glow {
   0% {
-    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.1), 0 0 0 0 rgba(255, 42, 109, 0.1);
+    box-shadow: 0 0 0 0 rgba(0, 104, 255, 0.1), 0 0 0 0 rgba(0, 230, 226, 0.1);
   }
   50% {
-    box-shadow: 0 0 10px 2px rgba(0, 240, 255, 0.3), 0 0 15px 5px rgba(255, 42, 109, 0.1);
+    box-shadow: 0 0 10px 2px rgba(0, 104, 255, 0.3), 0 0 15px 5px rgba(0, 230, 226, 0.1);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.1), 0 0 0 0 rgba(255, 42, 109, 0.1);
+    box-shadow: 0 0 0 0 rgba(0, 104, 255, 0.1), 0 0 0 0 rgba(0, 230, 226, 0.1);
   }
 }
 

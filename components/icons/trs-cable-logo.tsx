@@ -1,7 +1,5 @@
-import Image from "next/image"
+import { Logo } from '@/components/brand'
 
 export function TRSCableLogo({ className }: { className?: string }) {
-  return (
-    <Image src="/logo.png" alt="Patchline AI Logo" width={40} height={40} className={className} />
-  )
+  return <Logo variant="primary" size="md" className={className} />
 }
