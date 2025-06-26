@@ -36,9 +36,9 @@ export interface TierConfig {
 }
 
 export const TIER_CONFIGS: Record<UserTier, TierConfig> = {
-  [UserTier.CREATOR]: {
-    id: UserTier.CREATOR,
-    name: "Creator",
+  [UserTier.HOBBY]: {
+    id: UserTier.HOBBY,
+    name: "Hobby",
     tagline: "For solo artists & emerging talent",
     description: "Perfect for artists starting their journey with essential tools for catalog management, fan engagement, and release planning",
     price: {
@@ -80,18 +80,18 @@ export const TIER_CONFIGS: Record<UserTier, TierConfig> = {
     ctaText: "Start Free"
   },
   
-  [UserTier.ROSTER]: {
-    id: UserTier.ROSTER,
-    name: "Roster",
+  [UserTier.PRO]: {
+    id: UserTier.PRO,
+    name: "Pro",
     tagline: "For managers, small labels & venues",
-    description: "Roster plan covers artist managers and small venues or festival ops juggling multiple stages",
+    description: "Pro plan covers artist managers and small venues or festival ops juggling multiple stages",
     price: {
       monthly: 59,
       yearly: 590,
       currency: "USD"
     },
     features: [
-      "Everything in Creator, plus:",
+      "Everything in Hobby, plus:",
       "5 team seats (+ $9/additional seat)",
       "1,000 AI agent actions per month",
       "Advanced release management",
@@ -133,18 +133,18 @@ export const TIER_CONFIGS: Record<UserTier, TierConfig> = {
     ctaText: "Start 14-Day Trial"
   },
   
-  [UserTier.ENTERPRISE]: {
-    id: UserTier.ENTERPRISE,
-    name: "Enterprise",
+  [UserTier.ULTRA]: {
+    id: UserTier.ULTRA,
+    name: "Ultra",
     tagline: "For labels, publishers & promoters",
     description: "Built for established companies managing large rosters and complex operations",
     price: {
-      monthly: 299,
-      yearly: 2990,
+      monthly: 200,
+      yearly: 2000,
       currency: "USD"
     },
     features: [
-      "Everything in Roster, plus:",
+      "Everything in Pro, plus:",
       "Unlimited seats & custom roles",
       "Unlimited AI agent actions",
       "Bulk catalog import & management",
@@ -228,7 +228,7 @@ export function getTierByPrice(monthlyPrice: number): UserTier | null {
 }
 
 export function getUpgradePath(currentTier: UserTier): UserTier[] {
-  const tierOrder = [UserTier.CREATOR, UserTier.ROSTER, UserTier.ENTERPRISE]
+  const tierOrder = [UserTier.HOBBY, UserTier.PRO, UserTier.ULTRA]
   const currentIndex = tierOrder.indexOf(currentTier)
   return currentIndex >= 0 ? tierOrder.slice(currentIndex + 1) : []
 } 

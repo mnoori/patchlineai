@@ -15,9 +15,9 @@ import { persist } from "zustand/middleware"
 
 // Tiers (music-industry wording)
 export enum UserTier {
-  CREATOR = "creator",        // Solo artists / small teams
-  ROSTER = "roster",          // Indie managers, small labels, festivals
-  ENTERPRISE = "enterprise",  // Mid-large labels, rights cos., promoters
+  HOBBY = "hobby",            // Solo artists / small teams
+  PRO = "pro",                // Indie managers, small labels, festivals
+  ULTRA = "ultra",            // Mid-large labels, rights cos., promoters
   GOD_MODE = "god_mode"        // Internal / power user
 }
 
@@ -191,7 +191,7 @@ export const FEATURE_CATALOG: Record<FeatureId, Feature> = {
  * ---------------------------------------------------------------- */
 export const TIER_FEATURES: Record<UserTier, FeatureId[]> = {
   /* CREATOR – free / low-cost */
-  [UserTier.CREATOR]: [
+  [UserTier.HOBBY]: [
     FeatureId.DASHBOARD,
     FeatureId.CATALOG,
     FeatureId.RELEASES,
@@ -203,7 +203,7 @@ export const TIER_FEATURES: Record<UserTier, FeatureId[]> = {
   ],
 
   /* ROSTER – growth */
-  [UserTier.ROSTER]: [
+  [UserTier.PRO]: [
     FeatureId.DASHBOARD,
     FeatureId.CATALOG,
     FeatureId.RELEASES,
@@ -219,7 +219,7 @@ export const TIER_FEATURES: Record<UserTier, FeatureId[]> = {
   ],
 
   /* ENTERPRISE – scale */
-  [UserTier.ENTERPRISE]: [
+  [UserTier.ULTRA]: [
     FeatureId.DASHBOARD,
     FeatureId.CATALOG,
     FeatureId.RELEASES,
@@ -252,19 +252,19 @@ export interface TierLimits {
 }
 
 export const TIER_LIMITS: Record<UserTier, TierLimits> = {
-  [UserTier.CREATOR]: {
+  [UserTier.HOBBY]: {
     maxSeats: 1,
     catalogTrackLimit: 50,
     agentActionsPerDay: 3,
     marketplaceCreditsPerMonth: 0
   },
-  [UserTier.ROSTER]: {
+  [UserTier.PRO]: {
     maxSeats: 5,
     catalogTrackLimit: 5000,
     agentActionsPerDay: null, // Unlimited
     marketplaceCreditsPerMonth: 10
   },
-  [UserTier.ENTERPRISE]: {
+  [UserTier.ULTRA]: {
     maxSeats: null, // Unlimited
     catalogTrackLimit: null,
     agentActionsPerDay: null,
@@ -382,16 +382,22 @@ function normalizeTier(tier: string): UserTier {
   switch (tier) {
     // Legacy / alias mapping
     case "free":
-      return UserTier.CREATOR
+    case "creator":
+      return UserTier.HOBBY
     case "indie":
     case "professional":
-      return UserTier.ROSTER
+    case "roster":
+      return UserTier.PRO
     case "label":
     case "enterprise":
-      return UserTier.ENTERPRISE
-    case "roster":
-      return UserTier.ROSTER
+      return UserTier.ULTRA
+    case "hobby":
+      return UserTier.HOBBY
+    case "pro":
+      return UserTier.PRO
+    case "ultra":
+      return UserTier.ULTRA
     default:
-      return (Object.values(UserTier) as string[]).includes(tier) ? (tier as UserTier) : UserTier.CREATOR
+      return (Object.values(UserTier) as string[]).includes(tier) ? (tier as UserTier) : UserTier.HOBBY
   }
 }

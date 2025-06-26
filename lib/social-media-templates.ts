@@ -41,7 +41,7 @@ export interface SocialMediaTemplate {
   }
 }
 
-// Pre-generated templates from our AI agent Aria
+// Pre-generated templates from our AI agent ARIA
 export const ARIA_GENERATED_TEMPLATES: SocialMediaTemplate[] = [
   {
     id: 'new-release-hype',

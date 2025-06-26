@@ -1,9 +1,10 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
+import { Button, GradientOrbs, PageGradient, Card } from "@/components/brand"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Linkedin, Instagram } from "lucide-react"
+import { headingStyles } from "@/lib/brand"
 
 export default function AboutPage() {
   const values = [
@@ -23,162 +24,148 @@ export default function AboutPage() {
       title: "Reliability at Scale",
       description: "Cloud-agnostic, BYOC architecture built for 24/7 uptime as catalogs and classes grow.",
     },
-    {
-      title: "Inclusive Community",
-      description: "Tools priced and designed so labels, educators, and individual artists all thrive together.",
-    },
   ]
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 pt-16">
-        {/* Hero Section */}
-        <section className="py-12 neural-network">
-          <div className="container">
-            <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading">
-                Less Admin. More Music with the <span className="gradient-text">Agentic AI Backbone</span> for the Music
-                Industry.
-              </h1>
-              <p className="text-xl text-muted-foreground mb-6">
-                Automating the busywork so artists and labels can move faster, smarter, and with more creative freedom.
-              </p>
+        {/* Our Story Section - Hero with DEFAULT gradient */}
+        <section className="relative py-16 pb-8 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="default" />
+          <div className="container relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <h2 className={`${headingStyles.h2} mb-8 text-center`}>Our Story</h2>
+              <Card variant="gradient" className="p-8 backdrop-blur-sm">
+                <div className="space-y-4 text-base text-muted-foreground">
+                  <p>
+                    Patchline AI was born from a simple observation: music professionals spend too much time on repetitive
+                    tasks.
+                  </p>
+                  <p>
+                    During his time in both the AI and music industries, Dr. Noori experienced firsthand how
+                    administrative work was draining creative energy from talented people. He saw how major labels had
+                    access to sophisticated tools and teams that independent artists and smaller labels couldn't afford.
+                  </p>
+                  <p>
+                    In 2024, he set out to build something different: an AI platform that speaks the language of music, 
+                    not just tech. Starting with deep research into how labels, artists, and music schools actually work, 
+                    he began prototyping AI agents that could handle the repetitive tasks that steal time from creativity.
+                  </p>
+                  <p>
+                    Today, Patchline AI is pioneering a new approach to music technology. Our vision is clear: give every 
+                    music professional—from bedroom producers to established labels—access to AI tools that previously only 
+                    tech giants could afford. We're not just building software; we're reimagining how the music industry 
+                    can work when artificial intelligence handles the admin and humans focus on the art.
+                  </p>
+                </div>
+              </Card>
             </div>
           </div>
         </section>
 
-        {/* Founder Section */}
-        <section className="py-10 bg-cosmic-space/50">
-          <div className="container">
-            <h2 className="text-3xl font-bold mb-5 font-heading text-center">Meet Our Founder</h2>
-            <div className="flex flex-col md:flex-row gap-6 max-w-5xl mx-auto">
-              <div className="md:w-1/3 flex flex-col items-center">
-                <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-cosmic-teal">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Headshot.jpg-omMnc2assOnpd8GCYZ1kxj2KMiNibK.jpeg"
-                    alt="Dr. Mehdi Noori, Founder of Patchline AI"
-                    width={256}
-                    height={256}
-                    className="object-cover w-full h-full"
-                  />
+        {/* Founder Section - RIGHT EDGE */}
+        <section className="relative pt-4 pb-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="edge-right" className="opacity-25" />
+          <div className="container relative z-10">
+            <h2 className={`${headingStyles.h2} mb-12 text-center`}>Meet Our Founder</h2>
+            <Card variant="gradient" className="max-w-5xl mx-auto p-8 backdrop-blur-sm">
+              <div className="flex flex-col md:flex-row gap-8">
+                <div className="md:w-1/3 flex flex-col items-center">
+                  <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-brand-cyan">
+                    <Image
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Headshot.jpg-omMnc2assOnpd8GCYZ1kxj2KMiNibK.jpeg"
+                      alt="Dr. Mehdi Noori, Founder of Patchline AI"
+                      width={256}
+                      height={256}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <div className="flex justify-center mt-4 space-x-4">
+                    <Link
+                      href="https://www.linkedin.com/in/mehdi-noori/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-brand-cyan/20 p-3 rounded-full hover:bg-brand-cyan/30 transition-colors"
+                    >
+                      <Linkedin className="h-5 w-5 text-brand-cyan" />
+                    </Link>
+                    <Link
+                      href="https://www.instagram.com/algoryxmusic/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-brand-cyan/20 p-3 rounded-full hover:bg-brand-cyan/30 transition-colors"
+                    >
+                      <Instagram className="h-5 w-5 text-brand-cyan" />
+                    </Link>
+                  </div>
                 </div>
-                <div className="flex justify-center mt-3 space-x-4">
-                  <Link
-                    href="https://www.linkedin.com/in/mehdi-noori/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-cosmic-teal/20 p-2 rounded-full hover:bg-cosmic-teal/30 transition-colors"
-                  >
-                    <Linkedin className="h-5 w-5 text-cosmic-teal" />
-                  </Link>
-                  <Link
-                    href="https://www.instagram.com/algoryxmusic/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-cosmic-teal/20 p-2 rounded-full hover:bg-cosmic-teal/30 transition-colors"
-                  >
-                    <Instagram className="h-5 w-5 text-cosmic-teal" />
-                  </Link>
+                <div className="md:w-2/3">
+                  <div className="space-y-4 text-base text-muted-foreground">
+                    <p>
+                      Dr. Mehdi Noori is a rare hybrid of AI scientist and music industry insider. With a Ph.D. in
+                      engineering, a postdoc at MIT, and 15+ years leading AI innovation at firms like AWS and Nielsen,
+                      he's built scalable GenAI systems used by Fortune 500s across healthcare, finance, and media.
+                    </p>
+                    <p>
+                      But he's also a trained music producer and DJ (ALGORYX). Formally educated at Point Blank, Sound
+                      Collective, and Cosmic Academy, and deeply embedded in the creative scene. That dual fluency gives
+                      him a unique edge: he's lived the pain points Patchline solves.
+                    </p>
+                    <p>
+                      Before founding Patchline, Mehdi led the Algoryx Art & Tech Lab, where he prototyped AI-native tools
+                      for creative workflows. Now, he's applying that experience to reimagine how music teams work: with
+                      agentic infrastructure that blends deep technical rigor with human-centered design.
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div className="md:w-2/3">
-                <div className="space-y-3 text-base">
-                  <p>
-                    Dr. Mehdi Noori is a rare hybrid of AI scientist and music industry insider. With a Ph.D. in
-                    engineering, a postdoc at MIT, and 15+ years leading AI innovation at firms like AWS and Nielsen,
-                    he's built scalable GenAI systems used by Fortune 500s across healthcare, finance, and media.
-                  </p>
-                  <p>
-                    But he's also a trained music producer and DJ (ALGORYX). Formally educated at Point Blank, Sound
-                    Collective, and Cosmic Academy, and deeply embedded in the creative scene. That dual fluency gives
-                    him a unique edge: he's lived the pain points Patchline solves.
-                  </p>
-                  <p>
-                    Before founding Patchline, Mehdi led the Algoryx Art & Tech Lab, where he prototyped AI-native tools
-                    for creative workflows. Now, he's applying that experience to reimagine how music teams work: with
-                    agentic infrastructure that blends deep technical rigor with human-centered design.
-                  </p>
-                </div>
-              </div>
-            </div>
+            </Card>
           </div>
         </section>
 
-        {/* Our Story Section */}
-        <section className="py-10">
-          <div className="container">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold mb-4 font-heading text-center">Our Story</h2>
-              <div className="space-y-3 text-base">
-                <p>
-                  Patchline AI was born from a simple observation: music professionals spend too much time on repetitive
-                  tasks and not enough time on creative work.
-                </p>
-                <p>
-                  During his time in both the AI and music industries, Dr. Noori experienced firsthand how
-                  administrative work was draining creative energy from talented people. He saw how major labels had
-                  access to sophisticated tools and teams that independent artists and smaller labels couldn't afford.
-                </p>
-                <p>
-                  In 2024, he assembled a team of AI researchers and music industry veterans to explore how artificial
-                  intelligence could democratize access to professional tools. They built the first prototype of the
-                  Scout Agent to help A&R teams discover promising talent more efficiently.
-                </p>
-                <p>
-                  The results were immediate: teams saved hours of manual work and discovered artists they would have
-                  otherwise missed. This early success led to the development of our full suite of AI agents, each
-                  designed to solve specific pain points in the music business.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Values Section */}
-        <section className="py-10 bg-cosmic-space/50">
-          <div className="container">
-            <div className="max-w-3xl mx-auto text-center mb-8">
-              <h2 className="text-3xl font-bold mb-3 font-heading">Our Principles</h2>
+        {/* Values Section - LEFT EDGE */}
+        <section className="relative py-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="edge-left" className="opacity-25" />
+          <div className="container relative z-10">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className={`${headingStyles.h2} mb-4`}>Our Principles</h2>
               <p className="text-lg text-muted-foreground">
                 These core principles guide everything we do at Patchline AI.
               </p>
             </div>
-            <div className="grid gap-4 max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {values.map((value, index) => (
-                <div
+                <Card
                   key={index}
-                  className="glass-effect rounded-xl p-5 hover:border-cosmic-teal/30 transition-all duration-300"
+                  variant="outlined"
+                  hover="glow"
+                  className="p-6 backdrop-blur-sm bg-black/20"
                 >
-                  <h3 className="text-xl font-bold mb-2 font-heading">{value.title}</h3>
+                  <h3 className={`${headingStyles.h3} mb-3`}>{value.title}</h3>
                   <p className="text-muted-foreground">{value.description}</p>
-                </div>
+                </Card>
               ))}
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-12 bg-cosmic-space/50">
-          <div className="container">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 font-heading">Join us on our mission</h2>
-              <p className="text-xl text-muted-foreground mb-6">
-                We're building the future of the music business. Let's work together.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button asChild size="lg" className="px-8 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
-                  <Link href="#">Book a Demo</Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="px-8 border-cosmic-teal text-cosmic-teal hover:bg-cosmic-teal/10"
-                >
-                  <Link href="#">Join Our Team</Link>
-                </Button>
-              </div>
+        {/* CTA Section - SUBTLE BOTTOM */}
+        <section className="relative py-20 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <PageGradient variant="vibrant" className="opacity-30" />
+          <GradientOrbs variant="subtle-bottom" />
+          <div className="container relative z-10 text-center">
+            <h2 className={`${headingStyles.h2} mb-6`}>Join Us on Our Mission</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
+              We're building the future of the music business. Let's work together.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
+                <Link href="/contact">Book a Demo</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="min-w-[200px]">
+                <Link href="/contact">Join Our Team</Link>
+              </Button>
             </div>
           </div>
         </section>

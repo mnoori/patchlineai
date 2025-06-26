@@ -56,13 +56,13 @@ export function GradientOrbs({
         <div 
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 100% 100% at 90% -10%, 
+            background: `radial-gradient(ellipse 100% 100% at 90% 10%, 
               rgba(0, 230, 228, 0.6) 0%, 
               rgba(0, 230, 228, 0.55) 20%, 
               rgba(0, 104, 255, 0.5) 35%,
               rgba(0, 39, 114, 0.4) 50%, 
               #010102 75%)`,
-            opacity: 0.6,
+            opacity: 0.72,
           }}
         />
       </div>
@@ -94,40 +94,40 @@ export function GradientOrbs({
   if (variant === 'dispersed') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* From TOP-LEFT corner */}
+        {/* From TOP-LEFT corner - MORE CYAN and BRIGHTER */}
         <div 
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 90% 90% at 10% -10%, 
-              rgba(0, 230, 228, 0.55) 0%, 
-              rgba(0, 230, 228, 0.5) 18%, 
-              rgba(0, 104, 255, 0.4) 32%,
-              rgba(0, 39, 114, 0.3) 45%, 
+            background: `radial-gradient(ellipse 95% 95% at 10% -10%, 
+              rgba(0, 230, 228, 0.7) 0%, 
+              rgba(0, 230, 228, 0.65) 18%, 
+              rgba(0, 104, 255, 0.45) 32%,
+              rgba(0, 39, 114, 0.35) 45%, 
               #010102 60%)`,
-            opacity: 0.5,
+            opacity: 0.8,
           }}
         />
-        {/* From TOP-RIGHT corner */}
+        {/* From TOP-RIGHT corner - MORE CYAN and BRIGHTER */}
         <div 
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 70% 70% at 85% -5%, 
-              rgba(0, 230, 228, 0.5) 0%, 
-              rgba(0, 230, 228, 0.45) 22%, 
-              rgba(0, 39, 114, 0.3) 40%, 
+            background: `radial-gradient(ellipse 75% 75% at 85% -5%, 
+              rgba(0, 230, 228, 0.65) 0%, 
+              rgba(0, 230, 228, 0.55) 22%, 
+              rgba(0, 39, 114, 0.35) 40%, 
               transparent 65%)`,
-            opacity: 0.4,
+            opacity: 0.7,
           }}
         />
-        {/* From TOP center accent */}
+        {/* From TOP center accent - MORE CYAN and BRIGHTER */}
         <div 
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 60% 80% at 50% -15%, 
-              rgba(0, 230, 228, 0.4) 0%, 
-              rgba(0, 230, 228, 0.35) 8%, 
+            background: `radial-gradient(ellipse 65% 85% at 50% -15%, 
+              rgba(0, 230, 228, 0.55) 0%, 
+              rgba(0, 230, 228, 0.45) 8%, 
               transparent 35%)`,
-            opacity: 0.3,
+            opacity: 0.6,
           }}
         />
       </div>

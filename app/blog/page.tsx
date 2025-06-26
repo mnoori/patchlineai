@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Calendar } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, GradientOrbs, PageGradient, Card } from "@/components/brand"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { listBlogPosts } from "@/lib/blog-db"
@@ -144,23 +144,32 @@ export default async function BlogPage() {
   const getSlug = (post: AnyPost) => post.slug
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 pt-16">
-        <section className="py-20">
-          <div className="container">
-            <div className="max-w-4xl mx-auto mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 font-heading">Blog</h1>
-              <p className="text-xl text-muted-foreground">
+        {/* Hero Section with DISPERSED orbs */}
+        <section className="relative py-16 pb-8 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="dispersed" />
+          <div className="container relative z-10">
+            <div className="max-w-7xl mx-auto">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white mb-2">
+                Blog
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground">
                 Insights, updates, and perspectives on AI in the music industry
               </p>
             </div>
+          </div>
+        </section>
 
-            {/* Featured Post */}
-            <div className="mb-16">
-              <div className="glass-effect rounded-xl overflow-hidden">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="relative h-64 md:h-full">
+        {/* Featured Post - LEFT EDGE */}
+        <section className="relative pt-4 pb-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="edge-left" className="opacity-25" />
+          <div className="container relative z-10">
+            <div className="max-w-7xl mx-auto">
+              <Card variant="gradient" className="overflow-hidden">
+                <div className="grid md:grid-cols-2 gap-0">
+                  <div className="relative h-64 md:h-full min-h-[400px]">
                     <Image
                       src={getImage(featuredPost) || "/placeholder.svg"}
                       alt={featuredPost.title}
@@ -168,80 +177,97 @@ export default async function BlogPage() {
                       className="object-cover"
                     />
                   </div>
-                  <div className="p-6 md:p-8 flex flex-col">
-                    <div className="flex items-center gap-4 mb-4">
-                      <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-cosmic-teal/20 text-cosmic-teal">
+                  <div className="p-8 md:p-12 flex flex-col">
+                    <div className="flex items-center gap-4 mb-6">
+                      <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20">
                         {featuredPost.category}
                       </span>
                       <div className="flex items-center text-muted-foreground text-sm">
-                        <Calendar className="h-3.5 w-3.5 mr-1" />
+                        <Calendar className="h-3.5 w-3.5 mr-1.5" />
                         {getDate(featuredPost)}
                       </div>
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-bold mb-4 font-heading">{featuredPost.title}</h2>
-                    <p className="text-muted-foreground mb-6 flex-grow">{getExcerpt(featuredPost)}</p>
-                    <Button asChild className="w-fit bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
-                      <Link href={`/blog/${getSlug(featuredPost)}`}>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-brand-cyan">{featuredPost.title}</h2>
+                    <p className="text-muted-foreground mb-8 flex-grow leading-relaxed">{getExcerpt(featuredPost)}</p>
+                    <Button asChild variant="gradient" className="w-fit">
+                      <Link href={`/blog/${getSlug(featuredPost)}`} className="inline-flex items-center whitespace-nowrap">
                         Read Article <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
                   </div>
                 </div>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Recent Posts - RIGHT EDGE */}
+        <section className="relative py-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="edge-right" className="opacity-25" />
+          <div className="container relative z-10">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {remainingPosts.map((post, index) => (
+                  <Card
+                    key={"id" in post ? post.id : `placeholder-${index}`}
+                    variant="outlined"
+                    hover="glow"
+                    className="overflow-hidden flex flex-col backdrop-blur-sm bg-black/20"
+                  >
+                    <div className="relative h-48">
+                      <Image src={getImage(post) || "/placeholder.svg"} alt={post.title} fill className="object-cover" />
+                    </div>
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="flex items-center gap-4 mb-4">
+                        <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20">
+                          {post.category}
+                        </span>
+                        <div className="flex items-center text-muted-foreground text-sm">
+                          <Calendar className="h-3.5 w-3.5 mr-1" />
+                          {getDate(post)}
+                        </div>
+                      </div>
+                      <h3 className="text-xl font-bold mb-2 text-brand-cyan">{post.title}</h3>
+                      <p className="text-muted-foreground mb-4 flex-grow">{getExcerpt(post)}</p>
+                      <Button
+                        asChild
+                        variant="ghost"
+                        className="w-fit text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10 p-0"
+                      >
+                        <Link href={`/blog/${getSlug(post)}`} className="inline-flex items-center whitespace-nowrap">
+                          Read More <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* Recent Posts */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {remainingPosts.map((post, index) => (
-                <div
-                  key={"id" in post ? post.id : `placeholder-${index}`}
-                  className="glass-effect rounded-xl overflow-hidden flex flex-col"
-                >
-                  <div className="relative h-48">
-                    <Image src={getImage(post) || "/placeholder.svg"} alt={post.title} fill className="object-cover" />
-                  </div>
-                  <div className="p-6 flex flex-col flex-grow">
-                    <div className="flex items-center gap-4 mb-4">
-                      <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-cosmic-teal/20 text-cosmic-teal">
-                        {post.category}
-                      </span>
-                      <div className="flex items-center text-muted-foreground text-sm">
-                        <Calendar className="h-3.5 w-3.5 mr-1" />
-                        {getDate(post)}
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 font-heading">{post.title}</h3>
-                    <p className="text-muted-foreground mb-4 flex-grow">{getExcerpt(post)}</p>
-                    <Button
-                      asChild
-                      variant="ghost"
-                      className="w-fit text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
-                    >
-                      <Link href={`/blog/${getSlug(post)}`}>
-                        Read More <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Newsletter */}
-            <div className="mt-24 max-w-2xl mx-auto text-center glass-effect rounded-xl p-8 md:p-12">
-              <h3 className="text-2xl font-bold mb-3 font-heading">Stay Updated</h3>
-              <p className="text-muted-foreground mb-6">
-                Subscribe to our newsletter for the latest updates on AI in music.
-              </p>
-              <form className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="flex-1 rounded-md bg-card border border-input px-4 py-2"
-                />
-                <Button type="submit" className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
-                  Subscribe
-                </Button>
-              </form>
+        {/* Newsletter - SUBTLE BOTTOM */}
+        <section className="relative py-20 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <PageGradient variant="vibrant" className="opacity-30" />
+          <GradientOrbs variant="subtle-bottom" />
+          <div className="container relative z-10">
+            <div className="max-w-2xl mx-auto text-center">
+              <Card variant="glass" className="p-8 md:p-12 backdrop-blur-xl">
+                <h3 className="text-2xl font-bold mb-3">Stay Updated</h3>
+                <p className="text-muted-foreground mb-6">
+                  Subscribe to our newsletter for the latest updates on AI in music.
+                </p>
+                <form className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email"
+                    placeholder="Your email address"
+                    className="flex-1 rounded-md bg-background/50 border border-white/10 px-4 py-2 text-white placeholder:text-muted-foreground focus:outline-none focus:border-brand-cyan/50"
+                  />
+                  <Button type="submit" variant="gradient">
+                    Subscribe
+                  </Button>
+                </form>
+              </Card>
             </div>
           </div>
         </section>

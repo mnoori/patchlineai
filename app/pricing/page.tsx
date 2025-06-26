@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, GradientOrbs, PageGradient, Card } from "@/components/brand"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { TIER_CONFIGS, UserTier } from "@/lib/tier-config"
@@ -32,60 +32,79 @@ export default function PricingPage() {
   ]
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 pt-16">
-        {/* Hero Section */}
-        <section className="py-12 neural-network">
-          <div className="container">
-            <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading">
-                Fair Pricing for <span className="gradient-text">All Music Professionals</span>
+        {/* Hero Section - Compact */}
+        <section className="relative py-12 pb-4 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="subtle" className="opacity-80" />
+          <div className="container relative z-10">
+            <div className="max-w-7xl mx-auto">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white mb-2">
+                Pricing
               </h1>
-              <p className="text-xl text-muted-foreground mb-6">
-                We believe AI tools should be accessible to independent creators, not just major labels. Our pricing
-                reflects that commitment.
+              <p className="text-lg md:text-xl text-muted-foreground">
+                Choose the plan that works for you
               </p>
             </div>
           </div>
         </section>
 
-        {/* Pricing Plans */}
-        <section className="py-8">
-          <div className="container">
-            <div className="grid md:grid-cols-3 gap-6">
+        {/* Pricing Plans - RIGHT EDGE */}
+        <section className="relative pt-2 pb-12 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="edge-right" className="opacity-25" />
+          <div className="container relative z-10">
+            <div className="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto">
               {plans.map((plan) => (
-                <div
+                <Card
                   key={plan.id}
-                  className={`glass-effect rounded-xl p-6 relative ${
-                    plan.highlighted
-                      ? "border-cosmic-teal/50 ring-1 ring-cosmic-teal/50"
-                      : "border-border hover:border-cosmic-teal/30"
-                  } transition-all duration-300`}
+                  variant={plan.highlighted ? "gradient" : "outlined"}
+                  hover="glow"
+                  className={`p-8 backdrop-blur-sm ${plan.highlighted ? "" : "bg-black/20"} relative`}
                 >
                   {plan.highlighted && (
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-cosmic-teal px-3 py-1 rounded-full text-xs font-medium text-black">
+                    <Badge className="bg-brand-cyan text-black border-0 px-4 py-1 absolute top-8 right-8">
                       Most Popular
-                    </div>
+                    </Badge>
                   )}
-                  <div className="mb-4">
-                    <h2 className="text-2xl font-bold mb-2 font-heading">{plan.name}</h2>
-                    <div className="flex items-baseline mb-2">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold mb-3">{plan.name}</h2>
+                    <div className="flex items-baseline mb-3">
                       <span className="text-4xl font-bold">
                         {plan.price.monthly === 0 ? "Free" : plan.price.monthly === 299 ? "Custom" : `$${plan.price.monthly}`}
                       </span>
                       {plan.price.monthly > 0 && plan.price.monthly !== 299 && (
-                        <span className="text-muted-foreground ml-1">/month</span>
+                        <span className="text-muted-foreground ml-2">/month</span>
                       )}
                     </div>
-                    <p className="text-muted-foreground mb-3">{plan.tagline}</p>
-                    <p className="text-sm text-muted-foreground">{plan.description}</p>
+                    <p className="text-lg font-medium">{plan.tagline}</p>
                   </div>
                   
+                  <ul className="space-y-3 mb-8">
+                    {plan.features
+                      .filter(feature => !feature.includes("Up to 5,000 tracks"))
+                      .map((feature, i) => (
+                      <li key={i} className="flex items-start">
+                        <Check className="h-5 w-5 text-brand-cyan mr-3 mt-0.5 shrink-0" />
+                        <span className="text-sm text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button
+                    asChild
+                    variant={plan.highlighted ? "gradient" : "outline"}
+                    className="w-full mb-6"
+                  >
+                    <Link href={plan.id === UserTier.ULTRA ? "/contact" : "/dashboard"}>
+                      {plan.ctaText}
+                    </Link>
+                  </Button>
+
                   {/* Target Personas */}
-                  <div className="mb-4">
-                    <p className="text-xs font-medium text-muted-foreground mb-2">IDEAL FOR:</p>
-                    <div className="flex flex-wrap gap-1">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-3">IDEAL FOR:</p>
+                    <div className="flex flex-wrap gap-2">
                       {plan.personas.slice(0, 3).map((persona, i) => (
                         <Badge key={i} variant="secondary" className="text-xs">
                           {persona}
@@ -93,80 +112,64 @@ export default function PricingPage() {
                       ))}
                     </div>
                   </div>
-                  
-                  <ul className="space-y-2 mb-6">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-start">
-                        <Check className="h-5 w-5 text-cosmic-teal mr-2 mt-0.5 shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Button
-                    asChild
-                    className={`w-full ${
-                      plan.highlighted
-                        ? "bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
-                        : "bg-transparent border border-cosmic-teal text-cosmic-teal hover:bg-cosmic-teal/10"
-                    }`}
-                  >
-                    <Link href={plan.id === UserTier.ENTERPRISE ? "/contact" : "/dashboard"}>
-                      {plan.ctaText}
-                    </Link>
-                  </Button>
-                </div>
+                </Card>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Add-ons */}
-        <section className="py-10">
-          <div className="container">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center font-heading">Optional Add-ons</h2>
-              <div className="grid md:grid-cols-3 gap-5">
+        {/* Add-ons - LEFT EDGE */}
+        <section className="relative py-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="edge-left" className="opacity-25" />
+          <div className="container relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Optional Add-ons</h2>
+              <div className="grid md:grid-cols-3 gap-6">
                 {addOns.map((addon, index) => (
-                  <div
+                  <Card
                     key={index}
-                    className="glass-effect rounded-xl p-5 relative hover:border-cosmic-teal/30 transition-all duration-300"
+                    variant="outlined"
+                    hover="glow"
+                    className="p-6 backdrop-blur-sm bg-black/20 relative"
                   >
                     {addon.comingSoon && (
-                      <div className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-muted px-2 py-1 rounded-full text-xs font-medium">
-                        Coming Soon
+                      <div className="absolute top-3 right-3">
+                        <Badge variant="secondary" className="text-xs">
+                          Coming Soon
+                        </Badge>
                       </div>
                     )}
-                    <h3 className="text-xl font-bold mb-1 font-heading">{addon.name}</h3>
-                    <p className="text-cosmic-teal font-medium mb-1">{addon.price}</p>
-                    <p className="text-muted-foreground text-sm mb-3">{addon.description}</p>
+                    <h3 className="text-xl font-bold mb-2">{addon.name}</h3>
+                    <p className="text-brand-cyan font-medium mb-3">{addon.price}</p>
+                    <p className="text-muted-foreground text-sm mb-4">{addon.description}</p>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full border-cosmic-teal text-cosmic-teal hover:bg-cosmic-teal/10"
+                      className="w-full"
                       disabled={addon.comingSoon}
                     >
                       {addon.comingSoon ? "Coming Soon" : "Add to Plan"}
                     </Button>
-                  </div>
+                  </Card>
                 ))}
               </div>
             </div>
           </div>
         </section>
 
-        {/* Enterprise Section */}
-        <section className="py-10 bg-cosmic-space/50">
-          <div className="container">
-            <div className="max-w-3xl mx-auto">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold mb-3 font-heading">Enterprise Solutions</h2>
+        {/* Enterprise Section - RIGHT EDGE */}
+        <section className="relative py-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="edge-right" className="opacity-25" />
+          <div className="container relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">Enterprise Solutions</h2>
                 <p className="text-lg text-muted-foreground">
                   For larger labels, distributors, and educational institutions, we offer custom solutions including:
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4 mb-8">
+              <div className="grid md:grid-cols-2 gap-4 mb-12">
                 {[
                   "Private deployment options",
                   "Custom agent development",
@@ -178,14 +181,14 @@ export default function PricingPage() {
                   "Compliance documentation",
                 ].map((feature, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <Check className="h-5 w-5 text-cosmic-teal shrink-0 mt-0.5" />
-                    <span className="text-lg">{feature}</span>
+                    <Check className="h-5 w-5 text-brand-cyan shrink-0 mt-0.5" />
+                    <span className="text-lg text-muted-foreground">{feature}</span>
                   </div>
                 ))}
               </div>
 
               <div className="text-center">
-                <Button asChild size="lg" className="px-8 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
                   <Link href="/contact">Contact Sales</Link>
                 </Button>
               </div>
@@ -193,27 +196,22 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-12 bg-cosmic-space/50">
-          <div className="container">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 font-heading">Ready to get started?</h2>
-              <p className="text-xl text-muted-foreground mb-6">
-                Join the music professionals already using Patchline AI.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button asChild size="lg" className="px-8 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
-                  <Link href="/dashboard">Start Free Trial</Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="px-8 border-cosmic-teal text-cosmic-teal hover:bg-cosmic-teal/10"
-                >
-                  <Link href="/contact">Contact Sales</Link>
-                </Button>
-              </div>
+        {/* CTA Section - SUBTLE BOTTOM */}
+        <section className="relative py-20 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <PageGradient variant="vibrant" className="opacity-30" />
+          <GradientOrbs variant="subtle-bottom" />
+          <div className="container relative z-10 text-center">
+            <h2 className="text-3xl md:text-4xl font-semibold mb-6">Ready to Get Started?</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
+              Join the music professionals already using Patchline AI.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
+                <Link href="/dashboard">Start Free Trial</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="min-w-[200px]">
+                <Link href="/contact">Contact Sales</Link>
+              </Button>
             </div>
           </div>
         </section>

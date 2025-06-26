@@ -9,10 +9,11 @@ import { cn } from "@/lib/utils"
 import { Logo } from "@/components/logo"
 import { AuthButton } from "@/components/auth-button"
 import { Button } from "@/components/brand"
+import { AGENTS } from "@/config/agents"
 
 const navItems = [
   { name: "Home", href: "/" },
-  { name: "Aria", href: "/aria", badge: "NEW" },
+  { name: AGENTS.aria.displayName, href: "/aria", badge: "NEW" },
   { name: "Features", href: "/features" },
   { name: "Pricing", href: "/pricing" },
   { name: "About", href: "/about" },

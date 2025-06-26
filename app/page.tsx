@@ -5,7 +5,7 @@ import { Waveform } from "@/components/waveform"
 import { AnimatedCounter } from "@/components/animated-counter"
 import { Badge } from "@/components/ui/badge"
 import { Search, FileText, Users, Database, Sparkles, Zap, Globe, Layers, Music2, ArrowRight } from "lucide-react"
-import { Button, GradientText, Card, CardHeader, CardTitle, CardDescription, CardContent, PageGradient, GradientOrbs, MeshGradient, HeroSection } from "@/components/brand"
+import { Button, GradientText, Card, CardHeader, CardTitle, CardDescription, CardContent, PageGradient, GradientOrbs, MeshGradient, Logo } from "@/components/brand"
 import { AGENTS } from "@/config/agents"
 
 export default function Home() {
@@ -14,26 +14,48 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative -mt-16 min-h-screen flex items-center justify-center">
-          <HeroSection
-            title="Revolutionizing the Music Industry"
-            subtitle="with Intelligent Infrastructure"
-            features={[
-              { title: "Label OS", description: "Smart dashboards for record labels" },
-              { title: "Modular AI Agents", description: "Specialized tools for royalties, metadata, and marketing" },
-              { title: "Real-Time Collaboration", description: "AI tools for artists, managers, and teams to co-create" },
-            ]}
-            showLogo
-            logoSize="xl"
-            className="pt-16"
-          />
+      <main className="flex-1 pt-16">
+        {/* Hero Section with DEFAULT gradient */}
+        <section className="relative py-16 pb-8 bg-gradient-to-b from-background via-background to-background overflow-hidden">
+          <GradientOrbs variant="default" />
+          <div className="container relative z-10">
+            <div className="text-center space-y-12 pt-12">
+              {/* Logo */}
+              <div className="flex justify-center">
+                <Logo size="xl" showText background="gradient" />
+              </div>
+              
+              {/* Title */}
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white leading-tight">
+                Orchestrate your Music Business with AI Agents
+              </h1>
+              
+              {/* Subtitle */}
+              <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                A full-stack, AI-first platform, Patchline connects your data, simplifies your workflows, and gives music professionals time back.
+              </p>
+              
+              {/* Feature Cards */}
+              <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-20">
+                {[
+                  { title: "Intelligent Orchestration", description: "Smart dashboards for record labels" },
+                  { title: "Future of Label OS", description: "Specialized tools for royalties, metadata, and marketing" },
+                  { title: "Autonomous Actions", description: "Post content, pitch to playlists, and engage fans automatically" },
+                ].map((feature, index) => (
+                  <Card
+                    key={index}
+                    variant="gradient"
+                    hover="glow"
+                    className="p-8 backdrop-blur-md"
+                  >
+                    <h3 className="text-xl font-bold mb-3 text-brand-cyan">{feature.title}</h3>
+                    <p className="text-muted-foreground">{feature.description}</p>
+                  </Card>
+                ))}
+              </div>
 
-          {/* CTA Buttons */}
-          <div className="absolute bottom-20 left-0 right-0 z-20">
-            <div className="container">
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-12">
                 <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
                   <Link href="/contact">Book a Demo</Link>
                 </Button>
@@ -55,12 +77,12 @@ export default function Home() {
                   Flagship Product
                 </Badge>
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                  Meet <span className={ariaAgent.gradientClass}>{ariaAgent.displayName}</span> — Your Agentic Record Label
+                  Meet <span className="text-brand-cyan">{ariaAgent.displayName}</span> — Your Agentic Record Label
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                  {ariaAgent.displayName} is our most advanced offering - an AI-first infrastructure that orchestrates all your agents 
+                  <span className="text-brand-cyan">{ariaAgent.displayName}</span> is our most advanced offering - an AI-first infrastructure that orchestrates all your agents 
                   to create autonomous label operations. From talent discovery to revenue distribution, 
-                  {ariaAgent.displayName} handles the complex workflows while you maintain creative control.
+                  <span className="text-brand-cyan">{ariaAgent.displayName}</span> handles the complex workflows while you maintain creative control.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Button asChild variant="gradient" size="lg" className="group">

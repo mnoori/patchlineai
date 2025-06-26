@@ -36,6 +36,7 @@ const nextConfig = {
       'i.scdn.co', // Spotify images
       'platform-lookaside.fbsbx.com', // Instagram images
       'pbs.twimg.com', // Twitter images
+      'hebbkx1anhila5yf.public.blob.vercel-storage.com', // Vercel blob storage
     ],
     formats: ['image/webp', 'image/avif'],
   },
