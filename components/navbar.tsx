@@ -3,12 +3,12 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/logo"
 import { AuthButton } from "@/components/auth-button"
+import { Button } from "@/components/brand"
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -36,14 +36,14 @@ export function Navbar() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-cosmic-teal",
-                  pathname === item.href ? "text-cosmic-teal" : "text-muted-foreground",
+                  "text-sm font-medium transition-colors hover:text-brand-cyan",
+                  pathname === item.href ? "text-brand-cyan" : "text-muted-foreground",
                 )}
               >
                 <span className="flex items-center gap-2">
                   {item.name}
                   {item.badge && (
-                    <Badge className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/30 text-xs">
+                    <Badge className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 text-xs">
                       {item.badge}
                     </Badge>
                   )}
@@ -58,9 +58,10 @@ export function Navbar() {
         <div className="md:hidden">
           <Button
             variant="ghost"
-            size="icon"
+            size="md"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
+            className="p-2"
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
@@ -73,15 +74,15 @@ export function Navbar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "block py-2 text-base font-medium transition-colors hover:text-cosmic-teal",
-                pathname === item.href ? "text-cosmic-teal" : "text-muted-foreground",
+                "block py-2 text-base font-medium transition-colors hover:text-brand-cyan",
+                pathname === item.href ? "text-brand-cyan" : "text-muted-foreground",
               )}
               onClick={() => setMobileMenuOpen(false)}
             >
               <span className="flex items-center gap-2">
                 {item.name}
                 {item.badge && (
-                  <Badge className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/30 text-xs">
+                  <Badge className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 text-xs">
                     {item.badge}
                   </Badge>
                 )}
@@ -89,7 +90,7 @@ export function Navbar() {
             </Link>
           ))}
           <div className="pt-4 flex flex-col space-y-3">
-            <Button asChild className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+            <Button asChild variant="gradient">
               <Link href="/login">Log in</Link>
             </Button>
           </div>

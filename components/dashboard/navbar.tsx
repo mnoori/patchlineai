@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/brand"
 import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
@@ -216,7 +216,7 @@ export function DashboardNavbar() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
         <div className="flex h-16 items-center px-4 md:px-6">
           <div className="flex items-center md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setShowMobileMenu(!showMobileMenu)}>
+            <Button variant="ghost" size="md" className="p-2" onClick={() => setShowMobileMenu(!showMobileMenu)}>
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
             </Button>
@@ -247,12 +247,12 @@ export function DashboardNavbar() {
                       ref={searchInputRef}
                       type="search"
                       placeholder="Search..."
-                      className="pl-8 bg-muted/50 border-border/50 focus:border-cosmic-teal/50"
+                      className="pl-8 bg-muted/50 border-border/50 focus:border-brand-cyan/50"
                     />
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="absolute right-0 text-muted-foreground"
+                      size="md"
+                      className="absolute right-0 text-muted-foreground p-2"
                       onClick={toggleSearch}
                     >
                       <X className="h-4 w-4" />
@@ -261,8 +261,8 @@ export function DashboardNavbar() {
                 ) : (
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-cosmic-teal transition-colors"
+                    size="md"
+                    className="text-muted-foreground hover:text-brand-cyan transition-colors p-2"
                     onClick={toggleSearch}
                   >
                     <Search className="h-5 w-5" />
@@ -274,7 +274,7 @@ export function DashboardNavbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-muted-foreground hover:text-cosmic-teal transition-colors"
+                className="text-muted-foreground hover:text-brand-cyan transition-colors"
               >
                 <HelpCircle className="h-5 w-5" />
                 <span className="sr-only">Help</span>
@@ -283,12 +283,12 @@ export function DashboardNavbar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-muted-foreground hover:text-cosmic-teal transition-colors"
+                  className="text-muted-foreground hover:text-brand-cyan transition-colors"
                 >
                   <Bell className="h-5 w-5" />
                   <span className="sr-only">Notifications</span>
                   {unreadNotifications > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-cosmic-teal text-xs text-black font-medium">
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-cyan text-xs text-black font-medium">
                       {unreadNotifications}
                     </span>
                   )}
@@ -297,7 +297,7 @@ export function DashboardNavbar() {
               <Link href="/dashboard">
                 <Button
                   variant="ghost"
-                  className="text-cosmic-teal hover:bg-cosmic-teal/10 font-medium"
+                  className="text-brand-cyan hover:bg-brand-cyan/10 font-medium"
                   size="sm"
                 >
                   <LayoutDashboard className="h-4 w-4 mr-1" />
@@ -308,11 +308,11 @@ export function DashboardNavbar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-8 w-8 rounded-full border-2 border-transparent hover:border-cosmic-teal/50 transition-all duration-200"
+                    className="relative h-8 w-8 rounded-full border-2 border-transparent hover:border-brand-cyan/50 transition-all duration-200"
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={userInfo.profilePicture} alt={userInfo.fullName} />
-                      <AvatarFallback className="bg-gradient-to-br from-cosmic-teal to-purple-400 text-white">
+                      <AvatarFallback className="bg-gradient-to-br from-brand-cyan to-purple-400 text-white">
                         {userInfo.fullName
                           .split(" ")
                           .map((n) => n[0])
@@ -329,10 +329,10 @@ export function DashboardNavbar() {
                 >
                   <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
                     <div className="flex items-center justify-start gap-2 p-2 mb-1">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cosmic-teal/20">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-cyan/20">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={userInfo.profilePicture} alt={userInfo.fullName} />
-                          <AvatarFallback className="bg-gradient-to-br from-cosmic-teal to-purple-400 text-white">
+                          <AvatarFallback className="bg-gradient-to-br from-brand-cyan to-purple-400 text-white">
                             {userInfo.fullName
                               .split(" ")
                               .map((n) => n[0])
@@ -355,32 +355,32 @@ export function DashboardNavbar() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     asChild
-                    className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-cosmic-teal/20 focus:bg-cosmic-teal/20"
+                    className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-brand-cyan/20 focus:bg-brand-cyan/20"
                   >
                     <Link href="/dashboard/settings">
-                      <Settings className="mr-2 h-4 w-4 text-cosmic-teal" />
+                      <Settings className="mr-2 h-4 w-4 text-brand-cyan" />
                       <span>Settings</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-cosmic-teal/20 focus:bg-cosmic-teal/20">
-                    <User className="mr-2 h-4 w-4 text-cosmic-teal" />
+                  <DropdownMenuItem className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-brand-cyan/20 focus:bg-brand-cyan/20">
+                    <User className="mr-2 h-4 w-4 text-brand-cyan" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-cosmic-teal/20 focus:bg-cosmic-teal/20">
-                    <CreditCard className="mr-2 h-4 w-4 text-cosmic-teal" />
+                  <DropdownMenuItem className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-brand-cyan/20 focus:bg-brand-cyan/20">
+                    <CreditCard className="mr-2 h-4 w-4 text-brand-cyan" />
                     <span>Billing</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-cosmic-teal/20 focus:bg-cosmic-teal/20">
-                    <MessageSquare className="mr-2 h-4 w-4 text-cosmic-teal" />
+                  <DropdownMenuItem className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-brand-cyan/20 focus:bg-brand-cyan/20">
+                    <MessageSquare className="mr-2 h-4 w-4 text-brand-cyan" />
                     <span>Support Chat</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-cosmic-teal/20 focus:bg-cosmic-teal/20">
-                    <Mail className="mr-2 h-4 w-4 text-cosmic-teal" />
+                  <DropdownMenuItem className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-brand-cyan/20 focus:bg-brand-cyan/20">
+                    <Mail className="mr-2 h-4 w-4 text-brand-cyan" />
                     <span>Contact Us</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-cosmic-teal/20 focus:bg-cosmic-teal/20">
-                    <LifeBuoy className="mr-2 h-4 w-4 text-cosmic-teal" />
+                  <DropdownMenuItem className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-brand-cyan/20 focus:bg-brand-cyan/20">
+                    <LifeBuoy className="mr-2 h-4 w-4 text-brand-cyan" />
                     <span>Documentation</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -388,10 +388,10 @@ export function DashboardNavbar() {
                     <>
                       <DropdownMenuItem
                         asChild
-                        className="flex items-center gap-2 py-1.5 cursor-pointer bg-gradient-to-r from-cosmic-teal/20 to-purple-500/20 hover:from-cosmic-teal/30 hover:to-purple-500/30 focus:from-cosmic-teal/30 focus:to-purple-500/30"
+                        className="flex items-center gap-2 py-1.5 cursor-pointer bg-gradient-to-r from-brand-cyan/20 to-purple-500/20 hover:from-brand-cyan/30 hover:to-purple-500/30 focus:from-brand-cyan/30 focus:to-purple-500/30"
                       >
                         <Link href="/dashboard/settings?tab=billing">
-                          <Zap className="mr-2 h-4 w-4 text-cosmic-teal" />
+                          <Zap className="mr-2 h-4 w-4 text-brand-cyan" />
                           <span className="font-medium">Upgrade Plan</span>
                         </Link>
                       </DropdownMenuItem>
@@ -438,7 +438,7 @@ export function DashboardNavbar() {
                             className={cn(
                               "flex w-full items-center justify-between rounded-md px-3 py-3 text-sm font-medium transition-colors",
                               isActive
-                                ? "bg-cosmic-teal/10 text-cosmic-teal"
+                                ? "bg-brand-cyan/10 text-brand-cyan"
                                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
                             )}
                           >
@@ -469,7 +469,7 @@ export function DashboardNavbar() {
                                       className={cn(
                                         "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
                                         isSubActive
-                                          ? "bg-cosmic-teal/10 text-cosmic-teal"
+                                          ? "bg-brand-cyan/10 text-brand-cyan"
                                           : "text-muted-foreground hover:bg-muted hover:text-foreground",
                                       )}
                                     >
@@ -489,7 +489,7 @@ export function DashboardNavbar() {
                           className={cn(
                             "flex items-center rounded-md px-3 py-3 text-sm font-medium transition-colors",
                             isActive
-                              ? "bg-cosmic-teal/10 text-cosmic-teal"
+                              ? "bg-brand-cyan/10 text-brand-cyan"
                               : "text-muted-foreground hover:bg-muted hover:text-foreground",
                           )}
                         >

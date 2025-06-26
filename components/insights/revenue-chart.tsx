@@ -13,6 +13,7 @@ import {
   Legend,
   ReferenceLine,
 } from "recharts"
+import { CHART_COLORS } from "@/lib/brand"
 
 interface Campaign {
   date: string
@@ -110,7 +111,7 @@ export function RevenueChart({ data, campaigns }: RevenueChartProps) {
               <Line
                 type="monotone"
                 dataKey="spotify"
-                stroke="#1DB954"
+                stroke={CHART_COLORS.platforms.spotify}
                 strokeWidth={2}
                 dot={{ r: 4 }}
                 activeDot={{ r: 6 }}
@@ -118,7 +119,7 @@ export function RevenueChart({ data, campaigns }: RevenueChartProps) {
               <Line
                 type="monotone"
                 dataKey="apple"
-                stroke="#FC3C44"
+                stroke={CHART_COLORS.platforms.appleMusic}
                 strokeWidth={2}
                 dot={{ r: 4 }}
                 activeDot={{ r: 6 }}
@@ -126,7 +127,7 @@ export function RevenueChart({ data, campaigns }: RevenueChartProps) {
               <Line
                 type="monotone"
                 dataKey="youtube"
-                stroke="#FF0000"
+                stroke={CHART_COLORS.platforms.youtube}
                 strokeWidth={2}
                 dot={{ r: 4 }}
                 activeDot={{ r: 6 }}
@@ -142,7 +143,7 @@ export function RevenueChart({ data, campaigns }: RevenueChartProps) {
               <Line
                 type="monotone"
                 dataKey="other"
-                stroke="#6b7280"
+                stroke={CHART_COLORS.platforms.soundcloud}
                 strokeWidth={2}
                 dot={{ r: 4 }}
                 activeDot={{ r: 6 }}
@@ -151,13 +152,13 @@ export function RevenueChart({ data, campaigns }: RevenueChartProps) {
                 <ReferenceLine
                   key={campaign.name}
                   x={campaign.date}
-                  stroke={hoveredCampaign?.date === campaign.date ? "#00F0FF" : "rgba(0, 240, 255, 0.5)"}
+                  stroke={hoveredCampaign?.date === campaign.date ? CHART_COLORS.primary : `${CHART_COLORS.primary}80`}
                   strokeWidth={hoveredCampaign?.date === campaign.date ? 2 : 1}
                   strokeDasharray={hoveredCampaign?.date === campaign.date ? "3 0" : "3 3"}
                   label={{
                     value: hoveredCampaign?.date === campaign.date ? campaign.name : "",
                     position: "top",
-                    fill: "#00F0FF",
+                    fill: CHART_COLORS.primary,
                     fontSize: 12,
                   }}
                 />

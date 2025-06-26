@@ -45,17 +45,17 @@ interface SidebarItem {
 const pulseGlowStyle = `
   @keyframes pulse-glow {
     0%, 100% { 
-      box-shadow: 0 0 5px rgba(0, 240, 255, 0.1), 0 0 10px rgba(0, 240, 255, 0.05);
-      border-color: rgba(0, 240, 255, 0.1);
+      box-shadow: 0 0 5px rgba(0, 230, 228, 0.1), 0 0 10px rgba(0, 230, 228, 0.05);
+      border-color: rgba(0, 230, 228, 0.1);
     }
     50% { 
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2), 0 0 20px rgba(0, 240, 255, 0.1);
-      border-color: rgba(0, 240, 255, 0.2);
+      box-shadow: 0 0 10px rgba(0, 230, 228, 0.2), 0 0 20px rgba(0, 230, 228, 0.1);
+      border-color: rgba(0, 230, 228, 0.2);
     }
   }
   .animate-pulse-glow {
     animation: pulse-glow 3s ease-in-out infinite;
-    border: 1px solid rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 230, 228, 0.1);
   }
 
   @keyframes pulse-glow-yellow {
@@ -140,7 +140,7 @@ const pulseGlowStyle = `
     background: rgba(13, 13, 30, 0.4);
     box-shadow: 
       0 12px 48px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(0, 240, 255, 0.1);
+      0 0 0 1px rgba(0, 230, 228, 0.1);
     transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1), 
                 padding 300ms cubic-bezier(0.16, 1, 0.3, 1),
                 background 300ms ease,
@@ -158,9 +158,9 @@ const pulseGlowStyle = `
     bottom: -1px;
     border-radius: 16px;
     background: linear-gradient(135deg, 
-      rgba(0, 240, 255, 0.1) 0%, 
-      rgba(0, 240, 255, 0.02) 50%,
-      rgba(0, 240, 255, 0.1) 100%);
+      rgba(0, 230, 228, 0.1) 0%, 
+      rgba(0, 230, 228, 0.02) 50%,
+      rgba(0, 230, 228, 0.1) 100%);
     opacity: 0.2;
     filter: blur(1px);
     z-index: -1;
@@ -200,7 +200,7 @@ const pulseGlowStyle = `
 
   .cursor {
     animation: blink 1s infinite;
-    color: #00f0ff;
+    color: #00E6E4;
   }
 
   .suggestion-text {
@@ -216,10 +216,10 @@ const pulseGlowStyle = `
   .dot {
     width: 8px;
     height: 8px;
-    background: #00f0ff;
+    background: #00E6E4;
     border-radius: 50%;
     margin-right: 10px;
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 230, 228, 0.5);
     animation: pulse 2s infinite;
   }
 
@@ -257,7 +257,7 @@ const pulseGlowStyle = `
   }
 
   .logs-container::-webkit-scrollbar-thumb {
-    background: rgba(0, 240, 255, 0.3);
+    background: rgba(0, 230, 228, 0.3);
     border-radius: 3px;
   }
 
@@ -286,7 +286,7 @@ const pulseGlowStyle = `
   }
 
   .log-timestamp {
-    color: rgba(0, 240, 255, 0.6);
+    color: rgba(0, 230, 228, 0.6);
     margin-right: 8px;
     font-size: 10px;
     min-width: 60px;
@@ -855,19 +855,19 @@ export function SidebarWithChat() {
                     <div className="spinner" style={{
                       width: '16px',
                       height: '16px',
-                      border: '2px solid rgba(0, 240, 255, 0.3)',
-                      borderTop: '2px solid #00f0ff',
+                      border: '2px solid rgba(0, 230, 228, 0.3)',
+                      borderTop: '2px solid #00E6E4',
                       borderRadius: '50%',
                       marginRight: '12px'
                     }} />
-                    <span style={{ color: '#00f0ff', fontSize: '14px', fontWeight: 600 }}>
+                    <span style={{ color: '#00E6E4', fontSize: '14px', fontWeight: 600 }}>
                       Agent Activity
                     </span>
                   </>
                 ) : (
                   <>
                     <div className="dot" />
-                    <span style={{ color: '#00f0ff', fontSize: '14px', fontWeight: 500 }}>
+                    <span style={{ color: '#00E6E4', fontSize: '14px', fontWeight: 500 }}>
                       Aria's Suggestions
                     </span>
                   </>
@@ -927,7 +927,7 @@ export function SidebarWithChat() {
                           className={cn(
                             "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
                             isActive
-                              ? "bg-cosmic-teal/10 text-cosmic-teal"
+                              ? "bg-brand-cyan/10 text-brand-cyan"
                               : "text-muted-foreground hover:bg-muted hover:text-foreground",
                           )}
                         >
@@ -950,7 +950,7 @@ export function SidebarWithChat() {
                                   className={cn(
                                     "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
                                     isSubActive
-                                      ? "bg-cosmic-teal/10 text-cosmic-teal"
+                                      ? "bg-brand-cyan/10 text-brand-cyan"
                                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                                   )}
                                 >
@@ -970,7 +970,7 @@ export function SidebarWithChat() {
                           item.isGodMode
                             ? "text-amber-400 hover:bg-amber-400/10"
                             : isActive
-                            ? "bg-cosmic-teal/10 text-cosmic-teal"
+                            ? "bg-brand-cyan/10 text-brand-cyan"
                             : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         )}
                       >
@@ -992,13 +992,13 @@ export function SidebarWithChat() {
               className={cn(
                 "flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-all duration-300 relative overflow-hidden",
                 isChatExpanded
-                  ? "bg-gradient-to-r from-cosmic-teal/20 to-cosmic-pink/10 text-cosmic-teal border border-cosmic-teal/30 shadow-[0_0_15px_rgba(0,240,255,0.3)]"
+                  ? "bg-gradient-to-r from-brand-cyan/20 to-brand-bright-blue/10 text-brand-cyan border border-brand-cyan/30 shadow-[0_0_15px_rgba(0,230,228,0.3)]"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground border border-transparent animate-pulse-glow",
               )}
             >
               <div className="flex items-center relative z-10">
                 <div className="relative flex items-center justify-center w-6 h-6 mr-3 rounded-full">
-                  <TRSCableLogo className="h-5 w-5 text-cosmic-teal" />
+                  <TRSCableLogo className="h-5 w-5 text-brand-cyan" />
                   {!isChatExpanded && unreadCount > 0 && (
                     <Badge
                       variant="destructive"
@@ -1011,7 +1011,7 @@ export function SidebarWithChat() {
                 <span
                   className={cn(
                     "font-semibold tracking-wide",
-                    isChatExpanded ? "text-cosmic-teal" : "text-cosmic-teal/80",
+                    isChatExpanded ? "text-brand-cyan" : "text-brand-cyan/80",
                   )}
                 >
                   Aria

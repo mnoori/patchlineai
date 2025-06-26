@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowUp, ArrowDown, AlertTriangle } from "lucide-react"
 import { motion } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { CHART_COLORS, COLORS } from "@/lib/brand"
 
 interface KPICardProps {
   title: string
@@ -20,7 +21,7 @@ interface KPICardProps {
   alert?: string
 }
 
-const SparklineComponent = ({ data, color = "#00F0FF" }: { data: number[]; color?: string }) => {
+const SparklineComponent = ({ data, color = CHART_COLORS.primary }: { data: number[]; color?: string }) => {
   const max = Math.max(...data)
   const min = Math.min(...data)
   const range = max - min || 1
@@ -47,10 +48,10 @@ const SparklineComponent = ({ data, color = "#00F0FF" }: { data: number[]; color
   )
 }
 
-const trendColor = {
-  up: "text-green-500",
-  down: "text-red-500",
-  flat: "text-muted-foreground",
+const trendColors = {
+  up: COLORS.semantic.success,
+  down: COLORS.semantic.error,
+  flat: CHART_COLORS.primary,
 }
 
 const trendIcon = {
@@ -137,7 +138,7 @@ export function KPICard({
           </div>
 
           <div className="flex items-center justify-between mb-3">
-            <div className={`flex items-center gap-1 text-xs ${trendColor[trend]}`}>
+            <div className={`flex items-center gap-1 text-xs ${trendColors[trend]}`}>
               {trendIcon[trend]}
               <span>
                 {change > 0 ? "+" : ""}

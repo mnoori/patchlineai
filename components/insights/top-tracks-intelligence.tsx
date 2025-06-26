@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
 import { ArrowUp, ArrowDown, Music, PlayCircle, BarChart2, TrendingUp, Calendar } from "lucide-react"
 import { motion } from "framer-motion"
+import { CHART_COLORS } from "@/lib/brand"
 
 interface Track {
   id: string
@@ -176,7 +177,7 @@ export function TopTracksIntelligence({ tracks, timeframe }: TopTracksIntelligen
                             borderRadius: "4px",
                           }}
                         />
-                        <Area type="monotone" dataKey="streams" stroke="#00F0FF" fill="rgba(0, 240, 255, 0.2)" />
+                        <Area type="monotone" dataKey="streams" stroke={CHART_COLORS.primary} fill={`${CHART_COLORS.primary}33`} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>

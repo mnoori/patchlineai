@@ -11,7 +11,7 @@ export interface AgentConfig {
 export const AGENTS: Record<AgentKey, AgentConfig> = {
   aria: {
     key: "aria",
-    displayName: "Aria",
+    displayName: "ARIA",
     gradientClass:
       "bg-gradient-to-r from-purple-400 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent",
     avatarUrl: "/avatars/aria.png",

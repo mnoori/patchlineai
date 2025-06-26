@@ -19,6 +19,7 @@ import {
   Pie,
   Cell,
 } from "recharts"
+import { CHART_COLORS, getChartColor } from "@/lib/brand"
 
 export function AnalyticsView() {
   // Sample data for charts
@@ -55,8 +56,6 @@ export function AnalyticsView() {
     { name: "YouTube", value: 12 },
     { name: "Instagram", value: 8 },
   ]
-
-  const COLORS = ["#00F0FF", "#FF4D6D", "#9381FF", "#FFD166", "#06D6A0"]
 
   return (
     <Card className="glass-effect">
@@ -98,20 +97,21 @@ export function AnalyticsView() {
               <div className="h-[400px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trendData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                    <XAxis dataKey="name" stroke="#888" />
-                    <YAxis stroke="#888" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid.line} />
+                    <XAxis dataKey="name" stroke={CHART_COLORS.grid.text} />
+                    <YAxis stroke={CHART_COLORS.grid.text} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#111",
-                        borderColor: "#333",
-                        color: "#fff",
+                        backgroundColor: CHART_COLORS.tooltip.background,
+                        borderColor: CHART_COLORS.grid.line,
+                        color: CHART_COLORS.tooltip.text,
                       }}
+                      labelStyle={{ color: CHART_COLORS.tooltip.text }}
                     />
                     <Legend />
-                    <Line type="monotone" dataKey="Electronic" stroke="#00F0FF" activeDot={{ r: 8 }} strokeWidth={2} />
-                    <Line type="monotone" dataKey="HipHop" stroke="#FF4D6D" strokeWidth={2} />
-                    <Line type="monotone" dataKey="Indie" stroke="#9381FF" strokeWidth={2} />
+                    <Line type="monotone" dataKey="Electronic" stroke={CHART_COLORS.series[0]} activeDot={{ r: 8 }} strokeWidth={2} />
+                    <Line type="monotone" dataKey="HipHop" stroke={CHART_COLORS.series[1]} strokeWidth={2} />
+                    <Line type="monotone" dataKey="Indie" stroke={CHART_COLORS.series[2]} strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -178,15 +178,16 @@ export function AnalyticsView() {
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       >
                         {genreData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell key={`cell-${index}`} fill={getChartColor(index)} />
                         ))}
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#111",
-                          borderColor: "#333",
-                          color: "#fff",
+                          backgroundColor: CHART_COLORS.tooltip.background,
+                          borderColor: CHART_COLORS.grid.line,
+                          color: CHART_COLORS.tooltip.text,
                         }}
+                        labelStyle={{ fill: CHART_COLORS.tooltip.text }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -195,19 +196,20 @@ export function AnalyticsView() {
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={genreData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                      <XAxis type="number" stroke="#888" />
-                      <YAxis dataKey="name" type="category" stroke="#888" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid.line} />
+                      <XAxis type="number" stroke={CHART_COLORS.grid.text} />
+                      <YAxis dataKey="name" type="category" stroke={CHART_COLORS.grid.text} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#111",
-                          borderColor: "#333",
-                          color: "#fff",
+                          backgroundColor: CHART_COLORS.tooltip.background,
+                          borderColor: CHART_COLORS.grid.line,
+                          color: CHART_COLORS.tooltip.text,
                         }}
+                        labelStyle={{ fill: CHART_COLORS.tooltip.text }}
                       />
-                      <Bar dataKey="value" fill="#00F0FF" radius={[0, 4, 4, 0]}>
+                      <Bar dataKey="value" fill={CHART_COLORS.series[0]} radius={[0, 4, 4, 0]}>
                         {genreData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell key={`cell-${index}`} fill={getChartColor(index)} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -248,15 +250,16 @@ export function AnalyticsView() {
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       >
                         {regionData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell key={`cell-${index}`} fill={getChartColor(index)} />
                         ))}
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#111",
-                          borderColor: "#333",
-                          color: "#fff",
+                          backgroundColor: CHART_COLORS.tooltip.background,
+                          borderColor: CHART_COLORS.grid.line,
+                          color: CHART_COLORS.tooltip.text,
                         }}
+                        labelStyle={{ fill: CHART_COLORS.tooltip.text }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -265,19 +268,20 @@ export function AnalyticsView() {
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={regionData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                      <XAxis type="number" stroke="#888" />
-                      <YAxis dataKey="name" type="category" stroke="#888" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid.line} />
+                      <XAxis type="number" stroke={CHART_COLORS.grid.text} />
+                      <YAxis dataKey="name" type="category" stroke={CHART_COLORS.grid.text} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#111",
-                          borderColor: "#333",
-                          color: "#fff",
+                          backgroundColor: CHART_COLORS.tooltip.background,
+                          borderColor: CHART_COLORS.grid.line,
+                          color: CHART_COLORS.tooltip.text,
                         }}
+                        labelStyle={{ fill: CHART_COLORS.tooltip.text }}
                       />
-                      <Bar dataKey="value" fill="#00F0FF" radius={[0, 4, 4, 0]}>
+                      <Bar dataKey="value" fill={CHART_COLORS.series[0]} radius={[0, 4, 4, 0]}>
                         {regionData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell key={`cell-${index}`} fill={getChartColor(index)} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -318,15 +322,16 @@ export function AnalyticsView() {
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       >
                         {platformData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell key={`cell-${index}`} fill={getChartColor(index)} />
                         ))}
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#111",
-                          borderColor: "#333",
-                          color: "#fff",
+                          backgroundColor: CHART_COLORS.tooltip.background,
+                          borderColor: CHART_COLORS.grid.line,
+                          color: CHART_COLORS.tooltip.text,
                         }}
+                        labelStyle={{ fill: CHART_COLORS.tooltip.text }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -335,19 +340,20 @@ export function AnalyticsView() {
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={platformData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                      <XAxis type="number" stroke="#888" />
-                      <YAxis dataKey="name" type="category" stroke="#888" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid.line} />
+                      <XAxis type="number" stroke={CHART_COLORS.grid.text} />
+                      <YAxis dataKey="name" type="category" stroke={CHART_COLORS.grid.text} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#111",
-                          borderColor: "#333",
-                          color: "#fff",
+                          backgroundColor: CHART_COLORS.tooltip.background,
+                          borderColor: CHART_COLORS.grid.line,
+                          color: CHART_COLORS.tooltip.text,
                         }}
+                        labelStyle={{ fill: CHART_COLORS.tooltip.text }}
                       />
-                      <Bar dataKey="value" fill="#00F0FF" radius={[0, 4, 4, 0]}>
+                      <Bar dataKey="value" fill={CHART_COLORS.series[0]} radius={[0, 4, 4, 0]}>
                         {platformData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell key={`cell-${index}`} fill={getChartColor(index)} />
                         ))}
                       </Bar>
                     </BarChart>

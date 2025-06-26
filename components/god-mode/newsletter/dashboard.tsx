@@ -37,6 +37,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { COLORS } from "@/lib/brand"
 
 interface NewsletterTopic {
   title: string
@@ -280,62 +281,63 @@ export function NewsletterGeneratorDashboard() {
   const generateHtml = () => {
     if (!newsletterData) return
     
-    const html = `<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>${newsletterData.headline}</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #0f172a; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0f172a;">
-    <tr>
-      <td align="center" style="padding: 10px;">
-        <table width="100%" style="max-width: 600px; background-color: #1e293b; border-radius: 8px; overflow: hidden;">
-          <!-- Header -->
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>${newsletterData.headline}</title>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: ${COLORS.ui.background}; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${COLORS.ui.background};">
           <tr>
-            <td align="center" style="padding: 20px;">
-              <div style="font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; color: #ffffff;">THE BREACH REPORT</div>
-              <div style="width: 50px; height: 2px; background-color: #38bdf8; margin: 10px auto;"></div>
-            </td>
-          </tr>
-          <!-- Title + Content -->
-          <tr>
-            <td style="padding: 0 20px 20px;">
-              <h1 style="font-size: 20px; color: #ffffff; text-align: center; margin: 20px 0; font-weight: 700;">${newsletterData.headline}</h1>
-              
-              <h2 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 18px; color: #38bdf8; margin: 20px 0 12px; font-weight: 700;">Good Morning, Operator.</h2>
-              <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #d1d5db; margin: 12px 0 24px; line-height: 1.6;">${newsletterData.introduction}</p>
-
-              ${newsletterData.sections.map(section => `
-                <div style="margin: 16px 0;">
-                  ${section.imageUrl ? `<img src="${section.imageUrl}" alt="Technology Signal" style="display: block; width: 100%; max-width: 100%; border-radius: 10px; margin: 0 auto; height: auto; border: 1px solid rgba(56, 189, 248, 0.3);">` : ''}
-                </div>
-                <h3 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; color: #38bdf8; margin: 20px 0 10px; font-weight: 700;">${section.title}</h3>
-                <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #d1d5db; margin: 12px 0; line-height: 1.6;">${section.content.replace(/\n/g, '<br>')}</p>
-                <div style="margin-top: 30px; margin-bottom: 12px; padding-top: 30px; border-top: 1px solid rgba(56, 189, 248, 0.2);"></div>
-              `).join('')}
-
-              <div style="margin: 30px 0 20px; padding: 20px; border-radius: 8px; background-color: rgba(17, 24, 39, 0.5); border-left: 3px solid #38bdf8;">
-                <h3 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; color: #38bdf8; margin: 0 0 12px; font-weight: 700;">End of Transmission</h3>
-                <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #d1d5db; margin: 10px 0;">${newsletterData.callToAction}</p>
-              </div>
-            </td>
-          </tr>
-          <!-- Footer -->
-          <tr>
-            <td style="padding: 15px; border-top: 1px solid rgba(56, 189, 248, 0.2); background-color: #0f172a;">
-              <div style="font-size: 12px; color: #94a3b8; text-align: center; letter-spacing: 1px;">EXPONENTIAL WATCH NETWORK • ${new Date().toISOString().split('T')[0]}</div>
+            <td align="center" style="padding: 40px 20px;">
+              <table width="100%" style="max-width: 600px; background-color: ${COLORS.ui.card}; border-radius: 8px; overflow: hidden;">
+                <!-- Header -->
+                <tr>
+                  <td style="padding: 30px; text-align: center;">
+                    <div style="font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; color: ${COLORS.ui.foreground};">THE BREACH REPORT</div>
+                    <div style="width: 50px; height: 2px; background-color: ${COLORS.primary.cyan}; margin: 10px auto;"></div>
+                  </td>
+                </tr>
+                
+                <!-- Main Content -->
+                <tr>
+                  <td style="padding: 0 30px 30px;">
+                    <h1 style="font-size: 20px; color: ${COLORS.ui.foreground}; text-align: center; margin: 20px 0; font-weight: 700;">${newsletterData.headline}</h1>
+                    
+                    <h2 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 18px; color: ${COLORS.primary.cyan}; margin: 20px 0 12px; font-weight: 700;">Good Morning, Operator.</h2>
+                    <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: ${COLORS.ui.muted}; margin: 12px 0 24px; line-height: 1.6;">${newsletterData.introduction}</p>
+                    
+                    ${newsletterData.sections.map(section => `
+                      <div style="margin: 24px 0;">
+                        <h3 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; color: ${COLORS.primary.cyan}; margin: 20px 0 10px; font-weight: 700;">${section.title}</h3>
+                        <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: ${COLORS.ui.muted}; margin: 12px 0; line-height: 1.6;">${section.content.replace(/\n/g, '<br>')}</p>
+                      </div>
+                    `).join('')}
+                    
+                    <div style="margin: 30px 0 20px; padding: 20px; background-color: rgba(0, 230, 228, 0.05); border-radius: 6px; border: 1px solid rgba(0, 230, 228, 0.2); border-left: 3px solid ${COLORS.primary.cyan};">
+                      <h3 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; color: ${COLORS.primary.cyan}; margin: 0 0 12px; font-weight: 700;">End of Transmission</h3>
+                      <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: ${COLORS.ui.muted}; margin: 10px 0;">${newsletterData.callToAction}</p>
+                    </div>
+                  </td>
+                </tr>
+                
+                <!-- Footer -->
+                <tr>
+                  <td style="padding: 15px; border-top: 1px solid ${COLORS.ui.border}; background-color: ${COLORS.ui.background};">
+                    <div style="font-size: 12px; color: ${COLORS.ui.muted}; text-align: center; letter-spacing: 1px;">EXPONENTIAL WATCH NETWORK • ${new Date().toISOString().split('T')[0]}</div>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
         </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`
+      </body>
+      </html>
+    `
     
-    setFinalHtml(html)
+    setFinalHtml(htmlContent)
     setCurrentStep(5)
     toast.success("HTML newsletter generated and ready for Beehiiv!")
   }

@@ -24,8 +24,11 @@ import {
   ScatterChart,
   Scatter,
   ComposedChart,
+  ReferenceLine,
+  ReferenceArea,
 } from "recharts"
 import { cn } from "@/lib/utils"
+import { CHART_COLORS, getChartColor } from "@/lib/brand"
 
 // Common chart tooltip component
 export function ChartTooltip({ active, payload, label, formatter, labelFormatter, className, ...props }: any) {
@@ -128,8 +131,8 @@ export function AreaChartComponent({
         <AreaChart data={data} {...props}>
           <defs>
             <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#00F0FF" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#00F0FF" stopOpacity={0} />
+              <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.8} />
+              <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0} />
             </linearGradient>
           </defs>
           <ChartGrid {...gridProps} />
@@ -139,7 +142,7 @@ export function AreaChartComponent({
           <Area
             type="monotone"
             dataKey="value"
-            stroke="#00F0FF"
+            stroke={CHART_COLORS.primary}
             fillOpacity={1}
             fill="url(#colorGradient)"
             {...areaProps}
@@ -179,7 +182,7 @@ export function BarChartComponent({
           <ChartXAxis {...xAxisProps} />
           <ChartYAxis {...yAxisProps} />
           <Tooltip content={<ChartTooltip {...tooltipProps} />} />
-          <Bar dataKey="value" fill="#00F0FF" radius={[4, 4, 0, 0]} {...barProps} />
+          <Bar dataKey="value" fill={CHART_COLORS.bar.primary} radius={[4, 4, 0, 0]} {...barProps} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -218,10 +221,10 @@ export function LineChartComponent({
           <Line
             type="monotone"
             dataKey="value"
-            stroke="#00F0FF"
+            stroke={CHART_COLORS.primary}
             strokeWidth={2}
-            dot={{ r: 4, fill: "#00F0FF", strokeWidth: 0 }}
-            activeDot={{ r: 6, fill: "#00F0FF", strokeWidth: 0 }}
+            dot={{ r: 4, fill: CHART_COLORS.primary, strokeWidth: 0 }}
+            activeDot={{ r: 6, fill: CHART_COLORS.primary, strokeWidth: 0 }}
             {...lineProps}
           />
         </LineChart>
@@ -237,7 +240,7 @@ export function PieChartComponent({
   tooltipProps,
   height = 300,
   className,
-  colors = ["#00F0FF", "#0070F3", "#6B46C1", "#10B981", "#F59E0B", "#EF4444"],
+  colors = CHART_COLORS.series,
   ...props
 }: {
   data: any[]
@@ -263,7 +266,7 @@ export function PieChartComponent({
             {...pieProps}
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+              <Cell key={`cell-${index}`} fill={getChartColor(index)} />
             ))}
           </Pie>
         </PieChart>
@@ -294,7 +297,7 @@ export function RadarChartComponent({
           <PolarGrid />
           <PolarAngleAxis dataKey="subject" />
           <PolarRadiusAxis />
-          <Radar name="Value" dataKey="value" stroke="#00F0FF" fill="#00F0FF" fillOpacity={0.6} {...radarProps} />
+          <Radar name="Value" dataKey="value" stroke={CHART_COLORS.primary} fill={CHART_COLORS.primary} fillOpacity={0.6} {...radarProps} />
           <Tooltip content={<ChartTooltip {...tooltipProps} />} />
         </RadarChart>
       </ResponsiveContainer>
@@ -331,7 +334,7 @@ export function ScatterChartComponent({
           <ChartXAxis {...xAxisProps} />
           <ChartYAxis {...yAxisProps} />
           <Tooltip content={<ChartTooltip {...tooltipProps} />} />
-          <Scatter name="Values" data={data} fill="#00F0FF" {...scatterProps} />
+          <Scatter name="Values" data={data} fill={CHART_COLORS.primary} {...scatterProps} />
         </ScatterChart>
       </ResponsiveContainer>
     </div>
@@ -371,20 +374,20 @@ export function ComposedChartComponent({
           <ChartXAxis {...xAxisProps} />
           <ChartYAxis {...yAxisProps} />
           <Tooltip content={<ChartTooltip {...tooltipProps} />} />
-          {barProps && <Bar dataKey="bar" fill="#00F0FF" radius={[4, 4, 0, 0]} {...barProps} />}
+          {barProps && <Bar dataKey="bar" fill={CHART_COLORS.bar.primary} radius={[4, 4, 0, 0]} {...barProps} />}
           {lineProps && (
             <Line
               type="monotone"
               dataKey="line"
-              stroke="#0070F3"
+              stroke={CHART_COLORS.secondary}
               strokeWidth={2}
-              dot={{ r: 4, fill: "#0070F3", strokeWidth: 0 }}
-              activeDot={{ r: 6, fill: "#0070F3", strokeWidth: 0 }}
+              dot={{ r: 4, fill: CHART_COLORS.secondary, strokeWidth: 0 }}
+              activeDot={{ r: 6, fill: CHART_COLORS.secondary, strokeWidth: 0 }}
               {...lineProps}
             />
           )}
           {areaProps && (
-            <Area type="monotone" dataKey="area" stroke="#10B981" fill="#10B981" fillOpacity={0.3} {...areaProps} />
+            <Area type="monotone" dataKey="area" stroke={CHART_COLORS.semantic.success} fill={CHART_COLORS.semantic.success} fillOpacity={0.3} {...areaProps} />
           )}
         </ComposedChart>
       </ResponsiveContainer>

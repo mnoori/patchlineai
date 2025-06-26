@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PieChart } from "recharts"
 import { ResponsiveContainer, Pie, Cell, Legend, Tooltip } from "recharts"
 import { motion } from "framer-motion"
+import { CHART_COLORS, getChartColor } from "@/lib/brand"
 
 interface DataItem {
   name: string
@@ -116,11 +117,11 @@ export function AudienceDistribution({ platformData, geoData, demographicData }:
                     labelLine={false}
                     label={renderCustomizedLabel}
                     outerRadius={100}
-                    fill="#8884d8"
+                    fill={CHART_COLORS.tertiary}
                     dataKey="value"
                   >
                     {geoData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`cell-${index}`} fill={getChartColor(index)} />
                     ))}
                   </Pie>
                   <Tooltip
@@ -148,11 +149,11 @@ export function AudienceDistribution({ platformData, geoData, demographicData }:
                     labelLine={false}
                     label={renderCustomizedLabel}
                     outerRadius={100}
-                    fill="#8884d8"
+                    fill={CHART_COLORS.tertiary}
                     dataKey="value"
                   >
                     {demographicData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`cell-${index}`} fill={getChartColor(index)} />
                     ))}
                   </Pie>
                   <Tooltip

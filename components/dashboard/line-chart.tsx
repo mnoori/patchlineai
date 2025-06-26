@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import { CHART_COLORS } from "@/lib/brand"
 
 interface DataPoint {
   name: string
@@ -15,7 +16,7 @@ interface LineChartProps {
   color?: string
 }
 
-export function RevenueLineChart({ title, data, yAxisLabel = "", color = "#00E5FF" }: LineChartProps) {
+export function RevenueLineChart({ title, data, yAxisLabel = "", color = CHART_COLORS.primary }: LineChartProps) {
   const [chartData, setChartData] = useState<DataPoint[]>([])
 
   useEffect(() => {
@@ -48,13 +49,13 @@ export function RevenueLineChart({ title, data, yAxisLabel = "", color = "#00E5F
               <stop offset="95%" stopColor={color} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={{ stroke: "#333" }} />
+          <XAxis dataKey="name" stroke={CHART_COLORS.grid.text} fontSize={12} tickLine={false} axisLine={{ stroke: CHART_COLORS.grid.line }} />
           <YAxis
             tickFormatter={formatYAxis}
-            stroke="#666"
+            stroke={CHART_COLORS.grid.text}
             fontSize={12}
             tickLine={false}
-            axisLine={{ stroke: "#333" }}
+            axisLine={{ stroke: CHART_COLORS.grid.line }}
             label={{ value: yAxisLabel, angle: -90, position: "insideLeft", style: { textAnchor: "middle" } }}
           />
           <Tooltip
@@ -81,7 +82,7 @@ export function RevenueLineChart({ title, data, yAxisLabel = "", color = "#00E5F
             dataKey="value"
             stroke={color}
             strokeWidth={2}
-            dot={{ r: 4, strokeWidth: 2, fill: "#111", stroke: color }}
+            dot={{ r: 4, strokeWidth: 2, fill: CHART_COLORS.tooltip.background, stroke: color }}
             activeDot={{ r: 6, strokeWidth: 0, fill: color }}
             name="revenue"
           />

@@ -1,4 +1,11 @@
-export function TRSCableIcon({ className }: { className?: string }) {
+import React from "react"
+import { COLORS } from "@/lib/brand"
+
+interface TRSCableIconProps {
+  className?: string
+}
+
+export function TRSCableIcon({ className }: TRSCableIconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -10,13 +17,13 @@ export function TRSCableIcon({ className }: { className?: string }) {
       className={className}
     >
       {/* Outer rounded square (patchbay module) */}
-      <rect x="2" y="2" width="20" height="20" rx="3" fill="#0F172A" stroke="currentColor" />
+      <rect x="2" y="2" width="20" height="20" rx="3" fill={COLORS.ui.card} stroke="currentColor" />
       
       {/* Jack input holes */}
-      <circle cx="7" cy="7" r="2" fill="#1E293B" stroke="currentColor" />
-      <circle cx="17" cy="7" r="2" fill="#1E293B" stroke="currentColor" />
-      <circle cx="7" cy="17" r="2" fill="#1E293B" stroke="currentColor" />
-      <circle cx="17" cy="17" r="2" fill="#1E293B" stroke="currentColor" />
+      <circle cx="7" cy="7" r="2" fill={COLORS.ui.border} stroke="currentColor" />
+      <circle cx="17" cy="7" r="2" fill={COLORS.ui.border} stroke="currentColor" />
+      <circle cx="7" cy="17" r="2" fill={COLORS.ui.border} stroke="currentColor" />
+      <circle cx="17" cy="17" r="2" fill={COLORS.ui.border} stroke="currentColor" />
       
       {/* TRS Cable - going from top-left to bottom-right */}
       <path 
