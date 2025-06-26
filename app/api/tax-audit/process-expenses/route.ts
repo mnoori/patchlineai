@@ -272,6 +272,220 @@ function extractBofAExpenses(extractedData: any): ExtractedExpense[] {
   return expenses
 }
 
+// Chase-specific expense extraction
+function extractChaseExpenses(extractedData: any): ExtractedExpense[] {
+  const expenses: ExtractedExpense[] = []
+  
+  console.log('Chase extraction - tables found:', extractedData.tables?.length)
+  console.log('Chase extraction - text length:', extractedData.text?.length)
+  
+  // Chase statements have specific table structures
+  if (extractedData.tables && extractedData.tables.length > 0) {
+    for (let tableIndex = 0; tableIndex < extractedData.tables.length; tableIndex++) {
+      const table = extractedData.tables[tableIndex]
+      console.log(`Chase table ${tableIndex + 1} - rows:`, table.rows?.length)
+      
+      if (!table.rows || table.rows.length < 2) continue
+      
+      // Chase checking specific: Look for transaction tables
+      let looksLikeTransactions = false
+      let dateColumnIndex = -1
+      let amountColumnIndex = -1
+      
+      // Check first few rows to identify column structure
+      for (let i = 0; i < Math.min(5, table.rows.length); i++) {
+        const row = table.rows[i]
+        if (!row.cells) continue
+        
+        row.cells.forEach((cell: any, cellIndex: number) => {
+          const cellText = cell.text || ''
+          
+          // Check for date pattern (MM/DD)
+          if (/^\d{1,2}\/\d{1,2}$/.test(cellText.trim())) {
+            dateColumnIndex = cellIndex
+            looksLikeTransactions = true
+          }
+          
+          // Check for amount pattern with dollar sign
+          if (/^\$[\d,]+\.\d{2}$/.test(cellText.trim())) {
+            amountColumnIndex = cellIndex
+            console.log(`Found amount column ${cellIndex} with value: ${cellText}`)
+          }
+        })
+      }
+      
+      if (!looksLikeTransactions) {
+        console.log(`Table ${tableIndex + 1} doesn't look like transactions`)
+        continue
+      }
+      
+      // Process rows as transactions
+      for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
+        const row = table.rows[rowIndex]
+        if (!row.cells || row.cells.length < 3) continue
+        
+                 const cells = row.cells.map((c: any) => c.text || '')
+         console.log(`Chase row ${rowIndex}: ${JSON.stringify(cells)}`)
+         
+         // Skip header rows
+         if (cells.some(cell => cell.toLowerCase().includes('date') || 
+                                cell.toLowerCase().includes('description') ||
+                                cell.toLowerCase().includes('amount'))) {
+           console.log('Skipping header row')
+           continue
+         }
+        
+        // Chase format typically: Date | Description | Location | Amount
+        // For ATM withdrawals: Date | Description | Location | Amount
+        
+        let date = null
+        let description = ''
+        let amount = 0
+        
+        // Extract date from first column
+        if (cells[0] && /^\d{1,2}\/\d{1,2}$/.test(cells[0].trim())) {
+          date = parseDate(cells[0])
+        }
+        
+        // If no valid date, skip this row
+        if (!date) continue
+        
+        // Description is usually in second column
+        if (cells[1]) {
+          description = cells[1]
+        }
+        
+                 // For Chase checking, amount is typically in the last non-empty column
+         // Look for the rightmost column with a dollar amount
+         for (let i = cells.length - 1; i >= 2; i--) {
+           const cellText = cells[i]
+           
+           if (!cellText || cellText.trim() === '') continue
+           
+           // Chase checking shows amounts like "$5.00", "$45.00", "1,000.00", etc.
+           if (cellText.includes('$') || 
+               /^\d+\.\d{2}$/.test(cellText.trim()) ||
+               /^[\d,]+\.\d{2}$/.test(cellText.trim())) {
+             const cellAmount = parseAmount(cellText)
+             
+             if (cellAmount > 0 && cellAmount < 50000) {
+               amount = cellAmount
+               console.log(`Found Chase amount in cell ${i}: ${cellText} -> $${amount}`)
+               break
+             }
+           }
+         }
+         
+         // If still no amount found, check if there's a number without dollar sign in any cell
+         if (amount === 0) {
+           for (let i = cells.length - 1; i >= 2; i--) {
+             const cellText = cells[i]
+             
+             if (!cellText || cellText.trim() === '') continue
+             
+             // Check for pure numbers that could be amounts
+             if (/^[\d,]+\.\d{2}$/.test(cellText.trim()) || /^\d+$/.test(cellText.trim())) {
+               const cellAmount = parseAmount(cellText)
+               
+               if (cellAmount > 0 && cellAmount < 50000) {
+                 amount = cellAmount
+                 console.log(`Found Chase amount (no $) in cell ${i}: ${cellText} -> $${amount}`)
+                 break
+               }
+             }
+           }
+         }
+        
+                 // Debug logging for troubleshooting
+         console.log(`Row analysis: date=${date}, description="${description}", amount=${amount}`)
+         
+         // If we have all required fields, create the expense
+         if (date && description && amount > 0) {
+           // For Chase checking, include all outgoing transactions (expenses)
+           // Skip obvious deposits/credits like "ACH Credit", "Deposit", etc.
+           const descLower = description.toLowerCase()
+           const isDeposit = descLower.includes('deposit') || 
+                            descLower.includes('credit') || 
+                            descLower.includes('morgan stanley') || // Investment deposits
+                            descLower.includes('total') ||
+                            descLower.includes('balance')
+           
+           if (!isDeposit) {
+             expenses.push({
+               lineNumber: expenses.length + 1,
+               date,
+               description: cleanDescription(description),
+               amount,
+               vendor: extractVendorFromDescription(description),
+               transactionType: 'debit'
+             })
+             console.log(`✅ Chase transaction: ${date} - ${description} - $${amount}`)
+           } else {
+             console.log(`⏭️ Skipping deposit/credit: ${description}`)
+           }
+         } else {
+           console.log(`❌ Skipping row - missing data: date=${!!date}, desc=${!!description}, amount=${amount}`)
+         }
+      }
+    }
+  }
+  
+  // If no table transactions found, try text parsing with Chase patterns
+  if (expenses.length === 0 && extractedData.text) {
+    console.log('No Chase table transactions, trying text extraction')
+    
+    const lines = extractedData.text.split('\n')
+    let inTransactionSection = false
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
+      
+      // Chase transaction section markers
+      if (line.includes('ATM & DEBIT CARD WITHDRAWALS') || 
+          line.includes('ELECTRONIC WITHDRAWALS') ||
+          line.includes('CHECKS PAID')) {
+        inTransactionSection = true
+        console.log('Found Chase transaction section:', line)
+        continue
+      }
+      
+      if (line.includes('DEPOSITS AND OTHER CREDITS') || 
+          line.includes('SERVICE FEES') ||
+          line.includes('DAILY ENDING BALANCE')) {
+        inTransactionSection = false
+        continue
+      }
+      
+      if (!inTransactionSection) continue
+      
+      // Chase pattern: MM/DD Description Location Amount
+      const chasePattern = /^(\d{1,2}\/\d{1,2})\s+(.+?)\s+(\$[\d,]+\.\d{2})$/
+      const match = line.match(chasePattern)
+      
+      if (match) {
+        const [_, dateStr, desc, amountStr] = match
+        const date = parseDate(dateStr)
+        const amount = parseAmount(amountStr)
+        
+        if (date && amount > 0) {
+          expenses.push({
+            lineNumber: expenses.length + 1,
+            date,
+            description: cleanDescription(desc),
+            amount,
+            vendor: extractVendorFromDescription(desc),
+            transactionType: 'debit'
+          })
+          console.log(`Chase text transaction: ${date} - ${desc} - $${amount}`)
+        }
+      }
+    }
+  }
+  
+  console.log(`Chase extraction complete - found ${expenses.length} expenses`)
+  return expenses
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -349,17 +563,25 @@ export async function POST(request: NextRequest) {
       console.log('First table rows:', extractedData.tables[0].rows?.length)
     }
     
-    // Extract expenses using existing function
-    const expenses = extractExpensesFromStatement(extractedData)
+    // Use bank-specific extraction first, then fall back to generic
+    let expenses: ExtractedExpense[] = []
 
-    console.log(`Initial extraction found ${expenses.length} expenses`)
-
-    // If no expenses found and it's a BofA statement, try BofA-specific extraction
-    if (expenses.length === 0 && bankType === 'bofa') {
+    // Try bank-specific extraction first
+    if (bankType === 'bofa') {
       console.log('Attempting BofA-specific extraction')
-      const bofaExpenses = extractBofAExpenses(extractedData)
-      expenses.push(...bofaExpenses)
+      expenses = extractBofAExpenses(extractedData)
+    } else if (bankType === 'chase-checking' || bankType === 'chase-freedom' || bankType === 'chase-sapphire') {
+      console.log('Attempting Chase-specific extraction')
+      expenses = extractChaseExpenses(extractedData)
     }
+
+    // If bank-specific extraction didn't find anything, try generic extraction
+    if (expenses.length === 0) {
+      console.log('Bank-specific extraction found no expenses, trying generic extraction')
+      expenses = extractExpensesFromStatement(extractedData)
+    }
+
+    console.log(`Final extraction found ${expenses.length} expenses`)
 
     // Process and save each expense
     const savedExpenses = []
