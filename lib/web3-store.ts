@@ -19,7 +19,7 @@ export const useWeb3Store = create<Web3Store>()(
   persist(
     (set, get) => ({
       settings: {
-        enabled: false,
+        enabled: true,
         connectedWallets: {},
         preferredWallet: null,
       },

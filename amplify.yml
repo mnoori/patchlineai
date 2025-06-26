@@ -11,6 +11,14 @@ frontend:
         - echo "Setting production debug mode for zero-overhead logging"
         - node -e "console.log('DEBUG_MODE=prod')" >> .env.production
         
+        # Enable Web3 portal but disable wallet integrations for performance
+        - echo "Enabling Web3 portal (wallet integrations disabled for performance)"
+        - node -e "console.log('NEXT_PUBLIC_ENABLE_WEB3=true')" >> .env.production
+        
+        # Set production environment
+        - echo "Setting production environment"
+        - node -e "console.log('NODE_ENV=production')" >> .env.production
+        
         # Verify AWS credentials are available
         - echo "Verifying AWS environment..."
         - node -e "console.log('AWS Region:', process.env.AWS_REGION || 'us-east-1')"
@@ -47,6 +55,12 @@ frontend:
 # Required Application Configuration:
 # - NEXT_PUBLIC_APP_URL (set to your Amplify app URL)
 # - NEXT_PUBLIC_AWS_REGION=us-east-1
+# - NEXT_PUBLIC_DEMO_MODE=false
+# - NEXT_PUBLIC_ENABLE_WEB3=true (Web3 portal enabled, wallet integrations disabled)
+# - NODE_ENV=production
+# - DEBUG_MODE=prod (zero-overhead production logging)
+#
+# Required AWS Cognito (Authentication):
 # - NEXT_PUBLIC_USER_POOL_ID (from AWS Cognito)
 # - NEXT_PUBLIC_USER_POOL_CLIENT_ID (from AWS Cognito)
 # - NEXT_PUBLIC_IDENTITY_POOL_ID (from AWS Cognito)
@@ -57,7 +71,6 @@ frontend:
 # - BLOCKCHAIN_RPC_SECRET_ID=patchline/blockchain-rpc
 #
 # Debug System Configuration:
-# - DEBUG_MODE=prod (for zero-overhead production logging)
 # - S3_DEBUG_BUCKET=patchline-files-us-east-1
 #
 # DynamoDB Tables:
@@ -66,6 +79,14 @@ frontend:
 # - BLOG_POSTS_TABLE=BlogPosts-production
 # - CONTENT_DRAFTS_TABLE=ContentDrafts-production
 #
-# Optional Features:
-# - NEXT_PUBLIC_ENABLE_WEB3=true (enable Web3 portal)
-# - NEXT_PUBLIC_DEMO_MODE=false (disable for production) 
+# AI Agents Configuration:
+# - SUPERVISOR_AGENT_ID=8VG8LOVLNZ
+# - SUPERVISOR_AGENT_ALIAS_ID=TSTALIASID
+# - SCOUT_AGENT_ID=W00SGH6WWS
+# - SCOUT_AGENT_ALIAS_ID=TSTALIASID
+# - GMAIL_AGENT_ID=YOMXXWPSSQ
+# - GMAIL_AGENT_ALIAS_ID=TSTALIASID
+# - BLOCKCHAIN_AGENT_ID=W8H34DMCA5
+# - BLOCKCHAIN_AGENT_ALIAS_ID=TSTALIASID
+# - LEGAL_AGENT_ID=SOZZFV6SYD
+# - LEGAL_AGENT_ALIAS_ID=TSTALIASID 

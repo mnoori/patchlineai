@@ -1276,65 +1276,67 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="billing" className="space-y-6">
-          {/* Dev Mode Tier Switcher */}
-          <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-purple-500/30 hover:border-purple-500/50 transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-purple-400" />
-                  Dev Mode: Tier Switcher
-                </CardTitle>
-                <CardDescription>Switch between tiers for testing (Development only)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {Object.values(UserTier).map((tier) => (
-                    <Button
-                      key={tier}
-                      variant={user?.tier === tier ? "default" : "outline"}
-                      className={cn(
-                        "transition-all",
-                        user?.tier === tier && "bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
-                      )}
-                      onClick={() => {
-                        if (user) {
-                          const updatedUser = {
-                            ...user,
-                            tier: tier,
-                            godModeActivated: tier === UserTier.GOD_MODE
-                          }
-                          setUser(updatedUser)
-                          
-                          // Persist to localStorage
-                          try {
-                            const currentStore = JSON.parse(localStorage.getItem('patchline-permissions') || '{}')
-                            currentStore.state = {
-                              ...currentStore.state,
-                              user: updatedUser
+          {/* Dev Mode Tier Switcher - DISABLED FOR PRODUCTION */}
+          {process.env.NODE_ENV === 'development' && (
+            <motion.div variants={itemVariants}>
+              <Card className="glass-effect border-purple-500/30 hover:border-purple-500/50 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-purple-400" />
+                    Dev Mode: Tier Switcher
+                  </CardTitle>
+                  <CardDescription>Switch between tiers for testing (Development only)</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {Object.values(UserTier).map((tier) => (
+                      <Button
+                        key={tier}
+                        variant={user?.tier === tier ? "default" : "outline"}
+                        className={cn(
+                          "transition-all",
+                          user?.tier === tier && "bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                        )}
+                        onClick={() => {
+                          if (user) {
+                            const updatedUser = {
+                              ...user,
+                              tier: tier,
+                              godModeActivated: tier === UserTier.GOD_MODE
                             }
-                            localStorage.setItem('patchline-permissions', JSON.stringify(currentStore))
-                          } catch (error) {
-                            console.error('Failed to persist tier change:', error)
+                            setUser(updatedUser)
+                            
+                            // Persist to localStorage
+                            try {
+                              const currentStore = JSON.parse(localStorage.getItem('patchline-permissions') || '{}')
+                              currentStore.state = {
+                                ...currentStore.state,
+                                user: updatedUser
+                              }
+                              localStorage.setItem('patchline-permissions', JSON.stringify(currentStore))
+                            } catch (error) {
+                              console.error('Failed to persist tier change:', error)
+                            }
+                            
+                            toast.success(`Switched to ${getTierConfig(tier).name} tier`)
+                            
+                            // Debug tier persistence
+                            console.log('Tier changed to:', tier, 'Updated user:', updatedUser)
+                            console.log('LocalStorage state:', JSON.parse(localStorage.getItem('patchline-permissions') || '{}'))
                           }
-                          
-                          toast.success(`Switched to ${getTierConfig(tier).name} tier`)
-                          
-                          // Debug tier persistence
-                          console.log('Tier changed to:', tier, 'Updated user:', updatedUser)
-                          console.log('LocalStorage state:', JSON.parse(localStorage.getItem('patchline-permissions') || '{}'))
-                        }
-                      }}
-                    >
-                      {getTierConfig(tier).name}
-                    </Button>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground mt-4">
-                  ⚠️ This is for development testing only. In production, tier changes will be handled through Stripe subscriptions.
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
+                        }}
+                      >
+                        {getTierConfig(tier).name}
+                      </Button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-4">
+                    ⚠️ This is for development testing only. In production, tier changes will be handled through Stripe subscriptions.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           {/* Web3 Portal Toggle */}
           <motion.div variants={itemVariants}>
