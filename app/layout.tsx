@@ -1,6 +1,7 @@
 'use client'
 
 import './globals.css'
+import './fonts.css'
 import { Toaster } from 'sonner'
 import { TierPersistence } from "@/components/tier-persistence"
 import { ThemeProvider } from '@/components/theme-provider'

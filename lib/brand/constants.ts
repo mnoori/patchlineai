@@ -51,13 +51,16 @@ export const COLORS = {
     black: '#010102',      // Primary black
     deepBlue: '#002772',   // Deep blue
     brightBlue: '#0068FF', // Bright blue
-    cyan: '#00E6E2',       // Cyan accent
+    cyan: '#00E6E4',       // Cyan accent (more vibrant)
   },
-  // Gradient colors
+  // Gradient colors - Enhanced for more vibrant appearance
   gradient: {
-    start: '#70F7EA',      // Cyan gradient start
-    middle: '#2A09CC',     // Blue gradient middle
-    end: '#090030',        // Dark gradient end
+    start: '#00E6E4',      // Vibrant cyan
+    middle: '#0068FF',     // Bright blue
+    end: '#002772',        // Deep blue
+    darkStart: '#090030',  // Dark purple for backgrounds
+    darkMiddle: '#2A09CC', // Deep blue middle
+    darkEnd: '#000814',    // Very dark blue
   },
   // UI colors (maintaining existing dark theme)
   ui: {

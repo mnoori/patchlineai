@@ -15,27 +15,30 @@ export function FeatureCard({
   glowColor = 'cyan'
 }: FeatureCardProps) {
   const glowStyles = {
-    cyan: 'hover:border-brand-cyan/50 hover:shadow-[0_0_30px_rgba(0,230,226,0.3)]',
-    blue: 'hover:border-brand-bright-blue/50 hover:shadow-[0_0_30px_rgba(0,104,255,0.3)]',
-    gradient: 'hover:shadow-[0_0_30px_rgba(112,247,234,0.2)]'
+    cyan: 'hover:border-brand-cyan/60 hover:shadow-[0_0_40px_rgba(0,230,228,0.4)]',
+    blue: 'hover:border-brand-bright-blue/60 hover:shadow-[0_0_40px_rgba(0,104,255,0.4)]',
+    gradient: 'hover:shadow-[0_0_40px_rgba(0,230,228,0.3)]'
   }
 
   return (
     <Card 
       variant="outlined" 
-      padding="lg"
+      padding="xl"
       className={cn(
-        'bg-transparent backdrop-blur-sm',
-        'border-brand-cyan/20',
-        'transition-all duration-500',
+        'bg-black/20 backdrop-blur-md border-2',
+        'border-brand-cyan/30',
+        'transition-all duration-700 ease-out',
+        'hover:bg-black/30',
+        'hover:scale-105',
+        'group',
         glowStyles[glowColor],
         className
       )}
     >
-      <h3 className="text-xl font-bold mb-3 text-brand-cyan">
+      <h3 className="text-xl font-bold mb-4 text-brand-cyan transition-colors duration-300">
         {title}
       </h3>
-      <p className="text-muted-foreground">
+      <p className="text-white/80 transition-colors duration-300 leading-relaxed">
         {description}
       </p>
     </Card>

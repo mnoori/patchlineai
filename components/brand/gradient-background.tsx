@@ -15,27 +15,10 @@ export function GradientBackground({
   overlay = true 
 }: GradientBackgroundProps) {
   const gradients = {
-    hero: createGradient(135, [
-      COLORS.gradient.end,
-      COLORS.primary.deepBlue,
-      COLORS.primary.brightBlue,
-      COLORS.primary.cyan
-    ]),
-    section: createGradient(180, [
-      'rgba(1, 1, 2, 0.9)',
-      'rgba(0, 39, 114, 0.5)',
-      'rgba(0, 104, 255, 0.2)'
-    ]),
-    card: createGradient(45, [
-      'rgba(0, 39, 114, 0.2)',
-      'rgba(0, 104, 255, 0.1)',
-      'rgba(0, 230, 226, 0.1)'
-    ]),
-    subtle: createGradient(90, [
-      'rgba(9, 0, 48, 0.5)',
-      'rgba(42, 9, 204, 0.2)',
-      'rgba(112, 247, 234, 0.1)'
-    ])
+    hero: `linear-gradient(180deg, #010102 0%, #010102 100%)`, // Pure black base for hero, orbs will handle the gradient
+    section: `linear-gradient(180deg, #010102 0%, #010102 100%)`, // Pure black, orbs add color
+    card: `linear-gradient(180deg, rgba(0, 230, 228, 0.02) 0%, rgba(0, 39, 114, 0.1) 30%, #010102 100%)`,
+    subtle: `linear-gradient(180deg, rgba(0, 230, 228, 0.01) 0%, #010102 50%)`
   }
 
   return (
@@ -46,8 +29,8 @@ export function GradientBackground({
         minHeight: variant === 'hero' ? '100vh' : undefined
       }}
     >
-      {overlay && (
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
+      {overlay && variant === 'hero' && (
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/80 pointer-events-none" />
       )}
       {children && (
         <div className="relative z-10">
@@ -59,37 +42,177 @@ export function GradientBackground({
 }
 
 // Animated gradient orbs for background effects
-export function GradientOrbs({ className }: { className?: string }) {
+export function GradientOrbs({ 
+  className,
+  variant = 'default'
+}: { 
+  className?: string
+  variant?: 'default' | 'subtle' | 'vibrant' | 'dispersed' | 'subtle-bottom' | 'dispersed-bottom'
+}) {
+  if (variant === 'subtle') {
+    return (
+      <div className={cn('absolute inset-0 overflow-hidden', className)}>
+        {/* From TOP-RIGHT CORNER */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 100% 100% at 90% -10%, 
+              rgba(0, 230, 228, 0.6) 0%, 
+              rgba(0, 230, 228, 0.55) 20%, 
+              rgba(0, 104, 255, 0.5) 35%,
+              rgba(0, 39, 114, 0.4) 50%, 
+              #010102 75%)`,
+            opacity: 0.6,
+          }}
+        />
+      </div>
+    )
+  }
+
+  if (variant === 'vibrant') {
+    return (
+      <div className={cn('absolute inset-0 overflow-hidden', className)}>
+        {/* Strong vibrant glow from top center - matching the screenshot */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 80% 130% at 50% -30%, 
+              rgba(0, 230, 228, 0.75) 0%, 
+              rgba(0, 230, 228, 0.7) 18%, 
+              rgba(0, 230, 228, 0.6) 28%, 
+              rgba(0, 104, 255, 0.5) 38%,
+              rgba(0, 39, 114, 0.4) 48%, 
+              rgba(0, 20, 60, 0.6) 58%, 
+              #010102 68%)`,
+            opacity: 0.9,
+          }}
+        />
+      </div>
+    )
+  }
+
+  if (variant === 'dispersed') {
+    return (
+      <div className={cn('absolute inset-0 overflow-hidden', className)}>
+        {/* From TOP-LEFT corner */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 90% 90% at 10% -10%, 
+              rgba(0, 230, 228, 0.55) 0%, 
+              rgba(0, 230, 228, 0.5) 18%, 
+              rgba(0, 104, 255, 0.4) 32%,
+              rgba(0, 39, 114, 0.3) 45%, 
+              #010102 60%)`,
+            opacity: 0.5,
+          }}
+        />
+        {/* From TOP-RIGHT corner */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 70% 70% at 85% -5%, 
+              rgba(0, 230, 228, 0.5) 0%, 
+              rgba(0, 230, 228, 0.45) 22%, 
+              rgba(0, 39, 114, 0.3) 40%, 
+              transparent 65%)`,
+            opacity: 0.4,
+          }}
+        />
+        {/* From TOP center accent */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 60% 80% at 50% -15%, 
+              rgba(0, 230, 228, 0.4) 0%, 
+              rgba(0, 230, 228, 0.35) 8%, 
+              transparent 35%)`,
+            opacity: 0.3,
+          }}
+        />
+      </div>
+    )
+  }
+
+  if (variant === 'subtle-bottom') {
+    return (
+      <div className={cn('absolute inset-0 overflow-hidden', className)}>
+        {/* From BOTTOM-RIGHT CORNER - flipped version of subtle */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 100% 100% at 90% 110%, 
+              rgba(0, 230, 228, 0.6) 0%, 
+              rgba(0, 230, 228, 0.55) 20%, 
+              rgba(0, 104, 255, 0.5) 35%,
+              rgba(0, 39, 114, 0.4) 50%, 
+              #010102 75%)`,
+            opacity: 0.6,
+          }}
+        />
+      </div>
+    )
+  }
+
+  if (variant === 'dispersed-bottom') {
+    return (
+      <div className={cn('absolute inset-0 overflow-hidden', className)}>
+        {/* From BOTTOM-LEFT corner */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 90% 90% at 10% 110%, 
+              rgba(0, 230, 228, 0.55) 0%, 
+              rgba(0, 230, 228, 0.5) 18%, 
+              rgba(0, 104, 255, 0.4) 32%,
+              rgba(0, 39, 114, 0.3) 45%, 
+              #010102 60%)`,
+            opacity: 0.5,
+          }}
+        />
+        {/* From BOTTOM-RIGHT corner */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 70% 70% at 85% 105%, 
+              rgba(0, 230, 228, 0.5) 0%, 
+              rgba(0, 230, 228, 0.45) 22%, 
+              rgba(0, 39, 114, 0.3) 40%, 
+              transparent 65%)`,
+            opacity: 0.4,
+          }}
+        />
+        {/* From BOTTOM center accent */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 60% 80% at 50% 115%, 
+              rgba(0, 230, 228, 0.4) 0%, 
+              rgba(0, 230, 228, 0.35) 8%, 
+              transparent 35%)`,
+            opacity: 0.3,
+          }}
+        />
+      </div>
+    )
+  }
+
+  // Default variant - from TOP CENTER (like vibrant orbs example)
   return (
     <div className={cn('absolute inset-0 overflow-hidden', className)}>
-      {/* Large cyan orb */}
       <div 
-        className="absolute -top-1/4 -right-1/4 w-[800px] h-[800px] rounded-full opacity-20"
-        style={{
-          background: `radial-gradient(circle, ${COLORS.primary.cyan} 0%, transparent 70%)`,
-          filter: 'blur(100px)',
-          animation: 'float 20s ease-in-out infinite'
-        }}
-      />
-      
-      {/* Medium blue orb */}
-      <div 
-        className="absolute top-1/2 -left-1/4 w-[600px] h-[600px] rounded-full opacity-30"
-        style={{
-          background: `radial-gradient(circle, ${COLORS.primary.brightBlue} 0%, transparent 70%)`,
-          filter: 'blur(80px)',
-          animation: 'float 15s ease-in-out infinite reverse'
-        }}
-      />
-      
-      {/* Small gradient orb */}
-      <div 
-        className="absolute bottom-0 right-1/3 w-[400px] h-[400px] rounded-full opacity-25"
-        style={{
-          background: `radial-gradient(circle, ${COLORS.gradient.middle} 0%, transparent 70%)`,
-          filter: 'blur(60px)',
-          animation: 'float 25s ease-in-out infinite'
-        }}
+        className="absolute inset-0"
+                  style={{
+            background: `radial-gradient(ellipse 80% 120% at 50% -20%, 
+              rgba(0, 230, 228, 0.7) 0%, 
+              rgba(0, 230, 228, 0.65) 15%, 
+              rgba(0, 230, 228, 0.5) 25%, 
+              rgba(0, 104, 255, 0.4) 35%,
+              rgba(0, 39, 114, 0.5) 45%, 
+              rgba(0, 20, 60, 0.7) 55%,
+              #010102 70%)`,
+            opacity: 0.8,
+          }}
       />
     </div>
   )

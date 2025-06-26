@@ -22,9 +22,9 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: [TYPOGRAPHY.fontFamily.primary],
-        heading: [TYPOGRAPHY.fontFamily.heading],
-        mono: [TYPOGRAPHY.fontFamily.mono],
+        sans: ['Helvetica Neue', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        heading: ['Helvetica Neue', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', '"SF Mono"', 'Consolas', '"Liberation Mono"', 'Menlo', 'monospace'],
       },
       colors: {
         // Brand colors

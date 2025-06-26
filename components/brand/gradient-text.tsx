@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { createGradient } from '@/lib/brand'
+import { createGradient, COLORS } from '@/lib/brand'
 
 interface GradientTextProps {
   children: React.ReactNode
@@ -20,17 +20,17 @@ export function GradientText({
 
   switch (gradient) {
     case 'cyan':
-      gradientStyle = createGradient(direction, ['var(--brand-cyan)', 'var(--brand-bright-blue)'])
+      gradientStyle = createGradient(direction, [COLORS.primary.cyan, COLORS.primary.brightBlue])
       break
     case 'blue':
-      gradientStyle = createGradient(direction, ['var(--brand-bright-blue)', 'var(--brand-deep-blue)'])
+      gradientStyle = createGradient(direction, [COLORS.primary.brightBlue, COLORS.primary.deepBlue])
       break
     case 'custom':
       gradientStyle = customColors ? createGradient(direction, customColors) : ''
       break
     case 'brand':
     default:
-      gradientStyle = createGradient(direction, ['var(--brand-gradient-start)', 'var(--brand-gradient-middle)'])
+      gradientStyle = createGradient(direction, [COLORS.gradient.start, COLORS.gradient.middle])
   }
 
   return (

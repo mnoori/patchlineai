@@ -31,7 +31,7 @@ export default function BrandShowcasePage() {
             description: "Smart dashboards for record labels"
           },
           {
-            title: "Modular AI Agents",
+            title: "Modular AI Agents", 
             description: "Specialized tools for royalties, metadata, and marketing"
           },
           {
@@ -39,23 +39,25 @@ export default function BrandShowcasePage() {
             description: "AI tools for artists, managers, and teams to co-create"
           }
         ]}
+        showLogo={true}
+        logoSize="xl"
       />
 
       {/* Brand Components Showcase */}
       <div className="max-w-7xl mx-auto space-y-12 p-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <GradientText className="text-6xl font-bold">
+          <GradientText className="text-4xl font-medium">
             {BRAND.fullName} Brand System
           </GradientText>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             Comprehensive brand implementation showcase
           </p>
         </div>
 
         {/* Logo Variations */}
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold">Logo Variations</h2>
+          <GradientText className="text-3xl font-medium">Logo Variations</GradientText>
           <div className="grid grid-cols-4 gap-8 bg-card p-8 rounded-lg">
             <div className="text-center space-y-2">
               <Logo size="sm" />
@@ -78,7 +80,7 @@ export default function BrandShowcasePage() {
 
         {/* Logo Usage Guidelines */}
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold">Logo Usage Guidelines</h2>
+          <GradientText className="text-3xl font-medium">Logo Usage Guidelines</GradientText>
           <LogoShowcase />
         </section>
 
@@ -161,7 +163,10 @@ export default function BrandShowcasePage() {
 
         {/* Gradient Backgrounds */}
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold">Gradient Backgrounds</h2>
+          <GradientText className="text-3xl font-medium">Gradient Backgrounds</GradientText>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">Cyan (#00E6E4) flows from top to black (#010102) at bottom</p>
+          </div>
           <div className="grid grid-cols-2 gap-6">
             <div className="relative h-64 rounded-lg overflow-hidden">
               <GradientBackground variant="section" className="h-full">
@@ -184,10 +189,40 @@ export default function BrandShowcasePage() {
                 </div>
               </GradientBackground>
             </div>
-            <div className="relative h-64 rounded-lg overflow-hidden bg-background">
-              <GradientOrbs />
+            <div className="relative h-64 rounded-lg overflow-hidden bg-background border border-border">
+              <GradientOrbs variant="default" />
               <div className="relative z-10 flex items-center justify-center h-full">
-                <p className="font-semibold">Gradient Orbs Effect</p>
+                <p className="font-semibold">Default Orbs</p>
+              </div>
+            </div>
+            <div className="relative h-64 rounded-lg overflow-hidden bg-background border border-border">
+              <GradientOrbs variant="subtle" />
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <p className="font-semibold">Subtle Orbs</p>
+              </div>
+            </div>
+            <div className="relative h-64 rounded-lg overflow-hidden bg-background border border-border">
+              <GradientOrbs variant="vibrant" />
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <p className="font-semibold">Vibrant Orbs</p>
+              </div>
+            </div>
+            <div className="relative h-64 rounded-lg overflow-hidden bg-background border border-border">
+              <GradientOrbs variant="dispersed" />
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <p className="font-semibold">Dispersed Orbs</p>
+              </div>
+            </div>
+            <div className="relative h-64 rounded-lg overflow-hidden bg-background border border-border">
+              <GradientOrbs variant="subtle-bottom" />
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <p className="font-semibold">Subtle Bottom</p>
+              </div>
+            </div>
+            <div className="relative h-64 rounded-lg overflow-hidden bg-background border border-border">
+              <GradientOrbs variant="dispersed-bottom" />
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <p className="font-semibold">Dispersed Bottom</p>
               </div>
             </div>
           </div>
@@ -214,7 +249,7 @@ export default function BrandShowcasePage() {
 
         {/* UI Components */}
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold">UI Components</h2>
+          <GradientText className="text-3xl font-medium">UI Components</GradientText>
           
           {/* Cards */}
           <div>

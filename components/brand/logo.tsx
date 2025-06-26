@@ -64,9 +64,9 @@ export function Logo({
         priority
       />
       {showText && (
-        <span className={cn('font-heading font-bold', sizeConfig.text, textColor)}>
+        <span className={cn('font-heading font-normal', sizeConfig.text, textColor)}>
           {BRAND.name}
-          <sup className="text-xs font-medium ml-0.5">AI</sup>
+          <sup className="text-xs font-normal ml-0.5">AI</sup>
         </span>
       )}
     </div>
