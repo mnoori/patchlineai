@@ -19,9 +19,10 @@ export function PlatformIntegrationSettings({
   className,
   showCategories = true 
 }: PlatformIntegrationSettingsProps) {
-  const { platforms, loading, connectPlatform, disconnectPlatform, refreshPlatforms } = usePlatformConnections()
+  const { platforms, loading, connectPlatform, disconnectPlatform, reconnectPlatform, refreshPlatforms } = usePlatformConnections()
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
   const [googleDriveConnected, setGoogleDriveConnected] = useState(false)
+  const [platformErrors, setPlatformErrors] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     // Check Google Drive connection status
@@ -137,24 +138,41 @@ export function PlatformIntegrationSettings({
                 Coming Soon
               </Button>
             ) : isConnected ? (
-              <Button
-                variant="outline"
-                onClick={() => handleDisconnect(platform.id)}
-                disabled={isConnecting}
-                className="w-full"
-              >
-                {isConnecting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Disconnecting...
-                  </>
-                ) : (
-                  <>
-                    <X className="mr-2 h-4 w-4" />
-                    Disconnect
-                  </>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => handleDisconnect(platform.id)}
+                  disabled={isConnecting}
+                  className="flex-1"
+                >
+                  {isConnecting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Disconnecting...
+                    </>
+                  ) : (
+                    <>
+                      <X className="mr-2 h-4 w-4" />
+                      Disconnect
+                    </>
+                  )}
+                </Button>
+                {/* Show reconnect for Gmail if there might be token issues */}
+                {platform.id === 'gmail' && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      // Reconnect by forcing new authentication
+                      handleConnect(platform.id)
+                    }}
+                    disabled={isConnecting}
+                    className="px-3"
+                    title="Re-authenticate Gmail"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
                 )}
-              </Button>
+              </div>
             ) : (
               <Button
                 onClick={() => handleConnect(platform.id)}

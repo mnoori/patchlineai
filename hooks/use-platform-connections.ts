@@ -139,10 +139,26 @@ export function usePlatformConnections() {
   }
 
   const disconnectPlatform = async (platform: string) => {
-    if (!userId) return
+    if (!userId) return { success: false, error: 'No user ID' }
 
     try {
-      await platformsAPI.update({ userId, platform, connected: false })
+      // For Gmail, we need to clear the tokens from the database
+      if (platform === 'gmail') {
+        // Call a specific endpoint to clear Gmail tokens
+        const response = await fetch('/api/auth/gmail/disconnect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        })
+        
+        if (!response.ok) {
+          throw new Error('Failed to disconnect Gmail')
+        }
+      } else {
+        // For other platforms, use the generic disconnect
+        await platformsAPI.update({ userId, platform, connected: false })
+      }
+      
       setPlatforms(prev => ({
         ...prev,
         [platform]: { connected: false }
@@ -152,6 +168,11 @@ export function usePlatformConnections() {
       console.error(`Failed to disconnect ${platform}:`, err)
       return { success: false, error: `Failed to disconnect ${platform}` }
     }
+  }
+  
+  const reconnectPlatform = (platform: string) => {
+    // Force re-authentication by using the connect flow with prompt
+    connectPlatform(platform)
   }
 
   const getConnectedCount = () => {
@@ -178,6 +199,7 @@ export function usePlatformConnections() {
     error,
     connectPlatform,
     disconnectPlatform,
+    reconnectPlatform,
     refreshPlatforms: fetchPlatforms,
     getConnectedCount,
     getConnectedPlatforms,

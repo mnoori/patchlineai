@@ -34,8 +34,11 @@ let currentAgentId: string | undefined
 
 // POST /api/chat - Handle both chat mode (direct model) and agent mode (Bedrock Agent)
 export async function POST(request: NextRequest) {
+  let message: string, userId: string, mode: string, sessionId: string, modelId: string, agentType: string;
+  
   try {
-    let { message, userId, mode = 'chat', sessionId, modelId, agentType } = await request.json()
+    const body = await request.json();
+    ({ message, userId, mode = 'chat', sessionId, modelId, agentType } = body)
 
     // Normalize agentType to avoid whitespace / casing issues
     const normalizedAgentType = (agentType || '').toString().trim().toUpperCase()
@@ -143,9 +146,9 @@ export async function POST(request: NextRequest) {
           }
       }
 
-      // Resolve IDs with fallbacks
-      const AGENT_ID = agentConfig?.agentId || CONFIG.BEDROCK_AGENT_ID || process.env.BEDROCK_AGENT_ID || 'C7VZ0QWDSG'
-      const AGENT_ALIAS_ID = agentConfig?.agentAliasId || CONFIG.BEDROCK_AGENT_ALIAS_ID || process.env.BEDROCK_AGENT_ALIAS_ID || 'WDGFWL1YCB'
+      // Resolve IDs with fallbacks - remove hardcoded values that don't exist
+      const AGENT_ID = agentConfig?.agentId || CONFIG.BEDROCK_AGENT_ID || process.env.BEDROCK_AGENT_ID
+      const AGENT_ALIAS_ID = agentConfig?.agentAliasId || CONFIG.BEDROCK_AGENT_ALIAS_ID || process.env.BEDROCK_AGENT_ALIAS_ID
       
       // Determine the actual agent being used (important for fallback cases)
       let actualAgentType = agentType
@@ -173,10 +176,32 @@ export async function POST(request: NextRequest) {
         log.error('Bedrock Agent not configured')
         log.error(`BEDROCK_AGENT_ID: ${AGENT_ID ? 'set' : 'missing'}`)
         log.error(`BEDROCK_AGENT_ALIAS_ID: ${AGENT_ALIAS_ID ? 'set' : 'missing'}`)
-        return NextResponse.json({ 
-          error: 'Bedrock Agent not configured',
-          details: 'BEDROCK_AGENT_ID or BEDROCK_AGENT_ALIAS_ID is missing' 
-        }, { status: 500 })
+        
+        // Fallback to chat mode when agent is not configured
+        log.warning('Falling back to chat mode due to missing agent configuration')
+        
+        try {
+          const bedrockClient = new BedrockClientDirect(
+            modelId || CONFIG.BEDROCK_MODEL_ID,
+            `You are ${AGENT_NAME}, ${AGENT_DESCRIPTION}. Help the user with their request.`
+          )
+          
+          const response = await bedrockClient.generateResponse(message)
+          
+          return NextResponse.json({
+            response,
+            sessionId: chatSessionId,
+            mode: 'chat',
+            modelUsed: modelId || CONFIG.BEDROCK_MODEL_ID,
+            fallbackReason: 'Agent not configured'
+          })
+        } catch (fallbackError: any) {
+          return NextResponse.json({ 
+            error: 'Bedrock Agent not configured and chat fallback failed',
+            details: 'BEDROCK_AGENT_ID or BEDROCK_AGENT_ALIAS_ID is missing',
+            fallbackError: fallbackError.message
+          }, { status: 500 })
+        }
       }
 
       // Debug logging to track what we're actually using
@@ -391,12 +416,34 @@ export async function POST(request: NextRequest) {
     log.error(`API error: ${error.message}`)
     
     // Handle specific error types
-    if (error.name === 'ResourceNotFoundException') {
-      return NextResponse.json({ 
-        error: 'Agent not found',
-        details: 'The specified Bedrock Agent does not exist. Please check the agent ID and ensure it has been created.',
-        agentId: currentAgentId || 'unknown' 
-      }, { status: 404 })
+    if (error.name === 'ResourceNotFoundException' || error.$fault === 'client') {
+      log.warning(`Agent ${currentAgentId} not found, falling back to chat mode`)
+      
+      // Fallback to chat mode when agent doesn't exist
+      try {
+        const bedrockClient = new BedrockClientDirect(
+          CONFIG.BEDROCK_MODEL_ID,
+          "You are Aria, a helpful AI assistant for musicians and music industry professionals. Be friendly, knowledgeable, and supportive."
+        )
+        
+        const response = await bedrockClient.generateResponse(message)
+        
+        return NextResponse.json({
+          response,
+          sessionId: sessionId || `${userId}-${Date.now()}`,
+          mode: 'chat',
+          modelUsed: CONFIG.BEDROCK_MODEL_ID,
+          fallbackReason: 'Agent not found',
+          originalError: error.message
+        })
+      } catch (fallbackError: any) {
+        return NextResponse.json({ 
+          error: 'Agent not found and chat fallback failed',
+          details: 'The specified Bedrock Agent does not exist and fallback to chat mode failed.',
+          agentId: currentAgentId || 'unknown',
+          fallbackError: fallbackError.message
+        }, { status: 404 })
+      }
     }
     
     if (error.name === 'AccessDeniedException' || error.name === 'DependencyFailedException') {

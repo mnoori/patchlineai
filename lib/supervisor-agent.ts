@@ -282,8 +282,14 @@ export class SupervisorAgent {
           })
           
           // Handle specific AWS errors
-          if (error instanceof Error && (error.name === 'DependencyFailedException' || (error as any).$fault === 'client')) {
+          if (error instanceof Error && (error.name === 'DependencyFailedException' || error.name === 'ResourceNotFoundException' || (error as any).$fault === 'client')) {
             console.error('AWS Agent dependency error:', error)
+            
+            // For Gmail-specific queries, provide a helpful response
+            if (error.message.includes("doesn't exist")) {
+              return 'I apologize, but the Gmail agent is not properly configured. To search your emails, please ensure:\n\n1. You have connected your Gmail account in Settings\n2. The Gmail integration is properly authorized\n\nFor now, I can help you with general email-related questions or other tasks.'
+            }
+            
             return 'The Gmail agent is temporarily unavailable. Please try again in a moment.'
           }
           
@@ -383,8 +389,14 @@ export class SupervisorAgent {
           })
           
           // Handle specific AWS errors
-          if (error instanceof Error && (error.name === 'DependencyFailedException' || (error as any).$fault === 'client')) {
+          if (error instanceof Error && (error.name === 'DependencyFailedException' || error.name === 'ResourceNotFoundException' || (error as any).$fault === 'client')) {
             console.error('AWS Agent dependency error:', error)
+            
+            // For Legal-specific queries, provide a helpful response
+            if (error.message.includes("doesn't exist")) {
+              return 'I apologize, but the Legal agent is not properly configured. I can still provide general guidance on contracts and legal matters, but for detailed analysis, the specialized Legal agent needs to be set up.'
+            }
+            
             return 'The Legal agent is temporarily unavailable. Please try again in a moment.'
           }
           
@@ -647,6 +659,23 @@ ${gmailResponse}`
       });
 
       const supervisorResponse = await this.invokeSupervisorAgent(userInput, sessionId);
+      
+      // Check if we need to use fallback routing
+      if (supervisorResponse === 'FALLBACK_TO_DIRECT_ROUTING') {
+        // Use a simple response for complex queries when supervisor is not available
+        const fallbackResponse = `I understand you're asking about "${userInput}". While I don't have access to all specialized agents at the moment, I can still help you with general questions about:
+
+• Email management and communication
+• Contract and legal document guidance
+• Music industry best practices
+• General business advice
+
+Please let me know how I can assist you, or try asking a more specific question.`;
+        
+        this.memory.userSupervisorMemory.push({ role: 'assistant', content: fallbackResponse });
+        return fallbackResponse;
+      }
+      
       this.memory.userSupervisorMemory.push({ role: 'assistant', content: supervisorResponse });
       return supervisorResponse;
 
@@ -663,27 +692,43 @@ ${gmailResponse}`
   }
   
   protected async invokeSupervisorAgent(userInput: string, sessionId: string): Promise<string> {
-    const command = new InvokeAgentCommand({
-      agentId: SUPERVISOR_AGENT.agentId,
-      agentAliasId: SUPERVISOR_AGENT.agentAliasId,
-      sessionId: sessionId,
-      inputText: userInput,
-    });
-  
-    const response = await agentRuntime.send(command);
-    let agentResponse = '';
-  
-    if (response.completion) {
-      for await (const chunk of response.completion) {
-        if (chunk.chunk?.bytes) {
-          agentResponse += new TextDecoder().decode(chunk.chunk.bytes);
+    try {
+      const command = new InvokeAgentCommand({
+        agentId: SUPERVISOR_AGENT.agentId,
+        agentAliasId: SUPERVISOR_AGENT.agentAliasId,
+        sessionId: sessionId,
+        inputText: userInput,
+      });
+    
+      const response = await agentRuntime.send(command);
+      let agentResponse = '';
+    
+      if (response.completion) {
+        for await (const chunk of response.completion) {
+          if (chunk.chunk?.bytes) {
+            agentResponse += new TextDecoder().decode(chunk.chunk.bytes);
+          }
         }
+      } else {
+        throw new Error('No response completion stream from Supervisor agent');
       }
-    } else {
-      throw new Error('No response completion stream from Supervisor agent');
+    
+      return agentResponse;
+    } catch (error: any) {
+      // If supervisor agent doesn't exist, use direct routing logic
+      if (error.name === 'ResourceNotFoundException' || error.$fault === 'client') {
+        this.addTrace({
+          timestamp: new Date().toISOString(),
+          action: 'Supervisor Agent not found - using fallback routing',
+          status: 'info',
+          details: 'Using built-in routing logic'
+        });
+        
+        // Return a response indicating we'll use direct routing
+        return 'FALLBACK_TO_DIRECT_ROUTING';
+      }
+      throw error;
     }
-  
-    return agentResponse;
   }
 
   // --------------------- Helper methods ---------------------
