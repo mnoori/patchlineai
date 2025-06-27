@@ -56,4 +56,6 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

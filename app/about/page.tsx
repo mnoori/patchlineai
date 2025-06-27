@@ -32,7 +32,7 @@ export default function AboutPage() {
       <main className="flex-1 pt-16">
         {/* Our Story Section - Hero with DEFAULT gradient */}
         <section className="relative py-16 pb-8 bg-gradient-to-b from-background via-background to-background overflow-hidden">
-          <GradientOrbs variant="outline" />
+          <GradientOrbs />
           <div className="container relative z-10">
             <div className="max-w-4xl mx-auto">
               <h2 className={`${headingStyles.h2} mb-8 text-center`}>Our Story</h2>

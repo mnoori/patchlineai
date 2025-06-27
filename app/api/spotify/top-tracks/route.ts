@@ -107,4 +107,6 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching Spotify tracks", err)
     return NextResponse.json({ error: "Server error" }, { status: 500 })
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

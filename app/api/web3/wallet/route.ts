@@ -147,4 +147,6 @@ function isValidSolanaAddress(address: string): boolean {
   } catch {
     return false
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

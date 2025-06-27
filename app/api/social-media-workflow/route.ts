@@ -174,4 +174,6 @@ export async function GET() {
       'process_workflow - Process complete workflow'
     ]
   })
-} 
+}
+
+export const dynamic = 'force-dynamic'

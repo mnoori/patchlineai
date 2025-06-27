@@ -418,7 +418,8 @@ export function MarketplaceEnhanced() {
 
             <Button
               className="w-full mt-4 bg-cyan-500 hover:bg-cyan-600 text-black font-medium"
-              onClick={() = variant="outline"> handleOpenAgentDetails(agent)}
+              variant="outline"
+              onClick={() => handleOpenAgentDetails(agent)}
               disabled={agent.status === "coming-soon"}
             >
               {agent.status === "coming-soon" ? (
@@ -575,7 +576,8 @@ export function MarketplaceEnhanced() {
               <div className="flex gap-4 mt-4">
                 <Button
                   className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-black font-medium"
-                  onClick={() = variant="outline"> console.log("Access Developer Portal")}
+                  variant="outline"
+                  onClick={() => console.log("Access Developer Portal")}
                 >
                   <Code className="mr-2 h-4 w-4" /> Access Developer Portal
                 </Button>
@@ -774,7 +776,8 @@ export function MarketplaceEnhanced() {
                 {selectedAgent.status === "coming-soon" ? (
                   <Button
                     className="w-full bg-[#1f1f2f] hover:bg-[#2a2a3a]"
-                    onClick={() = variant="outline"> {
+                    variant="outline"
+                    onClick={() => {
                       console.log(`Join waitlist for ${selectedAgent.name}`)
                       setIsDialogOpen(false)
                     }}
@@ -784,7 +787,8 @@ export function MarketplaceEnhanced() {
                 ) : (
                   <Button
                     className="w-full bg-cyan-500 hover:bg-cyan-600 text-black font-medium"
-                    onClick={() = variant="outline"> {
+                    variant="outline"
+                    onClick={() => {
                       console.log(`Add ${selectedAgent.name} to workspace`)
                       setIsDialogOpen(false)
                     }}

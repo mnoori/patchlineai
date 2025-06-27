@@ -1049,7 +1049,8 @@ export default function GodModePage() {
                       <Button
                         className="flex-1 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-bold"
                         disabled={!selectedDocumentType}
-                        onClick={() = variant="outline"> {
+                        variant="outline"
+                        onClick={() => {
                           setShowUploadConfig(false)
                           handleFileUpload(pendingFiles)
                           setPendingFiles([])
@@ -1134,7 +1135,8 @@ export default function GodModePage() {
                       </Button>
                       <Button
                         className="flex-1 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-bold"
-                        onClick={() = variant="outline"> handleDuplicateReprocess(true)}
+                        variant="outline"
+                        onClick={() => handleDuplicateReprocess(true)}
                       >
                         Replace & Reprocess
                       </Button>
@@ -1180,7 +1182,8 @@ export default function GodModePage() {
                       </p>
                     </div>
                     <Button 
-                      onClick={() = variant="outline"> fileInputRef.current?.click()}
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
                       className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-bold"
                     >
                       <Plus className="h-4 w-4 mr-2" />

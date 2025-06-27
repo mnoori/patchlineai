@@ -82,4 +82,6 @@ export async function GET(request: NextRequest) {
       new URL(`/dashboard/content?error=${encodeURIComponent('authentication_failed')}`, request.url)
     )
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

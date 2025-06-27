@@ -438,4 +438,6 @@ async function generateTaxPackage(expenses: any[], userId: string) {
       businessTypes: [...new Set(expenses.map(exp => exp.businessType))]
     }
   })
-} 
+}
+
+export const dynamic = 'force-dynamic'

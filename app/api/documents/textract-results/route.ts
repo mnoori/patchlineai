@@ -295,4 +295,6 @@ function processRawTextractData(rawData: any) {
       averageConfidence: avgConfidence
     }
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

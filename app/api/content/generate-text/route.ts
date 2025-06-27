@@ -103,4 +103,6 @@ Create a compelling caption that will drive engagement and resonate with the tar
       error: 'Using fallback caption'
     })
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

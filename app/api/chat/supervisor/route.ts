@@ -243,4 +243,6 @@ export async function DELETE(request: NextRequest) {
   }
   
   return NextResponse.json({ success: false, message: 'Session not found' })
-} 
+}
+
+export const dynamic = 'force-dynamic'

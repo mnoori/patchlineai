@@ -280,4 +280,6 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

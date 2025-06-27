@@ -108,4 +108,6 @@ function getRelevantSnippet(query: string, index: number): string {
   ]
   
   return snippets[index % snippets.length]
-} 
+}
+
+export const dynamic = 'force-dynamic'

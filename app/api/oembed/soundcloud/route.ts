@@ -21,3 +21,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unable to fetch SoundCloud info" }, { status: 500 })
   }
 }
+
+export const dynamic = 'force-dynamic'

@@ -16,3 +16,5 @@ export async function GET() {
 
   return NextResponse.json({ url: authUrl })
 }
+
+export const dynamic = 'force-dynamic'

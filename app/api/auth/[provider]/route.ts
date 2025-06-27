@@ -182,4 +182,6 @@ function buildAuthUrl(
   }
   
   return `${config.authorize}?${params.toString()}`
-} 
+}
+
+export const dynamic = 'force-dynamic'

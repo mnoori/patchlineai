@@ -143,4 +143,6 @@ function guessCategory(text: string): string {
   if (lower.includes('hotel') || lower.includes('inn')) return 'travel'
   if (lower.includes('restaurant') || lower.includes('dining')) return 'meals'
   return 'uncategorized'
-} 
+}
+
+export const dynamic = 'force-dynamic'

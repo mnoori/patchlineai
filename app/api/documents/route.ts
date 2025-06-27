@@ -296,4 +296,6 @@ function determineBusinessType(filename: string): string | null {
   }
 
   return null
-} 
+}
+
+export const dynamic = 'force-dynamic'

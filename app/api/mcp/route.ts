@@ -198,4 +198,6 @@ async function handleDisconnect(params: {
       { status: 500 }
     )
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

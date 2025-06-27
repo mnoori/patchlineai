@@ -156,4 +156,6 @@ function getTransactionIndicators(bankType: string): string[] {
   }
 
   return [...baseIndicators, ...(bankSpecific[bankType] || [])]
-} 
+}
+
+export const dynamic = 'force-dynamic'

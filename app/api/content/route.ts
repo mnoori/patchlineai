@@ -241,3 +241,5 @@ export async function PUT(req: Request) {
     );
   }
 }
+
+export const dynamic = 'force-dynamic'

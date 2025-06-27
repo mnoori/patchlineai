@@ -559,4 +559,6 @@ async function updateDocumentInDynamoDB(documentId: string, data: any): Promise<
     logger.error('Failed to update document in DynamoDB', error)
     throw error
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

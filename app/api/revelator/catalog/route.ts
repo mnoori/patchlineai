@@ -136,4 +136,6 @@ function getMockPlaylists() {
       refreshRate: "Weekly",
     }
   ]
-} 
+}
+
+export const dynamic = 'force-dynamic'

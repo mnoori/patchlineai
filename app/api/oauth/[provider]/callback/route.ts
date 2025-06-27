@@ -229,4 +229,6 @@ async function storeTokens(userId: string, provider: string, tokens: any) {
     TableName: PLATFORM_CONNECTIONS_TABLE,
     Item: item,
   }))
-} 
+}
+
+export const dynamic = 'force-dynamic'

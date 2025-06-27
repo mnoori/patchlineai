@@ -44,4 +44,6 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json(envStatus)
-} 
+}
+
+export const dynamic = 'force-dynamic'

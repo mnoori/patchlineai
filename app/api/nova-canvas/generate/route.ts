@@ -125,4 +125,6 @@ function generateMockImage(prompt: string, options: any): string {
   // Convert SVG to base64
   const base64 = Buffer.from(mockSvg).toString('base64')
   return `data:image/svg+xml;base64,${base64}`
-} 
+}
+
+export const dynamic = 'force-dynamic'

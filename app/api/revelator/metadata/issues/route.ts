@@ -141,4 +141,6 @@ function getMockIssues() {
       category: 'Publisher'
     }
   ]
-} 
+}
+
+export const dynamic = 'force-dynamic'

@@ -183,4 +183,6 @@ export async function GET(request: NextRequest) {
     console.error("Error searching for artist:", err)
     return NextResponse.json({ error: "Server error" }, { status: 500 })
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

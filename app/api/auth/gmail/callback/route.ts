@@ -40,4 +40,6 @@ export async function GET(request: NextRequest) {
     console.error('Gmail callback error:', error);
     return NextResponse.redirect('/dashboard/settings?error=gmail_connection_failed');
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

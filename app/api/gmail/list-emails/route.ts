@@ -59,4 +59,6 @@ export async function GET(request: NextRequest) {
     console.error('Error listing Gmail emails:', error.message, error.response?.data);
     return NextResponse.json({ error: 'Failed to list emails' }, { status: 500 });
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

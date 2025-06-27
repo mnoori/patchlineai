@@ -309,7 +309,8 @@ export function TemplateLibrary() {
                 </Button>
                 <Button
                   className="bg-brand-cyan hover:bg-brand-cyan/90 text-black"
-                  onClick={() = variant="outline"> {
+                  variant="outline"
+                  onClick={() => {
                     const newTemplate = {
                       id: `new-${Date.now()}`,
                       name: "New Template",

@@ -58,4 +58,6 @@ export async function GET() {
       details: error
     }, { status: 500 })
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

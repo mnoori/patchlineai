@@ -351,7 +351,8 @@ export function ArtistDiscoveryGrid({
               <Button
                 size="sm"
                 className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
-                onClick={() = variant="outline"> {
+                variant="outline"
+                onClick={() => {
                   if (selectedArtist) {
                     handlePitchToPlaylists(selectedArtist)
                     setShowWaveform(false)

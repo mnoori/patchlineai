@@ -95,4 +95,6 @@ export async function POST(request: NextRequest) {
     console.error("Error storing artist profile:", err)
     return NextResponse.json({ error: "Server error" }, { status: 500 })
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

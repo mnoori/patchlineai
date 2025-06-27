@@ -34,4 +34,6 @@ export async function GET(request: NextRequest) {
     console.error('Error generating Gmail auth URL:', error);
     return NextResponse.json({ error: 'Failed to initiate Gmail connection' }, { status: 500 });
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

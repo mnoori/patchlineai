@@ -52,4 +52,6 @@ export async function GET(request: NextRequest) {
     console.error('Error listing Gmail drafts:', error.message, error.response?.data);
     return NextResponse.json({ error: 'Failed to list drafts' }, { status: 500 });
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

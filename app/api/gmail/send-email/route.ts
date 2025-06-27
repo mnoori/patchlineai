@@ -69,4 +69,6 @@ export async function POST(request: NextRequest) {
     console.error('Error sending Gmail email:', error.message, error.response?.data);
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

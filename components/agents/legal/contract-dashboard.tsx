@@ -234,7 +234,9 @@ export function ContractDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <BrandCard
           className={`glass-effect cursor-pointer transition-all duration-200 ${viewMode === "all" ? "border-brand-cyan" : ""}`}
-          onClick={() = variant="gradient" hover="glow"> setViewMode("all")}
+          variant="gradient"
+          hover="glow"
+          onClick={() => setViewMode("all")}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -247,7 +249,9 @@ export function ContractDashboard() {
 
         <BrandCard
           className={`glass-effect cursor-pointer transition-all duration-200 ${viewMode === "at-risk" ? "border-red-500" : ""}`}
-          onClick={() = variant="gradient" hover="glow"> setViewMode("at-risk")}
+          variant="gradient"
+          hover="glow"
+          onClick={() => setViewMode("at-risk")}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -260,7 +264,9 @@ export function ContractDashboard() {
 
         <BrandCard
           className={`glass-effect cursor-pointer transition-all duration-200 ${viewMode === "review" ? "border-amber-500" : ""}`}
-          onClick={() = variant="gradient" hover="glow"> setViewMode("review")}
+          variant="gradient"
+          hover="glow"
+          onClick={() => setViewMode("review")}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -273,7 +279,9 @@ export function ContractDashboard() {
 
         <BrandCard
           className={`glass-effect cursor-pointer transition-all duration-200 ${viewMode === "healthy" ? "border-green-500" : ""}`}
-          onClick={() = variant="gradient" hover="glow"> setViewMode("healthy")}
+          variant="gradient"
+          hover="glow"
+          onClick={() => setViewMode("healthy")}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -506,7 +514,8 @@ export function ContractDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Button
                     className="bg-brand-cyan hover:bg-brand-cyan/90 text-black"
-                    onClick={() = variant="outline"> handleDraftRenewal(selectedContract.id)}
+                    variant="outline"
+                    onClick={() => handleDraftRenewal(selectedContract.id)}
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     Draft Renewal

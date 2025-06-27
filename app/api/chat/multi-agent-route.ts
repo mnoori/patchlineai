@@ -258,4 +258,6 @@ To proceed with a legal analysis, please:
       details: error.message 
     }, { status: 500 })
   }
-} 
+}
+
+export const dynamic = 'force-dynamic' 

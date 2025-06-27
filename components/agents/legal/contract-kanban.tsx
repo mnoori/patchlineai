@@ -378,7 +378,8 @@ export function ContractKanban() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Button
                     className="bg-magenta-600 hover:bg-magenta-700 text-white"
-                    onClick={() = variant="outline"> handleDraftRenewal(selectedContract.id)}
+                    variant="outline"
+                    onClick={() => handleDraftRenewal(selectedContract.id)}
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     Draft Renewal

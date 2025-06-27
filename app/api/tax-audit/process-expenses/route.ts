@@ -1483,4 +1483,6 @@ function determineProofType(documentType: string): string {
   }
   
   return proofTypeMap[documentType] || 'Other Document'
-} 
+}
+
+export const dynamic = 'force-dynamic'

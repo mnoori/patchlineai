@@ -56,4 +56,6 @@ export async function POST(request: NextRequest) {
     console.error('Error creating Gmail draft:', error.message, error.response?.data);
     return NextResponse.json({ error: 'Failed to create draft' }, { status: 500 });
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

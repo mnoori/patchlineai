@@ -119,4 +119,6 @@ function getContentType(filename: string): string {
     default:
       return 'application/octet-stream'
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'

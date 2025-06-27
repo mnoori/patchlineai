@@ -159,4 +159,6 @@ async function compositeImages(subject: string, background: string, style: strin
   }
   
   return variations
-} 
+}
+
+export const dynamic = 'force-dynamic'
