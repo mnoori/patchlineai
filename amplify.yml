@@ -6,7 +6,7 @@ frontend:
         # Install dependencies
         - npm install -g pnpm
         # Install only production dependencies to cut memory usage
-        - pnpm install --prod --frozen-lockfile
+        - pnpm install --prod
         
         # Set production debug mode for zero-overhead logging
         - echo "Setting production debug mode for zero-overhead logging"

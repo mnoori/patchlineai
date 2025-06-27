@@ -30,11 +30,76 @@ export default function AboutPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 pt-16">
-        {/* Our Story Section - Hero with DEFAULT gradient */}
+        {/* Combined Hero Section - Story + Founder */}
         <section className="relative py-16 pb-8 bg-gradient-to-b from-background via-background to-background overflow-hidden">
           <GradientOrbs />
           <div className="container relative z-10">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
+              {/* Founder intro at the top */}
+              <div className="text-center mb-12">
+                <h1 className={`${headingStyles.h1} mb-4`}>About Patchline AI</h1>
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                  Building the future of music business with AI-powered infrastructure
+                </p>
+              </div>
+
+              {/* Founder section - now prominent and above the fold */}
+              <Card variant="gradient" className="p-8 backdrop-blur-sm mb-12">
+                <h2 className={`${headingStyles.h2} mb-8 text-center`}>Meet Our Founder</h2>
+                <div className="flex flex-col md:flex-row gap-8 items-center">
+                  <div className="md:w-1/3 flex flex-col items-center">
+                    <div className="w-56 h-56 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-brand-cyan shadow-2xl">
+                      <Image
+                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Headshot.jpg-omMnc2assOnpd8GCYZ1kxj2KMiNibK.jpeg"
+                        alt="Dr. Mehdi Noori, Founder of Patchline AI"
+                        width={256}
+                        height={256}
+                        className="object-cover w-full h-full"
+                        priority
+                      />
+                    </div>
+                    <div className="flex justify-center mt-4 space-x-4">
+                      <Link
+                        href="https://www.linkedin.com/in/mehdi-noori/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-brand-cyan/20 p-3 rounded-full hover:bg-brand-cyan/30 transition-colors"
+                      >
+                        <Linkedin className="h-5 w-5 text-brand-cyan" />
+                      </Link>
+                      <Link
+                        href="https://www.instagram.com/algoryxmusic/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-brand-cyan/20 p-3 rounded-full hover:bg-brand-cyan/30 transition-colors"
+                      >
+                        <Instagram className="h-5 w-5 text-brand-cyan" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="md:w-2/3">
+                    <div className="space-y-4 text-base text-muted-foreground">
+                      <p>
+                        Dr. Mehdi Noori is a rare hybrid of AI scientist and music industry insider. With a Ph.D. in
+                        engineering, a postdoc at MIT, and 15+ years leading AI innovation at firms like AWS and Nielsen,
+                        he's built scalable GenAI systems used by Fortune 500s across healthcare, finance, and media.
+                      </p>
+                      <p>
+                        But he's also a trained music producer and DJ (ALGORYX). Formally educated at Point Blank, Sound
+                        Collective, and Cosmic Academy, and deeply embedded in the creative scene. That dual fluency gives
+                        him a unique edge: he's lived the pain points Patchline solves.
+                      </p>
+                      <p>
+                        Before founding Patchline, Mehdi led the Algoryx Art & Tech Lab, where he prototyped AI-native tools
+                        for creative workflows. Now, he's applying that experience to reimagine how music teams work: with
+                        agentic infrastructure that blends deep technical rigor with human-centered design.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Our Story - now secondary */}
               <h2 className={`${headingStyles.h2} mb-8 text-center`}>Our Story</h2>
               <Card variant="gradient" className="p-8 backdrop-blur-sm">
                 <div className="space-y-4 text-base text-muted-foreground">
@@ -61,66 +126,6 @@ export default function AboutPage() {
                 </div>
               </Card>
             </div>
-          </div>
-        </section>
-
-        {/* Founder Section - RIGHT EDGE */}
-        <section className="relative pt-4 pb-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
-          <GradientOrbs variant="edge-right" className="opacity-25" />
-          <div className="container relative z-10">
-            <h2 className={`${headingStyles.h2} mb-12 text-center`}>Meet Our Founder</h2>
-            <Card variant="gradient" className="max-w-5xl mx-auto p-8 backdrop-blur-sm">
-              <div className="flex flex-col md:flex-row gap-8">
-                <div className="md:w-1/3 flex flex-col items-center">
-                  <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-brand-cyan">
-                    <Image
-                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Headshot.jpg-omMnc2assOnpd8GCYZ1kxj2KMiNibK.jpeg"
-                      alt="Dr. Mehdi Noori, Founder of Patchline AI"
-                      width={256}
-                      height={256}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                  <div className="flex justify-center mt-4 space-x-4">
-                    <Link
-                      href="https://www.linkedin.com/in/mehdi-noori/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-brand-cyan/20 p-3 rounded-full hover:bg-brand-cyan/30 transition-colors"
-                    >
-                      <Linkedin className="h-5 w-5 text-brand-cyan" />
-                    </Link>
-                    <Link
-                      href="https://www.instagram.com/algoryxmusic/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-brand-cyan/20 p-3 rounded-full hover:bg-brand-cyan/30 transition-colors"
-                    >
-                      <Instagram className="h-5 w-5 text-brand-cyan" />
-                    </Link>
-                  </div>
-                </div>
-                <div className="md:w-2/3">
-                  <div className="space-y-4 text-base text-muted-foreground">
-                    <p>
-                      Dr. Mehdi Noori is a rare hybrid of AI scientist and music industry insider. With a Ph.D. in
-                      engineering, a postdoc at MIT, and 15+ years leading AI innovation at firms like AWS and Nielsen,
-                      he's built scalable GenAI systems used by Fortune 500s across healthcare, finance, and media.
-                    </p>
-                    <p>
-                      But he's also a trained music producer and DJ (ALGORYX). Formally educated at Point Blank, Sound
-                      Collective, and Cosmic Academy, and deeply embedded in the creative scene. That dual fluency gives
-                      him a unique edge: he's lived the pain points Patchline solves.
-                    </p>
-                    <p>
-                      Before founding Patchline, Mehdi led the Algoryx Art & Tech Lab, where he prototyped AI-native tools
-                      for creative workflows. Now, he's applying that experience to reimagine how music teams work: with
-                      agentic infrastructure that blends deep technical rigor with human-centered design.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </Card>
           </div>
         </section>
 

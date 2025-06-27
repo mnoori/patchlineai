@@ -38,8 +38,8 @@ export default function Home() {
               {/* Feature Cards */}
               <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-20">
                 {[
-                  { title: "Intelligent Orchestration", description: "Smart dashboards for record labels" },
-                  { title: "Future of Label OS", description: "Specialized tools for royalties, metadata, and marketing" },
+                  { title: "Intelligent Orchestration", description: "Context aware workflows built for business of music" },
+                  { title: "Future of Label OS", description: "Specialized tools for release, metadata, and marketing" },
                   { title: "Autonomous Actions", description: "Post content, pitch to playlists, and engage fans automatically" },
                 ].map((feature, index) => (
                   <Card
