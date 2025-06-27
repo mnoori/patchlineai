@@ -5,7 +5,8 @@ frontend:
       commands:
         # Install dependencies
         - npm install -g pnpm
-        - pnpm install
+        # Install only production dependencies to cut memory usage
+        - pnpm install --prod --frozen-lockfile
         
         # Set production debug mode for zero-overhead logging
         - echo "Setting production debug mode for zero-overhead logging"
@@ -28,6 +29,9 @@ frontend:
         # Build the application
         - echo "Building Patchline AI Rebuilding AI Platform..."
         - pnpm run build
+        
+        # Prune global pnpm store to shrink cache upload size
+        - pnpm store prune
         
         # Verify build artifacts
         - echo "Build completed. Verifying artifacts..."
