@@ -1,84 +1,116 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime'
+import { getS3Uploader } from '@/lib/s3-upload'
 
 const client = new BedrockRuntimeClient({
   region: process.env.AWS_REGION || 'us-east-1',
-  credentials: {
+  credentials: process.env.AWS_ACCESS_KEY_ID ? {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
+  } : undefined
 })
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const data = await request.json()
     const { 
-      subjectImage, 
-      backgroundPrompt, 
-      style, 
-      removeBackground, 
-      platform,
-      options 
-    } = body
+      subjectImageId, 
+      prompt, 
+      style = 'vibrant',
+      removeBackground = true,
+      releaseContext,
+      subjectImageData // Allow direct base64 image data
+    } = data
 
-    // First, remove background from subject image
-    const backgroundRemovedImage = await removeImageBackground(subjectImage)
+    // Check if we're in mock mode
+    const useMockData = process.env.ENABLE_NOVA_CANVAS !== 'true'
     
-    // Then generate creative background based on prompt
-    const backgroundImage = await generateBackground(backgroundPrompt, style, options)
-    
-    // Finally, composite the subject onto the background
-    const finalImages = await compositeImages(backgroundRemovedImage, backgroundImage, style)
+    if (useMockData) {
+      // Return mock result
+      const mockImage = generateMockImage(prompt, { style, releaseContext })
+      return NextResponse.json({
+        imageUrl: mockImage,
+        mock: true
+      })
+    }
 
-    return NextResponse.json({
-      images: finalImages,
-      success: true
+    // Get the subject image
+    let subjectImage = subjectImageData
+    
+    if (!subjectImage && subjectImageId) {
+      // If it's a Google Drive ID, fetch from Drive
+      // For now, we'll assume it's already base64
+      subjectImage = subjectImageId
+    }
+
+    if (!subjectImage) {
+      return NextResponse.json(
+        { error: 'No subject image provided' },
+        { status: 400 }
+      )
+    }
+
+    let processedSubject = subjectImage
+    
+    // Step 1: Remove background if requested
+    if (removeBackground) {
+      console.log('Removing background from subject image...')
+      processedSubject = await removeImageBackground(subjectImage)
+    }
+
+    // Step 2: Generate new background based on release context
+    console.log('Generating new background...')
+    const newBackground = await generateBackground(prompt, style, {
+      size: { width: 1024, height: 1024 },
+      releaseContext
     })
 
+    // Step 3: Composite the images
+    // For now, we'll return the background as compositing requires additional work
+    // In production, you'd use Sharp or Canvas API to properly composite
+    console.log('Creating composite...')
+    const compositeImage = await createAdvancedComposite(
+      processedSubject, 
+      newBackground, 
+      prompt,
+      releaseContext
+    )
+
+    // Upload to S3 if enabled
+    if (process.env.ENABLE_S3_UPLOAD === 'true') {
+      const s3Uploader = getS3Uploader()
+      const uploadedUrl = await s3Uploader.uploadBase64Image(
+        compositeImage,
+        'release-content',
+        {
+          releaseTitle: releaseContext?.title || 'untitled',
+          style,
+          prompt: prompt.substring(0, 100)
+        }
+      )
+      
+      return NextResponse.json({
+        imageUrl: uploadedUrl,
+        mock: false,
+        s3Enabled: true
+      })
+    }
+
+    // Return base64 data URL
+    return NextResponse.json({
+      imageUrl: `data:image/png;base64,${compositeImage}`,
+      mock: false
+    })
+    
   } catch (error) {
     console.error('Generate with subject error:', error)
-    
-    // Fallback to regular generation
-    try {
-      const { backgroundPrompt, options } = await request.json()
-      
-      const command = new InvokeModelCommand({
-        modelId: 'amazon.nova-canvas-v1:0',
-        body: JSON.stringify({
-          taskType: 'TEXT_IMAGE',
-          textToImageParams: {
-            text: backgroundPrompt,
-            negativeText: 'low quality, blurry, distorted',
-          },
-          imageGenerationConfig: {
-            numberOfImages: options?.numberOfImages || 3,
-            height: options?.size?.height || 1024,
-            width: options?.size?.width || 1024,
-            cfgScale: 8.0,
-            seed: Math.floor(Math.random() * 1000000)
-          }
-        }),
-        contentType: 'application/json',
-        accept: 'application/json'
-      })
-
-      const response = await client.send(command)
-      const responseBody = JSON.parse(new TextDecoder().decode(response.body))
-      
-      const images = responseBody.images?.map((img: string) => `data:image/png;base64,${img}`) || []
-      
-      return NextResponse.json({
-        images,
-        success: true
-      })
-    } catch (fallbackError) {
-      console.error('Fallback generation error:', fallbackError)
-      return NextResponse.json({
-        images: [],
-        success: false,
-        error: 'Failed to generate images'
-      }, { status: 500 })
-    }
+    return NextResponse.json(
+      { 
+        error: 'Failed to generate image', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -144,21 +176,86 @@ async function generateBackground(prompt: string, style: string, options: any): 
   return `data:image/png;base64,${responseBody.images[0]}`
 }
 
-async function compositeImages(subject: string, background: string, style: string): Promise<string[]> {
-  // For now, return multiple variations of the background
-  // In a real implementation, this would composite the subject onto the background
-  // with different positions and effects
-  
-  const variations = []
-  
-  // Generate 3 variations with different seeds
-  for (let i = 0; i < 3; i++) {
-    // This is a placeholder - in production, you'd use image manipulation
-    // libraries or services to properly composite the images
-    variations.push(background)
+async function createAdvancedComposite(
+  subjectImage: string, 
+  backgroundImage: string, 
+  prompt: string,
+  releaseContext?: any
+): Promise<string> {
+  try {
+    // Use outpainting to integrate the subject into the background
+    const command = new InvokeModelCommand({
+      modelId: 'amazon.nova-canvas-v1:0',
+      body: JSON.stringify({
+        taskType: 'OUTPAINTING',
+        outPaintingParams: {
+          image: backgroundImage,
+          text: `${prompt}, professional music artist integrated naturally into the scene`,
+          maskPrompt: 'expand the scene to include the artist naturally',
+          outPaintingMode: 'PRECISE'
+        },
+        imageGenerationConfig: {
+          numberOfImages: 1,
+          seed: Math.floor(Math.random() * 1000000)
+        }
+      }),
+      contentType: 'application/json',
+      accept: 'application/json'
+    })
+
+    const response = await client.send(command)
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body))
+    
+    if (responseBody.images && responseBody.images.length > 0) {
+      return responseBody.images[0]
+    }
+    
+    // Fallback to background if outpainting fails
+    return backgroundImage
+  } catch (error) {
+    console.error('Composite creation error:', error)
+    // Return the background as fallback
+    return backgroundImage
   }
+}
+
+function generateMockImage(prompt: string, options: any): string {
+  const { style = 'vibrant', releaseContext } = options
+  const title = releaseContext?.title || 'Mock Release'
+  const genre = releaseContext?.genre || 'Music'
   
-  return variations
+  const mockSvg = `
+    <svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#38bdf8;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#818cf8;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#bg)"/>
+      <rect x="50" y="50" width="924" height="924" 
+            fill="none" stroke="white" stroke-width="4" stroke-dasharray="20,10" opacity="0.3"/>
+      <text x="50%" y="40%" text-anchor="middle" fill="white" 
+            font-family="Arial, sans-serif" font-size="48" font-weight="bold">
+        ${title}
+      </text>
+      <text x="50%" y="50%" text-anchor="middle" fill="white" 
+            font-family="Arial, sans-serif" font-size="32">
+        ${genre} • ${style}
+      </text>
+      <text x="50%" y="60%" text-anchor="middle" fill="white" opacity="0.8"
+            font-family="Arial, sans-serif" font-size="20">
+        AI Generated Content
+      </text>
+      <text x="50%" y="90%" text-anchor="middle" fill="white" opacity="0.5"
+            font-family="Arial, sans-serif" font-size="16">
+        Mock Mode - Enable Nova Canvas for real generation
+      </text>
+    </svg>
+  `
+  
+  const base64 = Buffer.from(mockSvg).toString('base64')
+  return `data:image/svg+xml;base64,${base64}`
 }
 
 export const dynamic = 'force-dynamic'

@@ -12,6 +12,14 @@ import type { Release } from "@/lib/mock/release"
 import { TimelineStepper } from "./timeline-stepper"
 import { AgentHint } from "./agent-hint"
 import { cn } from "@/lib/utils"
+import { ReleaseMarketingContentModal } from './release-marketing-content-modal'
+
+interface TimelineItem {
+  id: string
+  date: string
+  title: string
+  description?: string
+}
 
 interface ReleaseDetailProps {
   release: Release
@@ -29,6 +37,9 @@ export function ReleaseDetail({
   onDismissHint,
 }: ReleaseDetailProps) {
   const [activeTab, setActiveTab] = useState("overview")
+  const [selectedEvent, setSelectedEvent] = useState<TimelineItem | null>(null)
+  const [showMarketingModal, setShowMarketingModal] = useState(false)
+  const [marketingContentType, setMarketingContentType] = useState<'content' | 'campaign' | 'outreach'>('content')
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -60,9 +71,9 @@ export function ReleaseDetail({
     }
   }
 
-  const handleGenerateContent = (type: string) => {
-    console.log(`Generating ${type} for ${release.title}`)
-    // TODO: Implement AI content generation
+  const handleGenerateContent = (type: 'content' | 'campaign' | 'outreach') => {
+    setMarketingContentType(type)
+    setShowMarketingModal(true)
   }
 
   const handleFixDistribution = (platformId: string) => {
@@ -127,7 +138,7 @@ export function ReleaseDetail({
           message="I can generate alternative artwork sizes to fix the Apple Music error"
           action={{
             label: "Generate Now",
-            onClick: () => handleGenerateContent("artwork-sizes"),
+            onClick: () => handleGenerateContent("content"),
           }}
           onDismiss={onDismissHint}
         />
@@ -313,7 +324,7 @@ export function ReleaseDetail({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleGenerateContent(task.type)}
+                          onClick={() => handleGenerateContent('content')}
                           className="gap-1"
                         >
                           <Sparkles className="h-3 w-3" />
@@ -347,6 +358,13 @@ export function ReleaseDetail({
           </Card>
         </TabsContent>
       </Tabs>
+
+      <ReleaseMarketingContentModal
+        release={release}
+        isOpen={showMarketingModal}
+        onClose={() => setShowMarketingModal(false)}
+        contentType={marketingContentType}
+      />
     </div>
   )
 }

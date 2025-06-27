@@ -37,8 +37,16 @@ export function getGoogleAuthUrl(state?: string): string {
     throw new Error('Google Drive OAuth configuration not found')
   }
 
+  // Use the Gmail client ID which is already configured
+  const clientId = process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''
+  
+  if (!clientId) {
+    console.error('Google OAuth client ID not found. Please set NEXT_PUBLIC_GMAIL_CLIENT_ID or NEXT_PUBLIC_GOOGLE_CLIENT_ID')
+    throw new Error('Google OAuth client ID not configured')
+  }
+
   const params = new URLSearchParams({
-    client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+    client_id: clientId,
     redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/google/callback`,
     response_type: 'code',
     scope: config.scopes.join(' '),
@@ -56,6 +64,10 @@ export async function exchangeCodeForToken(code: string): Promise<GoogleTokenRes
     throw new Error('Google Drive OAuth configuration not found')
   }
 
+  // Server-side uses different env vars
+  const clientId = process.env.GMAIL_CLIENT_ID || process.env.GOOGLE_CLIENT_ID || ''
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET || ''
+
   const response = await fetch(config.tokenUrl, {
     method: 'POST',
     headers: {
@@ -63,8 +75,8 @@ export async function exchangeCodeForToken(code: string): Promise<GoogleTokenRes
     },
     body: new URLSearchParams({
       code,
-      client_id: process.env.GOOGLE_CLIENT_ID || '',
-      client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+      client_id: clientId,
+      client_secret: clientSecret,
       redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/auth/google/callback`,
       grant_type: 'authorization_code',
     }),
@@ -84,6 +96,10 @@ export async function refreshAccessToken(refreshToken: string): Promise<GoogleTo
     throw new Error('Google Drive OAuth configuration not found')
   }
 
+  // Server-side uses different env vars
+  const clientId = process.env.GMAIL_CLIENT_ID || process.env.GOOGLE_CLIENT_ID || ''
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET || ''
+
   const response = await fetch(config.tokenUrl, {
     method: 'POST',
     headers: {
@@ -91,8 +107,8 @@ export async function refreshAccessToken(refreshToken: string): Promise<GoogleTo
     },
     body: new URLSearchParams({
       refresh_token: refreshToken,
-      client_id: process.env.GOOGLE_CLIENT_ID || '',
-      client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+      client_id: clientId,
+      client_secret: clientSecret,
       grant_type: 'refresh_token',
     }),
   })
