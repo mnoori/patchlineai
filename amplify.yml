@@ -35,6 +35,13 @@ frontend:
         # Prune global pnpm store to shrink cache upload size
         - pnpm store prune
         
+        # Clean up unnecessary files before artifact upload
+        - echo "Cleaning up build artifacts..."
+        - rm -rf .next/cache/webpack
+        - find .next -name "*.map" -type f -delete
+        - find node_modules -name "*.md" -type f -delete
+        - find node_modules -name "*.ts" -type f -delete
+        
         # Verify build artifacts
         - echo "Build completed. Verifying artifacts..."
         - ls -la .next/
@@ -46,9 +53,7 @@ frontend:
       
   cache:
     paths:
-      - node_modules/**/*
       - .next/cache/**/*
-      - .pnpm-store/**/*
 
 # Environment variables that need to be set in Amplify Console
 # These are documented here for reference but must be configured in the Amplify Console
