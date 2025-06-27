@@ -571,9 +571,9 @@ export function EnhancedSocialMediaCreator({
                         <Card 
                           key={content.id}
                           className={cn(
-                            "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20 hover:border-cosmic-teal/50 group relative overflow-hidden will-change-transform",
-                            hoveredCard === content.id && "ring-2 ring-cosmic-teal/30",
-                            formState.selectedTemplate === content.title && "border-cosmic-teal border-2"
+                            "cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-brand-cyan/20 hover:border-brand-cyan/50 group relative overflow-hidden will-change-transform",
+                            hoveredCard === content.id && "ring-2 ring-brand-cyan/30",
+                            formState.selectedTemplate === content.title && "border-brand-cyan border-2"
                           )}
                           style={{ backfaceVisibility: 'hidden', perspective: '1000px' }}
                           onMouseEnter={() => setHoveredCard(content.id)}
@@ -597,10 +597,10 @@ export function EnhancedSocialMediaCreator({
                                 </div>
                               ))}
                             </div>
-                            <h4 className="font-semibold mb-1 group-hover:text-cosmic-teal transition-colors">{content.title}</h4>
+                            <h4 className="font-semibold mb-1 group-hover:text-brand-cyan transition-colors">{content.title}</h4>
                             <p className="text-sm text-muted-foreground mb-2">{content.subtitle}</p>
                             <p className="text-xs line-clamp-2">{content.preview}</p>
-                            <div className="flex items-center gap-2 mt-3 text-xs text-cosmic-teal opacity-0 group-hover:opacity-100 transition-opacity h-4">
+                            <div className="flex items-center gap-2 mt-3 text-xs text-brand-cyan opacity-0 group-hover:opacity-100 transition-opacity h-4">
                               <Sparkles className="h-3 w-3" />
                               <span>Click to use this content</span>
                             </div>
@@ -608,7 +608,7 @@ export function EnhancedSocialMediaCreator({
                           {/* Hover Overlay */}
                           <div
                             className={cn(
-                              "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300 pointer-events-none",
+                              "absolute inset-0 bg-gradient-to-r from-brand-cyan/5 to-transparent transition-opacity duration-300 pointer-events-none",
                               hoveredCard === content.id ? "opacity-100" : "opacity-0"
                             )}
                           />
@@ -756,7 +756,7 @@ export function EnhancedSocialMediaCreator({
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <Card 
-                      className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                      className="cursor-pointer transition-all hover:shadow-lg hover:border-brand-cyan/50 group"
                       onClick={() => {
                         setFormState(prev => ({ 
                           ...prev, 
@@ -776,7 +776,7 @@ export function EnhancedSocialMediaCreator({
                     </Card>
 
                     <Card 
-                      className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                      className="cursor-pointer transition-all hover:shadow-lg hover:border-brand-cyan/50 group"
                       onClick={() => {
                         setFormState(prev => ({ 
                           ...prev, 
@@ -796,7 +796,7 @@ export function EnhancedSocialMediaCreator({
                     </Card>
 
                     <Card 
-                      className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                      className="cursor-pointer transition-all hover:shadow-lg hover:border-brand-cyan/50 group"
                       onClick={() => {
                         setFormState(prev => ({ 
                           ...prev, 
@@ -816,7 +816,7 @@ export function EnhancedSocialMediaCreator({
                     </Card>
 
                     <Card 
-                      className="cursor-pointer transition-all hover:shadow-lg hover:border-cosmic-teal/50 group"
+                      className="cursor-pointer transition-all hover:shadow-lg hover:border-brand-cyan/50 group"
                       onClick={() => {
                         setFormState(prev => ({ 
                           ...prev, 
@@ -962,8 +962,8 @@ export function EnhancedSocialMediaCreator({
         <SheetContent className="sm:max-w-2xl overflow-y-auto bg-background/95 backdrop-blur-xl border-l border-border/50" style={{ position: 'fixed' }}>
           {/* Glassmorphism background overlay */}
           <div className="absolute inset-0 pointer-events-none bg-background/80 backdrop-blur-[2px] brightness-[0.96] -z-10" />
-          <SheetHeader className="border-b border-cosmic-teal/20 pb-4">
-            <SheetTitle className="text-cosmic-teal">AI Content Editor</SheetTitle>
+          <SheetHeader className="border-b border-brand-cyan/20 pb-4">
+            <SheetTitle className="text-brand-cyan">AI Content Editor</SheetTitle>
             <SheetDescription>
               Edit your image and caption with AI-powered tools
             </SheetDescription>
@@ -974,7 +974,7 @@ export function EnhancedSocialMediaCreator({
               {/* Image Section */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-cosmic-teal">IMAGE</h3>
+                  <h3 className="text-sm font-medium text-brand-cyan">IMAGE</h3>
                   {isGeneratingImage && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -992,7 +992,7 @@ export function EnhancedSocialMediaCreator({
                   {isGeneratingImage && (
                     <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
                       <div className="text-center space-y-2">
-                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-cosmic-teal" />
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-brand-cyan" />
                         <p className="text-sm text-muted-foreground">Applying AI edits...</p>
                       </div>
                     </div>
@@ -1050,7 +1050,7 @@ export function EnhancedSocialMediaCreator({
                   </div>
 
                   <Button
-                    className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                    className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                     onClick={() => handleApplyImageEdit()}
                     disabled={isGeneratingImage || !imageEditPrompt.trim()}
                   >
@@ -1069,12 +1069,12 @@ export function EnhancedSocialMediaCreator({
                 </div>
               </div>
 
-              <div className="border-t border-cosmic-teal/20" />
+              <div className="border-t border-brand-cyan/20" />
 
               {/* Caption Section */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-cosmic-teal">CAPTION</h3>
+                  <h3 className="text-sm font-medium text-brand-cyan">CAPTION</h3>
                   {isGeneratingText && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -1159,7 +1159,7 @@ export function EnhancedSocialMediaCreator({
                 </div>
               </div>
 
-              <div className="border-t border-cosmic-teal/20 pt-4">
+              <div className="border-t border-brand-cyan/20 pt-4">
                 <Button
                   className="w-full"
                   onClick={() => {

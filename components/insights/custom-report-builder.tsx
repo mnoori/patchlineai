@@ -1,8 +1,9 @@
 "use client"
 
 import type React from "react"
+import { Card as BrandCard } from '@/components/brand'
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -51,22 +52,22 @@ export function CustomReportBuilder({ availableModules, defaultActiveTab = "libr
   const getModuleIcon = (type: string) => {
     switch (type) {
       case "bar-chart":
-        return <BarChart className="h-5 w-5 text-cosmic-teal" />
+        return <BarChart className="h-5 w-5 text-brand-cyan" />
       case "line-chart":
-        return <LineChart className="h-5 w-5 text-cosmic-teal" />
+        return <LineChart className="h-5 w-5 text-brand-cyan" />
       case "pie-chart":
-        return <PieChart className="h-5 w-5 text-cosmic-teal" />
+        return <PieChart className="h-5 w-5 text-brand-cyan" />
       case "kpi":
-        return <FileText className="h-5 w-5 text-cosmic-teal" />
+        return <FileText className="h-5 w-5 text-brand-cyan" />
       case "table":
-        return <FileText className="h-5 w-5 text-cosmic-teal" />
+        return <FileText className="h-5 w-5 text-brand-cyan" />
       default:
-        return <Info className="h-5 w-5 text-cosmic-teal" />
+        return <Info className="h-5 w-5 text-brand-cyan" />
     }
   }
 
   return (
-    <Card className="glass-effect hover:border-cosmic-teal/30 hover:scale-[1.01] transition-all duration-300">
+    <BrandCard className="glass-effect hover:border-brand-cyan/30 hover:scale-[1.01] transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-2">
           <CardTitle className="text-lg font-medium">Custom Report Builder</CardTitle>
@@ -107,7 +108,7 @@ export function CustomReportBuilder({ availableModules, defaultActiveTab = "libr
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="border rounded-md p-3 hover:border-cosmic-teal/30 hover:scale-[1.02] transition-all duration-200"
+                    className="border rounded-md p-3 hover:border-brand-cyan/30 hover:scale-[1.02] transition-all duration-200"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -122,7 +123,7 @@ export function CustomReportBuilder({ availableModules, defaultActiveTab = "libr
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full hover:bg-cosmic-teal/10 hover:text-cosmic-teal transition-colors"
+                      className="w-full hover:bg-brand-cyan/10 hover:text-brand-cyan transition-colors"
                       onClick={() => addModule(module)}
                     >
                       <Plus className="h-3 w-3 mr-1" /> Add to Report
@@ -154,7 +155,7 @@ export function CustomReportBuilder({ availableModules, defaultActiveTab = "libr
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3 }}
-                        className="border rounded-md p-3 cursor-move hover:border-cosmic-teal/30 hover:scale-[1.02] transition-all duration-200"
+                        className="border rounded-md p-3 cursor-move hover:border-brand-cyan/30 hover:scale-[1.02] transition-all duration-200"
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -166,7 +167,7 @@ export function CustomReportBuilder({ availableModules, defaultActiveTab = "libr
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 hover:bg-cosmic-teal/10 hover:text-cosmic-teal"
+                              className="h-6 w-6 hover:bg-brand-cyan/10 hover:text-brand-cyan"
                             >
                               <Settings className="h-3 w-3" />
                             </Button>
@@ -199,6 +200,6 @@ export function CustomReportBuilder({ availableModules, defaultActiveTab = "libr
           </TabsContent>
         </Tabs>
       </CardContent>
-    </Card>
+    </BrandCard>
   )
 }

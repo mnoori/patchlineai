@@ -59,8 +59,8 @@ export function SupervisorTraces({ traces, isOpen, onClose }: SupervisorTracesPr
     return (
       <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-md border">
         <div className="flex items-center gap-2 mb-2">
-          <Mail className="h-4 w-4 text-cosmic-teal" />
-          <span className="text-sm font-medium text-cosmic-teal">Email Found</span>
+          <Mail className="h-4 w-4 text-brand-cyan" />
+          <span className="text-sm font-medium text-brand-cyan">Email Found</span>
         </div>
         <div className="space-y-1 text-xs">
           {emailData.subject && (
@@ -91,7 +91,7 @@ export function SupervisorTraces({ traces, isOpen, onClose }: SupervisorTracesPr
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-cosmic-teal" />
+            <Activity className="h-5 w-5 text-brand-cyan" />
             Supervisor Agent Orchestration Traces
           </DialogTitle>
           <DialogDescription>

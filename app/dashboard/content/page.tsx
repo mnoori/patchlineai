@@ -1,10 +1,10 @@
 "use client"
 
 import { ContentTypeSelector } from "../../../components/content/content-type-selector"
+import { Card, CardContent, CardHeader, CardDescription, CardTitle } from '@/components/brand'
 import { EnhancedContentIdeaCarousel } from "../../../components/content/enhanced-content-idea-carousel"
 import type { ContentType } from "@/lib/content-types"
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import { ContentPreview } from "../../../components/content-preview"
 import { ContentCreatorForm } from "../../../components/content-creator-form"
@@ -15,6 +15,7 @@ import { EnhancedSocialMediaCreator } from "../../../components/content/speciali
 import { SocialMediaCreator } from "../../../components/content/social-media-creator"
 import { ShortVideoCreatorForm } from "../../../components/content/specialized-forms/short-video-creator-form"
 import { MusicVideoCreatorForm } from "../../../components/content/specialized-forms/music-video-creator-form"
+import { Button } from "@/components/ui/button"
 
 // Helper function to get the image URL for a topic
 function getImageForTopic(topic: string): string | undefined {
@@ -159,7 +160,7 @@ export default function ContentPage() {
             )}
 
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">AI Content Studio</h1>
+              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">AI Content Studio</h1>
               <p className="text-muted-foreground">Create professional content with AI-powered assistance</p>
             </div>
           </div>

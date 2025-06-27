@@ -4,11 +4,12 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
+
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/logo"
 import { AuthButton } from "@/components/auth-button"
-import { Button } from "@/components/brand"
+
 import { AGENTS } from "@/config/agents"
 
 const navItems = [
@@ -100,3 +101,4 @@ export function Navbar() {
     </header>
   )
 }
+import { Button } from "@/components/brand"

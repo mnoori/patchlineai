@@ -136,7 +136,7 @@ export function ArtistPreferences({ onComplete, onSkip }: ArtistPreferencesProps
             className="space-y-6"
           >
             <div className="text-center space-y-2">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-cosmic-teal via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-brand-cyan via-purple-400 to-pink-400 bg-clip-text text-transparent">
                 What genres are you interested in?
               </h2>
               <p className="text-muted-foreground">Select all that apply to discover the best emerging talent</p>
@@ -157,18 +157,18 @@ export function ArtistPreferences({ onComplete, onSkip }: ArtistPreferencesProps
                       "relative p-4 rounded-xl border-2 transition-all duration-200",
                       "backdrop-blur-xl bg-black/20",
                       isSelected 
-                        ? "border-cosmic-teal bg-cosmic-teal/10 shadow-[0_0_20px_rgba(34,211,238,0.3)]" 
+                        ? "border-brand-cyan bg-brand-cyan/10 shadow-[0_0_20px_rgba(34,211,238,0.3)]" 
                         : "border-white/10 hover:border-white/20"
                     )}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Icon className={cn(
                         "h-6 w-6 transition-colors",
-                        isSelected ? "text-cosmic-teal" : "text-white/60"
+                        isSelected ? "text-brand-cyan" : "text-white/60"
                       )} />
                       <span className={cn(
                         "text-sm font-medium",
-                        isSelected ? "text-cosmic-teal" : "text-white/80"
+                        isSelected ? "text-brand-cyan" : "text-white/80"
                       )}>
                         {genre.label}
                       </span>
@@ -177,7 +177,7 @@ export function ArtistPreferences({ onComplete, onSkip }: ArtistPreferencesProps
                       <motion.div 
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-1 -right-1 bg-cosmic-teal rounded-full p-1"
+                        className="absolute -top-1 -right-1 bg-brand-cyan rounded-full p-1"
                       >
                         <Check className="h-3 w-3 text-black" />
                       </motion.div>
@@ -198,7 +198,7 @@ export function ArtistPreferences({ onComplete, onSkip }: ArtistPreferencesProps
               <Button
                 onClick={() => setStep(2)}
                 disabled={preferences.genres.length === 0}
-                className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black font-medium"
+                className="bg-brand-cyan hover:bg-brand-cyan/90 text-black font-medium"
               >
                 Next
                 <ChevronRight className="ml-2 h-4 w-4" />
@@ -216,7 +216,7 @@ export function ArtistPreferences({ onComplete, onSkip }: ArtistPreferencesProps
             className="space-y-6"
           >
             <div className="text-center space-y-2">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cosmic-teal bg-clip-text text-transparent">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-brand-cyan bg-clip-text text-transparent">
                 Which markets are you targeting?
               </h2>
               <p className="text-muted-foreground">We'll find artists with traction in these regions</p>
@@ -292,7 +292,7 @@ export function ArtistPreferences({ onComplete, onSkip }: ArtistPreferencesProps
             className="space-y-6"
           >
             <div className="text-center space-y-2">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-400 via-cosmic-teal to-purple-400 bg-clip-text text-transparent">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-400 via-brand-cyan to-purple-400 bg-clip-text text-transparent">
                 What career stage are you looking for?
               </h2>
               <p className="text-muted-foreground">Focus on artists at the right growth stage for your label</p>
@@ -359,7 +359,7 @@ export function ArtistPreferences({ onComplete, onSkip }: ArtistPreferencesProps
               <Button
                 onClick={handleComplete}
                 disabled={preferences.careerStage.length === 0}
-                className="bg-gradient-to-r from-pink-400 via-cosmic-teal to-purple-400 hover:opacity-90 text-black font-medium"
+                className="bg-gradient-to-r from-pink-400 via-brand-cyan to-purple-400 hover:opacity-90 text-black font-medium"
               >
                 Start Discovering Artists
                 <Sparkles className="ml-2 h-4 w-4" />
@@ -386,13 +386,13 @@ export function ArtistPreferences({ onComplete, onSkip }: ArtistPreferencesProps
                   <div className={cn(
                     "h-2 w-2 rounded-full transition-all duration-300",
                     i <= step 
-                      ? "bg-gradient-to-r from-cosmic-teal to-purple-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]" 
+                      ? "bg-gradient-to-r from-brand-cyan to-purple-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]" 
                       : "bg-white/20"
                   )} />
                   {i < 3 && (
                     <div className={cn(
                       "h-0.5 w-8 md:w-16 transition-all duration-300",
-                      i < step ? "bg-gradient-to-r from-cosmic-teal to-purple-400" : "bg-white/20"
+                      i < step ? "bg-gradient-to-r from-brand-cyan to-purple-400" : "bg-white/20"
                     )} />
                   )}
                 </div>

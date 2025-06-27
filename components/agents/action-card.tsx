@@ -2,8 +2,9 @@
 
 import type React from "react"
 
+import { Card as BrandCard } from '@/components/brand'
 import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Loader2, CheckCircle, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -55,9 +56,9 @@ export function ActionCard({ title, description, icon, actions, className, statu
   }
 
   return (
-    <Card
+    <BrandCard
       className={cn(
-        "glass-effect hover:border-cosmic-teal/30 transition-all duration-300",
+        "glass-effect hover:border-brand-cyan/30 transition-all duration-300",
         "hover:shadow-[0_8px_30px_rgb(0,240,255,0.1)]",
         cardStatus === "success" && "border-green-500/30",
         cardStatus === "error" && "border-red-500/30",
@@ -66,7 +67,7 @@ export function ActionCard({ title, description, icon, actions, className, statu
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className="rounded-full bg-cosmic-teal/10 p-2 mt-0.5">{icon}</div>
+          <div className="rounded-full bg-brand-cyan/10 p-2 mt-0.5">{icon}</div>
           <div className="flex-1">
             <div className="flex justify-between items-start">
               <div>
@@ -86,7 +87,7 @@ export function ActionCard({ title, description, icon, actions, className, statu
                   key={index}
                   variant={action.variant || (action.autoAction ? "default" : "outline")}
                   size="sm"
-                  className={cn("gap-1 h-8", action.autoAction && "bg-cosmic-teal hover:bg-cosmic-teal/90 text-black")}
+                  className={cn("gap-1 h-8", action.autoAction && "bg-brand-cyan hover:bg-brand-cyan/90 text-black")}
                   onClick={() => handleAction(action)}
                   disabled={cardStatus === "loading"}
                 >
@@ -104,6 +105,6 @@ export function ActionCard({ title, description, icon, actions, className, statu
           </div>
         </div>
       </CardContent>
-    </Card>
+    </BrandCard>
   )
 }

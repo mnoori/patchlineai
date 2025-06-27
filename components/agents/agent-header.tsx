@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Card } from '@/components/brand'
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ChevronDown, Zap } from "lucide-react"
@@ -30,7 +31,7 @@ export function AgentHeader({ agentName, title, description }: AgentHeaderProps)
   return (
     <div className="flex items-center justify-between mb-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight font-heading">{title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-heading bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">{title}</h1>
         <p className="text-muted-foreground">{description}</p>
       </div>
 
@@ -39,17 +40,17 @@ export function AgentHeader({ agentName, title, description }: AgentHeaderProps)
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className={`gap-2 ${isRunning ? "animate-pulse border-cosmic-teal" : ""}`}
+              className={`gap-2 ${isRunning ? "animate-pulse border-brand-cyan" : ""}`}
               disabled={isRunning}
             >
-              <Zap className={`h-4 w-4 ${isRunning ? "text-cosmic-teal animate-pulse" : ""}`} />
+              <Zap className={`h-4 w-4 ${isRunning ? "text-brand-cyan animate-pulse" : ""}`} />
               Run Agent
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem onClick={handleQuickAction} className="font-medium">
-              <Zap className="h-4 w-4 mr-2 text-cosmic-teal" />
+              <Zap className="h-4 w-4 mr-2 text-brand-cyan" />
               {agentActions.primary}
             </DropdownMenuItem>
             <div className="border-t my-1" />

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,7 +32,7 @@ export function AgentSettings({ agentType, onSave }: AgentSettingsProps) {
   }
 
   return (
-    <Card>
+    <BrandCard>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5" />
@@ -128,7 +129,7 @@ export function AgentSettings({ agentType, onSave }: AgentSettingsProps) {
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={handleSave} className="flex items-center gap-2">
+          <Button onClick={handleSave} className="flex items-center gap-2" variant="outline">
             <Save className="h-4 w-4" />
             Save Settings
           </Button>
@@ -138,6 +139,6 @@ export function AgentSettings({ agentType, onSave }: AgentSettingsProps) {
           </Button>
         </div>
       </CardContent>
-    </Card>
+    </BrandCard>
   )
 }

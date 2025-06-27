@@ -115,7 +115,7 @@ export function DashboardSidebar() {
                       className={cn(
                         "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
                         isActive
-                          ? "bg-cosmic-teal/10 text-cosmic-teal"
+                          ? "bg-brand-cyan/10 text-brand-cyan"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground",
                       )}
                     >
@@ -138,7 +138,7 @@ export function DashboardSidebar() {
                               className={cn(
                                 "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
                                 isSubActive
-                                  ? "bg-cosmic-teal/10 text-cosmic-teal"
+                                  ? "bg-brand-cyan/10 text-brand-cyan"
                                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
                               )}
                             >
@@ -156,7 +156,7 @@ export function DashboardSidebar() {
                     className={cn(
                       "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
                       isActive
-                        ? "bg-cosmic-teal/10 text-cosmic-teal"
+                        ? "bg-brand-cyan/10 text-brand-cyan"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground",
                     )}
                   >

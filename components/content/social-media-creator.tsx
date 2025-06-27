@@ -77,7 +77,7 @@ export function SocialMediaCreator() {
         return (
           <div className="py-8">
             <div className="text-center mb-8">
-              <ImageIcon className="w-16 h-16 mx-auto mb-4 text-cosmic-teal" />
+              <ImageIcon className="w-16 h-16 mx-auto mb-4 text-brand-cyan" />
               <h3 className="text-xl font-semibold mb-2">Select Your Photos</h3>
               <p className="text-muted-foreground">Choose 3 photos from your Google Drive folder</p>
             </div>
@@ -86,7 +86,7 @@ export function SocialMediaCreator() {
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
                   key={i}
-                  className="relative aspect-square rounded-lg border-2 border-muted hover:border-cosmic-teal/50 cursor-pointer transition-all hover:scale-105"
+                  className="relative aspect-square rounded-lg border-2 border-muted hover:border-brand-cyan/50 cursor-pointer transition-all hover:scale-105"
                 >
                   <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
                     <ImageIcon className="w-8 h-8 text-gray-400" />
@@ -151,7 +151,7 @@ export function SocialMediaCreator() {
       case 4:
         return (
           <div className="text-center py-12">
-            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-cosmic-teal to-purple-500 rounded-full flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-brand-cyan to-purple-500 rounded-full flex items-center justify-center">
               <Sparkles className={cn("w-10 h-10 text-white", isProcessing && "animate-pulse")} />
             </div>
             <h3 className="text-xl font-semibold mb-3">AI Content Processing</h3>
@@ -168,13 +168,13 @@ export function SocialMediaCreator() {
                   toast.success('Content processing complete!')
                   nextStep()
                 }, 3000)
-              }} className="bg-cosmic-teal hover:bg-cosmic-teal/80 text-black">
+              }} className="bg-brand-cyan hover:bg-brand-cyan/80 text-black">
                 <Sparkles className="w-4 h-4 mr-2" />
                 Start AI Processing
               </Button>
             ) : (
               <div className="space-y-4">
-                <Loader2 className="w-8 h-8 mx-auto animate-spin text-cosmic-teal" />
+                <Loader2 className="w-8 h-8 mx-auto animate-spin text-brand-cyan" />
                 <p className="text-sm text-muted-foreground">Processing your images...</p>
               </div>
             )}
@@ -195,7 +195,7 @@ export function SocialMediaCreator() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
               {[1, 2, 3].map((i) => (
                 <Card key={i} className="overflow-hidden">
-                  <div className="aspect-square bg-gradient-to-br from-cosmic-teal/20 to-purple-500/20 flex items-center justify-center">
+                  <div className="aspect-square bg-gradient-to-br from-brand-cyan/20 to-purple-500/20 flex items-center justify-center">
                     <ImageIcon className="w-16 h-16 text-muted-foreground" />
                   </div>
                   <CardContent className="p-4">
@@ -231,7 +231,7 @@ export function SocialMediaCreator() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-cosmic-teal" />
+                <Sparkles className="w-6 h-6 text-brand-cyan" />
                 Social Media Content Creator
               </CardTitle>
               <CardDescription>
@@ -266,7 +266,7 @@ export function SocialMediaCreator() {
                 <div className={cn(
                   "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200",
                   isCompleted && "bg-green-500 text-white",
-                  isCurrent && "bg-cosmic-teal text-black",
+                  isCurrent && "bg-brand-cyan text-black",
                   !isCompleted && !isCurrent && "bg-muted text-muted-foreground"
                 )}>
                   {isCompleted ? (

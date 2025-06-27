@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import {
@@ -904,7 +905,7 @@ export default function FanAgentPage() {
       case "idea":
         return "bg-purple-500/10 text-purple-500"
       default:
-        return "bg-gray-500/10 text-gray-500"
+        return "bg-gray-500/10 text-muted-foreground"
     }
   }
 
@@ -919,7 +920,7 @@ export default function FanAgentPage() {
       case "very high":
         return "bg-purple-500/10 text-purple-500"
       default:
-        return "bg-gray-500/10 text-gray-500"
+        return "bg-gray-500/10 text-muted-foreground"
     }
   }
 
@@ -932,7 +933,7 @@ export default function FanAgentPage() {
       case "low":
         return "bg-blue-500/10 text-blue-500"
       default:
-        return "bg-gray-500/10 text-gray-500"
+        return "bg-gray-500/10 text-muted-foreground"
     }
   }
 
@@ -1045,7 +1046,7 @@ export default function FanAgentPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight font-heading">Fan Agent</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-heading bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">Fan Agent</h1>
         <p className="text-muted-foreground">Optimize fan engagement and social media strategy</p>
       </div>
 
@@ -1092,7 +1093,7 @@ export default function FanAgentPage() {
         <TabsContent value="engagement">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {platformEngagements.map((platform) => (
-              <Card
+              <BrandCard
                 key={platform.id}
                 className="glass-effect transition-all duration-200 hover:shadow-md hover:-translate-y-1 cursor-pointer"
                 onClick={() => handleItemClick(platform, "platform")}
@@ -1103,7 +1104,7 @@ export default function FanAgentPage() {
                       {platform.icon}
                       <CardTitle>{platform.platform}</CardTitle>
                     </div>
-                    <Badge variant="outline" className="bg-cosmic-teal/10 text-cosmic-teal">
+                    <Badge variant="outline" className="bg-brand-cyan/10 text-brand-cyan">
                       {platform.metrics.engagement} Engagement
                     </Badge>
                   </div>
@@ -1148,7 +1149,7 @@ export default function FanAgentPage() {
                     ))}
 
                     {platform.recentActivity.length > 2 && (
-                      <div className="text-xs text-cosmic-teal font-medium">
+                      <div className="text-xs text-brand-cyan font-medium">
                         +{platform.recentActivity.length - 2} more activities
                       </div>
                     )}
@@ -1191,14 +1192,14 @@ export default function FanAgentPage() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </BrandCard>
             ))}
           </div>
         </TabsContent>
 
         <TabsContent value="fan-insights">
           <div className="grid gap-4 md:grid-cols-2">
-            <Card className="glass-effect">
+            <BrandCard className="glass-effect" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle>Audience Segments</CardTitle>
                 <CardDescription>Fan groups based on engagement patterns</CardDescription>
@@ -1224,7 +1225,7 @@ export default function FanAgentPage() {
                       <div className="flex justify-between items-center">
                         <div className="flex gap-1 flex-wrap">
                           {segment.platforms.map((platform, i) => (
-                            <span key={i} className="text-xs px-2 py-1 rounded-full bg-cosmic-teal/10 text-cosmic-teal">
+                            <span key={i} className="text-xs px-2 py-1 rounded-full bg-brand-cyan/10 text-brand-cyan">
                               {platform}
                             </span>
                           ))}
@@ -1237,9 +1238,9 @@ export default function FanAgentPage() {
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
 
-            <Card className="glass-effect">
+            <BrandCard className="glass-effect" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle>Campaigns</CardTitle>
                 <CardDescription>Coordinated content strategies</CardDescription>
@@ -1272,7 +1273,7 @@ export default function FanAgentPage() {
                     </div>
                   ))}
                   <Button
-                    className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                    className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                     onClick={() => {
                       console.log("Create new campaign")
                     }}
@@ -1281,12 +1282,12 @@ export default function FanAgentPage() {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
           </div>
         </TabsContent>
 
         <TabsContent value="content-calendar">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect" variant="gradient" hover="glow">
             <CardHeader>
               <CardTitle>Content Calendar</CardTitle>
               <CardDescription>Scheduled and published content</CardDescription>
@@ -1294,7 +1295,7 @@ export default function FanAgentPage() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-                  <Badge variant="outline" className="bg-cosmic-teal/10 text-cosmic-teal">
+                  <Badge variant="outline" className="bg-brand-cyan/10 text-brand-cyan">
                     All Platforms
                   </Badge>
                   <Badge variant="outline">Instagram</Badge>
@@ -1338,11 +1339,11 @@ export default function FanAgentPage() {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
 
         <TabsContent value="agent-settings">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect" variant="gradient" hover="glow">
             <CardHeader>
               <CardTitle>Agent Settings</CardTitle>
               <CardDescription>Configure your Fan Agent preferences</CardDescription>
@@ -1379,11 +1380,11 @@ export default function FanAgentPage() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Monitored Platforms</label>
                       <div className="flex flex-wrap gap-2">
-                        <Badge className="bg-cosmic-teal/10 text-cosmic-teal cursor-pointer">Instagram</Badge>
-                        <Badge className="bg-cosmic-teal/10 text-cosmic-teal cursor-pointer">TikTok</Badge>
-                        <Badge className="bg-cosmic-teal/10 text-cosmic-teal cursor-pointer">YouTube</Badge>
-                        <Badge className="bg-cosmic-teal/10 text-cosmic-teal cursor-pointer">Twitter</Badge>
-                        <Badge className="bg-cosmic-teal/10 text-cosmic-teal cursor-pointer">Facebook</Badge>
+                        <Badge className="bg-brand-cyan/10 text-brand-cyan cursor-pointer">Instagram</Badge>
+                        <Badge className="bg-brand-cyan/10 text-brand-cyan cursor-pointer">TikTok</Badge>
+                        <Badge className="bg-brand-cyan/10 text-brand-cyan cursor-pointer">YouTube</Badge>
+                        <Badge className="bg-brand-cyan/10 text-brand-cyan cursor-pointer">Twitter</Badge>
+                        <Badge className="bg-brand-cyan/10 text-brand-cyan cursor-pointer">Facebook</Badge>
                         <Badge variant="outline" className="cursor-pointer">
                           Spotify
                         </Badge>
@@ -1441,10 +1442,10 @@ export default function FanAgentPage() {
                   </div>
                 </div>
 
-                <Button className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">Save Settings</Button>
+                <Button className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">Save Settings</Button>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
       </Tabs>
 
@@ -1640,7 +1641,7 @@ export default function FanAgentPage() {
                           <Edit className="mr-2 h-4 w-4" /> Draft
                         </Button>
                         <Button
-                          className="h-8 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                          className="h-8 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                           size="sm"
                           onClick={() => {
                             console.log(`Take action: ${action.type}`)
@@ -1656,15 +1657,15 @@ export default function FanAgentPage() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg bg-cosmic-teal/10 border border-cosmic-teal/20">
+              <div className="p-4 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20">
                 <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-cosmic-teal" />
+                  <Sparkles className="h-4 w-4 text-brand-cyan" />
                   <span>AI Insights</span>
                 </h4>
                 <ul className="space-y-2">
                   {selectedItem.insights.map((insight, i) => (
                     <li key={i} className="text-sm flex items-start gap-2">
-                      <Zap className="h-4 w-4 text-cosmic-teal mt-0.5 flex-shrink-0" />
+                      <Zap className="h-4 w-4 text-brand-cyan mt-0.5 flex-shrink-0" />
                       <span>{insight}</span>
                     </li>
                   ))}
@@ -1673,7 +1674,7 @@ export default function FanAgentPage() {
 
               <div className="flex flex-col gap-2">
                 <Button
-                  className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                  className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                   onClick={() => {
                     handleCreateContent(selectedItem.platform, "social-media")
                     setOpenDrawer(false)
@@ -1773,15 +1774,15 @@ export default function FanAgentPage() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg bg-cosmic-teal/10 border border-cosmic-teal/20">
+              <div className="p-4 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20">
                 <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-cosmic-teal" />
+                  <Sparkles className="h-4 w-4 text-brand-cyan" />
                   <span>AI Insights</span>
                 </h4>
                 <ul className="space-y-2">
                   {selectedItem.aiInsights.map((insight, i) => (
                     <li key={i} className="text-sm flex items-start gap-2">
-                      <Zap className="h-4 w-4 text-cosmic-teal mt-0.5 flex-shrink-0" />
+                      <Zap className="h-4 w-4 text-brand-cyan mt-0.5 flex-shrink-0" />
                       <span>{insight}</span>
                     </li>
                   ))}
@@ -1800,7 +1801,7 @@ export default function FanAgentPage() {
                   <BarChart3 className="mr-2 h-4 w-4" /> Analytics
                 </Button>
                 <Button
-                  className="flex-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                  className="flex-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                   onClick={() => {
                     // Handle create targeted campaign
                     console.log("Create targeted campaign for segment:", selectedItem.id)
@@ -1897,15 +1898,15 @@ export default function FanAgentPage() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg bg-cosmic-teal/10 border border-cosmic-teal/20">
+              <div className="p-4 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20">
                 <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-cosmic-teal" />
+                  <Sparkles className="h-4 w-4 text-brand-cyan" />
                   <span>AI Insights</span>
                 </h4>
                 <ul className="space-y-2">
                   {selectedItem.aiInsights.map((insight, i) => (
                     <li key={i} className="text-sm flex items-start gap-2">
-                      <Zap className="h-4 w-4 text-cosmic-teal mt-0.5 flex-shrink-0" />
+                      <Zap className="h-4 w-4 text-brand-cyan mt-0.5 flex-shrink-0" />
                       <span>{insight}</span>
                     </li>
                   ))}
@@ -1924,7 +1925,7 @@ export default function FanAgentPage() {
                   <BarChart3 className="mr-2 h-4 w-4" /> Analytics
                 </Button>
                 <Button
-                  className="flex-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                  className="flex-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                   onClick={() => {
                     // Handle edit campaign
                     console.log("Edit campaign:", selectedItem.id)

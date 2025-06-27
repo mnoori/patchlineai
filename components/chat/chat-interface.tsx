@@ -642,7 +642,7 @@ export function ChatInterface() {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border/50 bg-background/80 backdrop-blur-sm">
         <div className="flex items-center space-x-2">
-          <TRSCableLogo className="h-5 w-5 text-cosmic-teal" />
+          <TRSCableLogo className="h-5 w-5 text-brand-cyan" />
                                 <span className={agentGradient()}>{agentName()}</span>
           {DEMO_MODE && (
             <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-500 border-purple-500/30">
@@ -661,8 +661,8 @@ export function ChatInterface() {
       >
         {globalMessages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cosmic-teal/20 to-cosmic-pink/20 flex items-center justify-center mb-4">
-              <TRSCableLogo className="h-6 w-6 text-cosmic-teal" />
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-cyan/20 to-gradient-middle/20 flex items-center justify-center mb-4">
+              <TRSCableLogo className="h-6 w-6 text-brand-cyan" />
             </div>
                           <p className="text-sm text-muted-foreground max-w-[280px]">Start a conversation with {agentName()}</p>
           </div>
@@ -674,7 +674,7 @@ export function ChatInterface() {
                   className={cn(
                     "max-w-[85%] rounded-2xl px-4 py-3 text-sm group relative",
                     message.role === "user"
-                      ? "bg-cosmic-teal text-black font-medium"
+                      ? "bg-brand-cyan text-black font-medium"
                       : message.type === "error"
                         ? "bg-red-500/10 text-foreground border border-red-500/30"
                         : "bg-background/80 text-foreground border border-border/50 backdrop-blur-sm",
@@ -772,7 +772,7 @@ export function ChatInterface() {
                 key={suggestion.command}
                 className={cn(
                   "px-3 py-2 text-sm cursor-pointer flex items-center justify-between",
-                  index === selectedSuggestionIndex ? "bg-cosmic-teal/10" : "hover:bg-muted/50",
+                  index === selectedSuggestionIndex ? "bg-brand-cyan/10" : "hover:bg-muted/50",
                 )}
                 onClick={() => {
                   setInput(suggestion.completion)
@@ -806,7 +806,7 @@ export function ChatInterface() {
               className={cn(
                 "px-3 py-1.5 text-sm rounded-md transition-all flex items-center",
                 mode === "agent"
-                  ? "bg-cosmic-teal/20 text-cosmic-teal"
+                  ? "bg-brand-cyan/20 text-brand-cyan"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
               )}
             >
@@ -822,7 +822,7 @@ export function ChatInterface() {
               className={cn(
                 "px-3 py-1.5 text-sm rounded-md transition-all flex items-center",
                 mode === "chat"
-                  ? "bg-cosmic-teal/20 text-cosmic-teal"
+                  ? "bg-brand-cyan/20 text-brand-cyan"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
               )}
             >
@@ -839,7 +839,7 @@ export function ChatInterface() {
               type="button"
               onClick={() => setShowModelMenu((prev) => !prev)}
             >
-              <div className="w-2 h-2 rounded-full bg-cosmic-teal" />
+              <div className="w-2 h-2 rounded-full bg-brand-cyan" />
               <span className="text-muted-foreground text-xs">{getIndicatorLabel()}</span>
               <ChevronDown className="h-3 w-3 opacity-50" />
             </Button>
@@ -878,14 +878,14 @@ export function ChatInterface() {
                             }}
                             className={cn(
                               "cursor-pointer flex items-center text-sm rounded-md px-3 py-2 gap-3",
-                              selectedAgent === agent.key ? "bg-cosmic-teal/10" : "hover:bg-muted/50",
+                              selectedAgent === agent.key ? "bg-brand-cyan/10" : "hover:bg-muted/50",
                             )}
                           >
                             <Brain className="h-4 w-4 text-muted-foreground" />
                             <div className="flex-1">
                               <div className="font-medium">{agent.label}</div>
                             </div>
-                            {selectedAgent === agent.key && <Check className="h-4 w-4 text-cosmic-teal" />}
+                            {selectedAgent === agent.key && <Check className="h-4 w-4 text-brand-cyan" />}
                           </div>
                         ))
                       : availableModels.map((model) => (
@@ -899,14 +899,14 @@ export function ChatInterface() {
                             }}
                             className={cn(
                               "cursor-pointer flex items-center text-sm rounded-md px-3 py-2 gap-3",
-                              selectedModel.key === model.key ? "bg-cosmic-teal/10" : "hover:bg-muted/50",
+                              selectedModel.key === model.key ? "bg-brand-cyan/10" : "hover:bg-muted/50",
                             )}
                           >
                             <Brain className="h-4 w-4 text-muted-foreground" />
                             <div className="flex-1">
                               <div className="font-medium">{model.name}</div>
                             </div>
-                            {selectedModel.key === model.key && <Check className="h-4 w-4 text-cosmic-teal" />}
+                            {selectedModel.key === model.key && <Check className="h-4 w-4 text-brand-cyan" />}
                           </div>
                         ))}
                   </div>
@@ -918,7 +918,7 @@ export function ChatInterface() {
 
         {/* Input */}
         <form onSubmit={handleSubmit} className="p-4 relative">
-          <div className="relative flex items-end bg-background/80 backdrop-blur-sm rounded-xl border border-input/50 focus-within:ring-1 focus-within:ring-cosmic-teal">
+          <div className="relative flex items-end bg-background/80 backdrop-blur-sm rounded-xl border border-input/50 focus-within:ring-1 focus-within:ring-brand-cyan">
             <textarea
               ref={inputRef}
               value={input}
@@ -940,7 +940,7 @@ export function ChatInterface() {
               className={cn(
                 "absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-colors",
                 input.trim() && !isGenerating
-                  ? "text-black bg-cosmic-teal hover:bg-cosmic-teal/90"
+                  ? "text-black bg-brand-cyan hover:bg-brand-cyan/90"
                   : "text-muted-foreground bg-muted/50",
               )}
               disabled={!input.trim() || isGenerating}

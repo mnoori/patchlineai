@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Button, GradientOrbs, PageGradient, Card } from "@/components/brand"
+import { GradientOrbs, PageGradient, Card, Button } from "@/components/brand"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Linkedin, Instagram } from "lucide-react"
@@ -32,7 +32,7 @@ export default function AboutPage() {
       <main className="flex-1 pt-16">
         {/* Our Story Section - Hero with DEFAULT gradient */}
         <section className="relative py-16 pb-8 bg-gradient-to-b from-background via-background to-background overflow-hidden">
-          <GradientOrbs variant="default" />
+          <GradientOrbs variant="outline" />
           <div className="container relative z-10">
             <div className="max-w-4xl mx-auto">
               <h2 className={`${headingStyles.h2} mb-8 text-center`}>Our Story</h2>

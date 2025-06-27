@@ -58,9 +58,9 @@ export const COLORS = {
     start: '#00E6E4',      // Vibrant cyan
     middle: '#0068FF',     // Bright blue
     end: '#002772',        // Deep blue
-    darkStart: '#090030',  // Dark purple for backgrounds
+    darkStart: '#002772',  // Dark purple for backgrounds
     darkMiddle: '#2A09CC', // Deep blue middle
-    darkEnd: '#000814',    // Very dark blue
+    darkEnd: '#010102',    // Very dark blue
   },
   // UI colors (maintaining existing dark theme)
   ui: {

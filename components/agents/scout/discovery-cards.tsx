@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -74,7 +75,7 @@ export function DiscoveryCards({ artists, onWatchlistToggle }: DiscoveryCardsPro
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,240,255,0.1)]">
+              <BrandCard className="glass-effect hover:border-brand-cyan/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,240,255,0.1)]">
                 <CardHeader className="pb-3">
                   <div className="flex items-start gap-3">
                     <Avatar className="h-12 w-12">
@@ -82,10 +83,10 @@ export function DiscoveryCards({ artists, onWatchlistToggle }: DiscoveryCardsPro
                       <AvatarFallback>{artist.name.slice(0, 2)}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold truncate">{artist.name}</h3>
+                      <h3 className="font-bold truncate">{artist.name}</h3>
                       <p className="text-sm text-muted-foreground truncate">{artist.track}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        <Badge variant="outline" className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/20">
+                        <Badge variant="outline" className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20">
                           {artist.genre}
                         </Badge>
                         <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
@@ -104,7 +105,7 @@ export function DiscoveryCards({ artists, onWatchlistToggle }: DiscoveryCardsPro
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={`h-8 w-8 ${artist.isWatchlisted ? "text-cosmic-teal" : "text-muted-foreground"}`}
+                      className={`h-8 w-8 ${artist.isWatchlisted ? "text-brand-cyan" : "text-muted-foreground"}`}
                       onClick={() => handleWatchlistToggle(artist)}
                     >
                       <motion.div
@@ -146,14 +147,14 @@ export function DiscoveryCards({ artists, onWatchlistToggle }: DiscoveryCardsPro
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full mt-2 gap-2 text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
+                    className="w-full mt-2 gap-2 text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
                     onClick={() => handleDraftEmail(artist)}
                   >
                     <Mail className="h-3.5 w-3.5" />
                     Draft Email
                   </Button>
                 </CardContent>
-              </Card>
+              </BrandCard>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -179,7 +180,7 @@ export function DiscoveryCards({ artists, onWatchlistToggle }: DiscoveryCardsPro
                 {Array.from({ length: 50 }).map((_, i) => (
                   <motion.div
                     key={i}
-                    className="bg-cosmic-teal rounded-full"
+                    className="bg-brand-cyan rounded-full"
                     style={{
                       width: "2px",
                       height: `${Math.random() * 60 + 20}%`,

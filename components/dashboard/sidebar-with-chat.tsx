@@ -200,7 +200,7 @@ const pulseGlowStyle = `
 
   .cursor {
     animation: blink 1s infinite;
-    color: #00E6E4;
+    color: brand-cyan;
   }
 
   .suggestion-text {
@@ -216,7 +216,7 @@ const pulseGlowStyle = `
   .dot {
     width: 8px;
     height: 8px;
-    background: #00E6E4;
+    background: brand-cyan;
     border-radius: 50%;
     margin-right: 10px;
     box-shadow: 0 0 10px rgba(0, 230, 228, 0.5);
@@ -856,18 +856,18 @@ export function SidebarWithChat() {
                       width: '16px',
                       height: '16px',
                       border: '2px solid rgba(0, 230, 228, 0.3)',
-                      borderTop: '2px solid #00E6E4',
+                      borderTop: '2px solid brand-cyan',
                       borderRadius: '50%',
                       marginRight: '12px'
                     }} />
-                    <span style={{ color: '#00E6E4', fontSize: '14px', fontWeight: 600 }}>
+                    <span style={{ color: 'brand-cyan', fontSize: '14px', fontWeight: 600 }}>
                       Agent Activity
                     </span>
                   </>
                 ) : (
                   <>
                     <div className="dot" />
-                    <span style={{ color: '#00E6E4', fontSize: '14px', fontWeight: 500 }}>
+                    <span style={{ color: 'brand-cyan', fontSize: '14px', fontWeight: 500 }}>
                       Aria's Suggestions
                     </span>
                   </>
@@ -1010,7 +1010,7 @@ export function SidebarWithChat() {
                 </div>
                 <span
                   className={cn(
-                    "font-semibold tracking-wide",
+                    "font-bold tracking-wide",
                     isChatExpanded ? "text-brand-cyan" : "text-brand-cyan/80",
                   )}
                 >

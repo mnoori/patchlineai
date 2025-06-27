@@ -1,8 +1,9 @@
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { HeroSection, GradientOrbs, Button, PageGradient, Card } from "@/components/brand"
+import { HeroSection, GradientOrbs, PageGradient, Card, Button } from "@/components/brand"
 import { Badge } from "@/components/ui/badge"
+
 import { Zap, Shield, Globe, ArrowRight, Music, Users, BarChart3, Clock } from "lucide-react"
 import { AGENTS } from "@/config/agents"
 

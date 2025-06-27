@@ -1,5 +1,6 @@
 "use client"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -31,7 +32,7 @@ interface WatchlistViewProps {
 export function WatchlistView({ artists, onWatchlistToggle, onArtistClick }: WatchlistViewProps) {
   if (artists.length === 0) {
     return (
-      <Card className="glass-effect">
+      <BrandCard className="glass-effect">
         <CardHeader>
           <CardTitle>Watchlist</CardTitle>
           <CardDescription>Artists you're keeping an eye on will appear here.</CardDescription>
@@ -43,12 +44,12 @@ export function WatchlistView({ artists, onWatchlistToggle, onArtistClick }: Wat
             Add artists to your watchlist to track their growth and get updates
           </p>
         </CardContent>
-      </Card>
+      </BrandCard>
     )
   }
 
   return (
-    <Card className="glass-effect">
+    <BrandCard className="glass-effect">
       <CardHeader>
         <CardTitle>Watchlist</CardTitle>
         <CardDescription>Artists you're keeping an eye on.</CardDescription>
@@ -64,8 +65,8 @@ export function WatchlistView({ artists, onWatchlistToggle, onArtistClick }: Wat
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <Card
-                className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,240,255,0.1)] cursor-pointer"
+              <BrandCard
+                className="glass-effect hover:border-brand-cyan/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,240,255,0.1)] cursor-pointer"
                 onClick={() => onArtistClick(artist)}
               >
                 <CardContent className="p-6">
@@ -79,11 +80,11 @@ export function WatchlistView({ artists, onWatchlistToggle, onArtistClick }: Wat
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-xl font-semibold">{artist.name}</h3>
+                          <h3 className="text-xl font-bold">{artist.name}</h3>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-cosmic-teal"
+                            className="h-8 w-8 text-brand-cyan"
                             onClick={(e) => {
                               e.stopPropagation()
                               onWatchlistToggle(artist.id)
@@ -96,8 +97,8 @@ export function WatchlistView({ artists, onWatchlistToggle, onArtistClick }: Wat
 
                         {/* AI Summary */}
                         <div className="mt-2 flex items-start gap-2">
-                          <MessageCircle className="h-4 w-4 text-cosmic-teal mt-1 shrink-0" />
-                          <p className="text-cosmic-teal/90 text-sm">{artist.aiSummary}</p>
+                          <MessageCircle className="h-4 w-4 text-brand-cyan mt-1 shrink-0" />
+                          <p className="text-brand-cyan/90 text-sm">{artist.aiSummary}</p>
                         </div>
                       </div>
                     </div>
@@ -106,7 +107,7 @@ export function WatchlistView({ artists, onWatchlistToggle, onArtistClick }: Wat
                     <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="space-y-1">
                         <p className="text-xs text-muted-foreground">Genre</p>
-                        <Badge variant="outline" className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/20">
+                        <Badge variant="outline" className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20">
                           {artist.genre}
                         </Badge>
                       </div>
@@ -133,11 +134,11 @@ export function WatchlistView({ artists, onWatchlistToggle, onArtistClick }: Wat
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </BrandCard>
             </motion.div>
           ))}
         </div>
       </CardContent>
-    </Card>
+    </BrandCard>
   )
 }

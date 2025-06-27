@@ -68,11 +68,11 @@ export function PerformanceDashboard() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 w-96">
-      <Card className="bg-background/95 backdrop-blur border-cosmic-teal/20">
+      <Card className="bg-background/95 backdrop-blur border-brand-cyan/20">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Activity className="h-4 w-4 text-cosmic-teal" />
+              <Activity className="h-4 w-4 text-brand-cyan" />
               Performance Monitor
             </CardTitle>
             <Badge variant="outline" className="text-xs">

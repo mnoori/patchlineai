@@ -2,6 +2,7 @@
 
 import "./scout.css"
 import { useState, useEffect, useCallback } from "react"
+import { Card as BrandCard } from '@/components/brand'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Filter, Download, BarChart2, Plus, RefreshCw, AlertCircle, UserPlus, Sparkles, Wand2, Zap, RotateCcw } from "lucide-react"
@@ -15,7 +16,6 @@ import { handoff } from "@/lib/agent-bridge"
 import { soundchartsClient } from "@/lib/services/soundcharts-client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Card } from "@/components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
 import { useDebounce } from "@/hooks/use-debounce"
 import { ArtistPreferences } from "@/components/onboarding/artist-preferences"
@@ -583,12 +583,12 @@ export default function ScoutAgentPage() {
 
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div className="relative w-full md:w-96 group">
-          <div className="absolute inset-0 bg-gradient-to-r from-cosmic-teal/20 to-purple-400/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-cyan/20 to-purple-400/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
           <Input
             type="search"
             placeholder="Search artists by name..."
-            className="pl-10 relative bg-black/40 border-white/10 hover:border-cosmic-teal/50 focus:border-cosmic-teal transition-colors duration-300"
+            className="pl-10 relative bg-black/40 border-white/10 hover:border-brand-cyan/50 focus:border-brand-cyan transition-colors duration-300"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             disabled={loading && !refreshing}
@@ -598,7 +598,7 @@ export default function ScoutAgentPage() {
           <Button 
             variant="outline" 
             size="sm" 
-            className="gap-1 border-white/10 hover:border-cosmic-teal/50 hover:bg-cosmic-teal/10 transition-all duration-300"
+            className="gap-1 border-white/10 hover:border-brand-cyan/50 hover:bg-brand-cyan/10 transition-all duration-300"
             onClick={handleRefresh}
             disabled={refreshing}
           >
@@ -664,7 +664,7 @@ export default function ScoutAgentPage() {
                   transition={{ delay: i * 0.1 }}
                   className="relative"
                 >
-                  <Card className="glass-effect p-6 overflow-hidden">
+                  <BrandCard className="glass-effect p-6 overflow-hidden" variant="gradient" hover="glow">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent shimmer" />
                     <div className="flex items-center space-x-4">
                       <Skeleton className="h-16 w-16 rounded-full" />
@@ -678,7 +678,7 @@ export default function ScoutAgentPage() {
                         <Skeleton className="h-8 w-24" />
                       </div>
                     </div>
-                  </Card>
+                  </BrandCard>
                 </motion.div>
               ))}
             </div>

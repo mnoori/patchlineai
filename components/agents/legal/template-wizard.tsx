@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -138,7 +139,7 @@ export function TemplateWizard() {
       case "low":
         return "text-green-500 bg-green-500/10"
       default:
-        return "text-gray-500 bg-gray-500/10"
+        return "text-muted-foreground bg-gray-500/10"
     }
   }
 
@@ -183,7 +184,7 @@ export function TemplateWizard() {
 
                 <div className="space-y-3">
                   {filteredClauses.map((clause) => (
-                    <Card key={clause.id} className="cursor-move hover:shadow-md transition-shadow">
+                    <BrandCard key={clause.id} className="cursor-move hover:shadow-md transition-shadow">
                       <CardContent className="p-3">
                         <div className="flex items-start justify-between mb-2">
                           <h4 className="font-medium text-sm">{clause.title}</h4>
@@ -195,7 +196,7 @@ export function TemplateWizard() {
                           <span>Used {clause.usage} times</span>
                         </div>
                       </CardContent>
-                    </Card>
+                    </BrandCard>
                   ))}
                 </div>
               </div>
@@ -204,7 +205,7 @@ export function TemplateWizard() {
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button size="sm" className="bg-magenta-600 hover:bg-magenta-700 text-white">
+              <Button size="sm" className="bg-magenta-600 hover:bg-magenta-700 text-white" variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Template
               </Button>
@@ -258,12 +259,12 @@ export function TemplateWizard() {
                 <TabsContent value="library" className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     {mockTemplates.map((template) => (
-                      <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                      <BrandCard key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
                         <CardContent className="p-3">
                           <h4 className="font-medium text-sm mb-1">{template.name}</h4>
                           <p className="text-xs text-muted-foreground">{template.description}</p>
                         </CardContent>
-                      </Card>
+                      </BrandCard>
                     ))}
                   </div>
                 </TabsContent>
@@ -271,7 +272,7 @@ export function TemplateWizard() {
 
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline">Cancel</Button>
-                <Button className="bg-magenta-600 hover:bg-magenta-700 text-white">Create Template</Button>
+                <Button className="bg-magenta-600 hover:bg-magenta-700 text-white" variant="outline">Create Template</Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -303,7 +304,7 @@ export function TemplateWizard() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.2 }}
           >
-            <Card className="hover:shadow-md transition-all duration-200 group">
+            <BrandCard className="hover:shadow-md transition-all duration-200 group">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -312,7 +313,7 @@ export function TemplateWizard() {
                       {editingTemplate === template.id ? (
                         <Input
                           defaultValue={template.name}
-                          className="h-6 text-base font-semibold"
+                          className="h-6 text-base font-bold"
                           onBlur={() => setEditingTemplate(null)}
                           onKeyDown={(e) => e.key === "Enter" && setEditingTemplate(null)}
                           autoFocus
@@ -348,14 +349,14 @@ export function TemplateWizard() {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
           </motion.div>
         ))}
 
         {/* Create New Template Card */}
         <Dialog>
           <DialogTrigger asChild>
-            <Card className="border-dashed border-magenta-500/50 hover:border-magenta-500/70 transition-all duration-300 cursor-pointer">
+            <BrandCard className="border-dashed border-magenta-500/50 hover:border-magenta-500/70 transition-all duration-300 cursor-pointer">
               <CardContent className="flex items-center justify-center h-full min-h-[200px]">
                 <div className="text-center">
                   <Plus className="h-8 w-8 mx-auto mb-2 text-magenta-500" />
@@ -363,7 +364,7 @@ export function TemplateWizard() {
                   <p className="text-xs text-muted-foreground">Start from scratch or import</p>
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
           </DialogTrigger>
         </Dialog>
       </div>

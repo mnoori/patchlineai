@@ -1,9 +1,10 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Button, GradientOrbs, PageGradient, Card } from "@/components/brand"
+import { GradientOrbs, PageGradient, Card, Button } from "@/components/brand"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Badge } from "@/components/ui/badge"
+
 import {
   Search,
   FileText,

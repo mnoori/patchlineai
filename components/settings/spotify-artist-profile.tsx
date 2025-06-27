@@ -102,7 +102,7 @@ export function SpotifyArtistProfile() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Music2 className="h-5 w-5 text-cosmic-teal" />
+            <Music2 className="h-5 w-5 text-brand-cyan" />
             Spotify Artist Profile
           </CardTitle>
           <CardDescription>Loading artist profile...</CardDescription>
@@ -115,7 +115,7 @@ export function SpotifyArtistProfile() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Music2 className="h-5 w-5 text-cosmic-teal" />
+          <Music2 className="h-5 w-5 text-brand-cyan" />
           Spotify Artist Profile
         </CardTitle>
         <CardDescription>
@@ -226,7 +226,7 @@ export function SpotifyArtistProfile() {
                 <Button
                   onClick={setupAlgoryx}
                   disabled={saving}
-                  className="gap-2 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                  className="gap-2 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                 >
                   <Music2 className="h-4 w-4" />
                   {saving ? "Setting up..." : "Setup ALGORYX Profile"}

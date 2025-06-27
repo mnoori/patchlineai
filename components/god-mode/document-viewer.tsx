@@ -60,7 +60,7 @@ export function DocumentViewer({ document, trigger }: DocumentViewerProps) {
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-cosmic-teal" />
+            <FileText className="h-5 w-5 text-brand-cyan" />
             {document.filename}
           </DialogTitle>
         </DialogHeader>

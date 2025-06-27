@@ -1,7 +1,8 @@
 "use client"
 
 import React from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -30,7 +31,7 @@ export function ArtistRosterView({ roster, loading, onRemoveFromRoster }: Artist
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
-          <Card key={i} className="glass-effect">
+          <BrandCard key={i} className="glass-effect">
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <Skeleton className="h-16 w-16 rounded-full" />
@@ -40,7 +41,7 @@ export function ArtistRosterView({ roster, loading, onRemoveFromRoster }: Artist
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         ))}
       </div>
     )
@@ -48,15 +49,15 @@ export function ArtistRosterView({ roster, loading, onRemoveFromRoster }: Artist
 
   if (roster.length === 0) {
     return (
-      <Card className="glass-effect">
+      <BrandCard className="glass-effect">
         <CardContent className="p-12 text-center">
           <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No artists in your roster yet</h3>
+          <h3 className="text-lg font-bold mb-2">No artists in your roster yet</h3>
           <p className="text-muted-foreground">
             Search for artists in the Discovery tab and add them to your roster to manage them as a label.
           </p>
         </CardContent>
-      </Card>
+      </BrandCard>
     )
   }
 
@@ -64,19 +65,19 @@ export function ArtistRosterView({ roster, loading, onRemoveFromRoster }: Artist
     <div className="space-y-6">
       {/* Roster stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="glass-effect">
+        <BrandCard className="glass-effect">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Artists</p>
                 <p className="text-2xl font-bold">{roster.length}</p>
               </div>
-              <Users className="h-8 w-8 text-cosmic-teal" />
+              <Users className="h-8 w-8 text-brand-cyan" />
             </div>
           </CardContent>
-        </Card>
+        </BrandCard>
         
-        <Card className="glass-effect">
+        <BrandCard className="glass-effect">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -86,9 +87,9 @@ export function ArtistRosterView({ roster, loading, onRemoveFromRoster }: Artist
               <Play className="h-8 w-8 text-purple-400" />
             </div>
           </CardContent>
-        </Card>
+        </BrandCard>
         
-        <Card className="glass-effect">
+        <BrandCard className="glass-effect">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -98,9 +99,9 @@ export function ArtistRosterView({ roster, loading, onRemoveFromRoster }: Artist
               <TrendingUp className="h-8 w-8 text-green-400" />
             </div>
           </CardContent>
-        </Card>
+        </BrandCard>
         
-        <Card className="glass-effect">
+        <BrandCard className="glass-effect">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -110,7 +111,7 @@ export function ArtistRosterView({ roster, loading, onRemoveFromRoster }: Artist
               <Globe className="h-8 w-8 text-pink-400" />
             </div>
           </CardContent>
-        </Card>
+        </BrandCard>
       </div>
 
       {/* Artist grid */}
@@ -122,7 +123,7 @@ export function ArtistRosterView({ roster, loading, onRemoveFromRoster }: Artist
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <Card className="glass-effect hover:border-cosmic-teal/50 transition-all duration-300 group">
+            <BrandCard className="glass-effect hover:border-brand-cyan/50 transition-all duration-300 group">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-4">
@@ -133,7 +134,7 @@ export function ArtistRosterView({ roster, loading, onRemoveFromRoster }: Artist
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-semibold text-lg">{artist.artistName}</h3>
+                      <h3 className="font-bold text-lg">{artist.artistName}</h3>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Badge variant="secondary" className="bg-white/5">
                           {artist.genres?.[0] || 'Unknown'}
@@ -187,7 +188,7 @@ export function ArtistRosterView({ roster, loading, onRemoveFromRoster }: Artist
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
           </motion.div>
         ))}
       </div>

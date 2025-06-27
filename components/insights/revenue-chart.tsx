@@ -62,7 +62,7 @@ export function RevenueChart({ data, campaigns }: RevenueChartProps) {
           </div>
           {data.find((item) => item.name === label)?.campaign && (
             <div className="mt-2 pt-2 border-t border-border/50">
-              <Badge variant="outline" className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/20">
+              <Badge variant="outline" className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20">
                 {data.find((item) => item.name === label)?.campaign}
               </Badge>
             </div>
@@ -74,7 +74,7 @@ export function RevenueChart({ data, campaigns }: RevenueChartProps) {
   }
 
   return (
-    <Card className="glass-effect hover:border-cosmic-teal/30 hover:scale-[1.01] transition-all duration-300">
+    <Card className="glass-effect hover:border-brand-cyan/30 hover:scale-[1.01] transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg font-medium">Revenue Trends</CardTitle>
         <div className="flex gap-2">
@@ -82,7 +82,7 @@ export function RevenueChart({ data, campaigns }: RevenueChartProps) {
             <Badge
               key={campaign.name}
               variant="outline"
-              className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/20 cursor-pointer hover:bg-cosmic-teal/20 transition-colors"
+              className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20 cursor-pointer hover:bg-brand-cyan/20 transition-colors"
               onMouseEnter={() => setHoveredCampaign(campaign)}
               onMouseLeave={() => setHoveredCampaign(null)}
             >

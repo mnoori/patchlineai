@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
@@ -153,7 +154,7 @@ export function ContractKanban() {
             exit={{ opacity: 0, y: 50 }}
             className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
           >
-            <Card className="bg-cosmic-midnight border-cosmic-teal shadow-lg">
+            <BrandCard className="bg-brand-black border-brand-cyan shadow-lg">
               <CardContent className="flex items-center gap-4 p-4">
                 <span className="text-sm font-medium">{selectedContracts.length} contracts selected</span>
                 <div className="flex gap-2">
@@ -168,7 +169,7 @@ export function ContractKanban() {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
           </motion.div>
         )}
       </AnimatePresence>
@@ -181,7 +182,7 @@ export function ContractKanban() {
           return (
             <div key={lane.id} className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-lg">{lane.title}</h3>
+                <h3 className="font-bold text-lg">{lane.title}</h3>
                 <Badge variant="secondary" className="text-xs">
                   {laneContracts.length}
                 </Badge>
@@ -201,9 +202,9 @@ export function ContractKanban() {
                       whileHover={{ scale: 1.02 }}
                       className="cursor-pointer"
                     >
-                      <Card
+                      <BrandCard
                         className={`hover:shadow-md transition-all duration-200 ${
-                          selectedContracts.includes(contract.id) ? "ring-2 ring-cosmic-teal" : ""
+                          selectedContracts.includes(contract.id) ? "ring-2 ring-brand-cyan" : ""
                         }`}
                         onClick={() => handleContractClick(contract)}
                       >
@@ -258,7 +259,7 @@ export function ContractKanban() {
                             </div>
                           </div>
                         </CardContent>
-                      </Card>
+                      </BrandCard>
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -282,7 +283,7 @@ export function ContractKanban() {
             <div className="py-6 space-y-6">
               {/* Summary Metrics */}
               <div className="grid grid-cols-2 gap-4">
-                <Card className="bg-cosmic-midnight/50">
+                <BrandCard className="bg-brand-black/50">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2">
                       <AlertCircle className="h-5 w-5 text-red-500" />
@@ -292,9 +293,9 @@ export function ContractKanban() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </BrandCard>
 
-                <Card className="bg-cosmic-midnight/50">
+                <BrandCard className="bg-brand-black/50">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-5 w-5 text-green-500" />
@@ -304,7 +305,7 @@ export function ContractKanban() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </BrandCard>
               </div>
 
               {/* AI-Highlighted Clauses */}
@@ -312,14 +313,14 @@ export function ContractKanban() {
                 <h3 className="text-sm font-medium text-magenta-400 mb-3">AI-HIGHLIGHTED CLAUSES</h3>
                 <div className="space-y-3">
                   {selectedContract.details.clauses.map((clause, index) => (
-                    <Card
+                    <BrandCard
                       key={index}
                       className={`${
                         clause.highlight
                           ? clause.risk === "high"
                             ? "border-red-500/50 bg-red-500/5"
                             : "border-amber-500/50 bg-amber-500/5"
-                          : "bg-cosmic-midnight/30"
+                          : "bg-brand-black/30"
                       }`}
                     >
                       <CardContent className="p-3">
@@ -339,7 +340,7 @@ export function ContractKanban() {
                           <p className="text-sm flex-1">{clause.text}</p>
                         </div>
                       </CardContent>
-                    </Card>
+                    </BrandCard>
                   ))}
                 </div>
               </div>
@@ -377,7 +378,7 @@ export function ContractKanban() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Button
                     className="bg-magenta-600 hover:bg-magenta-700 text-white"
-                    onClick={() => handleDraftRenewal(selectedContract.id)}
+                    onClick={() = variant="outline"> handleDraftRenewal(selectedContract.id)}
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     Draft Renewal

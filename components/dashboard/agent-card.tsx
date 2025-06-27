@@ -2,7 +2,8 @@
 
 import type React from "react"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
@@ -29,7 +30,7 @@ export function AgentCard({
   actionOnClick,
 }: AgentCardProps) {
   return (
-    <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300">
+    <BrandCard className="glass-effect hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         {icon}
@@ -41,7 +42,7 @@ export function AgentCard({
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1 h-7 px-2 text-xs text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10 justify-start"
+            className="gap-1 h-7 px-2 text-xs text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10 justify-start"
             asChild
           >
             <Link href={href}>
@@ -51,18 +52,18 @@ export function AgentCard({
 
           {actionOnClick ? (
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
-              className="gap-1 h-7 text-xs bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+              className="gap-1 h-7 text-xs bg-brand-cyan hover:bg-brand-cyan/90 text-black"
               onClick={actionOnClick}
             >
               {actionLabel}
             </Button>
           ) : (
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
-              className="gap-1 h-7 text-xs bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+              className="gap-1 h-7 text-xs bg-brand-cyan hover:bg-brand-cyan/90 text-black"
               asChild
             >
               <Link href={actionHref || href}>{actionLabel}</Link>
@@ -70,6 +71,6 @@ export function AgentCard({
           )}
         </div>
       </CardContent>
-    </Card>
+    </BrandCard>
   )
 }

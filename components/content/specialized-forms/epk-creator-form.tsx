@@ -275,15 +275,15 @@ Format this as a professional document suitable for media outlets, venues, and i
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-cosmic-teal/20">
-            <User className="h-5 w-5 text-cosmic-teal" />
+          <div className="p-2 rounded-lg bg-brand-cyan/20">
+            <User className="h-5 w-5 text-brand-cyan" />
           </div>
           <div>
             <CardTitle>Electronic Press Kit Creator</CardTitle>
             <CardDescription>
               Create a professional EPK for media outlets and industry professionals
               {initialPrompt?.topic && (
-                <span className="block text-cosmic-teal font-medium mt-1">Based on: {initialPrompt.topic}</span>
+                <span className="block text-brand-cyan font-medium mt-1">Based on: {initialPrompt.topic}</span>
               )}
             </CardDescription>
           </div>
@@ -294,7 +294,7 @@ Format this as a professional document suitable for media outlets, venues, and i
           {/* Artist Information Section */}
           <div className="space-y-6">
             <div className="flex items-center gap-2">
-              <User className="h-5 w-5 text-cosmic-teal" />
+              <User className="h-5 w-5 text-brand-cyan" />
               <h3 className="text-lg font-semibold">Artist Information</h3>
             </div>
 
@@ -340,7 +340,7 @@ Format this as a professional document suitable for media outlets, venues, and i
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Music className="h-5 w-5 text-cosmic-teal" />
+                <Music className="h-5 w-5 text-brand-cyan" />
                 <h3 className="text-lg font-semibold">Featured Tracks</h3>
               </div>
               <Button type="button" variant="outline" size="sm" onClick={addTrack}>
@@ -391,7 +391,7 @@ Format this as a professional document suitable for media outlets, venues, and i
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Quote className="h-5 w-5 text-cosmic-teal" />
+                <Quote className="h-5 w-5 text-brand-cyan" />
                 <h3 className="text-lg font-semibold">Press Quotes & Reviews</h3>
               </div>
               <Button type="button" variant="outline" size="sm" onClick={addPressQuote}>
@@ -452,7 +452,7 @@ Format this as a professional document suitable for media outlets, venues, and i
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-cosmic-teal" />
+                <Calendar className="h-5 w-5 text-brand-cyan" />
                 <h3 className="text-lg font-semibold">Notable Performances</h3>
               </div>
               <Button type="button" variant="outline" size="sm" onClick={addPerformance}>
@@ -519,7 +519,7 @@ Format this as a professional document suitable for media outlets, venues, and i
           {/* Contact Information Section */}
           <div className="space-y-6">
             <div className="flex items-center gap-2">
-              <Contact className="h-5 w-5 text-cosmic-teal" />
+              <Contact className="h-5 w-5 text-brand-cyan" />
               <h3 className="text-lg font-semibold">Contact Information</h3>
             </div>
 
@@ -616,7 +616,7 @@ Format this as a professional document suitable for media outlets, venues, and i
             <Button
               type="submit"
               disabled={isGenerating || !prompt.artistName?.trim()}
-              className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-white min-w-[160px]"
+              className="bg-brand-cyan hover:bg-brand-cyan/90 text-white min-w-[160px]"
             >
               {isGenerating ? (
                 <>

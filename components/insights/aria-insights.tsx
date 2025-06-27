@@ -1,7 +1,8 @@
 "use client"
 
 import type React from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Lightbulb, TrendingUp, Zap, ArrowRight } from "lucide-react"
@@ -35,9 +36,9 @@ export function AriaInsights({ insights }: AriaInsightsProps) {
       case "viral":
         return <Zap className="h-5 w-5 text-purple-500" />
       case "opportunity":
-        return <Lightbulb className="h-5 w-5 text-cosmic-teal" />
+        return <Lightbulb className="h-5 w-5 text-brand-cyan" />
       default:
-        return <Lightbulb className="h-5 w-5 text-cosmic-teal" />
+        return <Lightbulb className="h-5 w-5 text-brand-cyan" />
     }
   }
 
@@ -50,18 +51,18 @@ export function AriaInsights({ insights }: AriaInsightsProps) {
       case "low":
         return "bg-green-500/20 text-green-500 border-green-500/20"
       default:
-        return "bg-cosmic-teal/20 text-cosmic-teal border-cosmic-teal/20"
+        return "bg-brand-cyan/20 text-brand-cyan border-brand-cyan/20"
     }
   }
 
   return (
-    <Card className="glass-effect hover:border-cosmic-teal/30 hover:scale-[1.01] transition-all duration-300">
+    <BrandCard className="glass-effect hover:border-brand-cyan/30 hover:scale-[1.01] transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-2">
-          <Lightbulb className="h-5 w-5 text-cosmic-teal" />
+          <Lightbulb className="h-5 w-5 text-brand-cyan" />
           <CardTitle className="text-lg font-medium">Aria's Insights</CardTitle>
         </div>
-        <Badge variant="outline" className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/20">
+        <Badge variant="outline" className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20">
           AI-Powered
         </Badge>
       </CardHeader>
@@ -73,7 +74,7 @@ export function AriaInsights({ insights }: AriaInsightsProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="border border-border/50 rounded-lg p-4 hover:border-cosmic-teal/30 hover:scale-[1.01] transition-all duration-200"
+              className="border border-border/50 rounded-lg p-4 hover:border-brand-cyan/30 hover:scale-[1.01] transition-all duration-200"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -96,7 +97,7 @@ export function AriaInsights({ insights }: AriaInsightsProps) {
                     key={action.action}
                     variant="outline"
                     size="sm"
-                    className="hover:bg-cosmic-teal/10 hover:text-cosmic-teal hover:border-cosmic-teal/30 transition-colors"
+                    className="hover:bg-brand-cyan/10 hover:text-brand-cyan hover:border-brand-cyan/30 transition-colors"
                   >
                     {action.label}
                     <ArrowRight className="h-3.5 w-3.5 ml-1" />
@@ -107,6 +108,6 @@ export function AriaInsights({ insights }: AriaInsightsProps) {
           ))}
         </div>
       </CardContent>
-    </Card>
+    </BrandCard>
   )
 }

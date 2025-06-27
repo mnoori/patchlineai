@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { Card } from '@/components/brand'
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"

@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ChevronLeft, ChevronRight, Plus, AlertCircle, Clock, CheckCircle } from "lucide-react"
@@ -168,7 +169,7 @@ export function ContractCalendar() {
           </div>
         </div>
 
-        <Button size="sm" className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+        <Button size="sm" className="bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
           <Plus className="h-4 w-4 mr-2" />
           Add Key Date
         </Button>
@@ -177,7 +178,7 @@ export function ContractCalendar() {
       <div className="grid lg:grid-cols-4 gap-6">
         {/* Calendar Grid */}
         <div className="lg:col-span-3">
-          <Card>
+          <BrandCard>
             <CardContent className="p-6">
               {/* Days of Week Header */}
               <div className="grid grid-cols-7 gap-1 mb-4">
@@ -207,13 +208,13 @@ export function ContractCalendar() {
                     <motion.div
                       key={day}
                       className={`h-24 p-1 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors ${
-                        isToday ? "bg-cosmic-teal/10 border-cosmic-teal" : "border-border"
+                        isToday ? "bg-brand-cyan/10 border-brand-cyan" : "border-border"
                       }`}
                       whileHover={{ scale: 1.02 }}
                     >
                       <div className="h-full flex flex-col">
                         <div className="flex items-center justify-between mb-1">
-                          <span className={`text-sm font-medium ${isToday ? "text-cosmic-teal" : ""}`}>{day}</span>
+                          <span className={`text-sm font-medium ${isToday ? "text-brand-cyan" : ""}`}>{day}</span>
                         </div>
 
                         <div className="flex-1 space-y-1 overflow-hidden">
@@ -237,12 +238,12 @@ export function ContractCalendar() {
                 })}
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </div>
 
         {/* Event Details Sidebar */}
         <div className="space-y-4">
-          <Card>
+          <BrandCard>
             <CardHeader>
               <CardTitle className="text-lg">Upcoming Events</CardTitle>
             </CardHeader>
@@ -269,10 +270,10 @@ export function ContractCalendar() {
                   </motion.div>
                 ))}
             </CardContent>
-          </Card>
+          </BrandCard>
 
           {/* Legend */}
-          <Card>
+          <BrandCard>
             <CardHeader>
               <CardTitle className="text-lg">Event Types</CardTitle>
             </CardHeader>
@@ -290,7 +291,7 @@ export function ContractCalendar() {
                 </div>
               ))}
             </CardContent>
-          </Card>
+          </BrandCard>
         </div>
       </div>
 
@@ -300,8 +301,8 @@ export function ContractCalendar() {
           <div className="absolute inset-0 pointer-events-none bg-background/80 backdrop-blur-[2px] brightness-[0.96] -z-10" />
           {selectedEvent && (
             <>
-              <SheetHeader className="border-b border-cosmic-teal/20 pb-4">
-                <SheetTitle className="text-cosmic-teal">{selectedEvent.title}</SheetTitle>
+              <SheetHeader className="border-b border-brand-cyan/20 pb-4">
+                <SheetTitle className="text-brand-cyan">{selectedEvent.title}</SheetTitle>
                 <SheetDescription>
                   {selectedEvent.contract} • {selectedEvent.date.toLocaleDateString()}
                 </SheetDescription>
@@ -326,9 +327,9 @@ export function ContractCalendar() {
                 )}
 
                 <div className="pt-4 space-y-3">
-                  <h3 className="text-sm font-medium text-cosmic-teal">ACTIONS</h3>
+                  <h3 className="text-sm font-medium text-brand-cyan">ACTIONS</h3>
                   <div className="flex gap-2">
-                    <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">Take Action</Button>
+                    <Button className="bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">Take Action</Button>
                     <Button variant="outline">View Contract</Button>
                   </div>
                 </div>

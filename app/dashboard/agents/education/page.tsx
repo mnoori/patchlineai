@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { Card as BrandCard } from '@/components/brand'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
@@ -131,7 +132,7 @@ export default function EducationAgentPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight font-heading">Education Agent</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-heading bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">Education Agent</h1>
         <p className="text-muted-foreground">Streamline student data, class scheduling, and lesson feedback</p>
       </div>
 
@@ -168,7 +169,7 @@ export default function EducationAgentPage() {
         </TabsList>
 
         <TabsContent value="students">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect" variant="gradient" hover="glow">
             <CardHeader>
               <CardTitle>Student Dashboard</CardTitle>
               <CardDescription>Track student progress and manage feedback</CardDescription>
@@ -242,15 +243,15 @@ export default function EducationAgentPage() {
                     <span className="font-medium">Average Progress:</span> 62%
                   </div>
                 </div>
-                <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">Add New Student</Button>
+                <Button className="bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">Add New Student</Button>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
 
         <TabsContent value="lessons">
           <div className="grid gap-4 md:grid-cols-2">
-            <Card className="glass-effect">
+            <BrandCard className="glass-effect" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle>Upcoming Lessons</CardTitle>
                 <CardDescription>Scheduled lessons for the next 7 days</CardDescription>
@@ -282,14 +283,14 @@ export default function EducationAgentPage() {
                       </div>
                     </div>
                   ))}
-                  <Button className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                  <Button className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
                     Schedule New Lesson
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
 
-            <Card className="glass-effect">
+            <BrandCard className="glass-effect" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle>Lesson Analytics</CardTitle>
                 <CardDescription>Insights from past lessons</CardDescription>
@@ -328,12 +329,12 @@ export default function EducationAgentPage() {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
           </div>
         </TabsContent>
 
         <TabsContent value="materials">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect" variant="gradient" hover="glow">
             <CardHeader>
               <CardTitle>Learning Materials</CardTitle>
               <CardDescription>Courses, exercises, and resources for students</CardDescription>
@@ -384,16 +385,16 @@ export default function EducationAgentPage() {
                 </div>
               </div>
               <div className="mt-4 flex justify-end">
-                <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                <Button className="bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
                   <Plus className="h-4 w-4 mr-2" /> Add Material
                 </Button>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
 
         <TabsContent value="agent-settings">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect" variant="gradient" hover="glow">
             <CardHeader>
               <CardTitle>Agent Settings</CardTitle>
               <CardDescription>Configure your Education Agent preferences</CardDescription>
@@ -489,10 +490,10 @@ export default function EducationAgentPage() {
                   </div>
                 </div>
 
-                <Button className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">Save Settings</Button>
+                <Button className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">Save Settings</Button>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
       </Tabs>
     </div>

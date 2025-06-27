@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Card as BrandCard } from '@/components/brand'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useOnboardingStore } from "@/lib/onboarding-store"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
@@ -53,7 +54,7 @@ export default function ScoutDebugPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Scout Agent Debug</h1>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">Scout Agent Debug</h1>
         <Link href="/dashboard/agents/scout">
           <Button variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -62,7 +63,7 @@ export default function ScoutDebugPage() {
         </Link>
       </div>
 
-      <Card>
+      <BrandCard variant="gradient" hover="glow">
         <CardHeader>
           <CardTitle>Onboarding State</CardTitle>
         </CardHeader>
@@ -81,9 +82,9 @@ export default function ScoutDebugPage() {
             </div>
           )}
         </CardContent>
-      </Card>
+      </BrandCard>
 
-      <Card>
+      <BrandCard variant="gradient" hover="glow">
         <CardHeader>
           <CardTitle>LocalStorage Data</CardTitle>
         </CardHeader>
@@ -92,7 +93,7 @@ export default function ScoutDebugPage() {
             {JSON.stringify(localStorageData, null, 2)}
           </pre>
         </CardContent>
-      </Card>
+      </BrandCard>
 
       <div className="flex gap-4">
         <Button onClick={loadLocalStorage} variant="outline">

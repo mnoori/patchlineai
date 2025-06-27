@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -160,7 +161,7 @@ export default function MCPTestPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">MCP Test Console</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">MCP Test Console</h1>
           <p className="text-muted-foreground">
             Test Model Context Protocol integration and tool execution
           </p>
@@ -183,7 +184,7 @@ export default function MCPTestPage() {
       )}
 
       {/* Connection Status */}
-      <Card>
+      <BrandCard variant="gradient" hover="glow">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5" />
@@ -232,10 +233,10 @@ export default function MCPTestPage() {
             </div>
           )}
         </CardContent>
-      </Card>
+      </BrandCard>
 
       {/* Available Tools */}
-      <Card>
+      <BrandCard variant="gradient" hover="glow">
         <CardHeader>
           <CardTitle>Available Tools</CardTitle>
           <CardDescription>
@@ -249,8 +250,8 @@ export default function MCPTestPage() {
                 key={tool.name}
                 className={`p-3 border rounded-lg cursor-pointer transition-all ${
                   selectedTool === tool.name
-                    ? 'border-cosmic-teal bg-cosmic-teal/10'
-                    : 'hover:border-cosmic-teal/50'
+                    ? 'border-brand-cyan bg-brand-cyan/10'
+                    : 'hover:border-brand-cyan/50'
                 }`}
                 onClick={() => setSelectedTool(tool.name)}
               >
@@ -265,11 +266,11 @@ export default function MCPTestPage() {
             ))}
           </div>
         </CardContent>
-      </Card>
+      </BrandCard>
 
       {/* Tool Parameters */}
       {selectedToolData && (
-        <Card>
+        <BrandCard variant="gradient" hover="glow">
           <CardHeader>
             <CardTitle>Tool Parameters: {selectedTool}</CardTitle>
             <CardDescription>{selectedToolData.description}</CardDescription>
@@ -299,7 +300,7 @@ export default function MCPTestPage() {
               onClick={executeTool} 
               disabled={isLoading}
               className="w-full"
-            >
+             variant="outline">
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -313,12 +314,12 @@ export default function MCPTestPage() {
               )}
             </Button>
           </CardContent>
-        </Card>
+        </BrandCard>
       )}
 
       {/* Results */}
       {result && (
-        <Card>
+        <BrandCard variant="gradient" hover="glow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-500" />
@@ -333,7 +334,7 @@ export default function MCPTestPage() {
               className="font-mono text-sm"
             />
           </CardContent>
-        </Card>
+        </BrandCard>
       )}
 
       {/* Info */}

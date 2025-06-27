@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card } from "@/components/brand"
 import { Button } from "@/components/ui/button"
 import {
   ChevronDown,
@@ -54,7 +54,7 @@ export function TimeCapsuleFeed() {
         description:
           "Found Luna Ray, The Midnight Collective, and Neon Palms trending on TikTok with similar sound to your catalog.",
         time: "2 hours ago",
-        icon: <Music2 className="h-4 w-4 text-cosmic-teal" />,
+        icon: <Music2 className="h-4 w-4 text-brand-cyan" />,
         agent: "Scout Agent",
         status: "Added to your Scout feed",
         action: {
@@ -69,7 +69,7 @@ export function TimeCapsuleFeed() {
         description:
           "Your distribution agreement with SoundWave was set to expire in 3 days. Based on your preferences, Aria automatically generated and sent a renewal agreement.",
         time: "Yesterday",
-        icon: <FileText className="h-4 w-4 text-cosmic-teal" />,
+        icon: <FileText className="h-4 w-4 text-brand-cyan" />,
         agent: "Legal Agent",
         status: "Renewal agreement sent",
         action: {
@@ -84,7 +84,7 @@ export function TimeCapsuleFeed() {
         description:
           "Created and scheduled Instagram, Twitter, and TikTok posts for your upcoming 'Midnight Dreams' EP release on Friday.",
         time: "Yesterday",
-        icon: <Users className="h-4 w-4 text-cosmic-teal" />,
+        icon: <Users className="h-4 w-4 text-brand-cyan" />,
         agent: "Fan Agent",
         status: "Posts scheduled for optimal engagement times",
         action: {
@@ -99,7 +99,7 @@ export function TimeCapsuleFeed() {
         description:
           "Detected and fixed missing ISRC codes, composer credits, and publishing information on 5 tracks in your back catalog.",
         time: "3 days ago",
-        icon: <Database className="h-4 w-4 text-cosmic-teal" />,
+        icon: <Database className="h-4 w-4 text-brand-cyan" />,
         agent: "Metadata Agent",
         status: "Updated metadata on all platforms",
         action: {
@@ -114,7 +114,7 @@ export function TimeCapsuleFeed() {
         description:
           "Created a comprehensive report of your catalog's performance across all platforms for April 2023. Streaming up 12% month-over-month.",
         time: "1 week ago",
-        icon: <BarChart2 className="h-4 w-4 text-cosmic-teal" />,
+        icon: <BarChart2 className="h-4 w-4 text-brand-cyan" />,
         agent: "Insights Agent",
         status: "Report available in Insights tab",
         action: {
@@ -132,23 +132,23 @@ export function TimeCapsuleFeed() {
   }, [])
 
   return (
-    <Card className="glass-effect bg-gradient-to-r from-cosmic-midnight to-cosmic-purple/30 border-cosmic-teal/20 overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-cosmic-teal/10">
+    <Card variant="gradient" hover="glow" className="overflow-hidden">
+      <div className="flex items-center justify-between p-4 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <div className="rounded-full bg-cosmic-teal/10 p-1">
-            <Zap className="h-5 w-5 text-cosmic-teal" />
+          <div className="rounded-full bg-brand-cyan/10 p-1">
+            <Zap className="h-5 w-5 text-brand-cyan" />
           </div>
-          <h2 className="text-lg font-bold font-heading">Time Capsule</h2>
+          <h2 className="text-lg font-bold">Time Capsule</h2>
           <span className="text-xs text-muted-foreground">What Patchline Did Since Last We Jammed</span>
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1 text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
+            className="gap-1 text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
           >
             <ExternalLink className="h-4 w-4" />
-            <span className="text-cosmic-teal">Review All Logs</span>
+            <span>Review All Logs</span>
           </Button>
           <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setExpanded(!expanded)}>
             {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -162,12 +162,12 @@ export function TimeCapsuleFeed() {
           expanded ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0 overflow-hidden",
         )}
       >
-        <CardContent className="p-4">
+        <div className="p-4">
           <Tabs defaultValue="all" className="mb-4">
-            <TabsList className="bg-background/10">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="today">Today</TabsTrigger>
-              <TabsTrigger value="week">This Week</TabsTrigger>
+            <TabsList className="bg-black/20">
+              <TabsTrigger value="all" className="data-[state=active]:bg-brand-cyan data-[state=active]:text-black">All</TabsTrigger>
+              <TabsTrigger value="today" className="data-[state=active]:bg-brand-cyan data-[state=active]:text-black">Today</TabsTrigger>
+              <TabsTrigger value="week" className="data-[state=active]:bg-brand-cyan data-[state=active]:text-black">This Week</TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -181,7 +181,7 @@ export function TimeCapsuleFeed() {
               {events.map((event) => (
                 <div key={event.id} className="group">
                   <div className="flex items-start gap-4">
-                    <div className="rounded-full bg-background/20 p-3 mt-0.5">{event.icon}</div>
+                    <div className="rounded-full bg-black/20 p-3 mt-0.5">{event.icon}</div>
                     <div className="flex-1 space-y-2">
                       <div className="flex justify-between">
                         <div>
@@ -193,7 +193,7 @@ export function TimeCapsuleFeed() {
 
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-2">
-                          <span className="bg-background/20 text-xs px-2 py-1 rounded-full">{event.agent}</span>
+                          <span className="bg-black/20 text-xs px-2 py-1 rounded-full">{event.agent}</span>
                           <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <CheckCircle className="h-3 w-3 text-green-500" /> {event.status}
                           </span>
@@ -211,9 +211,8 @@ export function TimeCapsuleFeed() {
                           {event.action &&
                             (event.action.onClick ? (
                               <Button
-                                variant="default"
                                 size="sm"
-                                className="h-7 px-3 text-xs bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                                className="h-7 px-3 text-xs bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                                 onClick={event.action.onClick}
                               >
                                 {event.action.label}
@@ -221,9 +220,8 @@ export function TimeCapsuleFeed() {
                             ) : (
                               <a href={event.action.href}>
                                 <Button
-                                  variant="default"
                                   size="sm"
-                                  className="h-7 px-3 text-xs bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                                  className="h-7 px-3 text-xs bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                                 >
                                   {event.action.label}
                                 </Button>
@@ -238,13 +236,13 @@ export function TimeCapsuleFeed() {
 
               <Button
                 variant="outline"
-                className="w-full mt-4 border-cosmic-teal/30 text-cosmic-teal hover:bg-cosmic-teal/10"
+                className="w-full mt-4 border-brand-cyan/30 text-brand-cyan hover:bg-brand-cyan/10"
               >
                 View All Agent Activities <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
           )}
-        </CardContent>
+        </div>
       </div>
     </Card>
   )

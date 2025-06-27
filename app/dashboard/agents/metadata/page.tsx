@@ -1,10 +1,11 @@
 "use client"
 
 import { AgentHeader } from "@/components/agents/agent-header"
+import { Card as BrandCard } from '@/components/brand'
 import { CatalogOverview } from "@/components/agents/metadata/catalog-overview"
 import { IssuesKanban } from "@/components/agents/metadata/issues-kanban"
 import { SyncReadiness } from "@/components/agents/metadata/sync-readiness"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -13,10 +14,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 function AgentSettings() {
   return (
-    <Card className="glass-effect">
+    <BrandCard className="glass-effect" variant="gradient" hover="glow">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Settings className="h-5 w-5 text-cosmic-teal" />
+          <Settings className="h-5 w-5 text-brand-cyan" />
           Agent Settings
         </CardTitle>
       </CardHeader>
@@ -98,10 +99,10 @@ function AgentSettings() {
             </div>
           </div>
 
-          <Button className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">Save Settings</Button>
+          <Button className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">Save Settings</Button>
         </div>
       </CardContent>
-    </Card>
+    </BrandCard>
   )
 }
 

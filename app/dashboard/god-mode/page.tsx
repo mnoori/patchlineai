@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useState, useCallback, useRef, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -936,7 +937,7 @@ export default function GodModePage() {
           )}
 
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">
               {!selectedFeature ? "God Mode" : 
                selectedFeature === "documents" ? "Document Processing" :
                selectedFeature === "hr-recruiter" ? "AI HR Recruiter" :
@@ -977,8 +978,8 @@ export default function GodModePage() {
                 <SheetContent className="sm:w-[500px] bg-background/95 backdrop-blur-xl">
                   <div className="absolute inset-0 pointer-events-none bg-background/80 backdrop-blur-[2px] brightness-[0.96] -z-10" />
                   
-                  <SheetHeader className="border-b border-cosmic-teal/20 pb-4">
-                    <SheetTitle className="text-cosmic-teal">Configure Document Upload</SheetTitle>
+                  <SheetHeader className="border-b border-brand-cyan/20 pb-4">
+                    <SheetTitle className="text-brand-cyan">Configure Document Upload</SheetTitle>
                     <SheetDescription>
                       {pendingFiles.length} file{pendingFiles.length > 1 ? 's' : ''} ready to upload. Please categorize them for better organization.
                     </SheetDescription>
@@ -1004,17 +1005,17 @@ export default function GodModePage() {
 
                     {/* Preview of where files will be stored */}
                     {selectedDocumentType && (
-                      <Card className="glass-effect bg-cosmic-midnight/50">
+                      <BrandCard className="glass-effect bg-brand-black/50" variant="gradient" hover="glow">
                         <CardContent className="p-4">
                           <div className="flex items-center gap-2 text-sm">
-                            <FolderOpen className="h-4 w-4 text-cosmic-teal" />
+                            <FolderOpen className="h-4 w-4 text-brand-cyan" />
                             <span className="text-muted-foreground">Files will be organized in:</span>
                           </div>
-                          <p className="text-sm font-mono mt-2 text-cosmic-teal">
+                          <p className="text-sm font-mono mt-2 text-brand-cyan">
                             /{DOCUMENT_TYPES[selectedDocumentType as keyof typeof DOCUMENT_TYPES]?.folder}/{new Date().getFullYear()}/
                           </p>
                         </CardContent>
-                      </Card>
+                      </BrandCard>
                     )}
 
                     {/* File List */}
@@ -1046,9 +1047,9 @@ export default function GodModePage() {
                         Cancel
                       </Button>
                       <Button
-                        className="flex-1 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
+                        className="flex-1 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-bold"
                         disabled={!selectedDocumentType}
-                        onClick={() => {
+                        onClick={() = variant="outline"> {
                           setShowUploadConfig(false)
                           handleFileUpload(pendingFiles)
                           setPendingFiles([])
@@ -1067,8 +1068,8 @@ export default function GodModePage() {
                 <SheetContent className="sm:w-[480px] bg-background/95 backdrop-blur-xl">
                   <div className="absolute inset-0 pointer-events-none bg-background/80 backdrop-blur-[2px] brightness-[0.96] -z-10" />
                   
-                  <SheetHeader className="border-b border-cosmic-teal/20 pb-4">
-                    <SheetTitle className="text-cosmic-teal flex items-center gap-2">
+                  <SheetHeader className="border-b border-brand-cyan/20 pb-4">
+                    <SheetTitle className="text-brand-cyan flex items-center gap-2">
                       <AlertCircle className="h-5 w-5" />
                       File Already Exists
                     </SheetTitle>
@@ -1080,10 +1081,10 @@ export default function GodModePage() {
                   <div className="space-y-6 mt-6">
                     {/* File Info */}
                     {duplicateFile && (
-                      <Card className="glass-effect bg-cosmic-midnight/50">
+                      <BrandCard className="glass-effect bg-brand-black/50" variant="gradient" hover="glow">
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
-                            <FileText className="h-8 w-8 text-cosmic-teal" />
+                            <FileText className="h-8 w-8 text-brand-cyan" />
                             <div className="flex-1">
                               <p className="font-medium text-sm">{duplicateFile.file.name}</p>
                               <p className="text-xs text-muted-foreground">
@@ -1092,7 +1093,7 @@ export default function GodModePage() {
                             </div>
                           </div>
                         </CardContent>
-                      </Card>
+                      </BrandCard>
                     )}
 
                     {/* Options */}
@@ -1132,8 +1133,8 @@ export default function GodModePage() {
                         Keep Existing
                       </Button>
                       <Button
-                        className="flex-1 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
-                        onClick={() => handleDuplicateReprocess(true)}
+                        className="flex-1 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-bold"
+                        onClick={() = variant="outline"> handleDuplicateReprocess(true)}
                       >
                         Replace & Reprocess
                       </Button>
@@ -1143,12 +1144,12 @@ export default function GodModePage() {
               </Sheet>
 
               {/* Drag & Drop Zone */}
-              <Card className={cn(
+              <BrandCard className={cn(
                 "glass-effect transition-all duration-300 border-2 border-dashed",
                 isDragOver 
-                  ? "border-cosmic-teal bg-cosmic-teal/5 scale-[1.02]" 
-                  : "border-muted-foreground/20 hover:border-cosmic-teal/50"
-              )}>
+                  ? "border-brand-cyan bg-brand-cyan/5 scale-[1.02]" 
+                  : "border-muted-foreground/20 hover:border-brand-cyan/50"
+              )} variant="gradient" hover="glow">
                 <CardContent 
                   className="p-12 text-center"
                   onDragOver={onDragOver}
@@ -1159,16 +1160,16 @@ export default function GodModePage() {
                     <div className={cn(
                       "rounded-full p-4 transition-all duration-300",
                       isDragOver 
-                        ? "bg-cosmic-teal/20 scale-110" 
+                        ? "bg-brand-cyan/20 scale-110" 
                         : "bg-muted/20"
                     )}>
                       <Upload className={cn(
                         "h-12 w-12 transition-colors duration-300",
-                        isDragOver ? "text-cosmic-teal" : "text-muted-foreground"
+                        isDragOver ? "text-brand-cyan" : "text-muted-foreground"
                       )} />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold mb-2">
+                      <h3 className="text-xl font-bold mb-2">
                         {isDragOver ? "Drop your documents here" : "Upload Documents"}
                       </h3>
                       <p className="text-muted-foreground mb-4">
@@ -1179,8 +1180,8 @@ export default function GodModePage() {
                       </p>
                     </div>
                     <Button 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
+                      onClick={() = variant="outline"> fileInputRef.current?.click()}
+                      className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-bold"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Choose Files
@@ -1201,11 +1202,11 @@ export default function GodModePage() {
                     />
                   </div>
                 </CardContent>
-              </Card>
+              </BrandCard>
 
               {/* Upload Progress */}
               {uploadedFiles.length > 0 && (
-                <Card className="glass-effect">
+                <BrandCard className="glass-effect" variant="gradient" hover="glow">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Clock className="h-5 w-5" />
@@ -1238,14 +1239,14 @@ export default function GodModePage() {
                       </div>
                     ))}
                   </CardContent>
-                </Card>
+                </BrandCard>
               )}
             </TabsContent>
 
             {/* Documents Tab */}
             <TabsContent value="documents" className="space-y-6">
               {/* Search and Filters */}
-              <Card className="glass-effect">
+              <BrandCard className="glass-effect" variant="gradient" hover="glow">
                 <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
@@ -1280,16 +1281,16 @@ export default function GodModePage() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </BrandCard>
 
               {/* Documents Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredDocuments.map((doc) => (
-                  <Card key={doc.id} className="glass-effect hover:shadow-lg transition-all duration-300">
+                  <BrandCard key={doc.id} className="glass-effect hover:shadow-lg transition-all duration-300" variant="gradient" hover="glow">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-cosmic-teal" />
+                          <FileText className="h-5 w-5 text-brand-cyan" />
                           <div>
                             <CardTitle className="text-sm font-medium truncate">{doc.filename}</CardTitle>
                             <p className="text-xs text-muted-foreground">{format(new Date(doc.uploadDate), 'MMM dd, yyyy')}</p>
@@ -1305,7 +1306,7 @@ export default function GodModePage() {
                         {doc.extractedData.amount && (
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-muted-foreground">Amount</span>
-                            <span className="font-semibold text-green-400">${doc.extractedData.amount.toLocaleString()}</span>
+                            <span className="font-bold text-green-400">${doc.extractedData.amount.toLocaleString()}</span>
                           </div>
                         )}
                         {doc.extractedData.vendor && (
@@ -1332,7 +1333,7 @@ export default function GodModePage() {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
+                  </BrandCard>
                 ))}
               </div>
             </TabsContent>
@@ -1341,7 +1342,7 @@ export default function GodModePage() {
             <TabsContent value="insights" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Expense Breakdown */}
-                <Card className="glass-effect">
+                <BrandCard className="glass-effect" variant="gradient" hover="glow">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <PieChart className="h-5 w-5" />
@@ -1352,18 +1353,18 @@ export default function GodModePage() {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center p-3 rounded-lg bg-blue-500/10">
                         <span>Patchline AI</span>
-                        <span className="font-semibold">${patchlineExpenses.reduce((sum, doc) => sum + (doc.extractedData.amount || 0), 0).toLocaleString()}</span>
+                        <span className="font-bold">${patchlineExpenses.reduce((sum, doc) => sum + (doc.extractedData.amount || 0), 0).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between items-center p-3 rounded-lg bg-purple-500/10">
                         <span>Art & Tech Lab</span>
-                        <span className="font-semibold">${artLabExpenses.reduce((sum, doc) => sum + (doc.extractedData.amount || 0), 0).toLocaleString()}</span>
+                        <span className="font-bold">${artLabExpenses.reduce((sum, doc) => sum + (doc.extractedData.amount || 0), 0).toLocaleString()}</span>
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </BrandCard>
 
                 {/* Tax Deductions */}
-                <Card className="glass-effect">
+                <BrandCard className="glass-effect" variant="gradient" hover="glow">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Receipt className="h-5 w-5" />
@@ -1374,18 +1375,18 @@ export default function GodModePage() {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span>Schedule C Eligible</span>
-                        <span className="font-semibold text-green-400">${totalBusinessExpenses.toLocaleString()}</span>
+                        <span className="font-bold text-green-400">${totalBusinessExpenses.toLocaleString()}</span>
                       </div>
                       <div className="text-sm text-muted-foreground">
                         Based on {businessExpenses.length} business expense documents
                       </div>
-                      <Button className="w-full bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold">
+                      <Button className="w-full bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-bold" variant="outline">
                         <Download className="h-4 w-4 mr-2" />
                         Export Tax Summary
                       </Button>
                     </div>
                   </CardContent>
-                </Card>
+                </BrandCard>
               </div>
             </TabsContent>
 
@@ -1393,7 +1394,7 @@ export default function GodModePage() {
             <TabsContent value="tax-prep" className="space-y-6">
               {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="glass-effect">
+                <BrandCard className="glass-effect" variant="gradient" hover="glow">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Total Business Expenses</CardTitle>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -1406,9 +1407,9 @@ export default function GodModePage() {
                       {expenseSummary?.totalExpenses || 0} total expenses
                     </p>
                   </CardContent>
-                </Card>
+                </BrandCard>
 
-                <Card className="glass-effect">
+                <BrandCard className="glass-effect" variant="gradient" hover="glow">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Media Business</CardTitle>
                     <Building className="h-4 w-4 text-muted-foreground" />
@@ -1421,9 +1422,9 @@ export default function GodModePage() {
                       Target: $105,903
                     </p>
                   </CardContent>
-                </Card>
+                </BrandCard>
 
-                <Card className="glass-effect">
+                <BrandCard className="glass-effect" variant="gradient" hover="glow">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Consulting Business</CardTitle>
                     <Building className="h-4 w-4 text-muted-foreground" />
@@ -1436,11 +1437,11 @@ export default function GodModePage() {
                       Target: $44,794
                     </p>
                   </CardContent>
-                </Card>
+                </BrandCard>
               </div>
 
               {/* Actions Bar */}
-              <Card className="glass-effect">
+              <BrandCard className="glass-effect" variant="gradient" hover="glow">
                 <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row gap-4 justify-between">
                     <div className="flex gap-2">
@@ -1520,27 +1521,27 @@ export default function GodModePage() {
                     </div>
                     <div className="flex gap-2">
                       <Button 
-                        className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
+                        className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-bold"
                         onClick={exportToExcel}
-                      >
+                       variant="outline">
                         <FileSpreadsheet className="h-4 w-4 mr-2" />
                         Export to Excel
                       </Button>
                       <Button 
-                        className="bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 text-black font-semibold"
+                        className="bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 text-black font-bold"
                         onClick={generateTaxPackage}
-                      >
+                       variant="outline">
                         <Download className="h-4 w-4 mr-2" />
                         Generate Tax Package
                       </Button>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </BrandCard>
 
               {/* Schedule C Line Totals */}
               {expenseSummary?.scheduleCLineTotals && Object.keys(expenseSummary.scheduleCLineTotals).length > 0 && (
-                <Card className="glass-effect">
+                <BrandCard className="glass-effect" variant="gradient" hover="glow">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Calculator className="h-5 w-5" />
@@ -1554,16 +1555,16 @@ export default function GodModePage() {
                         .map(([line, amount]) => (
                           <div key={line} className="flex justify-between items-center p-3 rounded-lg bg-muted/20">
                             <span className="font-medium">{line}</span>
-                            <span className="font-semibold">${(amount as number).toLocaleString()}</span>
+                            <span className="font-bold">${(amount as number).toLocaleString()}</span>
                           </div>
                         ))}
                     </div>
                   </CardContent>
-                </Card>
+                </BrandCard>
               )}
 
               {/* Expense Review Table */}
-              <Card className="glass-effect">
+              <BrandCard className="glass-effect" variant="gradient" hover="glow">
                 <CardHeader>
                   <CardTitle>Expense Review & Classification</CardTitle>
                   <p className="text-sm text-muted-foreground">
@@ -1579,7 +1580,7 @@ export default function GodModePage() {
                     <ExpenseReviewTable userId="default-user" />
                   )}
                 </CardContent>
-              </Card>
+              </BrandCard>
             </TabsContent>
           </Tabs>
         </div>

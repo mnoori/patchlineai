@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -128,7 +129,7 @@ export function ArtistDiscoveryGrid({
 
   return (
     <>
-      <Card className="glass-effect">
+      <BrandCard className="glass-effect">
         <CardHeader>
           <CardTitle>Artist Discovery</CardTitle>
           <CardDescription>Artists with high growth potential that match your label's sound profile.</CardDescription>
@@ -145,7 +146,7 @@ export function ArtistDiscoveryGrid({
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,240,255,0.1)]">
+                  <BrandCard className="glass-effect hover:border-brand-cyan/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,240,255,0.1)]">
                     <CardHeader className="pb-3">
                       <div className="flex items-start gap-3">
                         <div className="relative">
@@ -160,12 +161,12 @@ export function ArtistDiscoveryGrid({
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold truncate">{artist.name}</h3>
+                          <h3 className="font-bold truncate">{artist.name}</h3>
                           <p className="text-sm text-muted-foreground truncate">{artist.track}</p>
                           <div className="flex flex-wrap gap-1 mt-2">
                             <Badge
                               variant="outline"
-                              className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/20"
+                              className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20"
                             >
                               {artist.genre}
                             </Badge>
@@ -185,7 +186,7 @@ export function ArtistDiscoveryGrid({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className={`h-8 w-8 ${artist.isWatchlisted ? "text-cosmic-teal" : "text-muted-foreground"}`}
+                          className={`h-8 w-8 ${artist.isWatchlisted ? "text-brand-cyan" : "text-muted-foreground"}`}
                           onClick={() => handleWatchlistToggle(artist)}
                         >
                           <motion.div
@@ -203,10 +204,10 @@ export function ArtistDiscoveryGrid({
 
                     <CardContent className="pt-0">
                       {/* AI Summary */}
-                      <div className="mb-3 bg-cosmic-midnight/50 rounded-md p-2 border border-cosmic-teal/10">
+                      <div className="mb-3 bg-brand-black/50 rounded-md p-2 border border-brand-cyan/10">
                         <div className="flex items-start gap-2">
-                          <MessageCircle className="h-4 w-4 text-cosmic-teal mt-0.5" />
-                          <p className="text-xs text-cosmic-teal/90">{artist.aiSummary}</p>
+                          <MessageCircle className="h-4 w-4 text-brand-cyan mt-0.5" />
+                          <p className="text-xs text-brand-cyan/90">{artist.aiSummary}</p>
                         </div>
                       </div>
 
@@ -216,7 +217,7 @@ export function ArtistDiscoveryGrid({
                           <TooltipProvider key={platform}>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="p-1 rounded-full bg-cosmic-midnight/50">
+                                <div className="p-1 rounded-full bg-brand-black/50">
                                   {getPlatformIcon(platform)}
                                 </div>
                               </TooltipTrigger>
@@ -253,20 +254,20 @@ export function ArtistDiscoveryGrid({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full mt-2 gap-2 text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
+                        className="w-full mt-2 gap-2 text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
                         onClick={() => handleDraftEmail(artist)}
                       >
                         <Mail className="h-3.5 w-3.5" />
                         Draft Email
                       </Button>
                     </CardContent>
-                  </Card>
+                  </BrandCard>
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
         </CardContent>
-      </Card>
+      </BrandCard>
 
       {/* Waveform Modal */}
       <Dialog open={showWaveform} onOpenChange={setShowWaveform}>
@@ -288,7 +289,7 @@ export function ArtistDiscoveryGrid({
                 {Array.from({ length: 50 }).map((_, i) => (
                   <motion.div
                     key={i}
-                    className="bg-cosmic-teal rounded-full"
+                    className="bg-brand-cyan rounded-full"
                     style={{
                       width: "2px",
                       height: `${Math.random() * 60 + 20}%`,
@@ -349,8 +350,8 @@ export function ArtistDiscoveryGrid({
               </Button>
               <Button
                 size="sm"
-                className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
-                onClick={() => {
+                className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
+                onClick={() = variant="outline"> {
                   if (selectedArtist) {
                     handlePitchToPlaylists(selectedArtist)
                     setShowWaveform(false)

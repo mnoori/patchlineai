@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -202,7 +203,7 @@ export default function SupervisorPage() {
       case 'delegating':
         return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
       default:
-        return <Info className="h-4 w-4 text-gray-500" />
+        return <Info className="h-4 w-4 text-muted-foreground" />
     }
   }
 
@@ -251,7 +252,7 @@ export default function SupervisorPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Chat Area */}
         <div className="lg:col-span-2">
-          <Card className="h-[800px] flex flex-col">
+          <BrandCard className="h-[800px] flex flex-col" variant="gradient" hover="glow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bot className="h-6 w-6" />
@@ -346,7 +347,7 @@ export default function SupervisorPage() {
                     }
                   }}
                 />
-                <Button type="submit" disabled={isLoading || !input.trim()}>
+                <Button type="submit" disabled={isLoading || !input.trim()} variant="outline">
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -355,12 +356,12 @@ export default function SupervisorPage() {
                 </Button>
               </form>
             </CardContent>
-          </Card>
+          </BrandCard>
         </div>
 
         {/* Real-time Traces */}
         <div className="lg:col-span-1">
-          <Card className="h-[800px] flex flex-col">
+          <BrandCard className="h-[800px] flex flex-col" variant="gradient" hover="glow">
             <CardHeader>
               <CardTitle className="text-sm">Real-time Activity</CardTitle>
               <CardDescription className="text-xs">
@@ -409,7 +410,7 @@ export default function SupervisorPage() {
                 </div>
               </ScrollArea>
             </CardContent>
-          </Card>
+          </BrandCard>
         </div>
       </div>
     </div>

@@ -48,7 +48,7 @@ function ContentIdeaCard({ idea, contentType, onClick }: ContentIdeaCardProps) {
   const getContentTypeColor = (type: ContentType) => {
     switch (type) {
       case "blog":
-        return "cosmic-teal"
+        return "brand-cyan"
       case "epk":
         return "purple-500"
       case "social":
@@ -58,7 +58,7 @@ function ContentIdeaCard({ idea, contentType, onClick }: ContentIdeaCardProps) {
       case "music-video":
         return "orange-500"
       default:
-        return "cosmic-teal"
+        return "brand-cyan"
     }
   }
 
@@ -66,9 +66,9 @@ function ContentIdeaCard({ idea, contentType, onClick }: ContentIdeaCardProps) {
     <Card
       className={cn(
         "cursor-pointer transition-all duration-300 transform relative group overflow-hidden",
-        "hover:scale-[1.02] hover:shadow-xl hover:shadow-cosmic-teal/20",
-        "border border-muted/30 hover:border-cosmic-teal/50",
-        isHovered && "ring-2 ring-cosmic-teal/30",
+        "hover:scale-[1.02] hover:shadow-xl hover:shadow-brand-cyan/20",
+        "border border-muted/30 hover:border-brand-cyan/50",
+        isHovered && "ring-2 ring-brand-cyan/30",
       )}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -116,7 +116,7 @@ function ContentIdeaCard({ idea, contentType, onClick }: ContentIdeaCardProps) {
             )}
           </div>
 
-          <h3 className="text-base font-bold mb-2 line-clamp-2 font-heading group-hover:text-cosmic-teal transition-colors">
+          <h3 className="text-base font-bold mb-2 line-clamp-2 font-heading group-hover:text-brand-cyan transition-colors">
             {idea.topic}
           </h3>
 
@@ -135,7 +135,7 @@ function ContentIdeaCard({ idea, contentType, onClick }: ContentIdeaCardProps) {
           <div
             className={cn(
               "flex items-center gap-2 text-xs transition-all duration-300",
-              isHovered ? "text-cosmic-teal opacity-100" : "text-muted-foreground opacity-70",
+              isHovered ? "text-brand-cyan opacity-100" : "text-muted-foreground opacity-70",
             )}
           >
             <Sparkles className="h-3 w-3" />
@@ -148,7 +148,7 @@ function ContentIdeaCard({ idea, contentType, onClick }: ContentIdeaCardProps) {
       {/* Hover Overlay */}
       <div
         className={cn(
-          "absolute inset-0 bg-gradient-to-r from-cosmic-teal/5 to-transparent transition-opacity duration-300",
+          "absolute inset-0 bg-gradient-to-r from-brand-cyan/5 to-transparent transition-opacity duration-300",
           isHovered ? "opacity-100" : "opacity-0",
         )}
       />
@@ -181,22 +181,22 @@ function WriteYourOwnCard({ contentType, onClick }: { contentType: ContentType; 
     <Card
       className={cn(
         "cursor-pointer transition-all duration-300 transform relative group",
-        "border-2 border-dashed border-cosmic-teal/30 hover:border-cosmic-teal/60",
-        "bg-gradient-to-br from-cosmic-teal/5 to-cosmic-teal/10 hover:from-cosmic-teal/10 hover:to-cosmic-teal/20",
-        "hover:scale-[1.02] hover:shadow-lg hover:shadow-cosmic-teal/20",
-        isHovered && "ring-2 ring-cosmic-teal/30",
+        "border-2 border-dashed border-brand-cyan/30 hover:border-brand-cyan/60",
+        "bg-gradient-to-br from-brand-cyan/5 to-brand-cyan/10 hover:from-brand-cyan/10 hover:to-brand-cyan/20",
+        "hover:scale-[1.02] hover:shadow-lg hover:shadow-brand-cyan/20",
+        isHovered && "ring-2 ring-brand-cyan/30",
       )}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <CardContent className="p-6 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-cosmic-teal/20 flex items-center justify-center group-hover:bg-cosmic-teal/30 transition-colors flex-shrink-0">
-          <Edit3 className="h-6 w-6 text-cosmic-teal" />
+        <div className="w-12 h-12 rounded-full bg-brand-cyan/20 flex items-center justify-center group-hover:bg-brand-cyan/30 transition-colors flex-shrink-0">
+          <Edit3 className="h-6 w-6 text-brand-cyan" />
         </div>
 
         <div className="flex-1">
-          <h3 className="text-lg font-bold font-heading group-hover:text-cosmic-teal transition-colors mb-1">
+          <h3 className="text-lg font-bold font-heading group-hover:text-brand-cyan transition-colors mb-1">
             {getContentTypeLabel(contentType)}
           </h3>
           <p className="text-sm text-muted-foreground mb-3">
@@ -206,7 +206,7 @@ function WriteYourOwnCard({ contentType, onClick }: { contentType: ContentType; 
           <div
             className={cn(
               "flex items-center gap-2 text-xs transition-all duration-300",
-              isHovered ? "text-cosmic-teal opacity-100" : "text-muted-foreground opacity-70",
+              isHovered ? "text-brand-cyan opacity-100" : "text-muted-foreground opacity-70",
             )}
           >
             <Zap className="h-3 w-3" />

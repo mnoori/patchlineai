@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
+import { Card as BrandCard } from '@/components/brand'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -169,7 +170,7 @@ export function ArtistDetailDrawer({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-8 w-8 ${artist.isWatchlisted ? "text-cosmic-teal" : "text-muted-foreground"} hover:scale-110 transition-transform`}
+                  className={`h-8 w-8 ${artist.isWatchlisted ? "text-brand-cyan" : "text-muted-foreground"} hover:scale-110 transition-transform`}
                   onClick={() => onWatchlistToggle(artist.id)}
                 >
                   <Star className={`h-5 w-5 ${artist.isWatchlisted ? "fill-current" : ""}`} />
@@ -187,10 +188,11 @@ export function ArtistDetailDrawer({
               transition={{ delay: 0.1 }}
             >
               <Button
-                className={`w-full h-12 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 ${
+                variant="outline"
+                className={`w-full h-12 font-bold shadow-lg hover:shadow-xl transition-all duration-300 ${
                   isInRoster 
                     ? 'bg-green-600 hover:bg-green-700 text-white cursor-default'
-                    : 'bg-gradient-to-r from-cosmic-teal to-purple-400 hover:from-cosmic-teal/90 hover:to-purple-400/90 text-black'
+                    : 'bg-gradient-to-r from-brand-cyan to-purple-400 hover:from-brand-cyan/90 hover:to-purple-400/90 text-black'
                 }`}
                 onClick={handleAddToRoster}
                 disabled={addedToRoster || isInRoster}
@@ -250,14 +252,14 @@ export function ArtistDetailDrawer({
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-cosmic-midnight/50 to-purple-900/20 rounded-xl p-4 border border-cosmic-teal/20 shadow-lg"
+            className="bg-gradient-to-br from-brand-black/50 to-purple-900/20 rounded-xl p-4 border border-brand-cyan/20 shadow-lg"
           >
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-cosmic-teal/20 rounded-lg">
-                <MessageCircle className="h-5 w-5 text-cosmic-teal" />
+              <div className="p-2 bg-brand-cyan/20 rounded-lg">
+                <MessageCircle className="h-5 w-5 text-brand-cyan" />
               </div>
               <div>
-                <p className="text-sm font-medium text-cosmic-teal mb-1">AI Insights</p>
+                <p className="text-sm font-medium text-brand-cyan mb-1">AI Insights</p>
                 <p className="text-white/90">{artist.aiSummary}</p>
               </div>
             </div>
@@ -281,20 +283,20 @@ export function ArtistDetailDrawer({
 
           {/* Biography */}
           {artist.biography && (
-            <Card>
+            <BrandCard>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Biography</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">{artist.biography}</p>
               </CardContent>
-            </Card>
+            </BrandCard>
           )}
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
           {/* Audio Preview */}
-          <Card>
+          <BrandCard>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Audio Preview</CardTitle>
             </CardHeader>
@@ -304,7 +306,7 @@ export function ArtistDetailDrawer({
                   {Array.from({ length: 50 }).map((_, i) => (
                     <motion.div
                       key={i}
-                      className="bg-cosmic-teal rounded-full"
+                      className="bg-brand-cyan rounded-full"
                       style={{
                         width: "2px",
                         height: `${Math.random() * 60 + 20}%`,
@@ -334,10 +336,10 @@ export function ArtistDetailDrawer({
                 </Button>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
 
           {/* Key Metrics */}
-          <Card>
+          <BrandCard>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Key Metrics</CardTitle>
             </CardHeader>
@@ -387,10 +389,10 @@ export function ArtistDetailDrawer({
                 <p className={`font-medium ${artist.engagement === 'Coming soon' ? 'text-muted-foreground text-sm' : ''}`}>{artist.engagement}</p>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
 
           {/* Recent Activity */}
-          <Card>
+          <BrandCard>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
             </CardHeader>
@@ -400,11 +402,11 @@ export function ArtistDetailDrawer({
                 {artist.recentActivity}
               </p>
             </CardContent>
-          </Card>
+          </BrandCard>
 
           {/* Playlists */}
           {artist.playlists && artist.playlists.length > 0 && (
-            <Card>
+            <BrandCard>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Featured Playlists</CardTitle>
               </CardHeader>
@@ -425,11 +427,11 @@ export function ArtistDetailDrawer({
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
           )}
 
           {/* Top Markets */}
-          <Card>
+          <BrandCard>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Top Markets</CardTitle>
             </CardHeader>
@@ -443,11 +445,11 @@ export function ArtistDetailDrawer({
                 ))}
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
 
           {/* Fan Demographics */}
           {artist.fanDemographics && (
-            <Card>
+            <BrandCard>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Fan Demographics</CardTitle>
               </CardHeader>
@@ -465,11 +467,11 @@ export function ArtistDetailDrawer({
                   <p className="text-sm">{artist.fanDemographics.locations}</p>
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
           )}
 
           {/* Similar Artists */}
-          <Card>
+          <BrandCard>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Similar Artists</CardTitle>
             </CardHeader>
@@ -482,15 +484,15 @@ export function ArtistDetailDrawer({
                 ))}
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
 
           {/* Potential Revenue */}
-          <Card>
+          <BrandCard>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Potential Revenue</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className={`text-xl font-semibold flex items-center gap-1 ${artist.potentialRevenue === 'Coming soon' ? 'text-muted-foreground text-base' : 'text-cosmic-teal'}`}>
+              <p className={`text-xl font-bold flex items-center gap-1 ${artist.potentialRevenue === 'Coming soon' ? 'text-muted-foreground text-base' : 'text-brand-cyan'}`}>
                 <DollarSign className="h-5 w-5" />
                 {artist.potentialRevenue}
               </p>
@@ -498,7 +500,7 @@ export function ArtistDetailDrawer({
                 Estimated annual revenue based on current growth trajectory
               </p>
             </CardContent>
-          </Card>
+          </BrandCard>
         </div>
 
         <SheetFooter className="mt-6 flex flex-row gap-2">
@@ -508,7 +510,7 @@ export function ArtistDetailDrawer({
           </Button>
 
           <Button
-            className="flex-1 gap-2 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+            className="flex-1 gap-2 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
             onClick={() => onPitchToPlaylists(artist)}
           >
             <ListMusic className="h-4 w-4" />

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Card } from '@/components/brand'
 import { AgentHeader } from "@/components/agents/agent-header"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -40,7 +41,7 @@ export default function LegalAgentPage() {
           <Button variant="outline" size="sm" className="gap-1">
             <Download className="h-4 w-4" /> Export
           </Button>
-          <Button size="sm" className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+          <Button size="sm" className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
             <Plus className="h-4 w-4" /> New Contract
           </Button>
         </div>

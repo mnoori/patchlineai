@@ -15,11 +15,11 @@ export const CHART_COLORS = {
   // Extended palette for multiple data series
   series: [
     COLORS.primary.cyan,         // #00E6E4
-    COLORS.primary.brightBlue,    // #0068FF
-    COLORS.gradient.middle,       // #0068FF
+    COLORS.primary.brightBlue,    // var(--brand-bright-blue)
+    COLORS.gradient.middle,       // var(--brand-bright-blue)
     COLORS.semantic.success,      // #10B981
     COLORS.semantic.warning,      // #F59E0B
-    COLORS.primary.deepBlue,      // #002772
+    COLORS.primary.deepBlue,      // var(--brand-deep-blue)
     COLORS.semantic.info,         // #3B82F6
     COLORS.semantic.error,        // #EF4444
   ],

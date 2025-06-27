@@ -6,38 +6,57 @@
 
 @layer base {
   :root {
-    /* Brand Colors */
-    --brand-black: #010102;
-    --brand-deep-blue: #002772;
-    --brand-bright-blue: #0068FF;
-    --brand-cyan: #00E6E2;
-    
-    /* Gradient Colors */
-    --brand-gradient-start: #70F7EA;
-    --brand-gradient-middle: #2A09CC;
-    --brand-gradient-end: #090030;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Brand Colors - Dark Theme */
+    --brand-cyan: 180 100% 45%;        /* #00E6E4 */
+    --brand-bright-blue: 210 100% 50%; /* #0068FF */
+    --brand-black: 220 70% 3%;         /* #010102 */
+    --brand-deep-blue: 252 100% 9%;    /* #002772 */
+    --cosmic-purple: 270 100% 30%;     /* #9900FF */
+    --cosmic-teal: 180 100% 40%;       /* #00CCCC */
     
     /* UI Colors - Dark Theme */
-    --background: 0 2% 1%;        /* #010102 */
-    --foreground: 0 0% 98%;       /* #FAFAFA */
-    --card: 0 3% 10%;             /* #1A1A1B */
-    --card-foreground: 0 0% 98%;
-    --popover: 0 3% 10%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 215 100% 50%;      /* #0068FF */
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 32%;            /* #525252 */
-    --muted-foreground: 0 0% 65%;
-    --accent: 215 100% 50%;       /* #0068FF */
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;           /* #262626 */
-    --input: 0 0% 15%;
-    --ring: 215 100% 50%;         /* #0068FF */
-    --radius: 0.75rem;
+    --background: 220 70% 3%;       /* #010102 - brand black */
+    --foreground: 0 0% 98%;         /* #FAFAFA */
+    --card: 0 3% 10%;               /* #1A1A1B */
+    --card-foreground: 0 0% 98%;    /* #FAFAFA */
+    --popover: 0 3% 10%;            /* #1A1A1B */
+    --popover-foreground: 0 0% 98%; /* #FAFAFA */
+    --primary: 180 100% 45%;        /* #00E6E4 - Brand Cyan */
+    --primary-foreground: 220 70% 3%; /* #010102 - Brand Black */
+    --secondary: 252 100% 9%;       /* #002772 - Brand Deep Blue */
+    --secondary-foreground: 0 0% 98%; /* #FAFAFA */
+    --muted: 0 0% 15%;              /* #262626 */
+    --muted-foreground: 0 0% 64%;   /* #A3A3A3 */
+    --accent: 210 100% 50%;         /* #0068FF - Brand Bright Blue */
+    --accent-foreground: 0 0% 98%;  /* #FAFAFA */
+    --destructive: 0 62.8% 30.6%;   /* #7F1D1D */
+    --destructive-foreground: 0 0% 98%; /* #FAFAFA */
+    --border: 0 0% 15%;             /* #262626 */
+    --input: 0 0% 15%;              /* #262626 */
+    --ring: 180 100% 45%;           /* #00E6E4 - Brand Cyan */
   }
 }
 
@@ -134,7 +153,9 @@
 
 /* Chat button active state with glow effect */
 .chat-button-active {
-  @apply bg-brand-bright-blue/20 text-brand-bright-blue border border-brand-bright-blue/30;
+  background-color: rgba(0, 104, 255, 0.2);
+  color: #0068FF;
+  border: 1px solid rgba(0, 104, 255, 0.3);
   box-shadow: 0 0 15px rgba(0, 104, 255, 0.3), inset 0 0 5px rgba(0, 104, 255, 0.1);
   position: relative;
   overflow: hidden;
@@ -166,43 +187,46 @@
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted));
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground));
-}
-
-/* Custom scrollbar styling for chat interface */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--brand-bright-blue);
-  opacity: 0.3;
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  opacity: 0.5;
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Custom scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
+  }
+  
+  .dark ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
 }
 
 /* Enhanced pulsing glow effect for brand button */

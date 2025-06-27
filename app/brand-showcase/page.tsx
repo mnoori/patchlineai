@@ -44,9 +44,9 @@ export default function BrandShowcasePage() {
       />
 
       {/* Brand Components Showcase */}
-      <div className="max-w-7xl mx-auto space-y-12 p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4 p-8 pb-0">
           <GradientText className="text-4xl font-medium">
             {BRAND.fullName} Brand System
           </GradientText>
@@ -56,7 +56,7 @@ export default function BrandShowcasePage() {
         </div>
 
         {/* Logo Variations */}
-        <section className="space-y-6">
+        <section className="space-y-6 p-8 pt-12">
           <GradientText className="text-3xl font-medium">Logo Variations</GradientText>
           <div className="grid grid-cols-4 gap-8 bg-card p-8 rounded-lg">
             <div className="text-center space-y-2">
@@ -79,13 +79,13 @@ export default function BrandShowcasePage() {
         </section>
 
         {/* Logo Usage Guidelines */}
-        <section className="space-y-6">
+        <section className="space-y-6 p-8">
           <GradientText className="text-3xl font-medium">Logo Usage Guidelines</GradientText>
           <LogoShowcase />
         </section>
 
         {/* Color Palette */}
-        <section className="space-y-6">
+        <section className="space-y-6 p-8">
           <h2 className="text-3xl font-bold">Color Palette</h2>
           
           {/* Primary Colors */}
@@ -135,7 +135,7 @@ export default function BrandShowcasePage() {
         </section>
 
         {/* Typography */}
-        <section className="space-y-6">
+        <section className="space-y-6 p-8">
           <h2 className="text-3xl font-bold">Typography</h2>
           <div className="space-y-4 bg-card p-8 rounded-lg">
             <div className="space-y-2">
@@ -162,7 +162,7 @@ export default function BrandShowcasePage() {
         </section>
 
         {/* Gradient Backgrounds */}
-        <section className="space-y-6">
+        <section className="space-y-6 p-8">
           <GradientText className="text-3xl font-medium">Gradient Backgrounds</GradientText>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Cyan (#00E6E4) flows from top to black (#010102) at bottom</p>
@@ -247,7 +247,7 @@ export default function BrandShowcasePage() {
         </section>
 
         {/* Gradient Text Examples */}
-        <section className="space-y-6">
+        <section className="space-y-6 p-8">
           <h2 className="text-3xl font-bold">Gradient Text</h2>
           <div className="space-y-4">
             <GradientText className="text-4xl font-bold">
@@ -266,7 +266,7 @@ export default function BrandShowcasePage() {
         </section>
 
         {/* UI Components */}
-        <section className="space-y-6">
+        <section className="space-y-6 p-8">
           <GradientText className="text-3xl font-medium">UI Components</GradientText>
           
           {/* Cards */}
@@ -367,7 +367,7 @@ export default function BrandShowcasePage() {
         </section>
 
         {/* Spacing System */}
-        <section className="space-y-6">
+        <section className="space-y-6 p-8">
           <h2 className="text-3xl font-bold">Spacing System</h2>
           <div className="space-y-4">
             {Object.entries(SPACING).map(([name, value]) => (
@@ -384,7 +384,7 @@ export default function BrandShowcasePage() {
         </section>
 
         {/* Border Radius */}
-        <section className="space-y-6">
+        <section className="space-y-6 p-8">
           <h2 className="text-3xl font-bold">Border Radius</h2>
           <div className="grid grid-cols-6 gap-4">
             {Object.entries(RADIUS).map(([name, value]) => (

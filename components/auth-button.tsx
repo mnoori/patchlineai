@@ -140,7 +140,7 @@ export function AuthButton() {
 
   return (
     <div className="flex items-center space-x-4">
-      <Button asChild className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+      <Button asChild className="bg-brand-cyan hover:bg-brand-cyan/90 text-black">
         <Link href="/login">Log in</Link>
       </Button>
     </div>

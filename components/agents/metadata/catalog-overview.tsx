@@ -2,9 +2,10 @@
 
 // First, let's make sure we have state for the drawer and selected item
 import { useState } from "react"
+import { Card as BrandCard } from '@/components/brand'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { AlertTriangle, CheckCircle, Settings, Music2, BarChart2, Play, XCircle, Lock } from "lucide-react"
@@ -122,49 +123,49 @@ export function CatalogOverview() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="glass-effect">
+        <BrandCard className="glass-effect">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Releases</CardTitle>
-            <Music2 className="h-4 w-4 text-cosmic-teal" />
+            <Music2 className="h-4 w-4 text-brand-cyan" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">142</div>
             <p className="text-xs text-muted-foreground">Across all platforms</p>
           </CardContent>
-        </Card>
-        <Card className="glass-effect">
+        </BrandCard>
+        <BrandCard className="glass-effect">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Metadata Health</CardTitle>
-            <CheckCircle className="h-4 w-4 text-cosmic-teal" />
+            <CheckCircle className="h-4 w-4 text-brand-cyan" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">87%</div>
             <p className="text-xs text-muted-foreground">Overall completeness</p>
           </CardContent>
-        </Card>
-        <Card className="glass-effect">
+        </BrandCard>
+        <BrandCard className="glass-effect">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Issues</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-cosmic-teal" />
+            <AlertTriangle className="h-4 w-4 text-brand-cyan" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">24</div>
             <p className="text-xs text-muted-foreground">Across 18 releases</p>
           </CardContent>
-        </Card>
-        <Card className="glass-effect">
+        </BrandCard>
+        <BrandCard className="glass-effect">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Sync Ready</CardTitle>
-            <Music2 className="h-4 w-4 text-cosmic-teal" />
+            <Music2 className="h-4 w-4 text-brand-cyan" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">68%</div>
             <p className="text-xs text-muted-foreground">Of catalog is sync-ready</p>
           </CardContent>
-        </Card>
+        </BrandCard>
       </div>
 
-      <Card className="glass-effect">
+      <BrandCard className="glass-effect">
         <CardHeader>
           <CardTitle>Catalog Overview</CardTitle>
           <CardDescription>Metadata health across your releases</CardDescription>
@@ -191,8 +192,8 @@ export function CatalogOverview() {
                     >
                       <td className="p-4 align-middle">
                         <div className="flex items-center gap-3">
-                          <div className="rounded-md bg-cosmic-teal/10 p-2">
-                            <Music2 className="h-4 w-4 text-cosmic-teal" />
+                          <div className="rounded-md bg-brand-cyan/10 p-2">
+                            <Music2 className="h-4 w-4 text-brand-cyan" />
                           </div>
                           <div>
                             <div className="font-medium">{item.title}</div>
@@ -229,7 +230,7 @@ export function CatalogOverview() {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </BrandCard>
 
       {/* Item Detail Drawer */}
       <Sheet open={!!openDrawer} onOpenChange={(open) => !open && setOpenDrawer(null)}>
@@ -238,7 +239,7 @@ export function CatalogOverview() {
             <>
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
-                  <Music2 className="h-5 w-5 text-cosmic-teal" />
+                  <Music2 className="h-5 w-5 text-brand-cyan" />
                   {selectedItem.title}
                 </SheetTitle>
                 <SheetDescription>
@@ -257,8 +258,8 @@ export function CatalogOverview() {
 
                   <div className="mt-4">
                     <Button
-                      variant="default"
-                      className="gap-2 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                      variant="outline"
+                      className="gap-2 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                       onClick={() => {
                         setOpenDrawer(null)
                         // This would navigate to metadata health in a real implementation
@@ -283,7 +284,7 @@ export function CatalogOverview() {
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     <div className="text-center p-2 rounded-lg border">
                       <div className="text-sm font-medium">Required Fields</div>
-                      <div className="text-lg font-bold text-cosmic-teal">100%</div>
+                      <div className="text-lg font-bold text-brand-cyan">100%</div>
                     </div>
                     <div className="text-center p-2 rounded-lg border">
                       <div className="text-sm font-medium">Optional Fields</div>

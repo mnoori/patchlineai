@@ -52,7 +52,7 @@ export function AgentTabs({ tabs, defaultValue, onValueChange }: AgentTabsProps)
 
         {/* DNA Line Indicator */}
         <motion.div
-          className="absolute bottom-0 h-0.5 bg-gradient-to-r from-cosmic-teal to-cosmic-pink"
+          className="absolute bottom-0 h-0.5 bg-gradient-to-r from-brand-cyan to-gradient-middle"
           animate={{
             left: indicatorStyle.left,
             width: indicatorStyle.width,

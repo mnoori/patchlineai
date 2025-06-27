@@ -2,11 +2,12 @@
 
 import Link from "next/link"
 import { Check } from "lucide-react"
-import { Button, GradientOrbs, PageGradient, Card } from "@/components/brand"
+import { GradientOrbs, PageGradient, Card, Button } from "@/components/brand"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { TIER_CONFIGS, UserTier } from "@/lib/tier-config"
 import { Badge } from "@/components/ui/badge"
+
 
 export default function PricingPage() {
   // Filter out GOD_MODE from public pricing

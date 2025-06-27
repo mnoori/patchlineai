@@ -229,9 +229,9 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
         {/* Glassmorphism background overlay */}
         <div className="absolute inset-0 pointer-events-none bg-background/80 backdrop-blur-[2px] brightness-[0.96] -z-10" />
         
-        <SheetHeader className="border-b border-cosmic-teal/20 pb-4">
+        <SheetHeader className="border-b border-brand-cyan/20 pb-4">
           <SheetTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-cosmic-teal" />
+            <FileText className="h-5 w-5 text-brand-cyan" />
             {document.filename}
           </SheetTitle>
           <SheetDescription>
@@ -249,7 +249,7 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6 mt-6">
               {/* Document Info */}
-              <Card className="glass-effect bg-cosmic-midnight/50">
+              <Card className="glass-effect bg-brand-black/50">
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     Document Information
@@ -320,10 +320,10 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
               {/* AI Analysis Section */}
               {isLoadingTextract ? (
-                <Card className="glass-effect bg-cosmic-midnight/50">
+                <Card className="glass-effect bg-brand-black/50">
                   <CardContent className="p-8">
                     <div className="flex flex-col items-center justify-center">
-                      <Loader2 className="h-8 w-8 text-cosmic-teal animate-spin mb-4" />
+                      <Loader2 className="h-8 w-8 text-brand-cyan animate-spin mb-4" />
                       <p className="text-muted-foreground">Loading AI analysis...</p>
                     </div>
                   </CardContent>
@@ -332,17 +332,17 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                 <>
                   {/* AI Insights */}
                   {(aiInsights || isLoadingInsights) && (
-                    <Card className="glass-effect bg-gradient-to-br from-cosmic-teal/10 to-cosmic-purple/10 border-cosmic-teal/20">
+                    <Card className="glass-effect bg-gradient-to-br from-brand-cyan/10 to-cosmic-purple/10 border-brand-cyan/20">
                       <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
-                          <Brain className="h-5 w-5 text-cosmic-teal" />
+                          <Brain className="h-5 w-5 text-brand-cyan" />
                           AI Document Analysis
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
                         {isLoadingInsights ? (
                           <div className="flex items-center gap-3">
-                            <Loader2 className="h-4 w-4 animate-spin text-cosmic-teal" />
+                            <Loader2 className="h-4 w-4 animate-spin text-brand-cyan" />
                             <span className="text-sm text-muted-foreground">Analyzing document with AI...</span>
                           </div>
                         ) : aiInsights ? (
@@ -351,8 +351,8 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                               className="text-sm space-y-3"
                               dangerouslySetInnerHTML={{ 
                                 __html: aiInsights
-                                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-cosmic-teal">$1</strong>')
-                                  .replace(/##\s+(.*?)$/gm, '<h3 class="text-base font-semibold mt-4 mb-2 text-cosmic-teal">$1</h3>')
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-brand-cyan">$1</strong>')
+                                  .replace(/##\s+(.*?)$/gm, '<h3 class="text-base font-semibold mt-4 mb-2 text-brand-cyan">$1</h3>')
                                   .replace(/\n/g, '<br />')
                                   .replace(/\d+\.\s+/g, '<br />• ')
                               }}
@@ -365,10 +365,10 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
                   {/* Extracted Text Preview */}
                   {textractData.text && (
-                    <Card className="glass-effect bg-cosmic-midnight/50">
+                    <Card className="glass-effect bg-brand-black/50">
                       <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
-                          <Brain className="h-5 w-5 text-cosmic-teal" />
+                          <Brain className="h-5 w-5 text-brand-cyan" />
                           AI Extracted Text Preview
                         </CardTitle>
                       </CardHeader>
@@ -382,10 +382,10 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
                   {/* Quick Summary Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="glass-effect bg-cosmic-midnight/50">
+                    <Card className="glass-effect bg-brand-black/50">
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2">
-                          <FileCheck className="h-5 w-5 text-cosmic-teal" />
+                          <FileCheck className="h-5 w-5 text-brand-cyan" />
                           <div>
                             <p className="text-sm font-medium">Confidence</p>
                             <p className="text-lg font-bold">{textractData.confidence?.toFixed(1)}%</p>
@@ -394,10 +394,10 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                       </CardContent>
                     </Card>
                     
-                    <Card className="glass-effect bg-cosmic-midnight/50">
+                    <Card className="glass-effect bg-brand-black/50">
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2">
-                          <Table className="h-5 w-5 text-cosmic-teal" />
+                          <Table className="h-5 w-5 text-brand-cyan" />
                           <div>
                             <p className="text-sm font-medium">Tables Found</p>
                             <p className="text-lg font-bold">{textractData.tables?.length || 0}</p>
@@ -406,10 +406,10 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                       </CardContent>
                     </Card>
 
-                    <Card className="glass-effect bg-cosmic-midnight/50">
+                    <Card className="glass-effect bg-brand-black/50">
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2">
-                          <Brain className="h-5 w-5 text-cosmic-teal" />
+                          <Brain className="h-5 w-5 text-brand-cyan" />
                           <div>
                             <p className="text-sm font-medium">Key-Value Pairs</p>
                             <p className="text-lg font-bold">{textractData.forms?.length || 0}</p>
@@ -420,7 +420,7 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                   </div>
                 </>
               ) : (
-                <Card className="glass-effect bg-cosmic-midnight/50">
+                <Card className="glass-effect bg-brand-black/50">
                   <CardContent className="p-8">
                     <div className="flex flex-col items-center justify-center">
                       <Brain className="h-8 w-8 text-muted-foreground mb-4" />
@@ -435,7 +435,7 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
               {/* Tags */}
               {document.tags.length > 0 && (
-                <Card className="glass-effect bg-cosmic-midnight/50">
+                <Card className="glass-effect bg-brand-black/50">
                   <CardHeader>
                     <CardTitle className="text-base flex items-center gap-2">
                       <Tag className="h-5 w-5" />
@@ -459,17 +459,17 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
             <TabsContent value="extracted" className="space-y-6 mt-6">
               {isLoadingTextract ? (
                 <div className="flex flex-col items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 text-cosmic-teal animate-spin mb-4" />
+                  <Loader2 className="h-8 w-8 text-brand-cyan animate-spin mb-4" />
                   <p className="text-muted-foreground">Loading AI analysis...</p>
                 </div>
               ) : textractData ? (
                 <>
                   {/* Extracted Text */}
                   {textractData.text && (
-                    <Card className="glass-effect bg-cosmic-midnight/50">
+                    <Card className="glass-effect bg-brand-black/50">
                       <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
-                          <Brain className="h-5 w-5 text-cosmic-teal" />
+                          <Brain className="h-5 w-5 text-brand-cyan" />
                           Extracted Text
                         </CardTitle>
                       </CardHeader>
@@ -479,9 +479,9 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                             <>
                               {/* Processing Statistics */}
                               {textractResults.processingStats && (
-                                <Card className="glass-effect bg-cosmic-midnight/50">
+                                <Card className="glass-effect bg-brand-black/50">
                                   <CardHeader>
-                                    <CardTitle className="text-cosmic-teal text-sm flex items-center gap-2">
+                                    <CardTitle className="text-brand-cyan text-sm flex items-center gap-2">
                                       <Activity className="h-4 w-4" />
                                       Processing Statistics
                                     </CardTitle>
@@ -513,7 +513,7 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                                         <div className="flex items-center gap-2">
                                           <div className="w-16 bg-muted/30 rounded-full h-1">
                                             <div 
-                                              className="h-1 bg-cosmic-teal rounded-full" 
+                                              className="h-1 bg-brand-cyan rounded-full" 
                                               style={{ width: `${Math.min(textractResults.confidence, 100)}%` }}
                                             />
                                           </div>
@@ -529,9 +529,9 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
                               {/* Extracted Text */}
                               {textractResults.text && (
-                                <Card className="glass-effect bg-cosmic-midnight/50">
+                                <Card className="glass-effect bg-brand-black/50">
                                   <CardHeader>
-                                    <CardTitle className="text-cosmic-teal text-sm flex items-center gap-2">
+                                    <CardTitle className="text-brand-cyan text-sm flex items-center gap-2">
                                       <FileText className="h-4 w-4" />
                                       Extracted Text ({textractResults.text.length} characters)
                                     </CardTitle>
@@ -548,9 +548,9 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
                               {/* Tables */}
                               {textractResults.tables && textractResults.tables.length > 0 && (
-                                <Card className="glass-effect bg-cosmic-midnight/50">
+                                <Card className="glass-effect bg-brand-black/50">
                                   <CardHeader>
-                                    <CardTitle className="text-cosmic-teal text-sm flex items-center gap-2">
+                                    <CardTitle className="text-brand-cyan text-sm flex items-center gap-2">
                                       <Table className="h-4 w-4" />
                                       Tables ({textractResults.tables.length})
                                     </CardTitle>
@@ -599,9 +599,9 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
                               {/* Key-Value Pairs (Forms) */}
                               {textractResults.forms && textractResults.forms.length > 0 && (
-                                <Card className="glass-effect bg-cosmic-midnight/50">
+                                <Card className="glass-effect bg-brand-black/50">
                                   <CardHeader>
-                                    <CardTitle className="text-cosmic-teal text-sm flex items-center gap-2">
+                                    <CardTitle className="text-brand-cyan text-sm flex items-center gap-2">
                                       <FileText className="h-4 w-4" />
                                       Key-Value Pairs ({textractResults.forms.length})
                                     </CardTitle>
@@ -614,7 +614,7 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                                           className="flex items-start justify-between p-3 rounded-lg bg-black/20 border border-border/10"
                                         >
                                           <div className="flex-1 space-y-1">
-                                            <div className="text-xs font-medium text-cosmic-teal">
+                                            <div className="text-xs font-medium text-brand-cyan">
                                               {form.key}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
@@ -635,9 +635,9 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
                               {/* Metadata */}
                               {textractResults.metadata && (
-                                <Card className="glass-effect bg-cosmic-midnight/50">
+                                <Card className="glass-effect bg-brand-black/50">
                                   <CardHeader>
-                                    <CardTitle className="text-cosmic-teal text-sm flex items-center gap-2">
+                                    <CardTitle className="text-brand-cyan text-sm flex items-center gap-2">
                                       <Settings className="h-4 w-4" />
                                       Processing Metadata
                                     </CardTitle>
@@ -666,7 +666,7 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                               )}
                             </>
                           ) : (
-                            <Card className="glass-effect bg-cosmic-midnight/50">
+                            <Card className="glass-effect bg-brand-black/50">
                               <CardContent className="p-8">
                                 <div className="flex flex-col items-center justify-center">
                                   <Brain className="h-8 w-8 text-muted-foreground mb-4" />
@@ -696,7 +696,7 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
             {/* Raw Data Tab */}
             <TabsContent value="raw" className="space-y-6 mt-6">
-              <Card className="glass-effect bg-cosmic-midnight/50">
+              <Card className="glass-effect bg-brand-black/50">
                 <CardHeader>
                   <CardTitle className="text-base">Raw Document Data</CardTitle>
                 </CardHeader>
@@ -712,16 +712,16 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
             <TabsContent value="textract" className="space-y-6 mt-6">
               {isLoadingTextract ? (
                 <div className="text-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin mx-auto mb-3 text-cosmic-teal" />
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto mb-3 text-brand-cyan" />
                   <p className="text-sm text-muted-foreground">Loading Textract data...</p>
                 </div>
               ) : textractResults ? (
                 <div className="space-y-6">
                   {/* Processing Statistics */}
                   {textractResults.processingStats && (
-                    <Card className="glass-effect bg-cosmic-midnight/50">
+                    <Card className="glass-effect bg-brand-black/50">
                       <CardHeader>
-                        <CardTitle className="text-cosmic-teal text-sm flex items-center gap-2">
+                        <CardTitle className="text-brand-cyan text-sm flex items-center gap-2">
                           <Activity className="h-4 w-4" />
                           Processing Statistics
                         </CardTitle>
@@ -753,7 +753,7 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                             <div className="flex items-center gap-2">
                               <div className="w-16 bg-muted/30 rounded-full h-1">
                                 <div 
-                                  className="h-1 bg-cosmic-teal rounded-full" 
+                                  className="h-1 bg-brand-cyan rounded-full" 
                                   style={{ width: `${Math.min(textractResults.confidence, 100)}%` }}
                                 />
                               </div>
@@ -769,9 +769,9 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
                   {/* Extracted Text */}
                   {textractResults.text && (
-                    <Card className="glass-effect bg-cosmic-midnight/50">
+                    <Card className="glass-effect bg-brand-black/50">
                       <CardHeader>
-                        <CardTitle className="text-cosmic-teal text-sm flex items-center gap-2">
+                        <CardTitle className="text-brand-cyan text-sm flex items-center gap-2">
                           <FileText className="h-4 w-4" />
                           Extracted Text ({textractResults.text.length} characters)
                         </CardTitle>
@@ -788,9 +788,9 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
                   {/* Tables */}
                   {textractResults.tables && textractResults.tables.length > 0 && (
-                    <Card className="glass-effect bg-cosmic-midnight/50">
+                    <Card className="glass-effect bg-brand-black/50">
                       <CardHeader>
-                        <CardTitle className="text-cosmic-teal text-sm flex items-center gap-2">
+                        <CardTitle className="text-brand-cyan text-sm flex items-center gap-2">
                           <Table className="h-4 w-4" />
                           Tables ({textractResults.tables.length})
                         </CardTitle>
@@ -839,9 +839,9 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
                   {/* Key-Value Pairs (Forms) */}
                   {textractResults.forms && textractResults.forms.length > 0 && (
-                    <Card className="glass-effect bg-cosmic-midnight/50">
+                    <Card className="glass-effect bg-brand-black/50">
                       <CardHeader>
-                        <CardTitle className="text-cosmic-teal text-sm flex items-center gap-2">
+                        <CardTitle className="text-brand-cyan text-sm flex items-center gap-2">
                           <FileText className="h-4 w-4" />
                           Key-Value Pairs ({textractResults.forms.length})
                         </CardTitle>
@@ -854,7 +854,7 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
                               className="flex items-start justify-between p-3 rounded-lg bg-black/20 border border-border/10"
                             >
                               <div className="flex-1 space-y-1">
-                                <div className="text-xs font-medium text-cosmic-teal">
+                                <div className="text-xs font-medium text-brand-cyan">
                                   {form.key}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
@@ -875,9 +875,9 @@ export function DocumentViewerSheet({ document, trigger, onDelete }: DocumentVie
 
                   {/* Metadata */}
                   {textractResults.metadata && (
-                    <Card className="glass-effect bg-cosmic-midnight/50">
+                    <Card className="glass-effect bg-brand-black/50">
                       <CardHeader>
-                        <CardTitle className="text-cosmic-teal text-sm flex items-center gap-2">
+                        <CardTitle className="text-brand-cyan text-sm flex items-center gap-2">
                           <Settings className="h-4 w-4" />
                           Processing Metadata
                         </CardTitle>

@@ -700,7 +700,7 @@ export default function CatalogPage() {
         <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
-              <Music2 className="h-5 w-5 text-cosmic-teal" />
+              <Music2 className="h-5 w-5 text-brand-cyan" />
               {track.title}
             </SheetTitle>
             <SheetDescription>
@@ -717,8 +717,8 @@ export default function CatalogPage() {
 
               <div className="mt-4">
                 <Button
-                  variant="default"
-                  className="gap-2 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                  variant="outline"
+                  className="gap-2 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                   onClick={() => {
                     setOpenTrackDrawer(null)
                     // This would navigate to metadata health in a real implementation
@@ -737,12 +737,12 @@ export default function CatalogPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Streams</p>
-                  <p className="text-lg font-semibold">{track.streams}</p>
+                  <p className="text-lg font-bold">{track.streams}</p>
                   {renderTrendIndicator(track.streamsTrend, track.streamsDelta)}
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Revenue</p>
-                  <p className="text-lg font-semibold">{track.revenue}</p>
+                  <p className="text-lg font-bold">{track.revenue}</p>
                   {renderTrendIndicator(track.revenueTrend, track.revenueDelta)}
                 </div>
               </div>
@@ -793,7 +793,7 @@ export default function CatalogPage() {
         <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
-              <Music2 className="h-5 w-5 text-cosmic-teal" />
+              <Music2 className="h-5 w-5 text-brand-cyan" />
               {album.title}
             </SheetTitle>
             <SheetDescription>
@@ -810,8 +810,8 @@ export default function CatalogPage() {
 
               <div className="mt-4">
                 <Button
-                  variant="default"
-                  className="gap-2 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                  variant="outline"
+                  className="gap-2 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                   onClick={() => {
                     setOpenAlbumDrawer(null)
                     // This would navigate to metadata health in a real implementation
@@ -831,7 +831,7 @@ export default function CatalogPage() {
                 {album.topTracks.map((track, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-cosmic-teal/10 flex items-center justify-center text-xs text-cosmic-teal">
+                      <div className="w-6 h-6 rounded-full bg-brand-cyan/10 flex items-center justify-center text-xs text-brand-cyan">
                         {index + 1}
                       </div>
                       <span className="text-sm">{track.title}</span>
@@ -870,12 +870,12 @@ export default function CatalogPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Total Streams</p>
-                  <p className="text-lg font-semibold">{album.totalStreams}</p>
+                  <p className="text-lg font-bold">{album.totalStreams}</p>
                   {renderTrendIndicator(album.streamsTrend, album.streamsDelta)}
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Total Revenue</p>
-                  <p className="text-lg font-semibold">{album.totalRevenue}</p>
+                  <p className="text-lg font-bold">{album.totalRevenue}</p>
                   {renderTrendIndicator(album.revenueTrend, album.revenueDelta)}
                 </div>
               </div>
@@ -887,7 +887,7 @@ export default function CatalogPage() {
                 <Play className="h-4 w-4" />
                 Play Album
               </Button>
-              <Button variant="default" className="flex-1 gap-2 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+              <Button variant="outline" className="flex-1 gap-2 bg-brand-cyan hover:bg-brand-cyan/90 text-black">
                 <Zap className="h-4 w-4" />
                 Generate EPK
               </Button>
@@ -1010,15 +1010,15 @@ export default function CatalogPage() {
             </div>
 
             {/* AI Pitch Analysis */}
-            <div className="p-4 rounded-lg border bg-cosmic-teal/5 border-cosmic-teal/20 space-y-4">
+            <div className="p-4 rounded-lg border bg-brand-cyan/5 border-brand-cyan/20 space-y-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-cosmic-teal" />
-                <h3 className="text-sm font-medium text-cosmic-teal">AI Pitch Analysis</h3>
+                <Sparkles className="h-4 w-4 text-brand-cyan" />
+                <h3 className="text-sm font-medium text-brand-cyan">AI Pitch Analysis</h3>
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-start gap-2">
-                  <TrendingUp className="h-4 w-4 text-cosmic-teal mt-0.5" />
+                  <TrendingUp className="h-4 w-4 text-brand-cyan mt-0.5" />
                   <div>
                     <p className="text-xs font-medium">Match Strength</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
@@ -1032,7 +1032,7 @@ export default function CatalogPage() {
                 </div>
 
                 <div className="flex items-start gap-2">
-                  <Users className="h-4 w-4 text-cosmic-teal mt-0.5" />
+                  <Users className="h-4 w-4 text-brand-cyan mt-0.5" />
                   <div>
                     <p className="text-xs font-medium">Audience Alignment</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
@@ -1044,7 +1044,7 @@ export default function CatalogPage() {
                 </div>
 
                 <div className="flex items-start gap-2">
-                  <BarChart className="h-4 w-4 text-cosmic-teal mt-0.5" />
+                  <BarChart className="h-4 w-4 text-brand-cyan mt-0.5" />
                   <div>
                     <p className="text-xs font-medium">Performance Prediction</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
@@ -1065,7 +1065,7 @@ export default function CatalogPage() {
                     <ul className="space-y-1.5">
                       {playlist.pitchInsights.map((insight, i) => (
                         <li key={i} className="text-xs flex items-start gap-1.5">
-                          <CheckCircle className="h-3 w-3 text-cosmic-teal mt-0.5 shrink-0" />
+                          <CheckCircle className="h-3 w-3 text-brand-cyan mt-0.5 shrink-0" />
                           <span>{insight}</span>
                         </li>
                       ))}
@@ -1089,9 +1089,9 @@ export default function CatalogPage() {
 
               <div className="space-y-2">
                 {matchingTracks.map((track, index) => (
-                  <div key={index} className="flex items-center justify-between py-1.5 px-3 rounded-md hover:bg-muted">
+                  <div key={index} className="flex items-center justify-between py-1.5 px-3 rounded-md hover:bg-brand-cyan/10 transition-all duration-200">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-cosmic-teal/10 flex items-center justify-center text-xs text-cosmic-teal">
+                      <div className="w-6 h-6 rounded-full bg-brand-cyan/10 flex items-center justify-center text-xs text-brand-cyan">
                         {index + 1}
                       </div>
                       <div>
@@ -1113,8 +1113,8 @@ export default function CatalogPage() {
             {/* Actions */}
             <div className="space-y-3">
               <Button
-                variant="default"
-                className="w-full gap-2 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                variant="outline"
+                className="w-full gap-2 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                 disabled={playlist.matchScore < 65 || pitchInProgress === playlist.id}
                 onClick={() => {
                   if (pitchInProgress !== playlist.id) {
@@ -1155,7 +1155,7 @@ export default function CatalogPage() {
       {/* Header with title on left, search and actions on right */}
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-heading">Catalog</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-heading bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">Catalog</h1>
           <p className="text-muted-foreground">Browse and manage your music assets</p>
         </div>
 
@@ -1177,7 +1177,7 @@ export default function CatalogPage() {
             <Button variant="outline" size="sm" className="gap-1">
               <Download className="h-4 w-4" /> Export
             </Button>
-            <Button size="sm" className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+            <Button size="sm" className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
               <Plus className="h-4 w-4" /> Add Music
             </Button>
           </div>
@@ -1194,7 +1194,7 @@ export default function CatalogPage() {
             </TabsList>
 
             <TabsContent value="tracks" className="space-y-4">
-              <Card className="glass-effect">
+              <Card className="glass-effect" variant="gradient" hover="glow">
                 <CardHeader>
                   <CardTitle>Tracks</CardTitle>
                   <CardDescription>All tracks in your catalog</CardDescription>
@@ -1223,8 +1223,8 @@ export default function CatalogPage() {
                             >
                               <td className="p-4 align-middle">
                                 <div className="flex items-center gap-3">
-                                  <div className="rounded-md bg-cosmic-teal/10 p-2">
-                                    <Music2 className="h-4 w-4 text-cosmic-teal" />
+                                  <div className="rounded-md bg-brand-cyan/10 p-2">
+                                    <Music2 className="h-4 w-4 text-brand-cyan" />
                                   </div>
                                   <div>
                                     <div className="font-medium">{track.title}</div>
@@ -1273,7 +1273,7 @@ export default function CatalogPage() {
             </TabsContent>
 
             <TabsContent value="albums" className="space-y-4">
-              <Card className="glass-effect">
+              <Card className="glass-effect" variant="gradient" hover="glow">
                 <CardHeader>
                   <CardTitle>Albums</CardTitle>
                   <CardDescription>All albums and EPs in your catalog</CardDescription>
@@ -1301,8 +1301,8 @@ export default function CatalogPage() {
                             >
                               <td className="p-4 align-middle">
                                 <div className="flex items-center gap-3">
-                                  <div className="h-10 w-10 rounded-md bg-cosmic-teal/10 flex items-center justify-center">
-                                    <Music2 className="h-5 w-5 text-cosmic-teal" />
+                                  <div className="h-10 w-10 rounded-md bg-brand-cyan/10 flex items-center justify-center">
+                                    <Music2 className="h-5 w-5 text-brand-cyan" />
                                   </div>
                                   <div>
                                     <div className="font-medium">{album.title}</div>
@@ -1361,7 +1361,7 @@ export default function CatalogPage() {
             </TabsContent>
 
             <TabsContent value="playlists" className="space-y-4">
-              <Card className="glass-effect">
+              <Card className="glass-effect" variant="gradient" hover="glow">
                 <CardHeader>
                   <CardTitle>Playlists</CardTitle>
                   <CardDescription>Playlists featuring your music</CardDescription>
@@ -1407,7 +1407,7 @@ export default function CatalogPage() {
                                         {playlist.tracksList.slice(0, 3).map((track, i) => (
                                           <div
                                             key={i}
-                                            className="w-6 h-6 rounded-full bg-cosmic-teal/10 border border-background flex items-center justify-center text-xs text-cosmic-teal"
+                                            className="w-6 h-6 rounded-full bg-brand-cyan/10 border border-background flex items-center justify-center text-xs text-brand-cyan"
                                           >
                                             {i + 1}
                                           </div>
@@ -1455,7 +1455,7 @@ export default function CatalogPage() {
                                   size="sm"
                                   className={
                                     playlist.matchScore >= 75
-                                      ? "bg-cosmic-teal hover:bg-cosmic-teal/90 text-black gap-1.5 w-full"
+                                      ? "bg-brand-cyan hover:bg-brand-cyan/90 text-black gap-1.5 w-full"
                                       : "text-muted-foreground w-full"
                                   }
                                   disabled={playlist.matchScore < 65}
@@ -1513,7 +1513,7 @@ export default function CatalogPage() {
           {/* Artist Profile Setup Prompt */}
           {needsArtistSetup && platforms.spotify?.connected && (
             <div className="mt-6">
-              <Card className="glass-effect border-amber-500/20 bg-amber-500/5">
+              <Card className="glass-effect border-amber-500/20 bg-amber-500/5" variant="gradient" hover="glow">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-amber-500" />
@@ -1532,7 +1532,8 @@ export default function CatalogPage() {
                     <div className="flex gap-2">
                       <Button 
                         onClick={() => window.location.href = '/dashboard/settings'}
-                        className="gap-2 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                        variant="outline"
+                        className="gap-2 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                       >
                         <Settings className="h-4 w-4" />
                         Configure Artist Profile
@@ -1555,7 +1556,7 @@ export default function CatalogPage() {
         {/* Agent-assist side panel - Desktop only */}
         {isAgentPanelOpen && (
           <div className="hidden xl:block w-72 sticky top-20 h-fit space-y-4">
-            <Card className="glass-effect">
+            <Card className="glass-effect" variant="gradient" hover="glow">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Agent Assist</CardTitle>
@@ -1571,7 +1572,7 @@ export default function CatalogPage() {
                     <div className="flex items-start gap-2">
                       {anomaly.severity === "warning" && <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5" />}
                       {anomaly.severity === "critical" && <XCircle className="h-4 w-4 text-rose-500 mt-0.5" />}
-                      {anomaly.severity === "opportunity" && <Zap className="h-4 w-4 text-cosmic-teal mt-0.5" />}
+                      {anomaly.severity === "opportunity" && <Zap className="h-4 w-4 text-brand-cyan mt-0.5" />}
                       <div>
                         <p className="text-sm font-medium">{anomaly.title}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -1579,7 +1580,7 @@ export default function CatalogPage() {
                         </p>
                       </div>
                     </div>
-                    <Button size="sm" className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                    <Button size="sm" className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
                       {anomaly.action}
                     </Button>
                   </div>
@@ -1589,7 +1590,7 @@ export default function CatalogPage() {
                   <div className="relative">
                     <Input placeholder="Ask Aria..." className="pr-10" />
                     <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-full aspect-square">
-                      <Zap className="h-4 w-4 text-cosmic-teal" />
+                      <Zap className="h-4 w-4 text-brand-cyan" />
                     </Button>
                   </div>
                 </div>
@@ -1603,7 +1604,8 @@ export default function CatalogPage() {
       <div className="xl:hidden">
         <Button
           onClick={() => setIsMobileAgentOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black shadow-lg z-50"
+          variant="outline"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-brand-cyan hover:bg-brand-cyan/90 text-black shadow-lg z-50"
           size="icon"
         >
           <Zap className="h-6 w-6" />
@@ -1615,7 +1617,7 @@ export default function CatalogPage() {
         <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-cosmic-teal" />
+              <Zap className="h-5 w-5 text-brand-cyan" />
               Agent Assist
             </SheetTitle>
                           <SheetDescription>Aria's recommendations</SheetDescription>
@@ -1627,7 +1629,7 @@ export default function CatalogPage() {
                 <div className="flex items-start gap-2">
                   {anomaly.severity === "warning" && <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5" />}
                   {anomaly.severity === "critical" && <XCircle className="h-4 w-4 text-rose-500 mt-0.5" />}
-                  {anomaly.severity === "opportunity" && <Zap className="h-4 w-4 text-cosmic-teal mt-0.5" />}
+                  {anomaly.severity === "opportunity" && <Zap className="h-4 w-4 text-brand-cyan mt-0.5" />}
                   <div>
                     <p className="text-sm font-medium">{anomaly.title}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
@@ -1635,7 +1637,7 @@ export default function CatalogPage() {
                     </p>
                   </div>
                 </div>
-                <Button size="sm" className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                <Button size="sm" className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
                   {anomaly.action}
                 </Button>
               </div>
@@ -1645,7 +1647,7 @@ export default function CatalogPage() {
               <div className="relative">
                 <Input placeholder="Ask Aria..." className="pr-10" />
                 <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-full aspect-square">
-                  <Zap className="h-4 w-4 text-cosmic-teal" />
+                  <Zap className="h-4 w-4 text-brand-cyan" />
                 </Button>
               </div>
             </div>
@@ -1655,30 +1657,30 @@ export default function CatalogPage() {
 
       {/* Catalog Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300">
+        <Card className="glass-effect hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Tracks</CardTitle>
-            <Music2 className="h-4 w-4 text-cosmic-teal" />
+            <Music2 className="h-4 w-4 text-brand-cyan" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">142</div>
             <p className="text-xs text-muted-foreground">Across all releases</p>
           </CardContent>
         </Card>
-        <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300">
+        <Card className="glass-effect hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Albums</CardTitle>
-            <Music2 className="h-4 w-4 text-cosmic-teal" />
+            <Music2 className="h-4 w-4 text-brand-cyan" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">18</div>
             <p className="text-xs text-muted-foreground">Including EPs and singles</p>
           </CardContent>
         </Card>
-        <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300">
+        <Card className="glass-effect hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Playlist Placements</CardTitle>
-            <Tag className="h-4 w-4 text-cosmic-teal" />
+            <Tag className="h-4 w-4 text-brand-cyan" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">87</div>
@@ -1688,10 +1690,10 @@ export default function CatalogPage() {
             </p>
           </CardContent>
         </Card>
-        <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300">
+        <Card className="glass-effect hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Catalog Value</CardTitle>
-            <DollarSign className="h-4 w-4 text-cosmic-teal" />
+            <DollarSign className="h-4 w-4 text-brand-cyan" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">$128,450</div>

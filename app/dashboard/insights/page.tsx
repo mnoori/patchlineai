@@ -412,9 +412,23 @@ export default function InsightsPage() {
 
   useEffect(() => {
     async function loadData() {
-      if (!userId) return
-      
       setIsLoading(true)
+      
+      // Always show content after a short delay, even if APIs fail
+      setTimeout(() => {
+        setIsLoading(false)
+      }, 1000)
+      
+      if (!userId) {
+        console.log("No userId available, using mock data")
+        setDashboardMetrics({
+          revenue: 45231.89,
+          listeners: 2350412,
+          engagement: 3827,
+        })
+        return
+      }
+      
       try {
         // Load embeds data
         const embedsData = await embedAPI.getAll(userId) as any
@@ -429,8 +443,12 @@ export default function InsightsPage() {
         })
       } catch (error) {
         console.error("Failed to load insights data:", error)
-      } finally {
-        setIsLoading(false)
+        // Use fallback data if API fails
+        setDashboardMetrics({
+          revenue: 45231.89,
+          listeners: 2350412,
+          engagement: 3827,
+        })
       }
     }
 
@@ -480,7 +498,7 @@ export default function InsightsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cosmic-teal"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-cyan"></div>
       </div>
     )
   }
@@ -489,7 +507,7 @@ export default function InsightsPage() {
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold mb-1">Insights</h1>
+          <h1 className="text-3xl font-bold mb-1 bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">Insights</h1>
           <p className="text-muted-foreground">Comprehensive analytics and intelligence for your music business</p>
         </div>
         <div className="flex items-center gap-2">
@@ -497,7 +515,7 @@ export default function InsightsPage() {
             <Button variant="ghost" className="rounded-none px-4 py-2 h-9 bg-background/30">
               7 Days
             </Button>
-            <Button variant="ghost" className="rounded-none px-4 py-2 h-9 bg-cosmic-teal/20 text-cosmic-teal">
+            <Button variant="ghost" className="rounded-none px-4 py-2 h-9 bg-brand-cyan/20 text-brand-cyan">
               30 Days
             </Button>
             <Button variant="ghost" className="rounded-none px-4 py-2 h-9 bg-background/30">

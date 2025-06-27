@@ -58,7 +58,7 @@ export function AudienceDistribution({ platformData, geoData, demographicData }:
   }
 
   return (
-    <Card className="glass-effect hover:border-cosmic-teal/30 hover:scale-[1.01] transition-all duration-300">
+    <Card className="glass-effect hover:border-brand-cyan/30 hover:scale-[1.01] transition-all duration-300">
       <CardHeader>
         <CardTitle className="text-lg font-medium">Audience Distribution</CardTitle>
       </CardHeader>

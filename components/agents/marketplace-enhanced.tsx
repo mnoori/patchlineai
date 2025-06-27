@@ -2,9 +2,10 @@
 
 import type React from "react"
 
+import { Card as BrandCard } from '@/components/brand'
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -350,7 +351,7 @@ export function MarketplaceEnhanced() {
         return <Badge className="bg-red-500 hover:bg-red-600">Enterprise</Badge>
       case "coming-soon":
         return (
-          <Badge variant="outline" className="border-gray-600 text-gray-400">
+          <Badge variant="outline" className="border-brand-cyan/10 text-muted-foreground">
             Coming Soon
           </Badge>
         )
@@ -365,7 +366,7 @@ export function MarketplaceEnhanced() {
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`h-4 w-4 ${i < Math.floor(rating) ? "text-yellow-400 fill-yellow-400" : i < rating ? "text-yellow-400 fill-yellow-400 opacity-50" : "text-gray-400"}`}
+            className={`h-4 w-4 ${i < Math.floor(rating) ? "text-yellow-400 fill-yellow-400" : i < rating ? "text-yellow-400 fill-yellow-400 opacity-50" : "text-muted-foreground"}`}
           />
         ))}
         <span className="ml-1 text-sm font-medium">{rating.toFixed(1)}</span>
@@ -377,7 +378,7 @@ export function MarketplaceEnhanced() {
   const renderAgentCard = (agent: AgentCard, isLarge = false) => {
     if (isLarge) {
       return (
-        <Card
+        <BrandCard
           key={agent.id}
           className="w-full bg-[#0f0f1a] border-[#1f1f2f] overflow-hidden transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,240,255,0.2)] hover:border-cyan-500/30 hover:scale-[1.02]"
         >
@@ -417,7 +418,7 @@ export function MarketplaceEnhanced() {
 
             <Button
               className="w-full mt-4 bg-cyan-500 hover:bg-cyan-600 text-black font-medium"
-              onClick={() => handleOpenAgentDetails(agent)}
+              onClick={() = variant="outline"> handleOpenAgentDetails(agent)}
               disabled={agent.status === "coming-soon"}
             >
               {agent.status === "coming-soon" ? (
@@ -429,12 +430,12 @@ export function MarketplaceEnhanced() {
               )}
             </Button>
           </div>
-        </Card>
+        </BrandCard>
       )
     }
 
     return (
-      <Card
+      <BrandCard
         key={agent.id}
         className={`bg-[#0f0f1a] border-[#1f1f2f] overflow-hidden transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,240,255,0.15)] hover:border-cyan-500/30 hover:scale-[1.03] ${agent.status === "coming-soon" ? "opacity-80" : ""}`}
       >
@@ -469,7 +470,7 @@ export function MarketplaceEnhanced() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-gray-700 hover:bg-gray-800"
+                className="border-brand-cyan/20 hover:bg-brand-black/90"
                 onClick={() => handleOpenAgentDetails(agent)}
               >
                 Join Waitlist
@@ -486,7 +487,7 @@ export function MarketplaceEnhanced() {
             )}
           </div>
         </div>
-      </Card>
+      </BrandCard>
     )
   }
 
@@ -507,7 +508,7 @@ export function MarketplaceEnhanced() {
     <div className="space-y-8 bg-[#090914] -mx-4 -mt-4 px-6 py-8 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-heading">Agent Marketplace</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-heading bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">Agent Marketplace</h1>
           <p className="text-muted-foreground">Discover and add specialized AI agents to enhance your workflow</p>
         </div>
 
@@ -544,7 +545,7 @@ export function MarketplaceEnhanced() {
           </div>
 
           {/* Build Your Own Agent Section */}
-          <Card className="w-full bg-[#0f0f1a] border-[#1f1f2f] overflow-hidden mb-10">
+          <BrandCard className="w-full bg-[#0f0f1a] border-[#1f1f2f] overflow-hidden mb-10">
             <div className="p-6 space-y-4">
               <div>
                 <h2 className="text-2xl font-bold">Build Your Own Agent</h2>
@@ -574,7 +575,7 @@ export function MarketplaceEnhanced() {
               <div className="flex gap-4 mt-4">
                 <Button
                   className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-black font-medium"
-                  onClick={() => console.log("Access Developer Portal")}
+                  onClick={() = variant="outline"> console.log("Access Developer Portal")}
                 >
                   <Code className="mr-2 h-4 w-4" /> Access Developer Portal
                 </Button>
@@ -587,7 +588,7 @@ export function MarketplaceEnhanced() {
                 </Button>
               </div>
             </div>
-          </Card>
+          </BrandCard>
         </div>
       </div>
 
@@ -708,7 +709,7 @@ export function MarketplaceEnhanced() {
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`h-3 w-3 ${i < 5 ? "text-yellow-400 fill-yellow-400" : "text-gray-400"}`}
+                                    className={`h-3 w-3 ${i < 5 ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`}
                                   />
                                 ))}
                               </div>
@@ -728,7 +729,7 @@ export function MarketplaceEnhanced() {
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`h-3 w-3 ${i < 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-400"}`}
+                                    className={`h-3 w-3 ${i < 4 ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`}
                                   />
                                 ))}
                               </div>
@@ -748,7 +749,7 @@ export function MarketplaceEnhanced() {
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`h-3 w-3 ${i < 5 ? "text-yellow-400 fill-yellow-400" : "text-gray-400"}`}
+                                    className={`h-3 w-3 ${i < 5 ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`}
                                   />
                                 ))}
                               </div>
@@ -773,7 +774,7 @@ export function MarketplaceEnhanced() {
                 {selectedAgent.status === "coming-soon" ? (
                   <Button
                     className="w-full bg-[#1f1f2f] hover:bg-[#2a2a3a]"
-                    onClick={() => {
+                    onClick={() = variant="outline"> {
                       console.log(`Join waitlist for ${selectedAgent.name}`)
                       setIsDialogOpen(false)
                     }}
@@ -783,7 +784,7 @@ export function MarketplaceEnhanced() {
                 ) : (
                   <Button
                     className="w-full bg-cyan-500 hover:bg-cyan-600 text-black font-medium"
-                    onClick={() => {
+                    onClick={() = variant="outline"> {
                       console.log(`Add ${selectedAgent.name} to workspace`)
                       setIsDialogOpen(false)
                     }}

@@ -97,7 +97,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-cosmic-teal/5 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-brand-cyan/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <Logo className="mx-auto h-12 w-auto" />
@@ -141,7 +141,7 @@ export default function LoginPage() {
               </div>
               <Button
                 type="submit"
-                className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                 disabled={isLoading}
               >
                 {isLoading ? "Signing in..." : "Sign In"}
@@ -185,7 +185,7 @@ export default function LoginPage() {
               </div>
               <Button
                 type="submit"
-                className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                 disabled={isLoading}
               >
                 {isLoading ? "Creating account..." : "Sign Up"}
@@ -195,10 +195,10 @@ export default function LoginPage() {
         </Tabs>
 
         <div className="flex justify-center space-x-4">
-          <Link href="#" className="text-sm text-muted-foreground hover:text-cosmic-teal">
+          <Link href="#" className="text-sm text-muted-foreground hover:text-brand-cyan">
             Terms of Service
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-cosmic-teal">
+          <Link href="#" className="text-sm text-muted-foreground hover:text-brand-cyan">
             Privacy Policy
           </Link>
         </div>

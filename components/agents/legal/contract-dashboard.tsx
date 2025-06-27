@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
@@ -231,9 +232,9 @@ export function ContractDashboard() {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card
-          className={`glass-effect cursor-pointer transition-all duration-200 ${viewMode === "all" ? "border-cosmic-teal" : ""}`}
-          onClick={() => setViewMode("all")}
+        <BrandCard
+          className={`glass-effect cursor-pointer transition-all duration-200 ${viewMode === "all" ? "border-brand-cyan" : ""}`}
+          onClick={() = variant="gradient" hover="glow"> setViewMode("all")}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -242,11 +243,11 @@ export function ContractDashboard() {
             </div>
             <FileText className="h-8 w-8 text-muted-foreground" />
           </CardContent>
-        </Card>
+        </BrandCard>
 
-        <Card
+        <BrandCard
           className={`glass-effect cursor-pointer transition-all duration-200 ${viewMode === "at-risk" ? "border-red-500" : ""}`}
-          onClick={() => setViewMode("at-risk")}
+          onClick={() = variant="gradient" hover="glow"> setViewMode("at-risk")}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -255,11 +256,11 @@ export function ContractDashboard() {
             </div>
             <AlertCircle className="h-8 w-8 text-red-500" />
           </CardContent>
-        </Card>
+        </BrandCard>
 
-        <Card
+        <BrandCard
           className={`glass-effect cursor-pointer transition-all duration-200 ${viewMode === "review" ? "border-amber-500" : ""}`}
-          onClick={() => setViewMode("review")}
+          onClick={() = variant="gradient" hover="glow"> setViewMode("review")}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -268,11 +269,11 @@ export function ContractDashboard() {
             </div>
             <Clock className="h-8 w-8 text-amber-500" />
           </CardContent>
-        </Card>
+        </BrandCard>
 
-        <Card
+        <BrandCard
           className={`glass-effect cursor-pointer transition-all duration-200 ${viewMode === "healthy" ? "border-green-500" : ""}`}
-          onClick={() => setViewMode("healthy")}
+          onClick={() = variant="gradient" hover="glow"> setViewMode("healthy")}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -281,11 +282,11 @@ export function ContractDashboard() {
             </div>
             <CheckCircle className="h-8 w-8 text-green-500" />
           </CardContent>
-        </Card>
+        </BrandCard>
       </div>
 
       {/* Contracts List */}
-      <Card className="glass-effect">
+      <BrandCard className="glass-effect" variant="gradient" hover="glow">
         <CardHeader>
           <CardTitle>Contract Dashboard</CardTitle>
           <CardDescription>
@@ -380,14 +381,14 @@ export function ContractDashboard() {
             ))}
           </div>
         </CardContent>
-      </Card>
+      </BrandCard>
 
       {/* Contract Detail Drawer */}
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
         <SheetContent className="sm:max-w-2xl overflow-y-auto bg-background/95 backdrop-blur-xl border-l border-border/50">
           <div className="absolute inset-0 pointer-events-none bg-background/80 backdrop-blur-[2px] brightness-[0.96] -z-10" />
-          <SheetHeader className="border-b border-cosmic-teal/20 pb-4">
-            <SheetTitle className="text-cosmic-teal">{selectedContract?.title}</SheetTitle>
+          <SheetHeader className="border-b border-brand-cyan/20 pb-4">
+            <SheetTitle className="text-brand-cyan">{selectedContract?.title}</SheetTitle>
             <SheetDescription>
               {selectedContract?.type} • Expires: {selectedContract?.expiry}
             </SheetDescription>
@@ -397,7 +398,7 @@ export function ContractDashboard() {
             <div className="py-6 space-y-6">
               {/* Summary Metrics */}
               <div className="grid grid-cols-2 gap-4">
-                <Card className="bg-cosmic-midnight/50">
+                <BrandCard className="bg-brand-black/50" variant="gradient" hover="glow">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2">
                       <AlertCircle className="h-5 w-5 text-red-500" />
@@ -407,9 +408,9 @@ export function ContractDashboard() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </BrandCard>
 
-                <Card className="bg-cosmic-midnight/50">
+                <BrandCard className="bg-brand-black/50" variant="gradient" hover="glow">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-5 w-5 text-green-500" />
@@ -419,24 +420,24 @@ export function ContractDashboard() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </BrandCard>
               </div>
 
               {/* AI-Highlighted Clauses */}
               <div>
-                <h3 className="text-sm font-medium text-cosmic-teal mb-3">AI-HIGHLIGHTED CLAUSES</h3>
+                <h3 className="text-sm font-medium text-brand-cyan mb-3">AI-HIGHLIGHTED CLAUSES</h3>
                 <div className="space-y-3">
                   {selectedContract.details.clauses.map((clause, index) => (
-                    <Card
+                    <BrandCard
                       key={index}
                       className={`${
                         clause.highlight
                           ? clause.risk === "high"
                             ? "border-red-500/50 bg-red-500/5"
                             : "border-amber-500/50 bg-amber-500/5"
-                          : "bg-cosmic-midnight/30"
+                          : "bg-brand-black/30"
                       }`}
-                    >
+                     variant="gradient" hover="glow">
                       <CardContent className="p-3">
                         <div className="flex items-start gap-2">
                           <Badge
@@ -454,7 +455,7 @@ export function ContractDashboard() {
                           <p className="text-sm flex-1">{clause.text}</p>
                         </div>
                       </CardContent>
-                    </Card>
+                    </BrandCard>
                   ))}
                 </div>
               </div>
@@ -488,7 +489,7 @@ export function ContractDashboard() {
 
               {/* Key Dates */}
               <div>
-                <h3 className="text-sm font-medium text-cosmic-teal mb-3">KEY DATES</h3>
+                <h3 className="text-sm font-medium text-brand-cyan mb-3">KEY DATES</h3>
                 <div className="space-y-2">
                   {selectedContract.details.keyDates.map((date, index) => (
                     <div key={index} className="flex justify-between text-sm border-b border-border/50 pb-2">
@@ -500,12 +501,12 @@ export function ContractDashboard() {
               </div>
 
               {/* Quick Actions */}
-              <div className="pt-4 space-y-3 border-t border-cosmic-teal/20">
-                <h3 className="text-sm font-medium text-cosmic-teal">QUICK ACTIONS</h3>
+              <div className="pt-4 space-y-3 border-t border-brand-cyan/20">
+                <h3 className="text-sm font-medium text-brand-cyan">QUICK ACTIONS</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Button
-                    className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
-                    onClick={() => handleDraftRenewal(selectedContract.id)}
+                    className="bg-brand-cyan hover:bg-brand-cyan/90 text-black"
+                    onClick={() = variant="outline"> handleDraftRenewal(selectedContract.id)}
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     Draft Renewal

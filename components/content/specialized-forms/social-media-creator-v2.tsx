@@ -530,8 +530,8 @@ export function SocialMediaCreatorV2({
             <Card 
               className={cn(
                 "cursor-pointer transition-all",
-                "hover:shadow-lg hover:border-cosmic-teal/50",
-                selectedContent?.id === content.id && "border-cosmic-teal ring-2 ring-cosmic-teal/20"
+                "hover:shadow-lg hover:border-brand-cyan/50",
+                selectedContent?.id === content.id && "border-brand-cyan ring-2 ring-brand-cyan/20"
               )}
               onClick={() => handleSelectPreGenerated(content)}
             >
@@ -544,7 +544,7 @@ export function SocialMediaCreatorV2({
                         key={idx}
                         className={cn(
                           "w-16 h-16 rounded-lg overflow-hidden border-2 border-background",
-                          idx === content.selectedImageIndex && "ring-2 ring-cosmic-teal"
+                          idx === content.selectedImageIndex && "ring-2 ring-brand-cyan"
                         )}
                       >
                         <Image
@@ -619,8 +619,8 @@ export function SocialMediaCreatorV2({
             <Card
               className={cn(
                 "cursor-pointer transition-all",
-                "hover:shadow-lg hover:border-cosmic-teal/50",
-                selectedTemplate?.id === template.id && "border-cosmic-teal ring-2 ring-cosmic-teal/20"
+                "hover:shadow-lg hover:border-brand-cyan/50",
+                selectedTemplate?.id === template.id && "border-brand-cyan ring-2 ring-brand-cyan/20"
               )}
               onClick={() => handleSelectTemplate(template)}
             >
@@ -655,14 +655,14 @@ export function SocialMediaCreatorV2({
       <Card
         className={cn(
           "cursor-pointer transition-all border-dashed",
-          "hover:shadow-lg hover:border-cosmic-teal/50",
-          customMode && "border-cosmic-teal ring-2 ring-cosmic-teal/20"
+          "hover:shadow-lg hover:border-brand-cyan/50",
+          customMode && "border-brand-cyan ring-2 ring-brand-cyan/20"
         )}
         onClick={handleCustomCreation}
       >
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-lg bg-cosmic-teal/20 text-cosmic-teal">
+            <div className="p-3 rounded-lg bg-brand-cyan/20 text-brand-cyan">
               <Wand2 className="h-6 w-6" />
             </div>
             <div className="flex-1">
@@ -695,8 +695,8 @@ export function SocialMediaCreatorV2({
                     "relative aspect-square rounded-lg overflow-hidden cursor-pointer",
                     "border-2 transition-all",
                     idx === selectedContent.selectedImageIndex 
-                      ? "border-cosmic-teal ring-2 ring-cosmic-teal/20" 
-                      : "border-muted hover:border-cosmic-teal/50"
+                      ? "border-brand-cyan ring-2 ring-brand-cyan/20" 
+                      : "border-muted hover:border-brand-cyan/50"
                   )}
                 >
                   <Image
@@ -706,7 +706,7 @@ export function SocialMediaCreatorV2({
                     className="object-cover"
                   />
                   {idx === selectedContent.selectedImageIndex && (
-                    <div className="absolute inset-0 bg-cosmic-teal/20 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-brand-cyan/20 flex items-center justify-center">
                       <Check className="h-8 w-8 text-white drop-shadow-lg" />
                     </div>
                   )}
@@ -728,7 +728,7 @@ export function SocialMediaCreatorV2({
           {/* Actions */}
           <div className="flex gap-3">
             <Button 
-              className="flex-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+              className="flex-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black"
               onClick={handlePublish}
             >
               <Download className="h-4 w-4 mr-2" />
@@ -766,8 +766,8 @@ export function SocialMediaCreatorV2({
                         "relative aspect-square rounded-lg overflow-hidden cursor-pointer",
                         "border-2 transition-all",
                         selectedPhotos.includes(photo.id)
-                          ? "border-cosmic-teal ring-2 ring-cosmic-teal/20"
-                          : "border-muted hover:border-cosmic-teal/50"
+                          ? "border-brand-cyan ring-2 ring-brand-cyan/20"
+                          : "border-muted hover:border-brand-cyan/50"
                       )}
                       onClick={() => handlePhotoSelection(photo.id)}
                     >
@@ -778,7 +778,7 @@ export function SocialMediaCreatorV2({
                         className="object-cover"
                       />
                       {selectedPhotos.includes(photo.id) && (
-                        <div className="absolute inset-0 bg-cosmic-teal/20 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-brand-cyan/20 flex items-center justify-center">
                           <Check className="h-6 w-6 text-white drop-shadow-lg" />
                         </div>
                       )}
@@ -819,7 +819,7 @@ export function SocialMediaCreatorV2({
 
           {/* Generate Button */}
           <Button
-            className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+            className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
             onClick={handleGenerateContent}
             disabled={generatingContent || (selectedTemplate?.requiresPhotos && selectedPhotos.length === 0)}
           >
@@ -848,8 +848,8 @@ export function SocialMediaCreatorV2({
                       "relative aspect-square rounded-lg overflow-hidden cursor-pointer",
                       "border-2 transition-all",
                       idx === selectedVariantIndex
-                        ? "border-cosmic-teal ring-2 ring-cosmic-teal/20"
-                        : "border-muted hover:border-cosmic-teal/50"
+                        ? "border-brand-cyan ring-2 ring-brand-cyan/20"
+                        : "border-muted hover:border-brand-cyan/50"
                     )}
                     onClick={() => setSelectedVariantIndex(idx)}
                   >
@@ -867,7 +867,7 @@ export function SocialMediaCreatorV2({
               </div>
               
               <Button
-                className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                 onClick={handlePublish}
               >
                 <Check className="h-4 w-4 mr-2" />

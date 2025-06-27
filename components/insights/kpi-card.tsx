@@ -1,7 +1,8 @@
 "use client"
 
 import type React from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowUp, ArrowDown, AlertTriangle } from "lucide-react"
 import { motion } from "framer-motion"
@@ -63,7 +64,7 @@ const trendIcon = {
 const sparklineColor = {
   up: "#22c55e",
   down: "#ef4444",
-  flat: "#00F0FF",
+  flat: "brand-cyan",
 }
 
 const formatValue = (value: number, format?: "currency" | "number" | "percentage") => {
@@ -103,7 +104,7 @@ export function KPICard({
 }: KPICardProps) {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <Card className="glass-effect hover:border-cosmic-teal/30 hover:scale-[1.02] transition-all duration-300 overflow-hidden group relative h-[180px]">
+      <BrandCard className="glass-effect hover:border-brand-cyan/30 hover:scale-[1.02] transition-all duration-300 overflow-hidden group relative h-[180px]">
         {alert && (
           <div className="absolute top-2 right-2 z-10">
             <TooltipProvider>
@@ -121,7 +122,7 @@ export function KPICard({
 
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-          <div className="rounded-full bg-cosmic-teal/10 p-1.5 text-cosmic-teal">{icon}</div>
+          <div className="rounded-full bg-brand-cyan/10 p-1.5 text-brand-cyan">{icon}</div>
         </CardHeader>
 
         <CardContent className="pb-4">
@@ -131,7 +132,7 @@ export function KPICard({
               {suffix}
             </div>
             {badge && (
-              <Badge variant="outline" className="text-xs bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/20">
+              <Badge variant="outline" className="text-xs bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20">
                 {badge}
               </Badge>
             )}
@@ -149,7 +150,7 @@ export function KPICard({
             <SparklineComponent data={sparkline} color={sparklineColor[trend]} />
           </div>
         </CardContent>
-      </Card>
+      </BrandCard>
     </motion.div>
   )
 }

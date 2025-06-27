@@ -1,6 +1,7 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
 import { Button } from "@/components/ui/button"
 import { Download, Filter, Calendar, TrendingUp, Music2, Globe } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -58,7 +59,7 @@ export function AnalyticsView() {
   ]
 
   return (
-    <Card className="glass-effect">
+    <BrandCard className="glass-effect">
       <CardHeader>
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
           <div>
@@ -90,7 +91,7 @@ export function AnalyticsView() {
           <TabsContent value="trends">
             <div className="space-y-6">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-cosmic-teal" />
+                <TrendingUp className="h-5 w-5 text-brand-cyan" />
                 <h3 className="text-lg font-medium">Genre Growth Trends</h3>
               </div>
 
@@ -117,19 +118,19 @@ export function AnalyticsView() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-cosmic-midnight/50">
+                <BrandCard className="bg-brand-black/50">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">Fastest Growing</p>
                         <p className="text-xl font-bold">Electronic</p>
                       </div>
-                      <div className="text-cosmic-teal text-xl font-bold">+55%</div>
+                      <div className="text-brand-cyan text-xl font-bold">+55%</div>
                     </div>
                   </CardContent>
-                </Card>
+                </BrandCard>
 
-                <Card className="bg-cosmic-midnight/50">
+                <BrandCard className="bg-brand-black/50">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -139,9 +140,9 @@ export function AnalyticsView() {
                       <div className="text-amber-500 text-xl font-bold">+45%</div>
                     </div>
                   </CardContent>
-                </Card>
+                </BrandCard>
 
-                <Card className="bg-cosmic-midnight/50">
+                <BrandCard className="bg-brand-black/50">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -151,7 +152,7 @@ export function AnalyticsView() {
                       <div className="text-purple-500 text-xl font-bold">+38%</div>
                     </div>
                   </CardContent>
-                </Card>
+                </BrandCard>
               </div>
             </div>
           </TabsContent>
@@ -159,7 +160,7 @@ export function AnalyticsView() {
           <TabsContent value="genres">
             <div className="space-y-6">
               <div className="flex items-center gap-2">
-                <Music2 className="h-5 w-5 text-cosmic-teal" />
+                <Music2 className="h-5 w-5 text-brand-cyan" />
                 <h3 className="text-lg font-medium">Genre Distribution</h3>
               </div>
 
@@ -217,7 +218,7 @@ export function AnalyticsView() {
                 </div>
               </div>
 
-              <div className="bg-cosmic-midnight/50 p-4 rounded-lg border border-cosmic-teal/20">
+              <div className="bg-brand-black/50 p-4 rounded-lg border border-brand-cyan/20">
                 <h4 className="font-medium mb-2">AI Insights</h4>
                 <p className="text-sm text-muted-foreground">
                   Electronic music has seen a 55% growth in the last quarter, with a significant increase in unsigned
@@ -231,7 +232,7 @@ export function AnalyticsView() {
           <TabsContent value="regions">
             <div className="space-y-6">
               <div className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-cosmic-teal" />
+                <Globe className="h-5 w-5 text-brand-cyan" />
                 <h3 className="text-lg font-medium">Regional Distribution</h3>
               </div>
 
@@ -289,7 +290,7 @@ export function AnalyticsView() {
                 </div>
               </div>
 
-              <div className="bg-cosmic-midnight/50 p-4 rounded-lg border border-cosmic-teal/20">
+              <div className="bg-brand-black/50 p-4 rounded-lg border border-brand-cyan/20">
                 <h4 className="font-medium mb-2">AI Insights</h4>
                 <p className="text-sm text-muted-foreground">
                   While North America remains your primary market, there's significant growth potential in Europe and
@@ -303,7 +304,7 @@ export function AnalyticsView() {
           <TabsContent value="platforms">
             <div className="space-y-6">
               <div className="flex items-center gap-2">
-                <Music2 className="h-5 w-5 text-cosmic-teal" />
+                <Music2 className="h-5 w-5 text-brand-cyan" />
                 <h3 className="text-lg font-medium">Platform Distribution</h3>
               </div>
 
@@ -361,7 +362,7 @@ export function AnalyticsView() {
                 </div>
               </div>
 
-              <div className="bg-cosmic-midnight/50 p-4 rounded-lg border border-cosmic-teal/20">
+              <div className="bg-brand-black/50 p-4 rounded-lg border border-brand-cyan/20">
                 <h4 className="font-medium mb-2">AI Insights</h4>
                 <p className="text-sm text-muted-foreground">
                   TikTok is showing the fastest growth rate among platforms, with a 25% increase in music discovery.
@@ -373,6 +374,6 @@ export function AnalyticsView() {
           </TabsContent>
         </Tabs>
       </CardContent>
-    </Card>
+    </BrandCard>
   )
 }

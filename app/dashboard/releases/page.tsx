@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Card } from '@/components/brand'
 import { motion } from "framer-motion"
 import { Search, Filter, Calendar, Plus, ChevronDown, Download, FolderSyncIcon as Sync, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -117,7 +118,7 @@ export default function ReleasesPage() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight font-heading">Release Workspace</h1>
+                <h1 className="text-3xl font-bold tracking-tight font-heading bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">Release Workspace</h1>
                 <p className="text-muted-foreground">
                   Plan, manage, and track all your releases in one unified workspace.
                 </p>
@@ -153,7 +154,7 @@ export default function ReleasesPage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button size="sm" className="gap-1 bg-cyan-500 hover:bg-cyan-600 text-black" onClick={handleNewRelease}>
+                <Button size="sm" className="gap-1 bg-cyan-500 hover:bg-cyan-600 text-black" onClick={handleNewRelease} variant="outline">
                   <Plus className="h-4 w-4" />
                   New Release
                 </Button>
@@ -232,12 +233,12 @@ export default function ReleasesPage() {
                       <Calendar className="h-8 w-8 text-cyan-500" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Select a Release</h3>
+                      <h3 className="text-lg font-bold">Select a Release</h3>
                       <p className="text-muted-foreground">
                         Choose a release from the list to view details and manage tasks
                       </p>
                     </div>
-                    <Button className="bg-cyan-500 hover:bg-cyan-600 text-black" onClick={handleNewRelease}>
+                    <Button className="bg-cyan-500 hover:bg-cyan-600 text-black" onClick={handleNewRelease} variant="outline">
                       <Plus className="h-4 w-4 mr-2" />
                       Create New Release
                     </Button>

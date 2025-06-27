@@ -32,7 +32,7 @@ function ContentIdeaCard({ idea, isActive, onClick }: ContentIdeaCardProps) {
       className={cn(
         "glass-effect rounded-xl overflow-hidden flex flex-col cursor-pointer transition-all duration-300 transform relative group",
         isActive
-          ? "scale-105 ring-2 ring-cosmic-teal shadow-lg shadow-cosmic-teal/20"
+          ? "scale-105 ring-2 ring-brand-cyan shadow-lg shadow-brand-cyan/20"
           : "hover:scale-102 opacity-85 hover:opacity-100 hover:shadow-md",
       )}
       onClick={onClick}
@@ -69,12 +69,12 @@ function ContentIdeaCard({ idea, isActive, onClick }: ContentIdeaCardProps) {
 
       <div className="p-4 flex flex-col flex-grow">
         <div className="flex items-center justify-between mb-2">
-          <Badge className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-cosmic-teal/20 text-cosmic-teal">
+          <Badge className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-brand-cyan/20 text-brand-cyan">
             Blog Post
           </Badge>
         </div>
 
-        <h3 className="text-base font-bold mb-2 line-clamp-2 font-heading group-hover:text-cosmic-teal transition-colors">
+        <h3 className="text-base font-bold mb-2 line-clamp-2 font-heading group-hover:text-brand-cyan transition-colors">
           {idea.topic}
         </h3>
 
@@ -83,7 +83,7 @@ function ContentIdeaCard({ idea, isActive, onClick }: ContentIdeaCardProps) {
         {/* AI Enhancement Indicator */}
         <div className="mt-3 pt-3 border-t border-muted/30">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <div className="w-1.5 h-1.5 rounded-full bg-cosmic-teal animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
             AI-optimized for maximum impact
           </div>
         </div>
@@ -98,20 +98,20 @@ function WriteYourOwnCard({ isActive, onClick }: { isActive: boolean; onClick: (
     <Card
       className={cn(
         "cursor-pointer transition-all duration-300 transform relative group h-full",
-        "border-2 border-dashed border-cosmic-teal/30 hover:border-cosmic-teal/60",
-        "bg-gradient-to-br from-cosmic-teal/5 to-cosmic-teal/10 hover:from-cosmic-teal/10 hover:to-cosmic-teal/20",
-        isActive && "ring-2 ring-cosmic-teal shadow-lg shadow-cosmic-teal/20 scale-105",
+        "border-2 border-dashed border-brand-cyan/30 hover:border-brand-cyan/60",
+        "bg-gradient-to-br from-brand-cyan/5 to-brand-cyan/10 hover:from-brand-cyan/10 hover:to-brand-cyan/20",
+        isActive && "ring-2 ring-brand-cyan shadow-lg shadow-brand-cyan/20 scale-105",
         !isActive && "hover:scale-102",
       )}
       onClick={onClick}
     >
       <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-cosmic-teal/20 flex items-center justify-center group-hover:bg-cosmic-teal/30 transition-colors">
-          <Edit3 className="h-8 w-8 text-cosmic-teal" />
+        <div className="w-16 h-16 rounded-full bg-brand-cyan/20 flex items-center justify-center group-hover:bg-brand-cyan/30 transition-colors">
+          <Edit3 className="h-8 w-8 text-brand-cyan" />
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-lg font-bold font-heading group-hover:text-cosmic-teal transition-colors">
+          <h3 className="text-lg font-bold font-heading group-hover:text-brand-cyan transition-colors">
             Write Your Own
           </h3>
           <p className="text-sm text-muted-foreground">
@@ -344,7 +344,7 @@ export function ContentIdeaCarousel({
             variant="outline"
             size="icon"
             onClick={handlePrev}
-            className="h-8 w-8 rounded-full hover:bg-cosmic-teal/20 hover:border-cosmic-teal/30"
+            className="h-8 w-8 rounded-full hover:bg-brand-cyan/20 hover:border-brand-cyan/30"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -352,7 +352,7 @@ export function ContentIdeaCarousel({
             variant="outline"
             size="icon"
             onClick={handleNext}
-            className="h-8 w-8 rounded-full hover:bg-cosmic-teal/20 hover:border-cosmic-teal/30"
+            className="h-8 w-8 rounded-full hover:bg-brand-cyan/20 hover:border-brand-cyan/30"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -382,7 +382,7 @@ export function ContentIdeaCarousel({
         <div className="flex items-center gap-4">
           <Button
             onClick={handleUseIdea}
-            className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black font-medium px-6"
+            className="bg-brand-cyan hover:bg-brand-cyan/90 text-black font-medium px-6"
           >
             {activeIndex === 0 ? (
               <>

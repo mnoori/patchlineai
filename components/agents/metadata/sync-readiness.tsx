@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -154,10 +155,10 @@ export function SyncReadiness() {
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {/* Sync Opportunities */}
-      <Card className="glass-effect">
+      <BrandCard className="glass-effect">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Music2 className="h-5 w-5 text-cosmic-teal" />
+            <Music2 className="h-5 w-5 text-brand-cyan" />
             Sync Opportunities
           </CardTitle>
         </CardHeader>
@@ -204,13 +205,13 @@ export function SyncReadiness() {
             ))}
           </div>
         </CardContent>
-      </Card>
+      </BrandCard>
 
       {/* Readiness Checklist */}
-      <Card className="glass-effect">
+      <BrandCard className="glass-effect">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-cosmic-teal" />
+            <FileText className="h-5 w-5 text-brand-cyan" />
             Sync Readiness
           </CardTitle>
         </CardHeader>
@@ -220,7 +221,7 @@ export function SyncReadiness() {
             <div>
               <div className="flex justify-between mb-2">
                 <h3 className="font-medium">Overall Sync Readiness</h3>
-                <span className="font-medium text-cosmic-teal">{overallReadiness}%</span>
+                <span className="font-medium text-brand-cyan">{overallReadiness}%</span>
               </div>
               <Progress value={overallReadiness} className="h-3" />
             </div>
@@ -249,13 +250,13 @@ export function SyncReadiness() {
               ))}
             </div>
 
-            <Button className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black gap-2">
+            <Button className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black gap-2" variant="outline">
               <Zap className="h-4 w-4" />
               Optimize All for Sync
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </BrandCard>
 
       {/* Opportunity Detail Drawer */}
       <Sheet open={selectedOpportunity !== null} onOpenChange={(open) => !open && setSelectedOpportunity(null)}>
@@ -263,7 +264,7 @@ export function SyncReadiness() {
           <SheetHeader>
             <SheetTitle className="flex items-center justify-between">
               <span>{selectedOpportunityData?.title}</span>
-              <SheetClose className="rounded-full hover:bg-muted p-1">
+              <SheetClose className="rounded-full hover:bg-brand-cyan/10 transition-all duration-200 p-1">
                 <X className="h-4 w-4" />
               </SheetClose>
             </SheetTitle>
@@ -276,7 +277,7 @@ export function SyncReadiness() {
             {/* AI Summary */}
             <div className="rounded-lg border bg-muted/50 p-4">
               <h4 className="font-medium mb-2 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-cosmic-teal" />
+                <AlertTriangle className="h-4 w-4 text-brand-cyan" />
                 AI Analysis
               </h4>
               <p className="text-sm text-muted-foreground mb-3">
@@ -344,7 +345,7 @@ export function SyncReadiness() {
           <SheetHeader>
             <SheetTitle className="flex items-center justify-between">
               <span>{selectedChecklistData?.item}</span>
-              <SheetClose className="rounded-full hover:bg-muted p-1">
+              <SheetClose className="rounded-full hover:bg-brand-cyan/10 transition-all duration-200 p-1">
                 <X className="h-4 w-4" />
               </SheetClose>
             </SheetTitle>
@@ -358,7 +359,7 @@ export function SyncReadiness() {
             {/* AI Summary */}
             <div className="rounded-lg border bg-muted/50 p-4">
               <h4 className="font-medium mb-2 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-cosmic-teal" />
+                <AlertTriangle className="h-4 w-4 text-brand-cyan" />
                 AI Analysis
               </h4>
               <p className="text-sm text-muted-foreground mb-3">
@@ -392,7 +393,7 @@ export function SyncReadiness() {
             {selectedChecklistData && (
               <Button
                 onClick={() => handleGenerateAction(selectedChecklistData)}
-                className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black gap-1"
+                className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black gap-1"
               >
                 <Zap className="h-4 w-4" />
                 {selectedChecklistData.action} Missing {selectedChecklistData.item}

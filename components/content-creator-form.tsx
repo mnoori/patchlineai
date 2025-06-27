@@ -251,7 +251,7 @@ Your content should follow proper markdown formatting with headers, lists, and e
         {/* Colored progress patchline */}
         <div
           className={cn(
-            "absolute w-[2px] top-0 left-1/2 transform -translate-x-1/2 bg-cosmic-teal transition-all duration-300",
+            "absolute w-[2px] top-0 left-1/2 transform -translate-x-1/2 bg-brand-cyan transition-all duration-300",
             currentStep === 1 ? "h-[16.67%]" : currentStep === 2 ? "h-[50%]" : "h-[83.33%]",
           )}
         ></div>
@@ -286,7 +286,7 @@ Your content should follow proper markdown formatting with headers, lists, and e
           className={cn(
             "w-10 h-10 rounded-full p-0 flex items-center justify-center text-sm font-medium transition-colors z-10 border",
             currentStep >= 1
-              ? "bg-cosmic-teal text-black border-transparent"
+              ? "bg-brand-cyan text-black border-transparent"
               : "bg-muted text-muted-foreground border-muted",
           )}
           onClick={() => handleNext(1)}
@@ -299,7 +299,7 @@ Your content should follow proper markdown formatting with headers, lists, and e
           className={cn(
             "w-10 h-10 rounded-full p-0 flex items-center justify-center text-sm font-medium transition-colors z-10 border",
             currentStep >= 2
-              ? "bg-cosmic-teal text-black border-transparent"
+              ? "bg-brand-cyan text-black border-transparent"
               : "bg-muted text-muted-foreground border-muted",
           )}
           onClick={() => handleNext(2)}
@@ -313,7 +313,7 @@ Your content should follow proper markdown formatting with headers, lists, and e
           className={cn(
             "w-10 h-10 rounded-full p-0 flex items-center justify-center text-sm font-medium transition-colors z-10 border",
             currentStep >= 3
-              ? "bg-cosmic-teal text-black border-transparent"
+              ? "bg-brand-cyan text-black border-transparent"
               : "bg-muted text-muted-foreground border-muted",
           )}
           onClick={() => handleNext(3)}
@@ -346,7 +346,7 @@ Your content should follow proper markdown formatting with headers, lists, and e
               )}
             >
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium bg-cosmic-teal text-black">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium bg-brand-cyan text-black">
                   {currentStep <= 2 ? currentStep : "✓"}
                 </div>
                 <h3 className="text-lg font-medium">
@@ -473,7 +473,7 @@ Your content should follow proper markdown formatting with headers, lists, and e
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
-                <div className="flex-1 rounded-lg border border-cosmic-teal/20 bg-cosmic-midnight/30 p-3 text-sm">
+                <div className="flex-1 rounded-lg border border-brand-cyan/20 bg-brand-black/30 p-3 text-sm">
                   <p>
                     After clicking "Generate Prompt", you'll see the prompt that will be sent to the AI. You can review
                     and edit it before generating content.
@@ -517,7 +517,7 @@ Your content should follow proper markdown formatting with headers, lists, and e
               )}
             >
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium bg-cosmic-teal text-black">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium bg-brand-cyan text-black">
                   3
                 </div>
                 <h3 className="text-lg font-medium">AI Prompt & Generation</h3>
@@ -558,7 +558,7 @@ Your content should follow proper markdown formatting with headers, lists, and e
                       {isGeneratingPrompt && (
                         <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-md">
                           <div className="flex flex-col items-center gap-2">
-                            <Loader2 className="h-8 w-8 animate-spin text-cosmic-teal" />
+                            <Loader2 className="h-8 w-8 animate-spin text-brand-cyan" />
                             <p className="text-sm font-medium">Generating prompt...</p>
                           </div>
                         </div>
@@ -591,7 +591,7 @@ Your content should follow proper markdown formatting with headers, lists, and e
                     </Select>
                   </div>
 
-                  <div className="flex-1 rounded-lg border border-cosmic-teal/20 bg-cosmic-midnight/30 p-3 text-sm">
+                  <div className="flex-1 rounded-lg border border-brand-cyan/20 bg-brand-black/30 p-3 text-sm">
                     <p>
                       This is the prompt that will be sent to the AI model. You can edit it to customize the content
                       generation.

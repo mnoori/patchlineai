@@ -94,7 +94,7 @@ const WORKFLOW_STEPS = [
     title: 'AI Processing',
     description: 'AI creates your social media content',
     icon: Sparkles,
-    color: 'bg-cosmic-teal'
+    color: 'bg-brand-cyan'
   },
   {
     id: 5,
@@ -258,7 +258,7 @@ export function SocialMediaWorkflow({
                 className={cn(
                   "w-12 h-12 rounded-full p-0 flex items-center justify-center transition-all duration-200",
                   status === 'completed' && "bg-green-500 text-white hover:bg-green-600",
-                  status === 'current' && "bg-cosmic-teal text-black hover:bg-cosmic-teal/80",
+                  status === 'current' && "bg-brand-cyan text-black hover:bg-brand-cyan/80",
                   status === 'pending' && "bg-muted text-muted-foreground hover:bg-muted/80",
                   status === 'disabled' && "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
                 )}
@@ -297,7 +297,7 @@ export function SocialMediaWorkflow({
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-cosmic-teal" />
+                <Sparkles className="w-6 h-6 text-brand-cyan" />
                 Social Media Content Creator
               </CardTitle>
               <CardDescription>

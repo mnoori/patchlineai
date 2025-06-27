@@ -2,9 +2,10 @@
 
 import type React from "react"
 
+import { Card as BrandCard } from '@/components/brand'
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -189,7 +190,7 @@ export function LegalAgentEnhanced() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight font-heading">Legal Agent</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-heading bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">Legal Agent</h1>
         <p className="text-muted-foreground">
           Automatically monitor contracts and flag potential risks across your entire catalog.
         </p>
@@ -213,7 +214,7 @@ export function LegalAgentEnhanced() {
           <Button variant="outline" size="sm" className="gap-1">
             <Download className="h-4 w-4" /> Export
           </Button>
-          <Button size="sm" className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+          <Button size="sm" className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
             <Plus className="h-4 w-4" /> New Contract
           </Button>
         </div>
@@ -226,7 +227,7 @@ export function LegalAgentEnhanced() {
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect">
             <CardHeader>
               <CardTitle>Contract Dashboard</CardTitle>
               <CardDescription>
@@ -243,7 +244,7 @@ export function LegalAgentEnhanced() {
                         key={contract.id}
                         title={contract.title}
                         description={`${contract.type} • Expires: ${contract.expiry} • ${contract.issues} ${contract.issues === 1 ? "issue" : "issues"}`}
-                        icon={<FileText className="h-5 w-5 text-cosmic-teal" />}
+                        icon={<FileText className="h-5 w-5 text-brand-cyan" />}
                         actions={[
                           {
                             label: "View Brief",
@@ -395,12 +396,12 @@ export function LegalAgentEnhanced() {
                 </div>
               )}
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
 
         {/* Templates tab content remains the same */}
         <TabsContent value="templates">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect">
             <CardHeader>
               <CardTitle>Contract Templates</CardTitle>
               <CardDescription>Standard contract templates for various music business needs.</CardDescription>
@@ -415,38 +416,38 @@ export function LegalAgentEnhanced() {
                   "Management Agreement",
                   "Producer Agreement",
                 ].map((template, index) => (
-                  <Card
+                  <BrandCard
                     key={index}
-                    className="bg-cosmic-midnight/50 hover:border-cosmic-teal/30 transition-all duration-300"
+                    className="bg-brand-black/50 hover:border-brand-cyan/30 transition-all duration-300"
                   >
                     <CardContent className="p-4 flex items-center gap-3">
-                      <FileText className="h-8 w-8 text-cosmic-teal" />
+                      <FileText className="h-8 w-8 text-brand-cyan" />
                       <div>
                         <p className="font-medium">{template}</p>
                         <p className="text-xs text-muted-foreground">Standard template</p>
                       </div>
                     </CardContent>
-                  </Card>
+                  </BrandCard>
                 ))}
-                <Card className="bg-cosmic-midnight/50 border-dashed border-cosmic-teal/50 hover:border-cosmic-teal/70 transition-all duration-300">
+                <BrandCard className="bg-brand-black/50 border-dashed border-brand-cyan/50 hover:border-brand-cyan/70 transition-all duration-300">
                   <CardContent className="p-4 flex items-center justify-center h-full">
                     <Button
                       variant="ghost"
-                      className="gap-2 text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
+                      className="gap-2 text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
                     >
                       <Plus className="h-5 w-5" />
                       <span>Create Template</span>
                     </Button>
                   </CardContent>
-                </Card>
+                </BrandCard>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
 
         {/* Calendar tab content remains the same */}
         <TabsContent value="calendar">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect">
             <CardHeader>
               <CardTitle>Contract Calendar</CardTitle>
               <CardDescription>Timeline view of contract deadlines and important dates.</CardDescription>
@@ -459,11 +460,11 @@ export function LegalAgentEnhanced() {
                   <p className="text-muted-foreground mb-4">
                     The calendar view is being developed and will be available soon.
                   </p>
-                  <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">View Dashboard</Button>
+                  <Button className="bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">View Dashboard</Button>
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
       </Tabs>
 
@@ -522,11 +523,11 @@ export function LegalAgentEnhanced() {
               )}
 
               <div>
-                <h3 className="text-sm font-medium text-cosmic-teal mb-2">RECOMMENDATIONS</h3>
+                <h3 className="text-sm font-medium text-brand-cyan mb-2">RECOMMENDATIONS</h3>
                 <ul className="space-y-1">
                   {selectedContract.details.recommendations.map((recommendation, index) => (
                     <li key={index} className="text-sm flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-cosmic-teal mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-brand-cyan mt-0.5 flex-shrink-0" />
                       <span>{recommendation}</span>
                     </li>
                   ))}
@@ -541,7 +542,7 @@ export function LegalAgentEnhanced() {
                       subject={`Renewal: ${selectedContract.title}`}
                       body={`Dear Luna Ray Team,\n\nI hope this email finds you well. I'm writing regarding the distribution agreement between Luna Ray and Patchline Records, which is set to expire on ${selectedContract.expiry}.\n\nWe'd like to discuss renewing this agreement under favorable terms for both parties. I've attached a draft of the proposed renewal terms for your review.\n\nPlease let me know if you'd like to schedule a call to discuss further.\n\nBest regards,\n[Your Name]\nPatchline Records`}
                       trigger={
-                        <Button className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                        <Button className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
                           <ArrowRight className="h-4 w-4 mr-2" /> Draft Renewal Email
                         </Button>
                       }
@@ -566,7 +567,7 @@ export function LegalAgentEnhanced() {
                     description={`Review contract terms and potential amendments for ${selectedContract.title}`}
                     attendees={["legal@patchline.com"]}
                     trigger={
-                      <Button className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                      <Button className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
                         <Calendar className="h-4 w-4 mr-2" /> Schedule Review
                       </Button>
                     }

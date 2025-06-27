@@ -7,7 +7,15 @@ import type React from "react"
 import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { 
+  DashboardHeader, 
+  DashboardGrid, 
+  DashboardCard, 
+  DashboardStat,
+  DashboardTabs,
+  DashboardSection 
+} from '@/components/brand/dashboard'
+import { GradientOrbs, PageGradient, Card as BrandCard } from '@/components/brand'
 import {
   Activity,
   AlertCircle,
@@ -148,25 +156,25 @@ function IntegrationsPanel() {
   const connectedCount = integrations.filter(i => i.connected).length
 
   return (
-    <Card className="glass-effect bg-gradient-to-r from-cosmic-midnight/50 to-cosmic-purple/20 border-cosmic-teal/10 overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-cosmic-teal/10">
+    <BrandCard variant="gradient" hover="glow" className="overflow-hidden">
+      <div className="flex items-center justify-between p-4 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="rounded-full bg-cosmic-teal/10 p-1">
-            <Settings className="h-4 w-4 text-cosmic-teal" />
+          <div className="rounded-full bg-brand-cyan/10 p-1">
+            <Settings className="h-4 w-4 text-brand-cyan" />
           </div>
-          <h2 className="text-lg font-bold font-heading">Platform Integrations</h2>
+          <h2 className="text-lg font-bold">Platform Integrations</h2>
           <Badge variant="secondary" className="h-5 px-2 text-xs">
             {connectedCount} of {integrations.length}
           </Badge>
           {/* Compact Progress Bar */}
           <div className="hidden sm:flex items-center gap-2 ml-2">
-            <div className="w-16 h-1.5 bg-background/20 rounded-full overflow-hidden">
+            <div className="w-16 h-1.5 bg-black/20 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-cosmic-teal to-cosmic-teal/80 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-brand-cyan to-brand-bright-blue transition-all duration-500"
                 style={{ width: `${(connectedCount / integrations.length) * 100}%` }}
               />
             </div>
-            <span className="text-xs text-cosmic-teal font-medium">
+            <span className="text-xs text-brand-cyan font-medium">
               {Math.round((connectedCount / integrations.length) * 100)}%
             </span>
           </div>
@@ -182,7 +190,7 @@ function IntegrationsPanel() {
           expanded ? "max-h-36 opacity-100" : "max-h-0 opacity-0 overflow-hidden",
         )}
       >
-        <CardContent className="p-4">
+        <div className="p-4">
           {/* Horizontal Scrollable Integrations */}
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {integrations.map((integration) => (
@@ -192,7 +200,7 @@ function IntegrationsPanel() {
                   "group relative flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-300 cursor-pointer w-[90px]", // Fixed width for all cards
                   integration.connected
                     ? "bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/30 hover:border-green-400/50 hover:shadow-lg hover:shadow-green-500/20"
-                    : "bg-gradient-to-br from-gray-500/5 to-gray-600/5 border border-gray-500/20 hover:border-cosmic-teal/40 hover:shadow-lg hover:shadow-cosmic-teal/10",
+                    : "bg-gradient-to-br from-gray-500/5 to-gray-600/5 border border-gray-500/20 hover:border-brand-cyan/40 hover:shadow-lg hover:shadow-brand-cyan/10",
                 )}
               >
                 {/* Icon with gradient background */}
@@ -201,7 +209,7 @@ function IntegrationsPanel() {
                     "relative w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110",
                     integration.connected
                       ? `bg-gradient-to-br ${integration.color} text-white shadow-lg`
-                      : "bg-gradient-to-br from-gray-400/20 to-gray-500/20 text-gray-400 group-hover:from-cosmic-teal/20 group-hover:to-cosmic-teal/30 group-hover:text-cosmic-teal",
+                      : "bg-gradient-to-br from-gray-400/20 to-gray-500/20 text-muted-foreground group-hover:from-brand-cyan/20 group-hover:to-brand-cyan/30 group-hover:text-brand-cyan",
                   )}
                 >
                   {integration.icon}
@@ -218,7 +226,7 @@ function IntegrationsPanel() {
                 <span
                   className={cn(
                     "text-xs font-medium text-center transition-colors duration-300 leading-tight",
-                    integration.connected ? "text-white" : "text-gray-400 group-hover:text-cosmic-teal",
+                    integration.connected ? "text-white" : "text-muted-foreground group-hover:text-brand-cyan",
                   )}
                 >
                   {integration.name}
@@ -235,7 +243,7 @@ function IntegrationsPanel() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-5 text-xs px-2 border-cosmic-teal/30 text-cosmic-teal hover:bg-cosmic-teal hover:text-black transition-all duration-300"
+                      className="h-5 text-xs px-2 border-brand-cyan/30 text-brand-cyan hover:bg-brand-cyan hover:text-black transition-all duration-300"
                       onClick={() => connectPlatform(integration.platform)}
                     >
                       +
@@ -249,49 +257,49 @@ function IntegrationsPanel() {
                     "absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none",
                     integration.connected
                       ? "bg-gradient-to-br from-green-400/5 to-green-600/5"
-                      : "bg-gradient-to-br from-cosmic-teal/5 to-cosmic-teal/10",
+                      : "bg-gradient-to-br from-brand-cyan/5 to-brand-cyan/10",
                   )}
                 ></div>
               </div>
             ))}
 
             {/* Add More Button - Keep this */}
-            <div className="flex-shrink-0 flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-cosmic-teal/30 hover:border-cosmic-teal/50 transition-all duration-300 cursor-pointer w-[90px] group">
-              <div className="w-8 h-8 rounded-lg bg-cosmic-teal/10 flex items-center justify-center group-hover:bg-cosmic-teal/20 transition-colors">
-                <Settings className="h-4 w-4 text-cosmic-teal" />
+            <div className="flex-shrink-0 flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-brand-cyan/30 hover:border-brand-cyan/50 transition-all duration-300 cursor-pointer w-[90px] group">
+              <div className="w-8 h-8 rounded-lg bg-brand-cyan/10 flex items-center justify-center group-hover:bg-brand-cyan/20 transition-colors">
+                <Settings className="h-4 w-4 text-brand-cyan" />
               </div>
-              <span className="text-xs font-medium text-cosmic-teal">Add More</span>
+              <span className="text-xs font-medium text-brand-cyan">Add More</span>
             </div>
           </div>
 
           {/* Quick Actions Row */}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-cosmic-teal/10">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 px-3 text-xs text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
+                className="h-7 px-3 text-xs text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
               >
                 Manage All
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 px-3 text-xs text-muted-foreground hover:text-cosmic-teal hover:bg-cosmic-teal/10"
+                className="h-7 px-3 text-xs text-muted-foreground hover:text-brand-cyan hover:bg-brand-cyan/10"
               >
                 Settings
               </Button>
             </div>
             <Button
               size="sm"
-              className="h-7 px-4 text-xs bg-cosmic-teal hover:bg-cosmic-teal/90 text-black font-medium"
+              className="h-7 px-4 text-xs bg-brand-cyan hover:bg-brand-cyan/90 text-black font-medium"
             >
               Connect Missing ({integrations.length - connectedCount})
             </Button>
           </div>
-        </CardContent>
+        </div>
       </div>
-    </Card>
+    </BrandCard>
   )
 }
 
@@ -321,7 +329,7 @@ function CompactReleaseCard({ release }: { release: any }) {
           className={cn(
             "text-xs",
             release.status === "In Progress"
-              ? "border-cosmic-teal text-cosmic-teal"
+              ? "border-brand-cyan text-brand-cyan"
               : "border-amber-500 text-amber-500",
           )}
         >
@@ -392,7 +400,7 @@ function AgentTile({
 
   if (isEmpty) {
     return (
-      <div className="flex items-center gap-2 py-2 px-3 bg-background/10 rounded-lg border border-border/30 hover:bg-background/20 transition-colors group">
+      <div className="flex items-center gap-2 py-2 px-3 bg-black/10 rounded-lg border border-white/10 hover:bg-black/20 transition-colors group">
         <CheckCircle className="h-4 w-4 text-green-500" />
         <span className="text-sm font-medium">{title} All Clear</span>
       </div>
@@ -400,9 +408,11 @@ function AgentTile({
   }
 
   return (
-    <Card
+    <BrandCard
+      variant="glass"
+      hover="glow"
       className={cn(
-        "glass-effect transition-all duration-200 relative overflow-hidden group hover:border-cosmic-teal/30",
+        "transition-all duration-200 relative overflow-hidden group",
         inTimeCapsule ? "opacity-60 hover:opacity-100" : "",
       )}
       onMouseEnter={() => setShowQuickAction(true)}
@@ -413,7 +423,7 @@ function AgentTile({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="rounded-full bg-background/20 p-1">
+                <div className="rounded-full bg-black/20 p-1">
                   <Clock className="h-3 w-3 text-muted-foreground" />
                 </div>
               </TooltipTrigger>
@@ -425,57 +435,58 @@ function AgentTile({
         </div>
       )}
 
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
-      </CardHeader>
+      <div className="p-4">
+        <div className="flex flex-row items-center justify-between pb-2">
+          <h3 className="text-sm font-medium">{title}</h3>
+          {icon}
+        </div>
 
-      <CardContent>
-        <div className="text-2xl font-bold">{count}</div>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <div>
+          <div className="text-2xl font-bold">{count}</div>
+          <p className="text-xs text-muted-foreground">{description}</p>
 
-        {showProgress && (
-          <div className="mt-3 space-y-1">
-            <div className="flex justify-between text-xs">
-              <span>Progress</span>
-              <span>{Math.round(progressValue)}%</span>
+          {showProgress && (
+            <div className="mt-3 space-y-1">
+              <div className="flex justify-between text-xs">
+                <span>Progress</span>
+                <span>{Math.round(progressValue)}%</span>
+              </div>
+              <Progress value={progressValue} className="h-1" />
             </div>
-            <Progress value={progressValue} className="h-1" />
-          </div>
-        )}
+          )}
 
-        <div className="mt-4 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1 h-7 px-2 text-xs text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
-            asChild
-          >
-            <Link href={href}>
-              See details <ChevronRight className="h-3 w-3" />
-            </Link>
-          </Button>
-
-          {/* Quick Action Slide-in Button */}
-          <div
-            className={cn(
-              "absolute inset-y-0 right-0 flex items-center transition-transform duration-200 ease-in-out",
-              showQuickAction ? "transform translate-x-0" : "transform translate-x-full",
-            )}
-          >
+          <div className="mt-4 flex items-center justify-between">
             <Button
-              variant="default"
+              variant="ghost"
               size="sm"
-              className="h-full rounded-l-none rounded-r-md bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
-              onClick={handleQuickAction}
-              disabled={actionComplete}
+              className="gap-1 h-7 px-2 text-xs text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
+              asChild
             >
-              {actionComplete ? <CheckCircle className="h-3.5 w-3.5 mr-1" /> : null}
-              {actionComplete ? "Done" : actionLabel}
+              <Link href={href}>
+                See details <ChevronRight className="h-3 w-3" />
+              </Link>
             </Button>
+
+            {/* Quick Action Slide-in Button */}
+            <div
+              className={cn(
+                "absolute inset-y-0 right-0 flex items-center transition-transform duration-200 ease-in-out",
+                showQuickAction ? "transform translate-x-0" : "transform translate-x-full",
+              )}
+            >
+              <Button
+                size="sm"
+                className="h-full rounded-l-none rounded-r-md bg-brand-cyan hover:bg-brand-cyan/90 text-black"
+                onClick={handleQuickAction}
+                disabled={actionComplete}
+              >
+                {actionComplete ? <CheckCircle className="h-3.5 w-3.5 mr-1" /> : null}
+                {actionComplete ? "Done" : actionLabel}
+              </Button>
+            </div>
           </div>
         </div>
-      </CardContent>
+      </div>
 
       {/* Undo Snackbar */}
       {showUndo && (
@@ -486,7 +497,7 @@ function AgentTile({
           </Button>
         </div>
       )}
-    </Card>
+    </BrandCard>
   )
 }
 
@@ -556,7 +567,7 @@ export default function DashboardPage() {
       message:
         "Lo-fi elements are gaining traction in your genre. Consider incorporating these elements in upcoming releases.",
       time: "Today",
-      icon: <Zap className="h-4 w-4 text-cosmic-teal" />,
+      icon: <Zap className="h-4 w-4 text-brand-cyan" />,
       action: "Auto-Generate",
       severity: "medium",
     },
@@ -566,7 +577,7 @@ export default function DashboardPage() {
       message:
         'Your track "Midnight Dreams" matches the profile for Spotify\'s "Late Night Vibes" playlist. We\'ve prepared a pitch.',
       time: "Yesterday",
-      icon: <Music2 className="h-4 w-4 text-cosmic-teal" />,
+      icon: <Music2 className="h-4 w-4 text-brand-cyan" />,
       action: "Auto-Pitch",
       severity: "medium",
     },
@@ -626,7 +637,7 @@ export default function DashboardPage() {
       message:
         "Lo-fi elements are gaining traction in your genre. Consider incorporating these elements in upcoming releases.",
       time: "Today",
-      icon: <Zap className="h-4 w-4 text-cosmic-teal" />,
+      icon: <Zap className="h-4 w-4 text-brand-cyan" />,
       action: "Auto-Generate",
       severity: "medium",
     },
@@ -636,7 +647,7 @@ export default function DashboardPage() {
       message:
         'Your track "Midnight Dreams" matches the profile for Spotify\'s "Late Night Vibes" playlist. We\'ve prepared a pitch.',
       time: "Yesterday",
-      icon: <Music2 className="h-4 w-4 text-cosmic-teal" />,
+      icon: <Music2 className="h-4 w-4 text-brand-cyan" />,
       action: "Auto-Pitch",
       severity: "medium",
     },
@@ -789,305 +800,263 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-
-      {/* Header - removed Last 30 Days filter */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <span className="text-sm text-muted-foreground">{format(new Date(), "EEEE, MMMM d")}</span>
-        </div>
-      </div>
-
-      {/* Greeting Strip (if last visit > 24h) */}
-      {showGreeting && (
-        <div className="bg-cosmic-teal/10 border border-cosmic-teal/30 rounded-lg p-3 animate-in fade-in-50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-cosmic-teal" />
-              <h2 className="font-medium">
-                Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"},
-                Alex
-              </h2>
-              <span className="text-sm text-muted-foreground">Streams up 4% overnight 🚀</span>
-            </div>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setShowGreeting(false)}>
-              <X className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Time Capsule Feed */}
-      <TimeCapsuleFeed />
-
-      {/* Integrations Panel */}
-                      <IntegrationsPanel />
-
-      {/* Critical Alert Banner */}
-      <CriticalAlertBanner alert={criticalAlert} onDismiss={removeAlert} onAction={handleAlertAction} />
-
-      {/* Web3 Wallet Balance - Show when Web3 is enabled and wallet is connected */}
-      {web3Settings.enabled && hasWallet && (
-        <div className="mb-4">
-          <WalletBalance />
-        </div>
-      )}
-
-      {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-cosmic-teal" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {loadingDashboard ? (
-                <div className="h-8 w-32 bg-cosmic-teal/10 animate-pulse rounded" />
-              ) : (
-                `$${dashboardData.revenue.toLocaleString()}`
-              )}
-            </div>
-            <p className="text-xs text-green-500 flex items-center gap-1">
-              <ArrowUpRight className="h-3 w-3" />
-              <span>+20.1%</span> from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Listeners</CardTitle>
-            <Activity className="h-4 w-4 text-cosmic-teal" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {loadingDashboard ? (
-                <div className="h-8 w-32 bg-cosmic-teal/10 animate-pulse rounded" />
-              ) : (
-                dashboardData.listeners.toLocaleString()
-              )}
-            </div>
-            <p className="text-xs text-green-500 flex items-center gap-1">
-              <ArrowUpRight className="h-3 w-3" />
-              <span>+15.3%</span> from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Engagement</CardTitle>
-            <Users className="h-4 w-4 text-cosmic-teal" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {loadingDashboard ? (
-                <div className="h-8 w-32 bg-cosmic-teal/10 animate-pulse rounded" />
-              ) : (
-                dashboardData.engagement.toLocaleString()
-              )}
-            </div>
-            <p className="text-xs text-green-500 flex items-center gap-1">
-              <ArrowUpRight className="h-3 w-3" />
-              <span>+18.7%</span> from last month
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Agent Tiles */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <AgentTile
-          title="Scout Agent"
-          count="8"
-          description="Demos surfaced based on your criteria"
-          icon={<Search className="h-4 w-4 text-cosmic-teal" />}
-          href="/dashboard/agents/scout"
-          actionLabel="Auto-Pitch"
-          actionOnClick={() => simulateAgentProgress("scout")}
-          inTimeCapsule={agentStates.scout.inTimeCapsule}
-          progress={agentStates.scout.progress}
-          isEmpty={agentStates.scout.isEmpty}
-        />
-        <AgentTile
-          title="Legal Agent"
-          count="2"
-          description="Contracts expiring in the next 30 days"
-          icon={<FileText className="h-4 w-4 text-cosmic-teal" />}
-          href="/dashboard/agents/legal"
-          actionLabel="Auto-Renew"
-          actionOnClick={() => simulateAgentProgress("legal")}
-          inTimeCapsule={agentStates.legal.inTimeCapsule}
-          progress={agentStates.legal.progress}
-          isEmpty={agentStates.legal.isEmpty}
-        />
-        <AgentTile
-          title="Metadata Agent"
-          count="15"
-          description="Tracks missing essential metadata"
-          icon={<Database className="h-4 w-4 text-cosmic-teal" />}
-          href="/dashboard/agents/metadata"
-          actionLabel="Auto-Fix"
-          actionOnClick={() => simulateAgentProgress("metadata")}
-          inTimeCapsule={agentStates.metadata.inTimeCapsule}
-          progress={agentStates.metadata.progress}
-          isEmpty={agentStates.metadata.isEmpty}
-        />
-        <AgentTile
-          title="Fan Agent"
-          count="5"
-          description="Posts generated for your approval"
-          icon={<Users className="h-4 w-4 text-cosmic-teal" />}
-          href="/dashboard/agents/fan"
-          actionLabel="Auto-Schedule"
-          actionOnClick={() => simulateAgentProgress("fan")}
-          inTimeCapsule={agentStates.fan.inTimeCapsule}
-          progress={agentStates.fan.progress}
-          isEmpty={agentStates.fan.isEmpty}
-        />
-        <AgentTile
-          title="Marketplace"
-          count="20+"
-          description="Agents available to enhance workflow"
-          icon={<Store className="h-4 w-4 text-cosmic-teal" />}
-          href="/dashboard/agents/marketplace"
-          actionLabel="Explore"
-          actionOnClick={() => {}}
-          inTimeCapsule={agentStates.marketplace.inTimeCapsule}
-          progress={agentStates.marketplace.progress}
-          isEmpty={agentStates.marketplace.isEmpty}
-        />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-3">
-        {/* Upcoming Releases - Compact List */}
-        <div className="md:col-span-2">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold tracking-tight font-heading">Upcoming Releases</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1 text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
-              asChild
-            >
-              <Link href="/dashboard/releases">
-                <Info className="h-4 w-4" />
-                <span className="text-cosmic-teal">View All</span>
-              </Link>
-            </Button>
-          </div>
-
-          <Card className="glass-effect">
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 gap-4">
-                {upcomingReleases.map((release, index) => (
-                  <CompactReleaseCard key={index} release={release} />
-                ))}
+    <div className="relative min-h-screen">
+      {/* Background gradient orbs */}
+      <GradientOrbs variant="default" />
+      
+      <div className="relative z-10 space-y-6">
+        {/* Greeting Strip (if last visit > 24h) */}
+        {showGreeting && (
+          <div className="bg-brand-cyan/10 border border-brand-cyan/30 rounded-lg p-3 animate-in fade-in-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-brand-cyan" />
+                <h2 className="font-medium">
+                  Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"},
+                  Alex
+                </h2>
+                <span className="text-sm text-muted-foreground">Streams up 4% overnight 🚀</span>
               </div>
-            </CardContent>
-          </Card>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setShowGreeting(false)}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+        )}
 
-          {/* Analytics Overview - Line Chart */}
-          <div className="mt-6">
+        {/* Time Capsule Feed - First main element */}
+        <TimeCapsuleFeed />
+
+        {/* Integrations Panel */}
+        <IntegrationsPanel />
+
+        {/* Critical Alert Banner */}
+        <CriticalAlertBanner alert={criticalAlert} onDismiss={removeAlert} onAction={handleAlertAction} />
+
+        {/* Web3 Wallet Balance - Show when Web3 is enabled and wallet is connected */}
+        {web3Settings.enabled && hasWallet && (
+          <div className="mb-4">
+            <WalletBalance />
+          </div>
+        )}
+
+        {/* Quick Stats - Use DashboardGrid and DashboardStat */}
+        <DashboardGrid cols={3}>
+          <DashboardStat
+            title="Total Revenue"
+            value={loadingDashboard ? "Loading..." : `$${dashboardData.revenue.toLocaleString()}`}
+            change={{ value: 20.1, period: "from last month" }}
+            icon={<DollarSign className="h-5 w-5" />}
+          />
+          <DashboardStat
+            title="Monthly Listeners"
+            value={loadingDashboard ? "Loading..." : dashboardData.listeners.toLocaleString()}
+            change={{ value: 15.3, period: "from last month" }}
+            icon={<Activity className="h-5 w-5" />}
+          />
+          <DashboardStat
+            title="Engagement"
+            value={loadingDashboard ? "Loading..." : dashboardData.engagement.toLocaleString()}
+            change={{ value: 18.7, period: "from last month" }}
+            icon={<Users className="h-5 w-5" />}
+          />
+        </DashboardGrid>
+
+        {/* Agent Tiles */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <AgentTile
+            title="Scout Agent"
+            count="8"
+            description="Demos surfaced based on your criteria"
+            icon={<Search className="h-4 w-4 text-brand-cyan" />}
+            href="/dashboard/agents/scout"
+            actionLabel="Auto-Pitch"
+            actionOnClick={() => simulateAgentProgress("scout")}
+            inTimeCapsule={agentStates.scout.inTimeCapsule}
+            progress={agentStates.scout.progress}
+            isEmpty={agentStates.scout.isEmpty}
+          />
+          <AgentTile
+            title="Legal Agent"
+            count="2"
+            description="Contracts expiring in the next 30 days"
+            icon={<FileText className="h-4 w-4 text-brand-cyan" />}
+            href="/dashboard/agents/legal"
+            actionLabel="Auto-Renew"
+            actionOnClick={() => simulateAgentProgress("legal")}
+            inTimeCapsule={agentStates.legal.inTimeCapsule}
+            progress={agentStates.legal.progress}
+            isEmpty={agentStates.legal.isEmpty}
+          />
+          <AgentTile
+            title="Metadata Agent"
+            count="15"
+            description="Tracks missing essential metadata"
+            icon={<Database className="h-4 w-4 text-brand-cyan" />}
+            href="/dashboard/agents/metadata"
+            actionLabel="Auto-Fix"
+            actionOnClick={() => simulateAgentProgress("metadata")}
+            inTimeCapsule={agentStates.metadata.inTimeCapsule}
+            progress={agentStates.metadata.progress}
+            isEmpty={agentStates.metadata.isEmpty}
+          />
+          <AgentTile
+            title="Fan Agent"
+            count="5"
+            description="Posts generated for your approval"
+            icon={<Users className="h-4 w-4 text-brand-cyan" />}
+            href="/dashboard/agents/fan"
+            actionLabel="Auto-Schedule"
+            actionOnClick={() => simulateAgentProgress("fan")}
+            inTimeCapsule={agentStates.fan.inTimeCapsule}
+            progress={agentStates.fan.progress}
+            isEmpty={agentStates.fan.isEmpty}
+          />
+          <AgentTile
+            title="Marketplace"
+            count="20+"
+            description="Agents available to enhance workflow"
+            icon={<Store className="h-4 w-4 text-brand-cyan" />}
+            href="/dashboard/agents/marketplace"
+            actionLabel="Explore"
+            actionOnClick={() => {}}
+            inTimeCapsule={agentStates.marketplace.inTimeCapsule}
+            progress={agentStates.marketplace.progress}
+            isEmpty={agentStates.marketplace.isEmpty}
+          />
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Upcoming Releases - Compact List */}
+          <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold tracking-tight font-heading">Performance Overview</h2>
-              <div className="flex items-center">
-                <Tabs defaultValue="revenue" className="mr-2" onValueChange={setSelectedMetric}>
-                  <TabsList className="h-7 bg-background/10">
-                    <TabsTrigger value="revenue" className="text-xs px-2 py-1">
-                      Revenue
-                    </TabsTrigger>
-                    <TabsTrigger value="listeners" className="text-xs px-2 py-1">
-                      Listeners
-                    </TabsTrigger>
-                    <TabsTrigger value="engagement" className="text-xs px-2 py-1">
-                      Engagement
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1 text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
-                >
-                  <BarChart2 className="h-4 w-4" />
-                  <span className="text-cosmic-teal">Full Insights</span>
-                </Button>
-              </div>
+              <h2 className="text-lg font-bold tracking-tight font-heading">Upcoming Releases</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1 text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
+                asChild
+              >
+                <Link href="/dashboard/releases">
+                  <Info className="h-4 w-4" />
+                  <span className="text-brand-cyan">View All</span>
+                </Link>
+              </Button>
             </div>
-            <Suspense fallback={<div className="h-64 w-full rounded bg-background/10 animate-pulse" />}> 
-              <RevenueLineChart
-                title=""
-                color={selectedMetric === "revenue" ? "#00E5FF" : selectedMetric === "listeners" ? "#9B6DFF" : "#FF6B6B"}
-              />
-            </Suspense>
-          </div>
-        </div>
 
-        {/* Agent Alerts */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold tracking-tight font-heading">Agent Alerts</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1 text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
-            >
-              <Info className="h-4 w-4" />
-              <span className="text-cosmic-teal">View All</span>
-            </Button>
+            <BrandCard variant="gradient" hover="glow">
+              <div className="p-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {upcomingReleases.map((release, index) => (
+                    <CompactReleaseCard key={index} release={release} />
+                  ))}
+                </div>
+              </div>
+            </BrandCard>
+
+            {/* Analytics Overview - Line Chart */}
+            <div className="mt-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold tracking-tight font-heading">Performance Overview</h2>
+                <div className="flex items-center">
+                  <Tabs defaultValue="revenue" className="mr-2" onValueChange={setSelectedMetric}>
+                    <TabsList className="h-7 bg-background/10">
+                      <TabsTrigger value="revenue" className="text-xs px-2 py-1">
+                        Revenue
+                      </TabsTrigger>
+                      <TabsTrigger value="listeners" className="text-xs px-2 py-1">
+                        Listeners
+                      </TabsTrigger>
+                      <TabsTrigger value="engagement" className="text-xs px-2 py-1">
+                        Engagement
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1 text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
+                  >
+                    <BarChart2 className="h-4 w-4" />
+                    <span className="text-brand-cyan">Full Insights</span>
+                  </Button>
+                </div>
+              </div>
+              <Suspense fallback={<div className="h-64 w-full rounded bg-background/10 animate-pulse" />}> 
+                <RevenueLineChart
+                  title=""
+                  color={selectedMetric === "revenue" ? "var(--brand-cyan)" : selectedMetric === "listeners" ? "#9B6DFF" : "#FF6B6B"}
+                />
+              </Suspense>
+            </div>
           </div>
-          <div className="space-y-4">
-            {agentAlertsState
-              .filter((alert) => !criticalAlert || alert.id !== criticalAlert.id)
-              .map((alert, index) => (
-                <Card
-                  key={index}
-                  className={`glass-effect hover:border-cosmic-teal/30 transition-all duration-300 group ${
-                    alert.severity === "high" ? "border-red-500/30" : ""
-                  }`}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-full bg-background p-1 mt-0.5">{alert.icon}</div>
-                      <div className="flex-1 space-y-1">
-                        <div className="flex justify-between">
-                          <p className="text-sm font-medium">{alert.type}</p>
-                          <div className="flex items-center">
-                            <p className="text-xs text-muted-foreground mr-2">{alert.time}</p>
+
+          {/* Agent Alerts */}
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold tracking-tight font-heading">Agent Alerts</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1 text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
+              >
+                <Info className="h-4 w-4" />
+                <span className="text-brand-cyan">View All</span>
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {agentAlertsState
+                .filter((alert) => !criticalAlert || alert.id !== criticalAlert.id)
+                .map((alert, index) => (
+                  <BrandCard
+                    key={index}
+                    variant={alert.severity === "high" ? "gradient" : "glass"}
+                    hover="glow"
+                    className={`transition-all duration-300 group ${
+                      alert.severity === "high" ? "border-red-500/30" : ""
+                    }`}
+                  >
+                    <div className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-full bg-black/20 p-1 mt-0.5">{alert.icon}</div>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex justify-between">
+                            <p className="text-sm font-medium">{alert.type}</p>
+                            <div className="flex items-center">
+                              <p className="text-xs text-muted-foreground mr-2">{alert.time}</p>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
+                                onClick={() => removeAlert(alert.id)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{alert.message}</p>
+                          <div className="flex justify-between items-center pt-2">
                             <Button
                               variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
-                              onClick={() => removeAlert(alert.id)}
+                              size="sm"
+                              className="h-7 px-2 text-xs text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
                             >
-                              <X className="h-3 w-3" />
+                              See rationale
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="h-7 px-3 text-xs bg-brand-cyan hover:bg-brand-cyan/90 text-black"
+                              onClick={() => handleAlertAction(alert.id)}
+                            >
+                              {alert.action}
                             </Button>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">{alert.message}</p>
-                        <div className="flex justify-between items-center pt-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs text-cosmic-teal hover:text-cosmic-teal hover:bg-cosmic-teal/10"
-                          >
-                            See rationale
-                          </Button>
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="h-7 px-3 text-xs bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
-                            onClick={() => handleAlertAction(alert.id)}
-                          >
-                            {alert.action}
-                          </Button>
-                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </BrandCard>
+                ))}
+            </div>
           </div>
         </div>
       </div>

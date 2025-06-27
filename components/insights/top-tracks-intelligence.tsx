@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -59,7 +60,7 @@ export function TopTracksIntelligence({ tracks, timeframe }: TopTracksIntelligen
   }
 
   return (
-    <Card className="glass-effect hover:border-cosmic-teal/30 hover:scale-[1.01] transition-all duration-300">
+    <BrandCard className="glass-effect hover:border-brand-cyan/30 hover:scale-[1.01] transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg font-medium">Top Tracks Intelligence</CardTitle>
         <div className="flex items-center gap-2">
@@ -78,8 +79,8 @@ export function TopTracksIntelligence({ tracks, timeframe }: TopTracksIntelligen
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
-                  className={`border rounded-lg p-3 cursor-pointer hover:border-cosmic-teal/30 hover:scale-[1.02] transition-all duration-200 ${
-                    selectedTrack.id === track.id ? "border-cosmic-teal/50 bg-cosmic-teal/5" : "border-border/50"
+                  className={`border rounded-lg p-3 cursor-pointer hover:border-brand-cyan/30 hover:scale-[1.02] transition-all duration-200 ${
+                    selectedTrack.id === track.id ? "border-brand-cyan/50 bg-brand-cyan/5" : "border-border/50"
                   }`}
                   onClick={() => setSelectedTrack(track)}
                 >
@@ -121,7 +122,7 @@ export function TopTracksIntelligence({ tracks, timeframe }: TopTracksIntelligen
                   <p className="text-muted-foreground">{selectedTrack.album}</p>
                   <div className="flex items-center gap-3 mt-2">
                     <div className="flex items-center gap-1">
-                      <Music className="h-4 w-4 text-cosmic-teal" />
+                      <Music className="h-4 w-4 text-brand-cyan" />
                       <span className="text-sm">{formatNumber(selectedTrack.streams)} streams</span>
                     </div>
                     <div className={`flex items-center gap-1 text-sm ${trendColor[selectedTrack.trend]}`}>
@@ -137,7 +138,7 @@ export function TopTracksIntelligence({ tracks, timeframe }: TopTracksIntelligen
                       <Badge
                         key={driver}
                         variant="outline"
-                        className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/20"
+                        className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20"
                       >
                         {driver}
                       </Badge>
@@ -185,21 +186,21 @@ export function TopTracksIntelligence({ tracks, timeframe }: TopTracksIntelligen
                     <div className="border border-border/50 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-muted-foreground">Engagement Rate</span>
-                        <BarChart2 className="h-3.5 w-3.5 text-cosmic-teal" />
+                        <BarChart2 className="h-3.5 w-3.5 text-brand-cyan" />
                       </div>
                       <div className="text-lg font-bold">{selectedTrack.engagementRate}%</div>
                     </div>
                     <div className="border border-border/50 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-muted-foreground">Save Rate</span>
-                        <BarChart2 className="h-3.5 w-3.5 text-cosmic-teal" />
+                        <BarChart2 className="h-3.5 w-3.5 text-brand-cyan" />
                       </div>
                       <div className="text-lg font-bold">{selectedTrack.saveRate}%</div>
                     </div>
                     <div className="border border-border/50 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-muted-foreground">Share Rate</span>
-                        <TrendingUp className="h-3.5 w-3.5 text-cosmic-teal" />
+                        <TrendingUp className="h-3.5 w-3.5 text-brand-cyan" />
                       </div>
                       <div className="text-lg font-bold">{selectedTrack.shareRate}%</div>
                     </div>
@@ -210,7 +211,7 @@ export function TopTracksIntelligence({ tracks, timeframe }: TopTracksIntelligen
                     {selectedTrack.playlists.map((playlist, index) => (
                       <div
                         key={index}
-                        className="border border-border/50 rounded-lg p-3 hover:border-cosmic-teal/30 hover:scale-[1.01] transition-all duration-200"
+                        className="border border-border/50 rounded-lg p-3 hover:border-brand-cyan/30 hover:scale-[1.01] transition-all duration-200"
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -231,7 +232,7 @@ export function TopTracksIntelligence({ tracks, timeframe }: TopTracksIntelligen
                     {selectedTrack.syncOpportunities.map((opportunity, index) => (
                       <div
                         key={index}
-                        className="border border-border/50 rounded-lg p-3 hover:border-cosmic-teal/30 hover:scale-[1.01] transition-all duration-200"
+                        className="border border-border/50 rounded-lg p-3 hover:border-brand-cyan/30 hover:scale-[1.01] transition-all duration-200"
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -252,6 +253,6 @@ export function TopTracksIntelligence({ tracks, timeframe }: TopTracksIntelligen
           </div>
         </div>
       </CardContent>
-    </Card>
+    </BrandCard>
   )
 }

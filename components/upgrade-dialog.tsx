@@ -82,7 +82,7 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-cosmic-teal" />
+            <Zap className="h-5 w-5 text-brand-cyan" />
             Upgrade Your Plan
           </DialogTitle>
           <DialogDescription>
@@ -103,8 +103,8 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
                     htmlFor={tierOption}
                     className={`flex items-start space-x-3 p-4 rounded-lg border cursor-pointer transition-all ${
                       selectedTier === tierOption
-                        ? "border-cosmic-teal bg-cosmic-teal/5"
-                        : "border-border hover:border-cosmic-teal/50"
+                        ? "border-brand-cyan bg-brand-cyan/5"
+                        : "border-border hover:border-brand-cyan/50"
                     } ${isEnterprise ? "opacity-75" : ""}`}
                   >
                     <RadioGroupItem
@@ -139,7 +139,7 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
                       <div className="space-y-1 mt-3">
                         {config.features.slice(0, 4).map((feature, i) => (
                           <div key={i} className="flex items-center gap-2 text-sm">
-                            <CheckCircle2 className="h-3 w-3 text-cosmic-teal shrink-0" />
+                            <CheckCircle2 className="h-3 w-3 text-brand-cyan shrink-0" />
                             <span>{feature}</span>
                           </div>
                         ))}
@@ -158,9 +158,9 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
           </RadioGroup>
 
                           {selectedTier === UserTier.PRO && (
-            <div className="mt-6 p-4 rounded-lg bg-cosmic-teal/10 border border-cosmic-teal/30">
+            <div className="mt-6 p-4 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30">
               <h5 className="font-medium mb-2 flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-cosmic-teal" />
+                <CreditCard className="h-4 w-4 text-brand-cyan" />
                 14-Day Free Trial
               </h5>
               <p className="text-sm text-muted-foreground">
@@ -179,7 +179,7 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
               onClick={() => {
                 window.location.href = "/contact"
               }}
-              className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+              className="bg-brand-cyan hover:bg-brand-cyan/90 text-black"
             >
               Contact Sales
             </Button>
@@ -187,7 +187,7 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
             <Button
               onClick={handleUpgrade}
               disabled={!selectedTier || isProcessing}
-              className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+              className="bg-brand-cyan hover:bg-brand-cyan/90 text-black"
             >
                               {isProcessing ? "Processing..." : selectedTier === UserTier.PRO ? "Start Free Trial" : "Upgrade Now"}
             </Button>

@@ -29,7 +29,7 @@ export const CONTENT_TYPES: Record<ContentType, ContentTypeConfig> = {
     name: "Blog Post",
     description: "In-depth articles and thought leadership content",
     icon: "FileText",
-    color: "cosmic-teal",
+    color: "brand-cyan",
     estimatedTime: "5-8 min",
     agentSuggestions: [
       "Industry insights and trends",
@@ -85,7 +85,7 @@ export const CONTENT_TYPES: Record<ContentType, ContentTypeConfig> = {
     name: "AI Social Media Creator",
     description: "Transform your photos into stunning social media content with AI",
     icon: "Sparkles",
-    color: "cosmic-teal",
+    color: "brand-cyan",
     estimatedTime: "3-5 min",
     agentSuggestions: [
       "Google Drive photo integration",

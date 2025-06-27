@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AlertTriangle, Zap, CheckCircle2, Clock, X } from "lucide-react"
@@ -112,7 +113,7 @@ export function IssuesKanban() {
 
   return (
     <div className="space-y-6">
-      <Card className="glass-effect">
+      <BrandCard className="glass-effect">
         <CardHeader>
           <CardTitle>Missing Fields</CardTitle>
         </CardHeader>
@@ -157,7 +158,7 @@ export function IssuesKanban() {
             ))}
           </div>
         </CardContent>
-      </Card>
+      </BrandCard>
 
       {/* Issue Detail Drawer */}
       <Sheet open={selectedIssue !== null} onOpenChange={(open) => !open && setSelectedIssue(null)}>
@@ -165,7 +166,7 @@ export function IssuesKanban() {
           <SheetHeader>
             <SheetTitle className="flex items-center justify-between">
               <span>{selectedIssueData?.field}</span>
-              <SheetClose className="rounded-full hover:bg-muted p-1">
+              <SheetClose className="rounded-full hover:bg-brand-cyan/10 transition-all duration-200 p-1">
                 <X className="h-4 w-4" />
               </SheetClose>
             </SheetTitle>
@@ -249,7 +250,7 @@ export function IssuesKanban() {
                 onClick={() => handleFixIssue(selectedIssueData)}
                 className={
                   selectedIssueData.canAutoFix
-                    ? "w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black gap-1"
+                    ? "w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black gap-1"
                     : "w-full gap-1"
                 }
                 variant={selectedIssueData.canAutoFix ? "default" : "outline"}

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { Card as BrandCard } from '@/components/brand'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -128,7 +129,7 @@ export function ScoutAgentEnhanced() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight font-heading">Scout Agent</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-heading bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">Scout Agent</h1>
         <p className="text-muted-foreground">
           Discover promising unsigned talent based on growth metrics, sound profile, and genre match.
         </p>
@@ -165,7 +166,7 @@ export function ScoutAgentEnhanced() {
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         <TabsContent value="discovery">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect">
             <CardHeader>
               <CardTitle>Artist Discovery</CardTitle>
               <CardDescription>
@@ -180,7 +181,7 @@ export function ScoutAgentEnhanced() {
                       key={artist.id}
                       title={`${artist.name} - ${artist.track}`}
                       description={`${artist.genre} • ${artist.streams} streams • ${artist.growth} growth`}
-                      icon={<Music2 className="h-5 w-5 text-cosmic-teal" />}
+                      icon={<Music2 className="h-5 w-5 text-brand-cyan" />}
                       actions={[
                         {
                           label: `Pitch to ${artist.playlistMatches.length} playlists`,
@@ -243,7 +244,7 @@ export function ScoutAgentEnhanced() {
                             <td className="p-4 align-middle">
                               <div className="flex items-center">
                                 <div
-                                  className="h-2 rounded-full bg-gradient-to-r from-cosmic-teal to-cosmic-pink"
+                                  className="h-2 rounded-full bg-gradient-to-r from-brand-cyan to-gradient-middle"
                                   style={{ width: `${artist.growthScore}%` }}
                                 ></div>
                                 <span className="ml-2">{artist.growthScore}</span>
@@ -252,7 +253,7 @@ export function ScoutAgentEnhanced() {
                             <td className="p-4 align-middle">
                               <div className="flex items-center">
                                 <div
-                                  className="h-2 rounded-full bg-cosmic-teal"
+                                  className="h-2 rounded-full bg-brand-cyan"
                                   style={{ width: `${artist.matchScore}%` }}
                                 ></div>
                                 <span className="ml-2">{artist.matchScore}</span>
@@ -283,12 +284,12 @@ export function ScoutAgentEnhanced() {
                 </div>
               )}
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
 
         {/* Other tabs remain the same */}
         <TabsContent value="watchlist">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect">
             <CardHeader>
               <CardTitle>Your Watchlist</CardTitle>
               <CardDescription>Artists you're tracking for potential signing.</CardDescription>
@@ -301,15 +302,15 @@ export function ScoutAgentEnhanced() {
                   <p className="text-muted-foreground mb-4">
                     Save artists you're interested in to track their growth over time.
                   </p>
-                  <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">Browse Discovery</Button>
+                  <Button className="bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">Browse Discovery</Button>
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
 
         <TabsContent value="analytics">
-          <Card className="glass-effect">
+          <BrandCard className="glass-effect">
             <CardHeader>
               <CardTitle>Growth Analytics</CardTitle>
               <CardDescription>Trend analysis across genres and growth patterns.</CardDescription>
@@ -322,11 +323,11 @@ export function ScoutAgentEnhanced() {
                   <p className="text-muted-foreground mb-4">
                     Detailed analytics will be available once you've saved artists to your watchlist.
                   </p>
-                  <Button className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">Browse Discovery</Button>
+                  <Button className="bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">Browse Discovery</Button>
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </TabsContent>
       </Tabs>
     </div>

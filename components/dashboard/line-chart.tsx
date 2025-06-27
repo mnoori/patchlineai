@@ -16,7 +16,7 @@ interface LineChartProps {
   color?: string
 }
 
-export function RevenueLineChart({ title, data, yAxisLabel = "", color = CHART_COLORS.primary }: LineChartProps) {
+export function RevenueLineChart({ title, data, yAxisLabel = "", color = "#00E6E4" }: LineChartProps) {
   const [chartData, setChartData] = useState<DataPoint[]>([])
 
   useEffect(() => {
@@ -39,36 +39,55 @@ export function RevenueLineChart({ title, data, yAxisLabel = "", color = CHART_C
     return `$${value}`
   }
 
+  // Convert CSS variable to actual color if needed
+  const getActualColor = (colorValue: string) => {
+    if (colorValue.startsWith('var(')) {
+      // Map CSS variables to actual colors
+      if (colorValue.includes('brand-cyan')) return '#00E6E4'
+      if (colorValue.includes('brand-bright-blue')) return '#0068FF'
+      if (colorValue.includes('brand-deep-blue')) return '#090030'
+    }
+    return colorValue
+  }
+
+  const actualColor = getActualColor(color)
+
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
           <defs>
             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={color} stopOpacity={0.8} />
-              <stop offset="95%" stopColor={color} stopOpacity={0} />
+              <stop offset="5%" stopColor={actualColor} stopOpacity={0.8} />
+              <stop offset="95%" stopColor={actualColor} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <XAxis dataKey="name" stroke={CHART_COLORS.grid.text} fontSize={12} tickLine={false} axisLine={{ stroke: CHART_COLORS.grid.line }} />
+          <XAxis 
+            dataKey="name" 
+            stroke="rgba(255, 255, 255, 0.5)" 
+            fontSize={12} 
+            tickLine={false} 
+            axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }} 
+          />
           <YAxis
             tickFormatter={formatYAxis}
-            stroke={CHART_COLORS.grid.text}
+            stroke="rgba(255, 255, 255, 0.5)"
             fontSize={12}
             tickLine={false}
-            axisLine={{ stroke: CHART_COLORS.grid.line }}
-            label={{ value: yAxisLabel, angle: -90, position: "insideLeft", style: { textAnchor: "middle" } }}
+            axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
+            label={{ value: yAxisLabel, angle: -90, position: "insideLeft", style: { textAnchor: "middle", fill: "rgba(255, 255, 255, 0.5)" } }}
           />
           <Tooltip
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 return (
-                  <div className="rounded-lg border bg-background p-2 shadow-md">
+                  <div className="rounded-lg border border-white/10 bg-black/80 backdrop-blur-sm p-2 shadow-md">
                     <div className="grid grid-cols-2 gap-2">
                       <div className="flex flex-col">
                         <span className="text-[0.70rem] uppercase text-muted-foreground">
                           {payload[0].payload.name}
                         </span>
-                        <span className="font-bold text-muted-foreground">${payload[0].value}</span>
+                        <span className="font-bold text-white">${payload[0].value}</span>
                       </div>
                     </div>
                   </div>
@@ -80,10 +99,10 @@ export function RevenueLineChart({ title, data, yAxisLabel = "", color = CHART_C
           <Line
             type="monotone"
             dataKey="value"
-            stroke={color}
-            strokeWidth={2}
-            dot={{ r: 4, strokeWidth: 2, fill: CHART_COLORS.tooltip.background, stroke: color }}
-            activeDot={{ r: 6, strokeWidth: 0, fill: color }}
+            stroke={actualColor}
+            strokeWidth={3}
+            dot={{ r: 4, strokeWidth: 2, fill: "#000814", stroke: actualColor }}
+            activeDot={{ r: 6, strokeWidth: 0, fill: actualColor }}
             name="revenue"
           />
         </LineChart>

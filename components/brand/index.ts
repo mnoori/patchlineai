@@ -12,4 +12,8 @@ export * from './feature-card'
 export * from './hero-section'
 export * from './section'
 export * from './polish'
-export * from './page-gradient' 
+export * from './page-gradient'
+
+// Export specific components that might not be auto-exported
+export { GradientOrbs, GradientBackground } from './gradient-background'
+export { MeshGradient, PageGradient, AnimatedGradientOrbs } from './page-gradient' 

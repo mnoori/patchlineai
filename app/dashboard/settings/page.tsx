@@ -279,7 +279,7 @@ export default function SettingsPage() {
   return (
     <motion.div className="space-y-8" initial="hidden" animate="visible" variants={containerVariants}>
       <motion.div variants={itemVariants}>
-        <h1 className="text-3xl font-bold tracking-tight font-heading">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-heading bg-gradient-to-r from-white to-brand-cyan/80 bg-clip-text text-transparent">Settings</h1>
         <p className="text-muted-foreground">Manage your account settings and preferences</p>
       </motion.div>
 
@@ -287,49 +287,49 @@ export default function SettingsPage() {
         <TabsList className="grid w-full max-w-4xl grid-cols-7 mb-8">
           <TabsTrigger
             value="profile"
-            className="data-[state=active]:bg-cosmic-teal/20 data-[state=active]:text-cosmic-teal"
+            className="data-[state=active]:bg-brand-cyan/20 data-[state=active]:text-brand-cyan"
           >
             <User className="h-4 w-4 mr-2" />
             Profile
           </TabsTrigger>
           <TabsTrigger
             value="platforms"
-            className="data-[state=active]:bg-cosmic-teal/20 data-[state=active]:text-cosmic-teal"
+            className="data-[state=active]:bg-brand-cyan/20 data-[state=active]:text-brand-cyan"
           >
             <Music2 className="h-4 w-4 mr-2" />
             Platforms
           </TabsTrigger>
           <TabsTrigger
             value="mcp"
-            className="data-[state=active]:bg-cosmic-teal/20 data-[state=active]:text-cosmic-teal"
+            className="data-[state=active]:bg-brand-cyan/20 data-[state=active]:text-brand-cyan"
           >
             <Zap className="h-4 w-4 mr-2" />
             MCP
           </TabsTrigger>
           <TabsTrigger
             value="aws-mcp"
-            className="data-[state=active]:bg-cosmic-teal/20 data-[state=active]:text-cosmic-teal"
+            className="data-[state=active]:bg-brand-cyan/20 data-[state=active]:text-brand-cyan"
           >
             <Sparkles className="h-4 w-4 mr-2" />
             AWS MCP
           </TabsTrigger>
           <TabsTrigger
             value="notifications"
-            className="data-[state=active]:bg-cosmic-teal/20 data-[state=active]:text-cosmic-teal"
+            className="data-[state=active]:bg-brand-cyan/20 data-[state=active]:text-brand-cyan"
           >
             <Bell className="h-4 w-4 mr-2" />
             Notifications
           </TabsTrigger>
           <TabsTrigger
             value="security"
-            className="data-[state=active]:bg-cosmic-teal/20 data-[state=active]:text-cosmic-teal"
+            className="data-[state=active]:bg-brand-cyan/20 data-[state=active]:text-brand-cyan"
           >
             <Shield className="h-4 w-4 mr-2" />
             Security
           </TabsTrigger>
           <TabsTrigger
             value="billing"
-            className="data-[state=active]:bg-cosmic-teal/20 data-[state=active]:text-cosmic-teal"
+            className="data-[state=active]:bg-brand-cyan/20 data-[state=active]:text-brand-cyan"
           >
             <CreditCard className="h-4 w-4 mr-2" />
             Billing
@@ -338,10 +338,10 @@ export default function SettingsPage() {
 
         <TabsContent value="profile" className="space-y-6">
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5 text-cosmic-teal" />
+                  <User className="h-5 w-5 text-brand-cyan" />
                   Profile Information
                 </CardTitle>
                 <CardDescription>Update your personal information</CardDescription>
@@ -349,17 +349,17 @@ export default function SettingsPage() {
               <CardContent className="space-y-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="md:w-1/3 flex flex-col items-center">
-                    <Avatar className="h-32 w-32 mb-4 border-4 border-cosmic-teal/20 hover:border-cosmic-teal/50 transition-all duration-300">
+                    <Avatar className="h-32 w-32 mb-4 border-4 border-brand-cyan/20 hover:border-brand-cyan/50 transition-all duration-300">
                       <AvatarImage src="/music-label-owner-avatar.png" alt="Label Owner" />
                       <AvatarFallback>
-                        <Disc className="h-12 w-12 text-cosmic-teal" />
+                        <Disc className="h-12 w-12 text-brand-cyan" />
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-1 hover:bg-cosmic-teal/20 hover:text-cosmic-teal transition-all duration-200"
+                        className="gap-1 hover:bg-brand-cyan/20 hover:text-brand-cyan transition-all duration-200"
                       >
                         <Upload className="h-4 w-4" /> Upload
                       </Button>
@@ -382,7 +382,7 @@ export default function SettingsPage() {
                           <Input
                             id="name"
                             placeholder="John Doe"
-                            className="pl-10 bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                            className="pl-10 bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                             value={fullName}
                             onChange={(e) => {
                               setFullName(e.target.value)
@@ -399,7 +399,7 @@ export default function SettingsPage() {
                             id="email"
                             type="email"
                             placeholder="john.doe@example.com"
-                            className="pl-10 bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                            className="pl-10 bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                             value={email}
                             onChange={(e) => {
                               setEmail(e.target.value)
@@ -415,7 +415,7 @@ export default function SettingsPage() {
                           <Input
                             id="company"
                             placeholder="Your company or artist name"
-                            className="pl-10 bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                            className="pl-10 bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                             value={company}
                             onChange={(e) => {
                               setCompany(e.target.value)
@@ -431,7 +431,7 @@ export default function SettingsPage() {
                           <Input
                             id="website"
                             placeholder="https://example.com"
-                            className="pl-10 bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                            className="pl-10 bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                             value={website}
                             onChange={(e) => {
                               setWebsite(e.target.value)
@@ -448,7 +448,7 @@ export default function SettingsPage() {
                         id="bio"
                         placeholder="Tell us about yourself or your company"
                         rows={4}
-                        className="bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                        className="bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                         value={bio}
                         onChange={(e) => {
                           setBio(e.target.value)
@@ -461,7 +461,7 @@ export default function SettingsPage() {
 
                 <div className="flex justify-end">
                   <Button
-                    className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black transition-all duration-200"
+                    className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black transition-all duration-200"
                     variant={isDirty ? undefined : "outline"}
                     disabled={!isDirty}
                     onClick={handleProfileSave}
@@ -474,10 +474,10 @@ export default function SettingsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sliders className="h-5 w-5 text-cosmic-teal" />
+                  <Sliders className="h-5 w-5 text-brand-cyan" />
                   Preferences
                 </CardTitle>
                 <CardDescription>Customize your interface and regional settings</CardDescription>
@@ -496,7 +496,7 @@ export default function SettingsPage() {
                         id="dark-mode"
                         checked={darkMode}
                         onCheckedChange={setDarkMode}
-                        className="data-[state=checked]:bg-cosmic-teal"
+                        className="data-[state=checked]:bg-brand-cyan"
                       />
                     </div>
 
@@ -504,7 +504,7 @@ export default function SettingsPage() {
                       <Label>Color Theme</Label>
                       <div className="grid grid-cols-3 gap-4">
                         <div className="flex flex-col items-center gap-2">
-                          <div className="h-12 w-full rounded-md bg-cosmic-teal flex items-center justify-center border-2 border-cosmic-teal">
+                          <div className="h-12 w-full rounded-md bg-brand-cyan flex items-center justify-center border-2 border-brand-cyan">
                             <Palette className="h-6 w-6 text-black" />
                           </div>
                           <span className="text-sm">Cosmic Teal</span>
@@ -534,7 +534,7 @@ export default function SettingsPage() {
                         <Languages className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <select
                           id="language"
-                          className="w-full pl-10 h-10 rounded-md border border-border/50 bg-background/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                          className="w-full pl-10 h-10 rounded-md border border-border/50 bg-background/50 focus:border-brand-cyan/50 transition-all duration-200"
                           value={language}
                           onChange={(e) => setLanguage(e.target.value)}
                         >
@@ -553,7 +553,7 @@ export default function SettingsPage() {
                         <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <select
                           id="timezone"
-                          className="w-full pl-10 h-10 rounded-md border border-border/50 bg-background/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                          className="w-full pl-10 h-10 rounded-md border border-border/50 bg-background/50 focus:border-brand-cyan/50 transition-all duration-200"
                           value={timezone}
                           onChange={(e) => setTimezone(e.target.value)}
                         >
@@ -574,7 +574,7 @@ export default function SettingsPage() {
                         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <select
                           id="date-format"
-                          className="w-full pl-10 h-10 rounded-md border border-border/50 bg-background/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                          className="w-full pl-10 h-10 rounded-md border border-border/50 bg-background/50 focus:border-brand-cyan/50 transition-all duration-200"
                           value={dateFormat}
                           onChange={(e) => setDateFormat(e.target.value)}
                         >
@@ -588,7 +588,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black transition-all duration-200">
+                  <Button className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black transition-all duration-200" variant="outline">
                     <Save className="h-4 w-4" /> Save Preferences
                   </Button>
                 </div>
@@ -603,10 +603,10 @@ export default function SettingsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-cosmic-teal" />
+                  <Zap className="h-5 w-5 text-brand-cyan" />
                   Platform Settings
                 </CardTitle>
                 <CardDescription>Configure how your platforms interact with Patchline</CardDescription>
@@ -623,7 +623,7 @@ export default function SettingsPage() {
                           Automatically sync data from connected platforms
                         </p>
                       </div>
-                      <Switch id="auto-sync" checked={true} className="data-[state=checked]:bg-cosmic-teal" />
+                      <Switch id="auto-sync" checked={true} className="data-[state=checked]:bg-brand-cyan" />
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -633,7 +633,7 @@ export default function SettingsPage() {
                       </div>
                       <select
                         id="sync-frequency"
-                        className="w-40 h-10 rounded-md border border-border/50 bg-background/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                        className="w-40 h-10 rounded-md border border-border/50 bg-background/50 focus:border-brand-cyan/50 transition-all duration-200"
                       >
                         <option value="daily">Daily</option>
                         <option value="hourly">Hourly</option>
@@ -648,7 +648,7 @@ export default function SettingsPage() {
                           Import historical data when connecting platforms
                         </p>
                       </div>
-                      <Switch id="historical-data" checked={true} className="data-[state=checked]:bg-cosmic-teal" />
+                      <Switch id="historical-data" checked={true} className="data-[state=checked]:bg-brand-cyan" />
                     </div>
                   </div>
 
@@ -660,7 +660,7 @@ export default function SettingsPage() {
                         <Label htmlFor="read-analytics">Read Analytics</Label>
                         <p className="text-sm text-muted-foreground">Allow platforms to read analytics data</p>
                       </div>
-                      <Switch id="read-analytics" checked={true} className="data-[state=checked]:bg-cosmic-teal" />
+                      <Switch id="read-analytics" checked={true} className="data-[state=checked]:bg-brand-cyan" />
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -668,7 +668,7 @@ export default function SettingsPage() {
                         <Label htmlFor="post-content">Post Content</Label>
                         <p className="text-sm text-muted-foreground">Allow posting content to platforms</p>
                       </div>
-                      <Switch id="post-content" checked={true} className="data-[state=checked]:bg-cosmic-teal" />
+                      <Switch id="post-content" checked={true} className="data-[state=checked]:bg-brand-cyan" />
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -676,13 +676,13 @@ export default function SettingsPage() {
                         <Label htmlFor="manage-releases">Manage Releases</Label>
                         <p className="text-sm text-muted-foreground">Allow managing releases on platforms</p>
                       </div>
-                      <Switch id="manage-releases" checked={false} className="data-[state=checked]:bg-cosmic-teal" />
+                      <Switch id="manage-releases" checked={false} className="data-[state=checked]:bg-brand-cyan" />
                     </div>
                   </div>
                 </div>
 
                 <div className="flex justify-end">
-                  <Button className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black transition-all duration-200">
+                  <Button className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black transition-all duration-200" variant="outline">
                     <Save className="h-4 w-4" /> Save Platform Settings
                   </Button>
                 </div>
@@ -705,10 +705,10 @@ export default function SettingsPage() {
 
         <TabsContent value="notifications" className="space-y-6">
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5 text-cosmic-teal" />
+                  <Bell className="h-5 w-5 text-brand-cyan" />
                   Notification Preferences
                 </CardTitle>
                 <CardDescription>Manage how you receive notifications</CardDescription>
@@ -721,7 +721,7 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="email-notifications" className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-cosmic-teal" />
+                          <Mail className="h-4 w-4 text-brand-cyan" />
                           Email Notifications
                         </Label>
                         <p className="text-sm text-muted-foreground">Receive notifications via email</p>
@@ -730,14 +730,14 @@ export default function SettingsPage() {
                         id="email-notifications"
                         checked={emailNotifications}
                         onCheckedChange={setEmailNotifications}
-                        className="data-[state=checked]:bg-cosmic-teal"
+                        className="data-[state=checked]:bg-brand-cyan"
                       />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="push-notifications" className="flex items-center gap-2">
-                          <Smartphone className="h-4 w-4 text-cosmic-teal" />
+                          <Smartphone className="h-4 w-4 text-brand-cyan" />
                           Push Notifications
                         </Label>
                         <p className="text-sm text-muted-foreground">Receive notifications in your browser</p>
@@ -746,19 +746,19 @@ export default function SettingsPage() {
                         id="push-notifications"
                         checked={pushNotifications}
                         onCheckedChange={setPushNotifications}
-                        className="data-[state=checked]:bg-cosmic-teal"
+                        className="data-[state=checked]:bg-brand-cyan"
                       />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="sms-notifications" className="flex items-center gap-2">
-                          <MessageSquare className="h-4 w-4 text-cosmic-teal" />
+                          <MessageSquare className="h-4 w-4 text-brand-cyan" />
                           SMS Notifications
                         </Label>
                         <p className="text-sm text-muted-foreground">Receive important alerts via SMS</p>
                       </div>
-                      <Switch id="sms-notifications" checked={false} className="data-[state=checked]:bg-cosmic-teal" />
+                      <Switch id="sms-notifications" checked={false} className="data-[state=checked]:bg-brand-cyan" />
                     </div>
                   </div>
 
@@ -768,7 +768,7 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="weekly-reports" className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-cosmic-teal" />
+                          <FileText className="h-4 w-4 text-brand-cyan" />
                           Weekly Reports
                         </Label>
                         <p className="text-sm text-muted-foreground">Receive weekly performance reports</p>
@@ -777,14 +777,14 @@ export default function SettingsPage() {
                         id="weekly-reports"
                         checked={weeklyReports}
                         onCheckedChange={setWeeklyReports}
-                        className="data-[state=checked]:bg-cosmic-teal"
+                        className="data-[state=checked]:bg-brand-cyan"
                       />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="release-reminders" className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-cosmic-teal" />
+                          <Calendar className="h-4 w-4 text-brand-cyan" />
                           Release Reminders
                         </Label>
                         <p className="text-sm text-muted-foreground">Get notified about upcoming releases</p>
@@ -793,14 +793,14 @@ export default function SettingsPage() {
                         id="release-reminders"
                         checked={releaseReminders}
                         onCheckedChange={setReleaseReminders}
-                        className="data-[state=checked]:bg-cosmic-teal"
+                        className="data-[state=checked]:bg-brand-cyan"
                       />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="contract-alerts" className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-cosmic-teal" />
+                          <FileText className="h-4 w-4 text-brand-cyan" />
                           Contract Alerts
                         </Label>
                         <p className="text-sm text-muted-foreground">Get notified about contract expirations</p>
@@ -809,19 +809,19 @@ export default function SettingsPage() {
                         id="contract-alerts"
                         checked={contractAlerts}
                         onCheckedChange={setContractAlerts}
-                        className="data-[state=checked]:bg-cosmic-teal"
+                        className="data-[state=checked]:bg-brand-cyan"
                       />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="ai-insights" className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4 text-cosmic-teal" />
+                          <Sparkles className="h-4 w-4 text-brand-cyan" />
                           AI Insights
                         </Label>
                         <p className="text-sm text-muted-foreground">Get notified about AI-generated insights</p>
                       </div>
-                      <Switch id="ai-insights" checked={true} className="data-[state=checked]:bg-cosmic-teal" />
+                      <Switch id="ai-insights" checked={true} className="data-[state=checked]:bg-brand-cyan" />
                     </div>
                   </div>
                 </div>
@@ -836,7 +836,7 @@ export default function SettingsPage() {
                         id="quiet-hours-start"
                         type="time"
                         defaultValue="22:00"
-                        className="bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                        className="bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                       />
                     </div>
 
@@ -846,7 +846,7 @@ export default function SettingsPage() {
                         id="quiet-hours-end"
                         type="time"
                         defaultValue="08:00"
-                        className="bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                        className="bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                       />
                     </div>
                   </div>
@@ -859,13 +859,13 @@ export default function SettingsPage() {
                     <Switch
                       id="weekend-notifications"
                       checked={false}
-                      className="data-[state=checked]:bg-cosmic-teal"
+                      className="data-[state=checked]:bg-brand-cyan"
                     />
                   </div>
                 </div>
 
                 <div className="flex justify-end">
-                  <Button className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black transition-all duration-200">
+                  <Button className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black transition-all duration-200" variant="outline">
                     <Save className="h-4 w-4" /> Save Preferences
                   </Button>
                 </div>
@@ -877,7 +877,7 @@ export default function SettingsPage() {
         <TabsContent value="security" className="space-y-6">
           {/* God Mode Activation - Simple and straightforward */}
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-amber-500/30 hover:border-amber-500/50 transition-all duration-300">
+            <Card className="glass-effect border-amber-500/30 hover:border-amber-500/50 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-amber-400" />
@@ -888,7 +888,8 @@ export default function SettingsPage() {
               <CardContent>
                 <Button
                   onClick={() => setShowGodModeDialog(true)}
-                  className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold"
+                  variant="outline"
+                  className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-bold"
                 >
                   <Zap className="h-4 w-4 mr-2" />
                   Activate God Mode
@@ -898,10 +899,10 @@ export default function SettingsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Lock className="h-5 w-5 text-cosmic-teal" />
+                  <Lock className="h-5 w-5 text-brand-cyan" />
                   Password
                 </CardTitle>
                 <CardDescription>Update your password</CardDescription>
@@ -915,7 +916,7 @@ export default function SettingsPage() {
                       <Input
                         id="current-password"
                         type={showPassword ? "text" : "password"}
-                        className="pl-10 pr-10 bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                        className="pl-10 pr-10 bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                       />
@@ -936,7 +937,7 @@ export default function SettingsPage() {
                       <Input
                         id="new-password"
                         type={showPassword ? "text" : "password"}
-                        className="pl-10 pr-10 bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                        className="pl-10 pr-10 bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                       />
@@ -957,7 +958,7 @@ export default function SettingsPage() {
                       <Input
                         id="confirm-password"
                         type={showPassword ? "text" : "password"}
-                        className="pl-10 pr-10 bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                        className="pl-10 pr-10 bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                       />
@@ -973,7 +974,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black transition-all duration-200">
+                  <Button className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black transition-all duration-200" variant="outline">
                     Update Password
                   </Button>
                 </div>
@@ -982,10 +983,10 @@ export default function SettingsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Fingerprint className="h-5 w-5 text-cosmic-teal" />
+                  <Fingerprint className="h-5 w-5 text-brand-cyan" />
                   Two-Factor Authentication
                 </CardTitle>
                 <CardDescription>Add an extra layer of security to your account</CardDescription>
@@ -1002,7 +1003,7 @@ export default function SettingsPage() {
                     id="two-factor"
                     checked={twoFactorAuth}
                     onCheckedChange={setTwoFactorAuth}
-                    className="data-[state=checked]:bg-cosmic-teal"
+                    className="data-[state=checked]:bg-brand-cyan"
                   />
                 </div>
 
@@ -1022,10 +1023,10 @@ export default function SettingsPage() {
                       <Input
                         id="verification-code"
                         placeholder="Enter the 6-digit code"
-                        className="bg-background/50 border-border/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                        className="bg-background/50 border-border/50 focus:border-brand-cyan/50 transition-all duration-200"
                       />
                     </div>
-                    <Button className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black transition-all duration-200">
+                    <Button className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black transition-all duration-200" variant="outline">
                       Verify and Enable
                     </Button>
                   </div>
@@ -1035,28 +1036,28 @@ export default function SettingsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Laptop className="h-5 w-5 text-cosmic-teal" />
+                  <Laptop className="h-5 w-5 text-brand-cyan" />
                   Sessions
                 </CardTitle>
                 <CardDescription>Manage your active sessions</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-cosmic-teal/10 border border-cosmic-teal/30">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-cosmic-teal/20 flex items-center justify-center">
-                        <Laptop className="h-5 w-5 text-cosmic-teal" />
+                      <div className="h-10 w-10 rounded-full bg-brand-cyan/20 flex items-center justify-center">
+                        <Laptop className="h-5 w-5 text-brand-cyan" />
                       </div>
                       <div>
                         <p className="font-medium">Current Session</p>
                         <p className="text-sm text-muted-foreground">San Francisco, CA • Chrome on macOS</p>
                       </div>
                     </div>
-                    <div className="text-sm text-cosmic-teal font-medium flex items-center gap-1">
-                      <div className="w-2 h-2 rounded-full bg-cosmic-teal animate-pulse"></div>
+                    <div className="text-sm text-brand-cyan font-medium flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse"></div>
                       Active Now
                     </div>
                   </div>
@@ -1113,10 +1114,10 @@ export default function SettingsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-cosmic-teal" />
+                  <Shield className="h-5 w-5 text-brand-cyan" />
                   Privacy & Data
                 </CardTitle>
                 <CardDescription>Manage your privacy settings and data</CardDescription>
@@ -1135,7 +1136,7 @@ export default function SettingsPage() {
                         id="analytics-consent"
                         checked={analyticsConsent}
                         onCheckedChange={setAnalyticsConsent}
-                        className="data-[state=checked]:bg-cosmic-teal"
+                        className="data-[state=checked]:bg-brand-cyan"
                       />
                     </div>
 
@@ -1148,7 +1149,7 @@ export default function SettingsPage() {
                         id="marketing-consent"
                         checked={marketingConsent}
                         onCheckedChange={setMarketingConsent}
-                        className="data-[state=checked]:bg-cosmic-teal"
+                        className="data-[state=checked]:bg-brand-cyan"
                       />
                     </div>
                   </div>
@@ -1165,7 +1166,7 @@ export default function SettingsPage() {
                         id="auto-backup"
                         checked={autoBackup}
                         onCheckedChange={setAutoBackup}
-                        className="data-[state=checked]:bg-cosmic-teal"
+                        className="data-[state=checked]:bg-brand-cyan"
                       />
                     </div>
 
@@ -1173,7 +1174,7 @@ export default function SettingsPage() {
                       <Label htmlFor="data-retention">Data Retention</Label>
                       <select
                         id="data-retention"
-                        className="w-full h-10 rounded-md border border-border/50 bg-background/50 focus:border-cosmic-teal/50 transition-all duration-200"
+                        className="w-full h-10 rounded-md border border-border/50 bg-background/50 focus:border-brand-cyan/50 transition-all duration-200"
                         value={dataRetention}
                         onChange={(e) => setDataRetention(e.target.value)}
                       >
@@ -1197,7 +1198,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black transition-all duration-200">
+                  <Button className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black transition-all duration-200" variant="outline">
                     <Save className="h-4 w-4" /> Save Privacy Settings
                   </Button>
                 </div>
@@ -1208,10 +1209,10 @@ export default function SettingsPage() {
           {/* God Mode Activation Card - DISABLED FOR PRODUCTION */}
           {user?.tier === UserTier.GOD_MODE && (
             <motion.div variants={itemVariants}>
-              <Card className="glass-effect border-border/50 hover:border-gray-400/30 transition-all duration-300 opacity-60">
+              <Card className="glass-effect border-border/50 hover:border-gray-400/30 transition-all duration-300 opacity-60" variant="gradient" hover="glow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-gray-400" />
+                    <Zap className="h-5 w-5 text-muted-foreground" />
                     God Mode
                     <Badge variant="secondary" className="text-xs">Inactive</Badge>
                   </CardTitle>
@@ -1226,7 +1227,7 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-gray-400/20 text-gray-400 border-gray-400/30">
+                      <Badge className="bg-gray-400/20 text-muted-foreground border-gray-400/30">
                         <X className="h-3 w-3 mr-1" />
                         Inactive
                       </Badge>
@@ -1234,7 +1235,7 @@ export default function SettingsPage() {
                         variant="outline"
                         size="sm"
                         disabled
-                        className="text-gray-400 cursor-not-allowed"
+                        className="text-muted-foreground cursor-not-allowed"
                       >
                         <Zap className="h-4 w-4 mr-2" />
                         Unavailable
@@ -1243,22 +1244,22 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2 pt-4 border-t">
-                    <h4 className="text-sm font-medium text-gray-400">Features (Inactive):</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground">Features (Inactive):</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div className="flex items-center gap-2 text-sm text-gray-400">
-                        <X className="h-4 w-4 text-gray-400" />
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <X className="h-4 w-4 text-muted-foreground" />
                         <span>Document Processing & Tax Prep</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-400">
-                        <X className="h-4 w-4 text-gray-400" />
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <X className="h-4 w-4 text-muted-foreground" />
                         <span>AI HR Recruiter</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-400">
-                        <X className="h-4 w-4 text-gray-400" />
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <X className="h-4 w-4 text-muted-foreground" />
                         <span>Newsletter Generator</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-400">
-                        <X className="h-4 w-4 text-gray-400" />
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <X className="h-4 w-4 text-muted-foreground" />
                         <span>Advanced AI Models</span>
                       </div>
                     </div>
@@ -1279,7 +1280,7 @@ export default function SettingsPage() {
           {/* Dev Mode Tier Switcher - DISABLED FOR PRODUCTION */}
           {process.env.NODE_ENV === 'development' && (
             <motion.div variants={itemVariants}>
-              <Card className="glass-effect border-purple-500/30 hover:border-purple-500/50 transition-all duration-300">
+              <Card className="glass-effect border-purple-500/30 hover:border-purple-500/50 transition-all duration-300" variant="gradient" hover="glow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-purple-400" />
@@ -1295,7 +1296,7 @@ export default function SettingsPage() {
                         variant={user?.tier === tier ? "default" : "outline"}
                         className={cn(
                           "transition-all",
-                          user?.tier === tier && "bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                          user?.tier === tier && "bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                         )}
                         onClick={() => {
                           if (user) {
@@ -1340,7 +1341,7 @@ export default function SettingsPage() {
 
           {/* Web3 Portal Toggle */}
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-purple-500/30 hover:border-purple-500/50 transition-all duration-300">
+            <Card className="glass-effect border-purple-500/30 hover:border-purple-500/50 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Wallet className="h-5 w-5 text-purple-400" />
@@ -1377,10 +1378,10 @@ export default function SettingsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-cosmic-teal" />
+                  <Zap className="h-5 w-5 text-brand-cyan" />
                   Current Plan
                 </CardTitle>
                 <CardDescription>Manage your subscription</CardDescription>
@@ -1390,8 +1391,8 @@ export default function SettingsPage() {
                   <div className="flex flex-col md:flex-row justify-between gap-6">
                     <div>
                       <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-                        <span className="text-cosmic-teal">{getTierConfig(user.tier).name} Plan</span>
-                        <span className="text-xs bg-cosmic-teal/20 text-cosmic-teal px-2 py-0.5 rounded-full">
+                        <span className="text-brand-cyan">{getTierConfig(user.tier).name} Plan</span>
+                        <span className="text-xs bg-brand-cyan/20 text-brand-cyan px-2 py-0.5 rounded-full">
                           Active
                         </span>
                       </h3>
@@ -1404,7 +1405,7 @@ export default function SettingsPage() {
                       <div className="space-y-2">
                         {getTierConfig(user.tier).features.slice(0, 4).map((feature, i) => (
                           <div key={i} className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-cosmic-teal" />
+                            <CheckCircle2 className="h-4 w-4 text-brand-cyan" />
                             <span className="text-sm">{feature}</span>
                           </div>
                         ))}
@@ -1420,7 +1421,7 @@ export default function SettingsPage() {
                         {getUpgradePath(user.tier).length > 0 && (
                           <Button
                             variant="outline"
-                            className="hover:bg-cosmic-teal/20 hover:text-cosmic-teal transition-all duration-200"
+                            className="hover:bg-brand-cyan/20 hover:text-brand-cyan transition-all duration-200"
                             onClick={() => setShowUpgradeDialog(true)}
                           >
                             Upgrade Plan
@@ -1445,10 +1446,10 @@ export default function SettingsPage() {
           {/* Upgrade Options */}
           {user && getUpgradePath(user.tier).length > 0 && (
             <motion.div variants={itemVariants}>
-              <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+              <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-cosmic-teal" />
+                    <Sparkles className="h-5 w-5 text-brand-cyan" />
                     Upgrade Your Plan
                   </CardTitle>
                   <CardDescription>Unlock more features and capabilities</CardDescription>
@@ -1460,11 +1461,11 @@ export default function SettingsPage() {
                       return (
                         <div
                           key={tierOption}
-                          className="p-4 rounded-lg border border-border/50 hover:border-cosmic-teal/30 transition-all duration-200"
+                          className="p-4 rounded-lg border border-border/50 hover:border-brand-cyan/30 transition-all duration-200"
                         >
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              <h4 className="font-semibold text-lg">{config.name}</h4>
+                              <h4 className="font-bold text-lg">{config.name}</h4>
                               <p className="text-sm text-muted-foreground">{config.tagline}</p>
                             </div>
                             <div className="text-right">
@@ -1479,13 +1480,13 @@ export default function SettingsPage() {
                           <div className="space-y-1 mb-4">
                             {config.features.slice(0, 3).map((feature, i) => (
                               <div key={i} className="flex items-center gap-2 text-sm">
-                                <CheckCircle2 className="h-3 w-3 text-cosmic-teal" />
+                                <CheckCircle2 className="h-3 w-3 text-brand-cyan" />
                                 <span>{feature}</span>
                               </div>
                             ))}
                           </div>
                           <Button
-                            className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
+                            className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
                             onClick={() => {
                               if (tierOption === UserTier.ULTRA) {
                                 window.location.href = "/contact"
@@ -1506,19 +1507,19 @@ export default function SettingsPage() {
           )}
 
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-cosmic-teal" />
+                  <CreditCard className="h-5 w-5 text-brand-cyan" />
                   Payment Method
                 </CardTitle>
                 <CardDescription>Manage your payment information</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-background/10 border border-border/50 hover:border-cosmic-teal/30 transition-all duration-200">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-background/10 border border-border/50 hover:border-brand-cyan/30 transition-all duration-200">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-cosmic-teal/20 flex items-center justify-center">
-                      <CreditCard className="h-5 w-5 text-cosmic-teal" />
+                    <div className="h-10 w-10 rounded-full bg-brand-cyan/20 flex items-center justify-center">
+                      <CreditCard className="h-5 w-5 text-brand-cyan" />
                     </div>
                     <div>
                       <p className="font-medium">Visa ending in 4242</p>
@@ -1529,7 +1530,7 @@ export default function SettingsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="hover:bg-cosmic-teal/20 hover:text-cosmic-teal transition-all duration-200"
+                      className="hover:bg-brand-cyan/20 hover:text-brand-cyan transition-all duration-200"
                     >
                       Edit
                     </Button>
@@ -1546,7 +1547,7 @@ export default function SettingsPage() {
                 <div className="flex justify-end">
                   <Button
                     variant="outline"
-                    className="gap-1 hover:bg-cosmic-teal/20 hover:text-cosmic-teal transition-all duration-200"
+                    className="gap-1 hover:bg-brand-cyan/20 hover:text-brand-cyan transition-all duration-200"
                   >
                     <Plus className="h-4 w-4" /> Add Payment Method
                   </Button>
@@ -1556,10 +1557,10 @@ export default function SettingsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="glass-effect border-border/50 hover:border-cosmic-teal/30 transition-all duration-300">
+            <Card className="glass-effect border-border/50 hover:border-brand-cyan/30 transition-all duration-300" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-cosmic-teal" />
+                  <FileText className="h-5 w-5 text-brand-cyan" />
                   Billing History
                 </CardTitle>
                 <CardDescription>View your past invoices</CardDescription>
@@ -1611,7 +1612,7 @@ export default function SettingsPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="hover:bg-cosmic-teal/20 hover:text-cosmic-teal transition-all duration-200"
+                                className="hover:bg-brand-cyan/20 hover:text-brand-cyan transition-all duration-200"
                               >
                                 <Download className="h-4 w-4 mr-1" /> Download
                               </Button>

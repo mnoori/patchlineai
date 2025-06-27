@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { Card } from '@/components/brand'
 import Link from "next/link"
-import { Button } from "@/components/brand"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,

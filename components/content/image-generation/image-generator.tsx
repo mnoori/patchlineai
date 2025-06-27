@@ -398,7 +398,7 @@ export function ImageGenerator({
 
                   {/* Selected badge */}
                   {selectedImage === index && (
-                    <Badge className="absolute top-2 right-2" variant="default">
+                    <Badge className="absolute top-2 right-2" variant="outline">
                       Selected
                     </Badge>
                   )}

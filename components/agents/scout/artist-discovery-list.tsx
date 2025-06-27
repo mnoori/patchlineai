@@ -1,6 +1,7 @@
 "use client"
 import React from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -41,7 +42,7 @@ export function ArtistDiscoveryList({
 }: ArtistDiscoveryListProps) {
   const getPlatformBadges = (platforms: string[]) => {
     return platforms.map((platform) => (
-      <Badge key={platform} variant="outline" className="bg-cosmic-midnight/50 text-xs">
+      <Badge key={platform} variant="outline" className="bg-brand-black/50 text-xs">
         {platform.charAt(0).toUpperCase() + platform.slice(1)}
       </Badge>
     ))
@@ -49,7 +50,7 @@ export function ArtistDiscoveryList({
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return "text-green-400"
-    if (score >= 70) return "text-cosmic-teal"
+    if (score >= 70) return "text-brand-cyan"
     if (score >= 50) return "text-yellow-400"
     return "text-orange-400"
   }
@@ -78,12 +79,12 @@ export function ArtistDiscoveryList({
           }}
           whileHover={{ scale: 1.01 }}
         >
-          <Card
-            className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,240,255,0.12)] cursor-pointer overflow-hidden group"
+          <BrandCard
+            className="glass-effect hover:border-brand-cyan/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,240,255,0.12)] cursor-pointer overflow-hidden group"
             onClick={() => onArtistClick(artist)}
           >
             {/* Animated background gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-cosmic-teal/5 via-transparent to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-cyan/5 via-transparent to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
             <CardContent className="p-6 relative">
               <div className="flex flex-col md:flex-row gap-6">
@@ -93,9 +94,9 @@ export function ArtistDiscoveryList({
                     whileHover={{ scale: 1.05, rotate: 2 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <Avatar className="h-16 w-16 ring-2 ring-white/10 group-hover:ring-cosmic-teal/30 transition-all duration-300">
+                    <Avatar className="h-16 w-16 ring-2 ring-white/10 group-hover:ring-brand-cyan/30 transition-all duration-300">
                       <AvatarImage src={artist.image || "/placeholder.svg"} alt={artist.name} />
-                      <AvatarFallback className="bg-gradient-to-br from-cosmic-teal to-purple-400 text-white">
+                      <AvatarFallback className="bg-gradient-to-br from-brand-cyan to-purple-400 text-white">
                         {artist.name.slice(0, 2)}
                       </AvatarFallback>
                     </Avatar>
@@ -103,13 +104,13 @@ export function ArtistDiscoveryList({
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-xl font-semibold group-hover:text-cosmic-teal transition-colors duration-300">
+                      <h3 className="text-xl font-bold group-hover:text-brand-cyan transition-colors duration-300">
                         {artist.name}
                       </h3>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={`h-8 w-8 ${artist.isWatchlisted ? "text-cosmic-teal" : "text-muted-foreground"} hover:scale-110 transition-transform`}
+                        className={`h-8 w-8 ${artist.isWatchlisted ? "text-brand-cyan" : "text-muted-foreground"} hover:scale-110 transition-transform`}
                         onClick={(e) => {
                           e.stopPropagation()
                           onWatchlistToggle(artist.id)
@@ -146,10 +147,10 @@ export function ArtistDiscoveryList({
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
                     >
-                      <div className="p-1.5 bg-cosmic-teal/20 rounded-md">
-                        <MessageCircle className="h-3 w-3 text-cosmic-teal" />
+                      <div className="p-1.5 bg-brand-cyan/20 rounded-md">
+                        <MessageCircle className="h-3 w-3 text-brand-cyan" />
                       </div>
-                      <p className="text-cosmic-teal/90 text-sm leading-relaxed">{artist.aiSummary}</p>
+                      <p className="text-brand-cyan/90 text-sm leading-relaxed">{artist.aiSummary}</p>
                     </motion.div>
                   </div>
                 </div>
@@ -162,7 +163,7 @@ export function ArtistDiscoveryList({
                     transition={{ type: "spring", stiffness: 300 }}
                   >
                     <p className="text-xs text-muted-foreground">Genre</p>
-                    <Badge variant="outline" className="bg-cosmic-teal/10 text-cosmic-teal border-cosmic-teal/20 backdrop-blur-sm">
+                    <Badge variant="outline" className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20 backdrop-blur-sm">
                       {artist.genre}
                     </Badge>
                   </motion.div>
@@ -240,7 +241,7 @@ export function ArtistDiscoveryList({
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </motion.div>
       ))}
     </div>

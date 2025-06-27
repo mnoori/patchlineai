@@ -483,7 +483,7 @@ The artists who thrive in this new landscape will be those who embrace AI as a p
                     </div>
                     <div className="p-6 md:p-8 flex flex-col">
                       <div className="flex items-center gap-4 mb-4">
-                        <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-cosmic-teal/20 text-cosmic-teal">
+                        <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-brand-cyan/20 text-brand-cyan">
                           {category}
                         </span>
                         <div className="flex items-center text-muted-foreground text-sm">

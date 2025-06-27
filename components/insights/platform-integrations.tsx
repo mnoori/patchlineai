@@ -16,7 +16,7 @@ interface PlatformCardProps {
 const PlatformCard = ({ name, icon, connected, onClick }: PlatformCardProps) => {
   return (
     <div
-      className={`relative rounded-lg p-4 flex flex-col items-center justify-center gap-2 border border-border/50 hover:border-cosmic-teal/30 hover:scale-[1.03] transition-all duration-200 cursor-pointer ${
+      className={`relative rounded-lg p-4 flex flex-col items-center justify-center gap-2 border border-border/50 hover:border-brand-cyan/30 hover:scale-[1.03] transition-all duration-200 cursor-pointer ${
         connected ? "bg-background/20" : "bg-background/10"
       }`}
       onClick={onClick}
@@ -31,8 +31,8 @@ const PlatformCard = ({ name, icon, connected, onClick }: PlatformCardProps) => 
           <span>On</span>
         </div>
       ) : (
-        <div className="w-6 h-6 rounded-full bg-background/30 flex items-center justify-center hover:bg-cosmic-teal/20 transition-colors">
-          <Plus className="h-4 w-4 text-cosmic-teal" />
+        <div className="w-6 h-6 rounded-full bg-background/30 flex items-center justify-center hover:bg-brand-cyan/20 transition-colors">
+          <Plus className="h-4 w-4 text-brand-cyan" />
         </div>
       )}
       {connected && (
@@ -287,7 +287,7 @@ export function PlatformIntegrations() {
     {
       name: "Add More",
       icon: (
-        <div className="w-10 h-10 rounded-lg bg-cosmic-teal/20 flex items-center justify-center text-cosmic-teal">
+        <div className="w-10 h-10 rounded-lg bg-brand-cyan/20 flex items-center justify-center text-brand-cyan">
           <Settings className="h-6 w-6" />
         </div>
       ),
@@ -301,10 +301,10 @@ export function PlatformIntegrations() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300 overflow-hidden">
+      <Card className="glass-effect hover:border-brand-cyan/30 transition-all duration-300 overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div className="flex items-center gap-2">
-            <Settings className="h-5 w-5 text-cosmic-teal" />
+            <Settings className="h-5 w-5 text-brand-cyan" />
             <CardTitle className="text-lg font-medium">Platform Integrations</CardTitle>
           </div>
           <div className="flex items-center gap-2 text-sm">

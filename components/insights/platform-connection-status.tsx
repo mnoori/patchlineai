@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card as BrandCard } from '@/components/brand'
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Info, Plus, Check, AlertTriangle, RefreshCw } from "lucide-react"
@@ -59,7 +60,7 @@ export function PlatformConnectionStatus({ platforms }: PlatformConnectionStatus
   const disconnectedPlatforms = platforms.filter((platform) => !platform.connected)
 
   return (
-    <Card className="glass-effect hover:border-cosmic-teal/30 transition-all duration-300">
+    <BrandCard className="glass-effect hover:border-brand-cyan/30 transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-2">
           <CardTitle className="text-lg font-medium">Platform Connections</CardTitle>
@@ -166,9 +167,9 @@ export function PlatformConnectionStatus({ platforms }: PlatformConnectionStatus
             </div>
           )}
 
-          <div className="p-3 border rounded-md bg-cosmic-teal/5 border-cosmic-teal/20">
+          <div className="p-3 border rounded-md bg-brand-cyan/5 border-brand-cyan/20">
             <div className="flex items-center gap-2 mb-1">
-              <Badge className="bg-cosmic-teal text-primary-foreground">Aria Tip</Badge>
+              <Badge className="bg-brand-cyan text-primary-foreground">Aria Tip</Badge>
               <h4 className="text-sm font-medium">More connections = better insights</h4>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -178,6 +179,6 @@ export function PlatformConnectionStatus({ platforms }: PlatformConnectionStatus
           </div>
         </div>
       </CardContent>
-    </Card>
+    </BrandCard>
   )
 }

@@ -53,8 +53,8 @@ const CONTENT_TYPES = [
     icon: Sparkles,
     features: ["Google Drive Integration", "AI Background Removal", "Custom Templates"],
     buttonText: "Create AI Social Content",
-    gradient: "from-cosmic-teal/20 to-purple-500/20",
-    iconColor: "text-cosmic-teal",
+    gradient: "from-brand-cyan/20 to-purple-500/20",
+    iconColor: "text-brand-cyan",
     available: true,
   },
   {
@@ -86,9 +86,9 @@ export function ContentTypeSelector({ selectedType, onTypeChange }: ContentTypeS
     <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
       {/* Header */}
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cosmic-teal/10 border border-cosmic-teal/20">
-          <Sparkles className="h-4 w-4 text-cosmic-teal" />
-          <span className="text-sm font-medium text-cosmic-teal">AI-Powered Content Creation</span>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-cyan/10 border border-brand-cyan/20">
+          <Sparkles className="h-4 w-4 text-brand-cyan" />
+          <span className="text-sm font-medium text-brand-cyan">AI-Powered Content Creation</span>
         </div>
         <h2 className="text-3xl font-bold tracking-tight">What would you like to create?</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -109,7 +109,7 @@ export function ContentTypeSelector({ selectedType, onTypeChange }: ContentTypeS
               className={cn(
                 "relative overflow-hidden transition-all duration-300 cursor-pointer group",
                 "hover:scale-105 hover:shadow-xl",
-                isSelected && "ring-2 ring-cosmic-teal shadow-lg shadow-cosmic-teal/20",
+                isSelected && "ring-2 ring-brand-cyan shadow-lg shadow-brand-cyan/20",
                 !type.available && "opacity-60 cursor-not-allowed",
                 "bg-gradient-to-br from-background/50 to-background/80 backdrop-blur-sm border-muted/30",
               )}
@@ -128,7 +128,7 @@ export function ContentTypeSelector({ selectedType, onTypeChange }: ContentTypeS
               {/* Selected Indicator */}
               {isSelected && (
                 <div className="absolute top-4 right-4 z-10">
-                  <div className="w-6 h-6 rounded-full bg-cosmic-teal flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-brand-cyan flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-black" />
                   </div>
                 </div>
@@ -151,7 +151,7 @@ export function ContentTypeSelector({ selectedType, onTypeChange }: ContentTypeS
                   <div className="space-y-2">
                     {type.features.map((feature, index) => (
                       <div key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <div className="w-1 h-1 rounded-full bg-cosmic-teal" />
+                        <div className="w-1 h-1 rounded-full bg-brand-cyan" />
                         {feature}
                       </div>
                     ))}
@@ -163,8 +163,8 @@ export function ContentTypeSelector({ selectedType, onTypeChange }: ContentTypeS
                   className={cn(
                     "w-full mt-6 transition-all duration-300",
                     isSelected
-                      ? "bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
-                      : "bg-cosmic-teal/20 hover:bg-cosmic-teal hover:text-black text-cosmic-teal",
+                      ? "bg-brand-cyan hover:bg-brand-cyan/90 text-black"
+                      : "bg-brand-cyan/20 hover:bg-brand-cyan hover:text-black text-brand-cyan",
                     !type.available && "opacity-50 cursor-not-allowed",
                   )}
                   disabled={!type.available}

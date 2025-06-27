@@ -2,8 +2,9 @@
 
 import { Badge } from "@/components/ui/badge"
 
+import { Card as BrandCard } from '@/components/brand'
 import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -197,7 +198,7 @@ export function TemplateLibrary() {
                 <div className="space-y-3">
                   {clauses.map((clause) => (
                     <motion.div key={clause.id} whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
-                      <Card className="cursor-move hover:shadow-md transition-shadow">
+                      <BrandCard className="cursor-move hover:shadow-md transition-shadow">
                         <CardContent className="p-3">
                           <div className="flex items-start justify-between mb-2">
                             <h4 className="font-medium text-sm">{clause.title}</h4>
@@ -220,7 +221,7 @@ export function TemplateLibrary() {
                             <span>Used {clause.usage} times</span>
                           </div>
                         </CardContent>
-                      </Card>
+                      </BrandCard>
                     </motion.div>
                   ))}
                 </div>
@@ -230,7 +231,7 @@ export function TemplateLibrary() {
 
           <Dialog open={showNewTemplateDialog} onOpenChange={setShowNewTemplateDialog}>
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+              <Button size="sm" className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
                 <Plus className="h-4 w-4" /> Create Template
               </Button>
             </DialogTrigger>
@@ -291,12 +292,12 @@ export function TemplateLibrary() {
                 <TabsContent value="library" className="space-y-4 py-4">
                   <div className="grid grid-cols-2 gap-3">
                     {templates.map((template) => (
-                      <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                      <BrandCard key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
                         <CardContent className="p-3">
                           <h4 className="font-medium text-sm mb-1">{template.name}</h4>
                           <p className="text-xs text-muted-foreground">{template.description}</p>
                         </CardContent>
-                      </Card>
+                      </BrandCard>
                     ))}
                   </div>
                 </TabsContent>
@@ -307,8 +308,8 @@ export function TemplateLibrary() {
                   Cancel
                 </Button>
                 <Button
-                  className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
-                  onClick={() => {
+                  className="bg-brand-cyan hover:bg-brand-cyan/90 text-black"
+                  onClick={() = variant="outline"> {
                     const newTemplate = {
                       id: `new-${Date.now()}`,
                       name: "New Template",
@@ -337,7 +338,7 @@ export function TemplateLibrary() {
             variant={selectedCategory === category ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedCategory(category)}
-            className={selectedCategory === category ? "bg-cosmic-teal hover:bg-cosmic-teal/90 text-black" : ""}
+            className={selectedCategory === category ? "bg-brand-cyan hover:bg-brand-cyan/90 text-black" : ""}
           >
             {category}
           </Button>
@@ -348,17 +349,17 @@ export function TemplateLibrary() {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredTemplates.map((template) => (
           <motion.div key={template.id} whileHover={{ scale: 1.02, y: -2 }} transition={{ duration: 0.2 }}>
-            <Card
+            <BrandCard
               className="hover:shadow-md transition-all duration-200 cursor-pointer"
               onClick={() => handleTemplateClick(template)}
             >
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <FileText className="h-8 w-8 text-cosmic-teal mt-1" />
+                  <FileText className="h-8 w-8 text-brand-cyan mt-1" />
                   <div className="flex-1">
                     <h3 className="font-medium text-lg mb-1">{template.name}</h3>
                     <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="outline" className="text-xs bg-cosmic-teal/10 text-cosmic-teal">
+                      <Badge variant="outline" className="text-xs bg-brand-cyan/10 text-brand-cyan">
                         {template.category}
                       </Badge>
                       <span className="text-xs text-muted-foreground">Used {template.usage} times</span>
@@ -394,24 +395,24 @@ export function TemplateLibrary() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
           </motion.div>
         ))}
 
         {/* Create New Template Card */}
         <motion.div whileHover={{ scale: 1.02, y: -2 }} transition={{ duration: 0.2 }}>
-          <Card
-            className="border-dashed border-cosmic-teal/50 hover:border-cosmic-teal/70 transition-all duration-300 cursor-pointer h-full"
+          <BrandCard
+            className="border-dashed border-brand-cyan/50 hover:border-brand-cyan/70 transition-all duration-300 cursor-pointer h-full"
             onClick={() => setShowNewTemplateDialog(true)}
           >
             <CardContent className="flex items-center justify-center h-full min-h-[200px]">
               <div className="text-center">
-                <Plus className="h-10 w-10 mx-auto mb-3 text-cosmic-teal" />
-                <p className="font-medium text-cosmic-teal text-lg">Create Template</p>
+                <Plus className="h-10 w-10 mx-auto mb-3 text-brand-cyan" />
+                <p className="font-medium text-brand-cyan text-lg">Create Template</p>
                 <p className="text-sm text-muted-foreground">Start from scratch or import</p>
               </div>
             </CardContent>
-          </Card>
+          </BrandCard>
         </motion.div>
       </div>
 
@@ -421,8 +422,8 @@ export function TemplateLibrary() {
           <div className="absolute inset-0 pointer-events-none bg-background/80 backdrop-blur-[2px] brightness-[0.96] -z-10" />
           {selectedTemplate && (
             <>
-              <SheetHeader className="border-b border-cosmic-teal/20 pb-4">
-                <SheetTitle className="text-cosmic-teal">{selectedTemplate.name}</SheetTitle>
+              <SheetHeader className="border-b border-brand-cyan/20 pb-4">
+                <SheetTitle className="text-brand-cyan">{selectedTemplate.name}</SheetTitle>
                 <SheetDescription>
                   {selectedTemplate.category} • Last modified: {selectedTemplate.lastModified}
                 </SheetDescription>
@@ -430,7 +431,7 @@ export function TemplateLibrary() {
 
               <div className="py-6 space-y-6">
                 <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="bg-cosmic-teal/10 text-cosmic-teal">
+                  <Badge variant="outline" className="bg-brand-cyan/10 text-brand-cyan">
                     {selectedTemplate.category}
                   </Badge>
                   <div className="flex gap-2">
@@ -440,7 +441,7 @@ export function TemplateLibrary() {
                     <Button variant="outline" size="sm" className="gap-1">
                       <Download className="h-4 w-4" /> Download
                     </Button>
-                    <Button size="sm" className="gap-1 bg-cosmic-teal hover:bg-cosmic-teal/90 text-black">
+                    <Button size="sm" className="gap-1 bg-brand-cyan hover:bg-brand-cyan/90 text-black" variant="outline">
                       <Plus className="h-4 w-4" /> Use Template
                     </Button>
                   </div>
@@ -463,7 +464,7 @@ export function TemplateLibrary() {
                       "Representations and Warranties",
                       "Termination",
                     ].map((section, index) => (
-                      <Card key={index} className="hover:shadow-sm transition-shadow">
+                      <BrandCard key={index} className="hover:shadow-sm transition-shadow">
                         <CardContent className="p-3">
                           <div className="flex items-center justify-between">
                             <h4 className="font-medium text-sm">{section}</h4>
@@ -472,7 +473,7 @@ export function TemplateLibrary() {
                             </Button>
                           </div>
                         </CardContent>
-                      </Card>
+                      </BrandCard>
                     ))}
                   </div>
                 </div>
@@ -480,22 +481,22 @@ export function TemplateLibrary() {
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground mb-3">USAGE STATISTICS</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <Card className="bg-cosmic-midnight/50">
+                    <BrandCard className="bg-brand-black/50">
                       <CardContent className="p-4">
                         <div className="text-center">
                           <p className="text-sm font-medium text-muted-foreground">Total Uses</p>
                           <p className="text-2xl font-bold">{selectedTemplate.usage}</p>
                         </div>
                       </CardContent>
-                    </Card>
-                    <Card className="bg-cosmic-midnight/50">
+                    </BrandCard>
+                    <BrandCard className="bg-brand-black/50">
                       <CardContent className="p-4">
                         <div className="text-center">
                           <p className="text-sm font-medium text-muted-foreground">Last Used</p>
                           <p className="text-lg font-medium">3 days ago</p>
                         </div>
                       </CardContent>
-                    </Card>
+                    </BrandCard>
                   </div>
                 </div>
               </div>

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Card as BrandCard } from '@/components/brand'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -171,10 +172,10 @@ export default function BlockchainAgentPage() {
       />
 
       {/* Wallet Connection Status */}
-      <Card className="glass-effect border-cosmic-teal/20">
+      <BrandCard className="glass-effect border-brand-cyan/20" variant="gradient" hover="glow">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Wallet className="h-5 w-5 text-cosmic-teal" />
+            <Wallet className="h-5 w-5 text-brand-cyan" />
             Wallet Connection
           </CardTitle>
         </CardHeader>
@@ -205,10 +206,10 @@ export default function BlockchainAgentPage() {
                 </Badge>
               )}
             </div>
-            <WalletMultiButton className="!bg-cosmic-teal !text-black hover:!bg-cosmic-teal/90" />
+            <WalletMultiButton className="!bg-brand-cyan !text-black hover:!bg-brand-cyan/90" />
           </div>
         </CardContent>
-      </Card>
+      </BrandCard>
 
       {connected && (
         <Tabs defaultValue="balance" className="space-y-6">
@@ -220,7 +221,7 @@ export default function BlockchainAgentPage() {
           </TabsList>
 
           <TabsContent value="balance">
-            <Card className="glass-effect">
+            <BrandCard className="glass-effect" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   Wallet Balance
@@ -238,7 +239,7 @@ export default function BlockchainAgentPage() {
                 {balance ? (
                   <div className="space-y-4">
                     <div className="text-center space-y-2">
-                      <div className="text-4xl font-bold text-cosmic-teal">
+                      <div className="text-4xl font-bold text-brand-cyan">
                         {parseFloat(balance.balance).toFixed(4)} SOL
                       </div>
                       <div className="text-xl text-muted-foreground">
@@ -256,14 +257,14 @@ export default function BlockchainAgentPage() {
                   </div>
                 )}
               </CardContent>
-            </Card>
+            </BrandCard>
           </TabsContent>
 
           <TabsContent value="send">
-            <Card className="glass-effect">
+            <BrandCard className="glass-effect" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Send className="h-5 w-5 text-cosmic-teal" />
+                  <Send className="h-5 w-5 text-brand-cyan" />
                   Quick Send to Coinbase
                 </CardTitle>
                 <CardDescription>
@@ -311,8 +312,8 @@ export default function BlockchainAgentPage() {
                 <Button
                   onClick={handleQuickSendToCoinbase}
                   disabled={loading || !sendAmount}
-                  className="w-full bg-cosmic-teal text-black hover:bg-cosmic-teal/90"
-                >
+                  className="w-full bg-brand-cyan text-black hover:bg-brand-cyan/90"
+                 variant="outline">
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : (
@@ -321,14 +322,14 @@ export default function BlockchainAgentPage() {
                   Send to Coinbase
                 </Button>
               </CardContent>
-            </Card>
+            </BrandCard>
           </TabsContent>
 
           <TabsContent value="history">
-            <Card className="glass-effect">
+            <BrandCard className="glass-effect" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-cosmic-teal" />
+                  <Activity className="h-5 w-5 text-brand-cyan" />
                   Transaction History
                 </CardTitle>
               </CardHeader>
@@ -373,14 +374,14 @@ export default function BlockchainAgentPage() {
                   </div>
                 )}
               </CardContent>
-            </Card>
+            </BrandCard>
           </TabsContent>
 
           <TabsContent value="security">
-            <Card className="glass-effect">
+            <BrandCard className="glass-effect" variant="gradient" hover="glow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-cosmic-teal" />
+                  <Shield className="h-5 w-5 text-brand-cyan" />
                   Security Features
                 </CardTitle>
               </CardHeader>
@@ -435,7 +436,7 @@ export default function BlockchainAgentPage() {
                   </p>
                 </div>
               </CardContent>
-            </Card>
+            </BrandCard>
           </TabsContent>
         </Tabs>
       )}

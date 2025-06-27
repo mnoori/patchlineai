@@ -74,7 +74,7 @@ const ImageSelector = ({ onSelectionChange }: any) => {
   return (
     <div className="py-8">
       <div className="text-center mb-8">
-        <ImageIcon className="w-16 h-16 mx-auto mb-4 text-cosmic-teal" />
+        <ImageIcon className="w-16 h-16 mx-auto mb-4 text-brand-cyan" />
         <h3 className="text-xl font-semibold mb-2">Select Your Photos</h3>
         <p className="text-muted-foreground">Choose 3 photos from your Google Drive folder</p>
         <Badge variant="outline" className="mt-2">
@@ -88,7 +88,7 @@ const ImageSelector = ({ onSelectionChange }: any) => {
             key={image.id}
             className={cn(
               "relative aspect-square rounded-lg border-2 cursor-pointer transition-all hover:scale-105",
-              index < selectedCount ? "border-cosmic-teal bg-cosmic-teal/10" : "border-muted hover:border-cosmic-teal/50"
+              index < selectedCount ? "border-brand-cyan bg-brand-cyan/10" : "border-muted hover:border-brand-cyan/50"
             )}
             onClick={() => handleImageClick(image.id)}
           >
@@ -96,7 +96,7 @@ const ImageSelector = ({ onSelectionChange }: any) => {
               <ImageIcon className="w-8 h-8 text-gray-400" />
             </div>
             {index < selectedCount && (
-              <div className="absolute top-2 right-2 w-6 h-6 bg-cosmic-teal rounded-full flex items-center justify-center">
+              <div className="absolute top-2 right-2 w-6 h-6 bg-brand-cyan rounded-full flex items-center justify-center">
                 <CheckCircle className="w-4 h-4 text-black" />
               </div>
             )}
@@ -133,7 +133,7 @@ const TemplateSelector = ({ onTemplateSelect }: any) => {
             key={template.id}
             className={cn(
               "cursor-pointer transition-all hover:scale-105 hover:shadow-lg",
-              selectedTemplate === template.id && "ring-2 ring-cosmic-teal"
+              selectedTemplate === template.id && "ring-2 ring-brand-cyan"
             )}
             onClick={() => handleTemplateSelect(template)}
           >
@@ -141,7 +141,7 @@ const TemplateSelector = ({ onTemplateSelect }: any) => {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{template.name}</CardTitle>
                 {selectedTemplate === template.id && (
-                  <CheckCircle className="w-5 h-5 text-cosmic-teal" />
+                  <CheckCircle className="w-5 h-5 text-brand-cyan" />
                 )}
               </div>
               <CardDescription>{template.description}</CardDescription>
@@ -204,7 +204,7 @@ const ContentProcessor = ({ onProcessingComplete }: any) => {
 
   return (
     <div className="text-center py-12">
-      <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-cosmic-teal to-purple-500 rounded-full flex items-center justify-center">
+      <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-brand-cyan to-purple-500 rounded-full flex items-center justify-center">
         <Sparkles className={cn("w-10 h-10 text-white", isProcessing && "animate-pulse")} />
       </div>
       <h3 className="text-xl font-semibold mb-3">AI Content Processing</h3>
@@ -213,13 +213,13 @@ const ContentProcessor = ({ onProcessingComplete }: any) => {
       </p>
       
       {!isProcessing ? (
-        <Button onClick={startProcessing} className="bg-cosmic-teal hover:bg-cosmic-teal/80 text-black">
+        <Button onClick={startProcessing} className="bg-brand-cyan hover:bg-brand-cyan/80 text-black">
           <Sparkles className="w-4 h-4 mr-2" />
           Start AI Processing
         </Button>
       ) : (
         <div className="space-y-4">
-          <Loader2 className="w-8 h-8 mx-auto animate-spin text-cosmic-teal" />
+          <Loader2 className="w-8 h-8 mx-auto animate-spin text-brand-cyan" />
           <div className="max-w-md mx-auto">
             <Progress value={progress} className="h-2" />
             <p className="text-sm text-muted-foreground mt-2">{Math.round(progress)}% complete</p>
@@ -243,7 +243,7 @@ const ContentPreview = ({ onFinalContentReady }: any) => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
       {[1, 2, 3].map((i) => (
         <Card key={i} className="overflow-hidden">
-          <div className="aspect-square bg-gradient-to-br from-cosmic-teal/20 to-purple-500/20 flex items-center justify-center">
+          <div className="aspect-square bg-gradient-to-br from-brand-cyan/20 to-purple-500/20 flex items-center justify-center">
             <ImageIcon className="w-16 h-16 text-muted-foreground" />
           </div>
           <CardContent className="p-4">
@@ -278,7 +278,7 @@ export function SocialMediaWorkflowSimple() {
     { id: 1, title: 'Connect', icon: Camera, color: 'bg-blue-500' },
     { id: 2, title: 'Select', icon: ImageIcon, color: 'bg-green-500' },
     { id: 3, title: 'Template', icon: Palette, color: 'bg-purple-500' },
-    { id: 4, title: 'Process', icon: Sparkles, color: 'bg-cosmic-teal' },
+    { id: 4, title: 'Process', icon: Sparkles, color: 'bg-brand-cyan' },
     { id: 5, title: 'Download', icon: Download, color: 'bg-yellow-500' }
   ]
 
@@ -305,7 +305,7 @@ export function SocialMediaWorkflowSimple() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-cosmic-teal" />
+                <Sparkles className="w-6 h-6 text-brand-cyan" />
                 Social Media Content Creator
               </CardTitle>
               <CardDescription>
@@ -340,7 +340,7 @@ export function SocialMediaWorkflowSimple() {
                 <div className={cn(
                   "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200",
                   isCompleted && "bg-green-500 text-white",
-                  isCurrent && "bg-cosmic-teal text-black",
+                  isCurrent && "bg-brand-cyan text-black",
                   !isCompleted && !isCurrent && "bg-muted text-muted-foreground"
                 )}>
                   {isCompleted ? (
