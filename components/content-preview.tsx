@@ -146,7 +146,6 @@ The artists who thrive in this new landscape will be those who embrace AI as a p
           contentType: (draftId as any) || "blog",
           tone: "professional",
           length: "medium",
-          modelId: "claude-3-5-sonnet-20241022-v2:0",
           keywords: draftId === "social" ? ["NewMusic", "ComingSoon", "StudioLife"] : ["AI", "music", "technology"],
           // EPK specific mock data
           artistName: draftId === "epk" ? "Nova Sound" : undefined,
@@ -419,7 +418,7 @@ The artists who thrive in this new landscape will be those who embrace AI as a p
 
   // Default blog post preview (existing implementation)
   // Get model information
-  const modelId = draft.prompt.modelId || "default"
+  const modelId = (draft.prompt as any).modelId || "default"
   const modelName = modelId.includes("claude")
     ? `Claude ${modelId.includes("3-7") ? "3.7" : "3.5"}`
     : modelId.includes("nova-premier")

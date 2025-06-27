@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getGoogleOAuth2Client } from '@/lib/google-auth';
+import { getGoogleOAuth2Client } from '@/lib/google-auth-server';
 
 const GMAIL_SCOPES = [
   'https://www.googleapis.com/auth/gmail.readonly', // View your email messages and settings

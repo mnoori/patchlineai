@@ -38,8 +38,7 @@ async function initializeClients() {
                 ...(SESSION_TOKEN && { sessionToken: SESSION_TOKEN }),
               }
             : undefined,
-        maxAttempts: 3,
-        requestTimeout: 5000, // 5 second timeout
+        maxAttempts: 3
       });
 
       docClient = DynamoDBDocumentClient.from(ddbClient, {

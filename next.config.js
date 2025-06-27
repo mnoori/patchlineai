@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Skip linting during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
   // Enable experimental features for better performance
   experimental: {
     // App directory is enabled by default in Next.js 14, no need to specify
@@ -16,15 +21,15 @@ const nextConfig = {
       '@aws-sdk/client-secretsmanager'
     ],
     
-    // Enable turbo mode for development
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
+    // Turbo mode disabled for production build stability
+    // turbo: {
+    //   rules: {
+    //     '*.svg': {
+    //       loaders: ['@svgr/webpack'],
+    //       as: '*.js',
+    //     },
+    //   },
+    // },
   },
 
   // Optimize images

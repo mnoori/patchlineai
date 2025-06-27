@@ -174,7 +174,7 @@ export function VideoPreview({ draft, onBack, onSubmit, isShortVideo = true }: V
           <CardContent>
             <div className="max-h-[32rem] overflow-y-auto">
               <div className="prose prose-sm max-w-none dark:prose-invert">
-                <ReactMarkdown>{draft.content.substring(0, 1000)}...</ReactMarkdown>
+                <ReactMarkdown>{`${draft.content.substring(0, 1000)}...`}</ReactMarkdown>
               </div>
             </div>
           </CardContent>

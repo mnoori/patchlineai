@@ -19,7 +19,7 @@ export function PermissionsProvider({
       permissionsStore.setUser({
         id: 'default-user',
         email: 'user@example.com',
-        tier: UserTier.CREATOR,
+        tier: UserTier.HOBBY,
         purchasedFeatures: []
       })
     }

@@ -491,15 +491,14 @@ export class AWSMCPClient {
         result: 'success',
         duration: Date.now() - startTime,
         securityContext: {
-          sourceIp: context.sourceIp || 'unknown',
-          userAgent: context.userAgent || 'unknown',
+          sourceIp: 'unknown',
+          userAgent: 'unknown',
           iamPrincipal: context.securityContext?.principalId,
         },
       })
 
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-        isError: false,
       }
     } catch (error) {
       // Log error
@@ -515,15 +514,14 @@ export class AWSMCPClient {
         result: 'error',
         duration: Date.now() - startTime,
         securityContext: {
-          sourceIp: context.sourceIp || 'unknown',
-          userAgent: context.userAgent || 'unknown',
+          sourceIp: 'unknown',
+          userAgent: 'unknown',
           iamPrincipal: context.securityContext?.principalId,
         },
       })
 
       return {
         content: [{ type: 'text', text: `Error executing ${toolName}: ${error.message}` }],
-        isError: true,
       }
     }
   }

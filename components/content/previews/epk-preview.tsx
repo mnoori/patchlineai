@@ -116,7 +116,7 @@ export function EPKPreview({ draft, onBack, onSubmit }: EPKPreviewProps) {
                     <h2 className="text-lg font-semibold">Artist Biography</h2>
                   </div>
                   <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown>{draft.content.substring(0, 500)}...</ReactMarkdown>
+                    <ReactMarkdown>{`${draft.content.substring(0, 500)}...`}</ReactMarkdown>
                   </div>
                 </div>
 

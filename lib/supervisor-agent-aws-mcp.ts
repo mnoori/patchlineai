@@ -81,8 +81,7 @@ export class AWSMCPSupervisorAgent {
       const mcpContext: AWSMCPContext = {
         userId: context.userId,
         sessionId: context.sessionId,
-        sourceIp: context.sourceIp,
-        userAgent: context.userAgent,
+        permissions: context.permissions,
         awsRegion: this.config.awsConfig.region,
         resourceArns: [],
         securityContext: {
@@ -250,7 +249,8 @@ export class AWSMCPSupervisorAgent {
       
       const result = await this.mcpClient.executeTool(step.tool, step.parameters, context)
       
-      if (result.isError) {
+      // Check if the result indicates an error based on content
+      if (result.content[0]?.text?.startsWith('Error executing')) {
         throw new Error(`Step ${step.action} failed: ${result.content[0]?.text}`)
       }
 

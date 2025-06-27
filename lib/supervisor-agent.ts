@@ -67,7 +67,7 @@ export class SupervisorAgent {
   private description: string
   private memory: ChatMemory
   private teamTools: AgentTool[]
-  private traces: AgentTrace[] = []
+  protected traces: AgentTrace[] = []
   private userSupervisorMemory: Array<{ role: string; content: string }> = []
   private supervisorTeamMemory: Record<string, Array<{ role: string; content: string }>> = {}
   private combinedMemory: Array<{ role: string; content: string; agent?: string }> = []
@@ -95,7 +95,7 @@ export class SupervisorAgent {
     ]
   }
 
-  private addTrace(trace: AgentTrace) {
+  protected addTrace(trace: AgentTrace) {
     this.traces.push(trace)
     // Call the callback if set
     if (this.onTrace) {
@@ -662,7 +662,7 @@ ${gmailResponse}`
     }
   }
   
-  private async invokeSupervisorAgent(userInput: string, sessionId: string): Promise<string> {
+  protected async invokeSupervisorAgent(userInput: string, sessionId: string): Promise<string> {
     const command = new InvokeAgentCommand({
       agentId: SUPERVISOR_AGENT.agentId,
       agentAliasId: SUPERVISOR_AGENT.agentAliasId,

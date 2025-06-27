@@ -93,11 +93,9 @@ export async function POST(req: Request) {
     generateContent(data).then(async (result) => {
       console.log(`[API /content POST] Content generated, updating draft ID: ${draft.id}`);
       // Update the draft with the generated content
-      const updatedDraft = await updateContentDraft({
-        ...draft,
+      const updatedDraft = await updateContentDraft(draft.id, {
         content: result.content,
-        promptUsed: result.promptUsed,
-        status: "ready",
+        status: "generated",
       });
       
       console.log(`[API /content POST] Draft updated successfully. ID: ${draft.id}, content length: ${result.content.length} chars`);
@@ -222,7 +220,7 @@ export async function PUT(req: Request) {
     console.log(`[API /content PUT] Updating draft. ID: ${id}, status: ${updatedDraft.status}`);
     
     // Save updated draft
-    const result = await updateContentDraft(updatedDraft);
+    const result = await updateContentDraft(id, updateData);
     
     console.log(`[API /content PUT] Draft updated successfully. ID: ${id}`);
     return NextResponse.json(result);

@@ -1411,7 +1411,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <div className="flex flex-col justify-between">
-                      {user.tier !== UserTier.CREATOR && (
+                      {user.tier !== UserTier.HOBBY && (
                         <div className="text-sm text-muted-foreground">
                           Your plan renews on <span className="font-medium">June 15, 2025</span>
                         </div>
@@ -1426,7 +1426,7 @@ export default function SettingsPage() {
                             Upgrade Plan
                           </Button>
                         )}
-                        {user.tier !== UserTier.CREATOR && (
+                        {user.tier !== UserTier.HOBBY && (
                           <Button
                             variant="outline"
                             className="text-red-500 hover:bg-red-500/10 hover:text-red-500 transition-all duration-200"
@@ -1487,7 +1487,7 @@ export default function SettingsPage() {
                           <Button
                             className="w-full bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
                             onClick={() => {
-                              if (tierOption === UserTier.ENTERPRISE) {
+                              if (tierOption === UserTier.ULTRA) {
                                 window.location.href = "/contact"
                               } else {
                                 setShowUpgradeDialog(true)

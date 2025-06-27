@@ -1,5 +1,5 @@
-import { ScanCommand, QueryCommand, GetCommand } from "@aws-sdk/lib-dynamodb"
-import { BLOG_POSTS_TABLE } from "./aws-config"
+import { ScanCommand, QueryCommand, GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb"
+import { BLOG_POSTS_TABLE, CONTENT_DRAFTS_TABLE } from "./aws-config"
 import type { BlogPost } from "./blog-types"
 import { shouldUseMockData } from "./config"
 
@@ -351,6 +351,147 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
       return post || null
     }
 
+    return null
+  }
+}
+
+/**
+ * Content Draft Functions
+ */
+
+export interface ContentDraft {
+  id: string
+  userId: string
+  type: string
+  prompt?: string
+  content?: string
+  metadata?: any
+  createdAt: string
+  updatedAt: string
+  status: 'draft' | 'generated' | 'published'
+}
+
+/**
+ * Create a new content draft
+ * @param draft The content draft to create
+ * @returns The created content draft
+ */
+export async function createContentDraft(draft: Omit<ContentDraft, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContentDraft> {
+  const now = new Date().toISOString()
+  const newDraft: ContentDraft = {
+    ...draft,
+    id: `draft-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  if (shouldUseMockData() || typeof window !== "undefined") {
+    // In development mode or browser, just return the draft
+    console.log("[Blog DB] Mock creating content draft:", newDraft)
+    return newDraft
+  }
+
+  try {
+    const { documentClient } = await import("./dynamodb-client")
+    
+    const command = new PutCommand({
+      TableName: CONTENT_DRAFTS_TABLE,
+      Item: newDraft,
+    })
+
+    await documentClient.send(command)
+    return newDraft
+  } catch (error) {
+    console.error("[Blog DB] Error creating content draft:", error)
+    throw error
+  }
+}
+
+/**
+ * Update an existing content draft
+ * @param draftId The draft ID
+ * @param updates The fields to update
+ * @returns The updated content draft
+ */
+export async function updateContentDraft(draftId: string, updates: Partial<ContentDraft>): Promise<ContentDraft> {
+  const now = new Date().toISOString()
+  const updatedDraft = {
+    ...updates,
+    id: draftId,
+    updatedAt: now,
+  }
+
+  if (shouldUseMockData() || typeof window !== "undefined") {
+    // In development mode or browser, just return the updated draft
+    console.log("[Blog DB] Mock updating content draft:", updatedDraft)
+    return updatedDraft as ContentDraft
+  }
+
+  try {
+    const { documentClient } = await import("./dynamodb-client")
+    
+    const updateExpression = Object.keys(updates)
+      .map((key) => `#${key} = :${key}`)
+      .join(", ")
+    
+    const expressionAttributeNames = Object.keys(updates).reduce((acc, key) => ({
+      ...acc,
+      [`#${key}`]: key,
+    }), { "#updatedAt": "updatedAt" })
+    
+    const expressionAttributeValues = Object.entries(updates).reduce((acc, [key, value]) => ({
+      ...acc,
+      [`:${key}`]: value,
+    }), { ":updatedAt": now })
+
+    const command = new UpdateCommand({
+      TableName: CONTENT_DRAFTS_TABLE,
+      Key: { id: draftId },
+      UpdateExpression: `SET ${updateExpression}, #updatedAt = :updatedAt`,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: "ALL_NEW",
+    })
+
+    const response = await documentClient.send(command)
+    return response.Attributes as ContentDraft
+  } catch (error) {
+    console.error("[Blog DB] Error updating content draft:", error)
+    throw error
+  }
+}
+
+/**
+ * Get a content draft by ID
+ * @param draftId The draft ID
+ * @returns The content draft or null if not found
+ */
+export async function getContentDraft(draftId: string): Promise<ContentDraft | null> {
+  if (shouldUseMockData() || typeof window !== "undefined") {
+    // In development mode or browser, return a mock draft
+    console.log("[Blog DB] Mock getting content draft:", draftId)
+    return {
+      id: draftId,
+      userId: "mock-user",
+      type: "social-media",
+      status: "draft",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+  }
+
+  try {
+    const { documentClient } = await import("./dynamodb-client")
+    
+    const command = new GetCommand({
+      TableName: CONTENT_DRAFTS_TABLE,
+      Key: { id: draftId },
+    })
+
+    const response = await documentClient.send(command)
+    return response.Item ? (response.Item as ContentDraft) : null
+  } catch (error) {
+    console.error("[Blog DB] Error getting content draft:", error)
     return null
   }
 }

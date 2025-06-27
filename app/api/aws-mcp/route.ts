@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/aws-mcp/tools - Get available tools
+// GET /api/aws-mcp - Get tools or health check
 export async function GET(request: NextRequest) {
   try {
     const auth = await authenticate(request)
@@ -176,204 +176,48 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supervisor = await getSupervisorAgent()
-    const tools = supervisor.getAvailableTools()
+    const { searchParams } = new URL(request.url)
+    const action = searchParams.get('action')
 
-    return NextResponse.json({
-      tools: tools.map(tool => ({
-        name: tool.name,
-        description: tool.description,
-        inputSchema: tool.inputSchema,
-      })),
-      count: tools.length,
-    })
+    if (action === 'health') {
+      // Health check
+      const supervisor = await getSupervisorAgent()
+      
+      const context = {
+        userId: auth.userId,
+        sessionId: `health-${Date.now()}`,
+        sourceIp: request.headers.get('x-forwarded-for') || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
+        permissions: auth.permissions,
+      }
+
+      const healthResult = await supervisor.monitorSystemHealth(context)
+
+      return NextResponse.json({
+        success: healthResult.success,
+        health: healthResult.data,
+        metadata: {
+          executionTime: healthResult.executionTime,
+          activeOperations: supervisor.getActiveOperations(),
+        },
+      })
+    } else {
+      // Default: get available tools
+      const supervisor = await getSupervisorAgent()
+      const tools = supervisor.getAvailableTools()
+
+      return NextResponse.json({
+        tools: tools.map(tool => ({
+          name: tool.name,
+          description: tool.description,
+          inputSchema: tool.inputSchema,
+        })),
+        count: tools.length,
+      })
+    }
 
   } catch (error) {
-    console.error('AWS MCP tools API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-// GET /api/aws-mcp/health - System health check
-export async function GET_HEALTH(request: NextRequest) {
-  try {
-    const auth = await authenticate(request)
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const supervisor = await getSupervisorAgent()
-    
-    const context = {
-      userId: auth.userId,
-      sessionId: `health-${Date.now()}`,
-      sourceIp: request.headers.get('x-forwarded-for') || 'unknown',
-      userAgent: request.headers.get('user-agent') || 'unknown',
-      permissions: auth.permissions,
-    }
-
-    const healthResult = await supervisor.monitorSystemHealth(context)
-
-    return NextResponse.json({
-      success: healthResult.success,
-      health: healthResult.data,
-      metadata: {
-        executionTime: healthResult.executionTime,
-        activeOperations: supervisor.getActiveOperations(),
-      },
-    })
-
-  } catch (error) {
-    console.error('AWS MCP health API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-// Music industry specific endpoints
-
-// POST /api/aws-mcp/artist/analyze - Analyze artist performance
-export async function POST_ARTIST_ANALYZE(request: NextRequest) {
-  try {
-    const auth = await authenticate(request)
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
-    const { artistId } = body
-
-    if (!artistId) {
-      return NextResponse.json({ error: 'Artist ID is required' }, { status: 400 })
-    }
-
-    const supervisor = await getSupervisorAgent()
-    
-    const context = {
-      userId: auth.userId,
-      sessionId: `artist-analysis-${Date.now()}`,
-      sourceIp: request.headers.get('x-forwarded-for') || 'unknown',
-      userAgent: request.headers.get('user-agent') || 'unknown',
-      permissions: auth.permissions,
-      musicIndustryRole: 'manager' as const,
-    }
-
-    const result = await supervisor.analyzeArtistPerformance(artistId, context)
-
-    return NextResponse.json({
-      success: result.success,
-      analysis: result.data,
-      error: result.error,
-      metadata: {
-        executionTime: result.executionTime,
-        toolsUsed: result.toolsUsed,
-        awsResourcesAccessed: result.awsResourcesAccessed,
-      },
-    })
-
-  } catch (error) {
-    console.error('Artist analysis API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-// POST /api/aws-mcp/release/insights - Generate release insights
-export async function POST_RELEASE_INSIGHTS(request: NextRequest) {
-  try {
-    const auth = await authenticate(request)
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
-    const { releaseId } = body
-
-    if (!releaseId) {
-      return NextResponse.json({ error: 'Release ID is required' }, { status: 400 })
-    }
-
-    const supervisor = await getSupervisorAgent()
-    
-    const context = {
-      userId: auth.userId,
-      sessionId: `release-insights-${Date.now()}`,
-      sourceIp: request.headers.get('x-forwarded-for') || 'unknown',
-      userAgent: request.headers.get('user-agent') || 'unknown',
-      permissions: auth.permissions,
-      musicIndustryRole: 'label' as const,
-    }
-
-    const result = await supervisor.generateReleaseInsights(releaseId, context)
-
-    return NextResponse.json({
-      success: result.success,
-      insights: result.data,
-      error: result.error,
-      metadata: {
-        executionTime: result.executionTime,
-        toolsUsed: result.toolsUsed,
-        awsResourcesAccessed: result.awsResourcesAccessed,
-      },
-    })
-
-  } catch (error) {
-    console.error('Release insights API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-// POST /api/aws-mcp/audio/upload - Upload and process audio
-export async function POST_AUDIO_UPLOAD(request: NextRequest) {
-  try {
-    const auth = await authenticate(request)
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
-    const { fileName, fileContent, metadata } = body
-
-    if (!fileName || !fileContent) {
-      return NextResponse.json({ error: 'File name and content are required' }, { status: 400 })
-    }
-
-    const supervisor = await getSupervisorAgent()
-    
-    const context = {
-      userId: auth.userId,
-      sessionId: `audio-upload-${Date.now()}`,
-      sourceIp: request.headers.get('x-forwarded-for') || 'unknown',
-      userAgent: request.headers.get('user-agent') || 'unknown',
-      permissions: auth.permissions,
-      musicIndustryRole: 'artist' as const,
-    }
-
-    const result = await supervisor.processAudioUpload(fileName, fileContent, metadata || {}, context)
-
-    return NextResponse.json({
-      success: result.success,
-      upload: result.data,
-      error: result.error,
-      metadata: {
-        executionTime: result.executionTime,
-        toolsUsed: result.toolsUsed,
-        awsResourcesAccessed: result.awsResourcesAccessed,
-      },
-    })
-
-  } catch (error) {
-    console.error('Audio upload API error:', error)
+    console.error('AWS MCP API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Mail, Send, Eye, Loader2 } from "lucide-react"
-import { useMediaQuery } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { PATCHLINE_CONFIG } from "@/lib/config"
 
 interface EmailIntegrationProps {
@@ -54,7 +54,8 @@ export function EmailIntegration({
     body,
   })
   const [isConnected, setIsConnected] = useState(false)
-  const isDesktop = useMediaQuery("(min-width: 768px)")
+  const isMobile = useIsMobile()
+  const isDesktop = !isMobile
 
   const handleConnect = () => {
     // In a real implementation, this would trigger OAuth flow

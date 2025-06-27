@@ -48,9 +48,7 @@ import { usePermissions } from "@/lib/permissions"
 import { getTierConfig } from "@/lib/tier-config"
 import { Badge } from "@/components/ui/badge"
 import { WalletLoader } from "@/components/web3/wallet-loader"
-import { MainNav } from "@/components/dashboard/main-nav"
-import { Search as DashboardSearch } from "@/components/dashboard/search"
-import { UserNav } from "@/components/dashboard/user-nav"
+// Note: MainNav, DashboardSearch, and UserNav components removed as they were unused
 
 interface UserInfo {
   fullName: string
@@ -273,8 +271,8 @@ export function DashboardNavbar() {
               <WalletLoader />
               <Button
                 variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-brand-cyan transition-colors"
+                size="sm"
+                className="text-muted-foreground hover:text-brand-cyan transition-colors p-2"
               >
                 <HelpCircle className="h-5 w-5" />
                 <span className="sr-only">Help</span>
@@ -282,8 +280,8 @@ export function DashboardNavbar() {
               <div className="relative">
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground hover:text-brand-cyan transition-colors"
+                  size="sm"
+                  className="text-muted-foreground hover:text-brand-cyan transition-colors p-2"
                 >
                   <Bell className="h-5 w-5" />
                   <span className="sr-only">Notifications</span>
@@ -384,7 +382,7 @@ export function DashboardNavbar() {
                     <span>Documentation</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  {user && user.tier !== 'enterprise' && (
+                  {user && user.tier !== 'ultra' && (
                     <>
                       <DropdownMenuItem
                         asChild

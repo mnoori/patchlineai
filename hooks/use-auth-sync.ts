@@ -33,7 +33,7 @@ export function useAuthSync() {
         const attributes = cognitoUser.signInDetails?.loginId || cognitoUser.username
         
         // For new users, start with CREATOR tier
-        const defaultTier = UserTier.CREATOR
+        const defaultTier = UserTier.HOBBY
         
         // Check if we have persisted data in localStorage
         let persistedUser = null

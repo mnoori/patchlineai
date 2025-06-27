@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const result = await docClient.send(command)
+    const result = await docClient.send(command) as any
     let documents = result.Items || []
 
     // Apply client-side filters

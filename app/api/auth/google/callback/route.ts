@@ -47,10 +47,6 @@ export async function GET(request: NextRequest) {
           userId,
           platform: 'googledrive',
           connected: true,
-          accessToken: tokenResponse.access_token,
-          refreshToken: tokenResponse.refresh_token,
-          expiresAt: new Date(Date.now() + tokenResponse.expires_in * 1000).toISOString(),
-          displayName: userInfo.email,
         })
       } catch (dbError) {
         console.error('Failed to store in database:', dbError)

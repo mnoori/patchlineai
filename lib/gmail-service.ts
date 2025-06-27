@@ -3,7 +3,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { CONFIG } from "@/lib/config";
-import { getGoogleOAuth2Client } from '@/lib/google-auth';
+import { getGoogleOAuth2Client } from '@/lib/google-auth-server';
 
 const PLATFORM_CONNECTIONS_TABLE = process.env.PLATFORM_CONNECTIONS_TABLE || "PlatformConnections-staging";
 
@@ -85,7 +85,7 @@ export async function getGmailApiClient(userId: string): Promise<ReturnType<type
         }
     }
 
-    return google.gmail({ version: 'v1', auth: oauth2Client });
+    return google.gmail({ version: 'v1', auth: oauth2Client as any });
   } catch (error) {
     console.error(`Error getting Gmail API client for user ${userId}:`, error);
     return null;

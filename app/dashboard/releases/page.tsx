@@ -35,10 +35,11 @@ export default function ReleasesPage() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "g" && e.shiftKey && e.key === "r") {
+      // Check for Shift+R as a simple shortcut for new release
+      if (e.key === "r" && e.shiftKey) {
         e.preventDefault()
         console.log("New Release shortcut triggered")
-        // TODO: Open new release modal
+        handleNewRelease()
       }
     }
 
@@ -218,8 +219,8 @@ export default function ReleasesPage() {
                 >
                   <ReleaseDetail
                     release={selectedRelease}
-                    onTaskComplete={markTaskComplete}
-                    onStepComplete={updateReleaseProgress}
+                    onTaskComplete={(taskId: string) => markTaskComplete(selectedRelease.id, taskId)}
+                    onStepComplete={(stepId: string) => updateReleaseProgress(selectedRelease.id, stepId, true)}
                     dismissedHints={dismissedHints}
                     onDismissHint={dismissHint}
                   />

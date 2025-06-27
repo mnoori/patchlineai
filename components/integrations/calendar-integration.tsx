@@ -30,7 +30,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
-import { useMediaQuery } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { PATCHLINE_CONFIG } from "@/lib/config"
 
 interface CalendarIntegrationProps {
@@ -75,7 +75,8 @@ export function CalendarIntegration({
   })
   const [isConnected, setIsConnected] = useState(false)
   const [attendeeInput, setAttendeeInput] = useState("")
-  const isDesktop = useMediaQuery("(min-width: 768px)")
+  const isMobile = useIsMobile()
+  const isDesktop = !isMobile
 
   const handleConnect = () => {
     // In a real implementation, this would trigger OAuth flow

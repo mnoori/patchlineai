@@ -1,4 +1,4 @@
-import { DynamoDBClient, CreateTableCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, CreateTableCommand, ScalarAttributeType, KeyType } from '@aws-sdk/client-dynamodb';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
@@ -20,12 +20,12 @@ async function createScoutWatchlistTable() {
   const params = {
     TableName: tableName,
     KeySchema: [
-      { AttributeName: 'user_id', KeyType: 'HASH' },
-      { AttributeName: 'artist_id', KeyType: 'RANGE' }
+      { AttributeName: 'user_id', KeyType: KeyType.HASH },
+      { AttributeName: 'artist_id', KeyType: KeyType.RANGE }
     ],
     AttributeDefinitions: [
-      { AttributeName: 'user_id', AttributeType: 'S' },
-      { AttributeName: 'artist_id', AttributeType: 'S' }
+      { AttributeName: 'user_id', AttributeType: ScalarAttributeType.S },
+      { AttributeName: 'artist_id', AttributeType: ScalarAttributeType.S }
     ],
     BillingMode: 'PAY_PER_REQUEST',
     Tags: [

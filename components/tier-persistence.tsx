@@ -52,9 +52,9 @@ export function TierPersistence() {
         
         // Determine which tier to use (prefer higher tier)
         const tierPriority: Record<UserTier, number> = {
-          [UserTier.CREATOR]: 1,
-          [UserTier.ROSTER]: 2,
-          [UserTier.ENTERPRISE]: 3,
+          [UserTier.HOBBY]: 1,
+          [UserTier.PRO]: 2,
+          [UserTier.ULTRA]: 3,
           [UserTier.GOD_MODE]: 4
         }
         

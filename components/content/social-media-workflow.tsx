@@ -31,12 +31,41 @@ import type {
 } from '@/lib/social-media-types'
 import { CONFIG } from '@/lib/config'
 
-// Import sub-components (we'll create these next)
-import { GoogleDriveConnector } from './social-media/google-drive-connector'
-import { ImageSelector } from './social-media/image-selector'
-import { TemplateSelector } from './social-media/template-selector'
-import { ContentProcessor } from './social-media/content-processor'
-import { ContentPreview } from './social-media/content-preview'
+// Placeholder components (TODO: Create separate files later)
+const GoogleDriveConnector = ({ currentConnection, onConnectionChange }: any) => (
+  <div className="text-center py-8">
+    <p>Google Drive Connector Component</p>
+    <Button onClick={() => onConnectionChange({ isConnected: true }, [])}>Connect (Mock)</Button>
+  </div>
+)
+
+const ImageSelector = ({ images, selectedImages, onSelectionChange, maxSelection }: any) => (
+  <div className="text-center py-8">
+    <p>Image Selector Component</p>
+    <Button onClick={() => onSelectionChange([{}, {}, {}])}>Select Images (Mock)</Button>
+  </div>
+)
+
+const TemplateSelector = ({ templates, selectedTemplate, onTemplateSelect }: any) => (
+  <div className="text-center py-8">
+    <p>Template Selector Component</p>
+    <Button onClick={() => onTemplateSelect({ name: 'Mock Template' })}>Select Template (Mock)</Button>
+  </div>
+)
+
+const ContentProcessor = ({ selectedImages, selectedTemplate, onProcessingComplete }: any) => (
+  <div className="text-center py-8">
+    <p>Content Processor Component</p>
+    <Button onClick={() => onProcessingComplete([], [])}>Process (Mock)</Button>
+  </div>
+)
+
+const ContentPreview = ({ processedImages, captions, onFinalContentReady }: any) => (
+  <div className="text-center py-8">
+    <p>Content Preview Component</p>
+    <Button onClick={() => onFinalContentReady({})}>Finalize (Mock)</Button>
+  </div>
+)
 
 const WORKFLOW_STEPS = [
   {

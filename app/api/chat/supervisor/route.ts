@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SupervisorAgent, type AgentTrace } from '@/lib/supervisor-agent'
 import { CONFIG } from '@/lib/config'
 import { DynamoDBClient, PutItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb'
-import { sendLog } from './stream/route'
+import { sendLog } from '@/lib/supervisor-stream'
 
 console.log('[CONFIG] Running in', CONFIG.ENV === 'production' ? 'PRODUCTION' : 'DEVELOPMENT', 'mode')
 
@@ -231,32 +231,7 @@ async function storeInteraction(sessionId: string, userId: string, message: stri
   }
 }
 
-export async function GET_OLD(request: NextRequest) {
-  const sessionId = request.nextUrl.searchParams.get('sessionId')
-  
-  if (sessionId && supervisorInstances.has(sessionId)) {
-    const supervisor = supervisorInstances.get(sessionId)!
-    const memory = supervisor.getMemory()
-    
-    return NextResponse.json({
-      status: 'active',
-      sessionId,
-      memory: {
-        userSupervisorCount: memory.userSupervisorMemory.length,
-        teamInteractions: Object.entries(memory.supervisorTeamMemory).map(([agent, msgs]) => ({
-          agent,
-          messageCount: msgs.length
-        })),
-        totalMemorySize: memory.combinedMemory.length
-      }
-    })
-  }
-  
-  return NextResponse.json({
-    status: 'not_found',
-    activeSessions: supervisorInstances.size
-  })
-}
+
 
 // DELETE endpoint to clear session
 export async function DELETE(request: NextRequest) {

@@ -95,7 +95,7 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
             <div className="space-y-4">
               {upgradePaths.map((tierOption) => {
                 const config = getTierConfig(tierOption)
-                const isEnterprise = tierOption === UserTier.ENTERPRISE
+                const isEnterprise = tierOption === UserTier.ULTRA
                 
                 return (
                   <label
@@ -157,7 +157,7 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
             </div>
           </RadioGroup>
 
-          {selectedTier === UserTier.ROSTER && (
+                          {selectedTier === UserTier.PRO && (
             <div className="mt-6 p-4 rounded-lg bg-cosmic-teal/10 border border-cosmic-teal/30">
               <h5 className="font-medium mb-2 flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-cosmic-teal" />
@@ -174,7 +174,7 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          {selectedTier === UserTier.ENTERPRISE ? (
+                          {selectedTier === UserTier.ULTRA ? (
             <Button
               onClick={() => {
                 window.location.href = "/contact"
@@ -189,7 +189,7 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
               disabled={!selectedTier || isProcessing}
               className="bg-cosmic-teal hover:bg-cosmic-teal/90 text-black"
             >
-              {isProcessing ? "Processing..." : selectedTier === UserTier.ROSTER ? "Start Free Trial" : "Upgrade Now"}
+                              {isProcessing ? "Processing..." : selectedTier === UserTier.PRO ? "Start Free Trial" : "Upgrade Now"}
             </Button>
           )}
         </DialogFooter>
