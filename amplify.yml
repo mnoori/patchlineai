@@ -5,8 +5,8 @@ frontend:
       commands:
         # Install dependencies
         - npm install -g pnpm
-        # Install only production dependencies to cut memory usage
-        - pnpm install --prod
+        # Install all dependencies (required for Next.js build)
+        - pnpm install
         
         # Set production debug mode for zero-overhead logging
         - echo "Setting production debug mode for zero-overhead logging"
@@ -26,6 +26,8 @@ frontend:
         
     build:
       commands:
+        # Set Node.js memory limit for build
+        - export NODE_OPTIONS="--max_old_space_size=4096"
         # Build the application
         - echo "Building Patchline AI Rebuilding AI Platform..."
         - pnpm run build
