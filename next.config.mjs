@@ -14,9 +14,10 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Disable type-checking in the production build to keep memory usage under the 2 GB Node.js limit used by Amplify.
+  // The CI workflow and local development should still run `pnpm type-check` so we don't lose safety.
   typescript: {
-    // Skip type checking during builds (rely on IDE/CI)
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: true,
   },
   
   // Optimize images
