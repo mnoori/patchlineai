@@ -87,9 +87,12 @@ export class SupervisorAgent {
       combinedMemory: []
     }
     
+    // This needs to be dynamic based on the user session
+    const tempUserIdForInit = 'temporary-user-id';
+    
     // Initialize team members as tools
     this.teamTools = [
-      this.createGmailAgentTool(),
+      this.createGmailAgentTool(tempUserIdForInit),
       this.createLegalAgentTool(),
       this.createSendMessagesTools()
     ]
@@ -173,127 +176,106 @@ export class SupervisorAgent {
   }
 
   // Create Gmail Agent as a tool
-  private createGmailAgentTool(): AgentTool {
+  private createGmailAgentTool(userId: string): AgentTool {
     return {
       name: 'gmail_agent',
-      description: 'Handles email operations - search, read, draft, and send emails',
+      description: 'Handles email operations including searching, reading, and managing Gmail messages',
       properties: {
         message: {
           type: 'string',
-          description: 'The request to send to the Gmail agent'
+          description: 'The email search query or natural language request'
         }
       },
       required: ['message'],
-      func: async (message: string) => {
+      func: async (args: any) => {
+        console.log('[Gmail Agent] Starting email operation:', args);
+        
+        // Add trace for Gmail operation
         this.addTrace({
           timestamp: new Date().toISOString(),
-          action: 'Delegating to Gmail Agent',
-          status: 'delegating',
-          agent: 'Gmail Agent',
-          details: 'Searching and reading emails...'
-        })
-        
-        // Record supervisor->team communication
-        this.memory.supervisorTeamMemory['Gmail Agent'].push({
-          role: 'supervisor',
-          content: message
-        })
+          action: 'Searching Gmail...',
+          status: 'info',
+          agent: 'Internal Gmail Service',
+          details: `Query: ${args.message || args}`
+        });
         
         try {
-          // Invoke Gmail agent
-          const command = new InvokeAgentCommand({
-            agentId: GMAIL_AGENT.agentId,
-            agentAliasId: GMAIL_AGENT.agentAliasId,
-            sessionId: `supervisor-gmail-${Date.now()}`,
-            inputText: message,
-          })
+          // Convert natural language to Gmail search query
+          let searchQuery = args.message || args.query || args || '';
           
-          this.addTrace({
-            timestamp: new Date().toISOString(),
-            action: 'Connecting to Gmail...',
-            status: 'info',
-            agent: 'Gmail Agent',
-            details: 'Establishing secure connection to your inbox'
-          })
-          
-          const response = await agentRuntime.send(command)
-          let agentResponse = ''
-          
-          this.addTrace({
-            timestamp: new Date().toISOString(),
-            action: 'Searching emails...',
-            status: 'info',
-            agent: 'Gmail Agent',
-            details: 'Scanning your inbox for relevant messages'
-          })
-          
-          if (response.completion) {
-            try {
-              for await (const chunk of response.completion) {
-                if (chunk.chunk?.bytes) {
-                  agentResponse += new TextDecoder().decode(chunk.chunk.bytes)
-                }
-              }
-            } catch (streamError) {
-              console.error('Error reading completion stream:', streamError)
-              // Fallback to any available response data
-              throw new Error('Failed to read agent response')
+          // Simple natural language to Gmail query conversion
+          if (searchQuery.toLowerCase().includes('from tom')) {
+            searchQuery = 'from:Tom';
+          } else if (searchQuery.toLowerCase().includes('email from')) {
+            const match = searchQuery.match(/email from (\w+)/i);
+            if (match) {
+              searchQuery = `from:${match[1]}`;
             }
-          } else {
-            // No completion stream available
-            throw new Error('No response from Gmail agent')
+          } else if (searchQuery.toLowerCase().includes('unread')) {
+            searchQuery = 'is:unread';
+          } else if (searchQuery.toLowerCase().includes('today')) {
+            searchQuery = 'after:today';
+          } else if (searchQuery.toLowerCase().includes('attachment')) {
+            searchQuery = 'has:attachment';
           }
           
-          // Extract email metadata for traces
-          const emailData = this.extractEmailMetadata(agentResponse)
+          console.log('[Gmail Agent] Converted query:', searchQuery);
           
-          // Record team->supervisor response
-          this.memory.supervisorTeamMemory['Gmail Agent'].push({
-            role: 'agent',
-            content: agentResponse
-          })
+          // Call our internal Gmail API
+          const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/gmail/search`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: userId,
+              query: searchQuery
+            })
+          });
+
+          const data = await response.json();
           
-          // Add to combined memory
-          this.memory.combinedMemory.push({
-            role: 'assistant',
-            content: agentResponse,
-            agent: 'Gmail Agent'
-          })
+          if (!response.ok) {
+            throw new Error(data.error || 'Gmail search failed');
+          }
+
+          console.log('[Gmail Agent] Search results:', data);
           
-          // Add success trace with email metadata
+          // Add success trace
           this.addTrace({
             timestamp: new Date().toISOString(),
-            action: 'Gmail Agent completed',
+            action: 'Gmail search complete',
             status: 'success',
-            agent: 'Gmail Agent',
-            details: emailData?.subject ? `Found email: "${emailData.subject}"` : emailData?.from ? `Found email from ${emailData.from}` : 'Email search completed',
-            emailData: emailData || undefined
-          })
+            agent: 'Internal Gmail Service',
+            details: data.result || `Found ${data.emails?.length || 0} emails.`
+          });
           
-          return agentResponse
-          
-        } catch (error) {
-          this.addTrace({
-            timestamp: new Date().toISOString(),
-            action: 'Gmail Agent failed',
-            status: 'error',
-            agent: 'Gmail Agent',
-            details: error instanceof Error ? error.message : 'Unknown error'
-          })
-          
-          // Handle specific AWS errors
-          if (error instanceof Error && (error.name === 'DependencyFailedException' || error.name === 'ResourceNotFoundException' || (error as any).$fault === 'client')) {
-            console.error('AWS Agent dependency error:', error)
-            
-            // For Gmail-specific queries, provide a helpful response
-            if (error.message.includes("doesn't exist")) {
-              return 'I apologize, but the Gmail agent is not properly configured. To search your emails, please ensure:\n\n1. You have connected your Gmail account in Settings\n2. The Gmail integration is properly authorized\n\nFor now, I can help you with general email-related questions or other tasks.'
-            }
-            
-            return 'The Gmail agent is temporarily unavailable. Please try again in a moment.'
+          // Format the response
+          if (data.emails && data.emails.length > 0) {
+            let emailSummary = `Found ${data.emails.length} email(s):\n\n`;
+            data.emails.forEach((email: any, index: number) => {
+              emailSummary += `${index + 1}. From: ${email.from}\n`;
+              emailSummary += `   Subject: ${email.subject}\n`;
+              emailSummary += `   Preview: ${email.snippet.substring(0, 100)}...\n\n`;
+            });
+            return emailSummary;
+          } else {
+            return data.result || 'No emails found matching your query.';
           }
           
-          throw error
+        } catch (error: any) {
+          console.error('[Gmail Agent] Error:', error);
+          
+          // Add error trace
+          this.addTrace({
+            timestamp: new Date().toISOString(),
+            action: 'Gmail Search Failed',
+            status: 'error',
+            agent: 'Internal Gmail Service',
+            details: error.message
+          });
+          
+          throw new Error(`Gmail search failed: ${error.message}`);
         }
       }
     }
@@ -474,21 +456,17 @@ export class SupervisorAgent {
 
   // Process user request using supervisor with tools
   async processRequest(userInput: string, userId: string, sessionId: string): Promise<string> {
-    // Clear previous traces for new request
-    this.traces = []
+    this.addTrace({ timestamp: new Date().toISOString(), action: 'Request analysis started', status: 'info', details: 'Supervisor analyzing user request and planning workflow' })
     
-    this.addTrace({
-      timestamp: new Date().toISOString(),
-      action: 'Request analysis started',
-      status: 'info',
-      details: 'Supervisor analyzing user request and planning workflow'
-    })
-    
-    // Add user message to memory
-    this.memory.userSupervisorMemory.push({
-      role: 'user',
-      content: userInput
-    })
+    // IMPORTANT: Re-create the Gmail tool with the actual userId for this request
+    this.teamTools = [
+      this.createGmailAgentTool(userId),
+      this.createLegalAgentTool(),
+      this.createSendMessagesTools()
+    ];
+
+    // Add user input to memory
+    this.memory.userSupervisorMemory.push({ role: 'user', content: userInput })
     
     this.memory.combinedMemory.push({
       role: 'user',

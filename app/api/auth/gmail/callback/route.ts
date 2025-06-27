@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getGoogleOAuth2Client } from '@/lib/google-auth-server';
-// TODO: Add platform connection update logic
+import { getDocumentClient } from '@/lib/aws/shared-dynamodb-client';
+import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +10,8 @@ export async function GET(request: NextRequest) {
     const state = searchParams.get('state');
 
     if (!code) {
-      return NextResponse.redirect('/dashboard/settings?error=gmail_connection_cancelled');
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      return NextResponse.redirect(`${baseUrl}/dashboard/settings?error=gmail_connection_cancelled`);
     }
 
     // Decode the state to get userId
@@ -18,7 +20,8 @@ export async function GET(request: NextRequest) {
       const stateData = JSON.parse(Buffer.from(state || '', 'base64').toString());
       userId = stateData.userId;
     } catch {
-      return NextResponse.redirect('/dashboard/settings?error=invalid_state');
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      return NextResponse.redirect(`${baseUrl}/dashboard/settings?error=invalid_state`);
     }
 
     const oauth2Client = getGoogleOAuth2Client();
@@ -27,18 +30,56 @@ export async function GET(request: NextRequest) {
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
-    // Store the tokens securely
-    // TODO: Implement platform connection storage
-    // await updatePlatformConnection(userId, 'gmail', {
-    //   accessToken: tokens.access_token!,
-    //   refreshToken: tokens.refresh_token!,
-    //   expiresAt: new Date(Date.now() + (tokens.expiry_date || 0)),
-    // });
+    console.log('Tokens received from Google:', {
+      hasAccessToken: !!tokens.access_token,
+      hasRefreshToken: !!tokens.refresh_token,
+      expiryDate: tokens.expiry_date,
+      scope: tokens.scope,
+      tokenType: tokens.token_type,
+      // Log first few chars for debugging
+      accessTokenPreview: tokens.access_token ? `${tokens.access_token.substring(0, 20)}...` : 'MISSING'
+    });
 
-    return NextResponse.redirect('/dashboard/settings?success=gmail_connected');
+    // Store the tokens securely in DynamoDB
+    try {
+      const docClient = await getDocumentClient();
+      if (!docClient) {
+        console.error('DynamoDB client not available');
+        return NextResponse.redirect('/dashboard/settings?error=gmail_storage_failed');
+      }
+      
+      const tableName = process.env.USERS_TABLE || 'Users-staging';
+      
+      await docClient.send(new UpdateCommand({
+        TableName: tableName,
+        Key: { userId },
+        UpdateExpression: 'SET platforms.gmail = :gmailData',
+        ExpressionAttributeValues: {
+          ':gmailData': {
+            connected: true,
+            accessToken: tokens.access_token!,
+            refreshToken: tokens.refresh_token!,
+            expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
+            connectedAt: Date.now(),
+            scope: tokens.scope || 'gmail',
+            displayName: 'gmail'
+          }
+        }
+      }));
+
+      console.log('Gmail tokens stored successfully for user:', userId);
+    } catch (error) {
+      console.error('Error storing Gmail tokens:', error);
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      return NextResponse.redirect(`${baseUrl}/dashboard/settings?error=gmail_storage_failed`);
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    return NextResponse.redirect(`${baseUrl}/dashboard/settings?success=gmail_connected`);
   } catch (error) {
     console.error('Gmail callback error:', error);
-    return NextResponse.redirect('/dashboard/settings?error=gmail_connection_failed');
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    return NextResponse.redirect(`${baseUrl}/dashboard/settings?error=gmail_connection_failed`);
   }
 }
 
