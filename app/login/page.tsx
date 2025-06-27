@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Logo } from "@/components/logo"
 import { toast } from "sonner"
 import { signIn, signUp, confirmSignUp, getCurrentUser } from "@aws-amplify/auth"
+import { GradientOrbs } from "@/components/brand"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -97,8 +98,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-brand-cyan/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen bg-background relative overflow-hidden flex items-center justify-center p-4">
+      <GradientOrbs variant="vibrant" className="opacity-40" />
+      <div className="w-full max-w-md space-y-8 relative z-10">
         <div className="text-center">
           <Logo className="mx-auto h-12 w-auto" />
           <h2 className="mt-6 text-3xl font-bold tracking-tight">Welcome to Patchline</h2>

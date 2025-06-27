@@ -81,7 +81,7 @@ export default function Home() {
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
                   <span className="text-brand-cyan">{ariaAgent.displayName}</span> is our most advanced offering - an AI-first infrastructure that orchestrates all your agents 
-                  to create autonomous label operations. From talent discovery to revenue distribution, 
+                  to create autonomous label operations. From talent discovery to revenue distribution,{" "}
                   <span className="text-brand-cyan">{ariaAgent.displayName}</span> handles the complex workflows while you maintain creative control.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

@@ -1,5 +1,4 @@
-'use client'
-
+import type { Metadata } from 'next'
 import './globals.css'
 import './fonts.css'
 import { Toaster } from 'sonner'
@@ -35,6 +34,16 @@ const ReceiveCryptoModal = isWeb3Enabled
 
 // Lazy Amplify bootstrap (client-side only)
 const AmplifyBootstrap = dynamic(() => import('@/components/amplify-bootstrap').then(m => m.AmplifyBootstrap), { ssr: false })
+
+export const metadata: Metadata = {
+  title: 'Patchline AI - Orchestrate Your Music Business',
+  description: 'AI-powered platform for music professionals. Automate workflows, manage releases, and grow your music business.',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
+}
 
 export default function RootLayout({
   children,
