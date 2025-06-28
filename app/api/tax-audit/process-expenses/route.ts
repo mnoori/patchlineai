@@ -492,6 +492,7 @@ function extractBiltExpenses(extractedData: any): ExtractedExpense[] {
   
   console.log('Bilt extraction - tables found:', extractedData.tables?.length)
   console.log('Bilt extraction - text length:', extractedData.text?.length)
+  console.log('Bilt extraction - pages:', extractedData.pages || 1)
   
   // Bilt credit card statements have specific table structures
   if (extractedData.tables && extractedData.tables.length > 0) {
@@ -504,58 +505,78 @@ function extractBiltExpenses(extractedData: any): ExtractedExpense[] {
       // Look for transaction tables - Bilt has "Transaction Summary" tables
       let looksLikeTransactions = false
       let hasAmountColumn = false
+      let dateColumnIndex = -1
+      let amountColumnIndex = -1
       
-             // Check first few rows to identify column structure
-       for (let i = 0; i < Math.min(5, table.rows.length); i++) {
-         const row = table.rows[i]
-         if (!row.cells) continue
-         
-         const rowText = row.cells.map((c: any) => c.text || '').join(' ').toLowerCase()
-         
-         // Check for Bilt transaction indicators (more flexible)
-         if (rowText.includes('trans date') || 
-             rowText.includes('post date') || 
-             rowText.includes('transaction') ||
-             rowText.includes('description') ||
-             rowText.includes('reference') ||
-             rowText.includes('amount')) {
-           looksLikeTransactions = true
-         }
-         
-         // Check for amount patterns - look for any dollar amounts
-         row.cells.forEach((cell: any, cellIndex: number) => {
-           const cellText = cell.text || ''
-           if (/^\$[\d,]+\.\d{2}$/.test(cellText.trim()) || 
-               cellText.toLowerCase().includes('amount') ||
-               /^\$\d/.test(cellText.trim())) {
-             hasAmountColumn = true
-             console.log(`Found amount column ${cellIndex} with value: ${cellText}`)
-           }
-         })
-         
-         // Also check if we have date patterns in first column
-         if (row.cells && row.cells.length > 0) {
-           const firstCell = row.cells[0]?.text || ''
-           if (/^\d{2}\/\d{2}$/.test(firstCell.trim())) {
-             looksLikeTransactions = true
-             console.log(`Found date pattern in first column: ${firstCell}`)
-           }
-         }
-       }
-       
-       // Be very aggressive for Bilt - process any table with more than 3 rows
-       // This catches transaction tables that might not have obvious headers
-       if (table.rows.length >= 3) {
-         console.log(`Table ${tableIndex + 1} has ${table.rows.length} rows - processing as potential transactions`)
-         looksLikeTransactions = true
-       }
-       
-       if (!looksLikeTransactions && !hasAmountColumn) {
-         console.log(`Table ${tableIndex + 1} doesn't look like transactions - no dates or amounts found`)
-         continue
-       } else {
-         console.log(`Table ${tableIndex + 1} looks like transactions - processing...`)
-       }
+      // Check first few rows to identify column structure
+      for (let i = 0; i < Math.min(5, table.rows.length); i++) {
+        const row = table.rows[i]
+        if (!row.cells) continue
+        
+        const rowText = row.cells.map((c: any) => c.text || '').join(' ').toLowerCase()
+        
+        // Check for Bilt transaction indicators (more flexible)
+        if (rowText.includes('trans date') || 
+            rowText.includes('post date') || 
+            rowText.includes('transaction') ||
+            rowText.includes('description') ||
+            rowText.includes('reference') ||
+            rowText.includes('amount')) {
+          looksLikeTransactions = true
+          
+          // Identify column indices
+          row.cells.forEach((cell: any, cellIndex: number) => {
+            const cellText = (cell.text || '').toLowerCase()
+            if (cellText.includes('trans date') || cellText.includes('date')) {
+              dateColumnIndex = cellIndex
+            }
+            if (cellText.includes('amount')) {
+              amountColumnIndex = cellIndex
+            }
+          })
+        }
+        
+        // Check for amount patterns - look for any dollar amounts
+        row.cells.forEach((cell: any, cellIndex: number) => {
+          const cellText = cell.text || ''
+          if (/^\$[\d,]+\.\d{2}$/.test(cellText.trim()) || 
+              cellText.toLowerCase().includes('amount') ||
+              /^\$\d/.test(cellText.trim())) {
+            hasAmountColumn = true
+            if (amountColumnIndex === -1) {
+              amountColumnIndex = cellIndex
+            }
+            console.log(`Found amount column ${cellIndex} with value: ${cellText}`)
+          }
+        })
+        
+        // Also check if we have date patterns in first column
+        if (row.cells && row.cells.length > 0) {
+          const firstCell = row.cells[0]?.text || ''
+          if (/^\d{2}\/\d{2}$/.test(firstCell.trim())) {
+            looksLikeTransactions = true
+            if (dateColumnIndex === -1) {
+              dateColumnIndex = 0
+            }
+            console.log(`Found date pattern in first column: ${firstCell}`)
+          }
+        }
+      }
+      
+      // Be very aggressive for Bilt - process any table with more than 3 rows
+      // This catches transaction tables that might not have obvious headers
+      if (table.rows.length >= 3) {
+        console.log(`Table ${tableIndex + 1} has ${table.rows.length} rows - processing as potential transactions`)
+        looksLikeTransactions = true
+      }
+      
+      if (!looksLikeTransactions && !hasAmountColumn) {
+        console.log(`Table ${tableIndex + 1} doesn't look like transactions - no dates or amounts found`)
+        continue
+      } else {
+        console.log(`Table ${tableIndex + 1} looks like transactions - processing...`)
+        console.log(`Date column index: ${dateColumnIndex}, Amount column index: ${amountColumnIndex}`)
+      }
       
       // Process rows as transactions
       for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
@@ -580,23 +601,29 @@ function extractBiltExpenses(extractedData: any): ExtractedExpense[] {
           continue
         }
         
-        // Bilt format: Trans Date | Post Date | Reference | Description | Amount
+        // Skip summary rows
+        if (cells.some(cell => cell.toLowerCase().includes('total') || 
+                              cell.toLowerCase().includes('balance') ||
+                              cell.toLowerCase().includes('payment due'))) {
+          console.log('Skipping summary row')
+          continue
+        }
+        
+        // Bilt format: Trans Date | Post Date | Reference | Number | Description | Amount
         // Sometimes: Date | Date | Ref | Ref | Description | Amount
         
         let date = null
         let description = ''
         let amount = 0
         
-        // Extract date from first column (be more flexible)
-        if (cells[0] && (/^\d{1,2}\/\d{1,2}$/.test(cells[0].trim()) || 
-                         /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(cells[0].trim()))) {
-          date = parseDate(cells[0])
-        }
-        
-        // If no date in first column, check second column
-        if (!date && cells[1] && (/^\d{1,2}\/\d{1,2}$/.test(cells[1].trim()) || 
-                                 /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(cells[1].trim()))) {
-          date = parseDate(cells[1])
+        // Extract date from identified date column or first few columns
+        const dateCheckColumns = dateColumnIndex >= 0 ? [dateColumnIndex] : [0, 1]
+        for (const colIndex of dateCheckColumns) {
+          if (cells[colIndex] && (/^\d{1,2}\/\d{1,2}$/.test(cells[colIndex].trim()) || 
+                                  /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(cells[colIndex].trim()))) {
+            date = parseDate(cells[colIndex])
+            if (date) break
+          }
         }
         
         // If no valid date, skip this row
@@ -605,53 +632,58 @@ function extractBiltExpenses(extractedData: any): ExtractedExpense[] {
           continue
         }
         
-                 // Find description - usually the column with merchant/vendor info
-         // Look for the cell that has meaningful text (not dates, not reference numbers)
-         for (let i = 1; i < cells.length - 1; i++) {
-           const cellText = cells[i]
-           if (cellText && cellText.length > 3 && 
-               !/^\d{2}\/\d{2}$/.test(cellText) && // Not a date
-               !/^\d+$/.test(cellText) && // Not just a number (but allow alphanumeric)
-               !cellText.includes('X ') && // Not exchange rate
-               !cellText.includes('QUETZAL') && // Currency info
-               !cellText.includes('PESO') && // Currency info
-               cellText !== '-' && // Not empty marker
-               cellText.trim() !== '') { // Not empty
-             
-             // Prefer cells that look like merchant names (contain letters)
-             if (/[A-Za-z]/.test(cellText)) {
-               // This looks like a description
-               if (!description || cellText.length > description.length) {
-                 description = cellText
-               }
-             }
-           }
-         }
-         
-         // If still no description found, be more lenient
-         if (!description) {
-           for (let i = 1; i < cells.length - 1; i++) {
-             const cellText = cells[i]
-             if (cellText && cellText.length > 2 && 
-                 !/^\d{2}\/\d{2}$/.test(cellText) && // Not a date
-                 cellText !== '-' && 
-                 cellText.trim() !== '') {
-               description = cellText
-               break
-             }
-           }
-         }
-        
-        // Extract amount - check multiple columns from right to left
-        for (let i = cells.length - 1; i >= 2; i--) {
+        // Find description - usually the column with merchant/vendor info
+        // Look for the cell that has meaningful text (not dates, not reference numbers)
+        for (let i = 1; i < cells.length - 1; i++) {
           const cellText = cells[i]
+          if (cellText && cellText.length > 3 && 
+              !/^\d{2}\/\d{2}$/.test(cellText) && // Not a date
+              !/^\d+$/.test(cellText) && // Not just a number (but allow alphanumeric)
+              !cellText.includes('X ') && // Not exchange rate
+              !cellText.includes('QUETZAL') && // Currency info
+              !cellText.includes('PESO') && // Currency info
+              cellText !== '-' && // Not empty marker
+              cellText.trim() !== '') { // Not empty
+            
+            // Prefer cells that look like merchant names (contain letters)
+            if (/[A-Za-z]/.test(cellText)) {
+              // This looks like a description
+              if (!description || cellText.length > description.length) {
+                description = cellText
+              }
+            }
+          }
+        }
+        
+        // If still no description found, be more lenient
+        if (!description) {
+          for (let i = 1; i < cells.length - 1; i++) {
+            const cellText = cells[i]
+            if (cellText && cellText.length > 2 && 
+                !/^\d{2}\/\d{2}$/.test(cellText) && // Not a date
+                cellText !== '-' && 
+                cellText.trim() !== '') {
+              description = cellText
+              break
+            }
+          }
+        }
+        
+        // Extract amount - check identified amount column or last few columns
+        const amountCheckColumns = amountColumnIndex >= 0 ? 
+          [amountColumnIndex] : 
+          Array.from({length: Math.min(3, cells.length)}, (_, i) => cells.length - 1 - i).reverse()
+        
+        for (const colIndex of amountCheckColumns) {
+          if (colIndex < 0 || colIndex >= cells.length) continue
+          const cellText = cells[colIndex]
           if (cellText && (cellText.includes('$') || 
                           /^[\d,]+\.\d{2}$/.test(cellText.trim()) ||
                           /^\$[\d,]+$/.test(cellText.trim()))) {
             const parsedAmount = parseAmount(cellText)
             if (parsedAmount > 0) {
               amount = parsedAmount
-              console.log(`Found Bilt amount in cell ${i}: ${cellText} -> $${amount}`)
+              console.log(`Found Bilt amount in cell ${colIndex}: ${cellText} -> $${amount}`)
               break
             }
           }
@@ -668,7 +700,8 @@ function extractBiltExpenses(extractedData: any): ExtractedExpense[] {
           const isCredit = descLower.includes('credit') || 
                           descLower.includes('refund') || 
                           descLower.includes('payment received') ||
-                          descLower.includes('total')
+                          descLower.includes('payment - thank you') ||
+                          amount.toString().includes('-')
           
           if (!isCredit) {
             expenses.push({
@@ -695,95 +728,130 @@ function extractBiltExpenses(extractedData: any): ExtractedExpense[] {
   // -----------------------------
   // Fallback: parse transactions from raw text if we still have fewer than 30 rows
   // -----------------------------
-  if (extractedData.text && expenses.length < 30) {
-    console.log('Attempting Bilt text-based extraction – raw text length:', extractedData.text.length)
+  if (extractedData.text && expenses.length < 50) {  // Increased threshold to be more aggressive
+    console.log('Running global regex scan for additional Bilt transactions (flexible regex)')
+    console.log(`Current expenses count: ${expenses.length}, scanning for more in ${extractedData.text.length} chars of text`)
 
-    const lines = extractedData.text.split(/\n+/)
-    let lineNumber = expenses.length + 1
-
-    // Regex patterns
-    const dateRegex = /^(\d{1,2})[\/](\d{1,2})(?:[\/](\d{2,4}))?/ // MM/DD or MM/DD/YY/YY
-    const amountRegex = /\$?([\d,]+\.\d{2})$/ // ends with amount
-
-    for (const rawLine of lines) {
-      const line = rawLine.trim()
-      if (line.length < 10) continue // skip very short
-
-      // Must contain an amount at end
-      const amtMatch = line.match(amountRegex)
-      if (!amtMatch) continue
-      const amount = parseFloat(amtMatch[1].replace(/,/g, ''))
-      if (!(amount > 0)) continue
-
-      // Must start with a date
-      const dateMatch = line.match(dateRegex)
-      if (!dateMatch) continue
-
-      const month = dateMatch[1]
-      const day = dateMatch[2]
-      const yearFragment = dateMatch[3]
-      const yearFull = yearFragment ? (yearFragment.length === 2 ? `20${yearFragment}` : yearFragment) : `${new Date().getFullYear()}`
-      const date = `${yearFull}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
-
-      // Description is everything between date and amount
-      const descStart = line.indexOf(dateMatch[0]) + dateMatch[0].length
-      const descEnd = line.lastIndexOf(amtMatch[0])
-      if (descEnd <= descStart) continue
-      let description = line.substring(descStart, descEnd).trim()
-      if (!description || description.length < 3) continue
-
-      // Skip obvious credits/refunds
-      const descLower = description.toLowerCase()
-      if (descLower.includes('credit') || descLower.includes('payment') || descLower.includes('refund')) continue
-
-      expenses.push({
-        lineNumber: lineNumber++,
-        date,
-        description: cleanDescription(description),
-        amount,
-        vendor: extractVendorFromDescription(description),
-        transactionType: 'debit'
-      })
-      console.log(`✅ Bilt TEXT transaction: ${date} - ${description} - $${amount}`)
-    }
-  }
-
-  // If still fewer than 30 expenses, do a global regex scan across the whole text
-  if (expenses.length < 30) {
-    /* eslint-disable @typescript-eslint/no-use-before-define */
-    console.log('Running global regex scan for additional Bilt transactions')
-
-    // Pattern:  MM/DD  <up to 120 chars>  $amount
-    const globalRegex = /(\d{1,2}\/\d{1,2})(?:\/\d{2,4})?\s+([A-Za-z0-9][^$\n]{5,120}?)\s+\$([\d,]+\.\d{2})/g
-    let match: RegExpExecArray | null
-    while ((match = globalRegex.exec(extractedData.text)) !== null) {
-      const dateRaw = match[1]
-      const descRaw = match[2].trim()
-      const amountRaw = match[3]
-
-      // Basic filters
-      if (!/^[A-Za-z].{2,}/.test(descRaw)) continue // description must have letters
-      const descLower = descRaw.toLowerCase()
-      if (descLower.includes('payment') || descLower.includes('credit') || descLower.includes('refund')) continue
-
-      const date = parseDate(dateRaw)
-      const amount = parseFloat(amountRaw.replace(/,/g, ''))
-      if (!date || !(amount > 0)) continue
-
-      // Dedup by date+amount+description
-      if (expenses.some(e => e.date === date && Math.abs(e.amount - amount) < 0.01 && e.description === cleanDescription(descRaw))) {
-        continue
+    // Enhanced patterns for Bilt statements
+    // Pattern 1: Standard table format - MM/DD MM/DD RefNum TransNum Description Amount
+    const tablePattern = /(\d{1,2}\/\d{1,2})\s+(\d{1,2}\/\d{1,2})\s+(\d+)\s+(\w+)\s+([A-Z][^\n]{5,100}?)\s+\$?([\d,]+\.\d{2})/g
+    
+    // Pattern 2: Simpler format - MM/DD Description Amount
+    const simplePattern = /(\d{1,2}\/\d{1,2})\s+([A-Z][^\$\n]{5,100}?)\s+\$?([\d,]+\.\d{2})/g
+    
+    // Pattern 3: Text continuation format (for pages 3-4) - more flexible
+    const continuationPattern = /^(\d{1,2}\/\d{1,2})\s+(.+?)\s+\$?([\d,]+\.\d{2})$/gm
+    
+    // Pattern 4: Bilt continuation pages format - MM/DD MM/DD RefNum TransNum Description Amount (with tabs/spaces)
+    const biltContinuationPattern = /(\d{1,2}\/\d{1,2})\s+(\d{1,2}\/\d{1,2})\s+(\d{9,})\s+(\w+)\s+(.+?)\s+\$?([\d,]+\.\d{2})/g
+    
+    // Try all patterns
+    const patterns = [
+      { regex: tablePattern, name: 'table' },
+      { regex: simplePattern, name: 'simple' },
+      { regex: continuationPattern, name: 'continuation' },
+      { regex: biltContinuationPattern, name: 'bilt-continuation' }
+    ]
+    
+    const foundTransactions = new Set(expenses.map(e => `${e.date}-${e.amount}-${e.description.substring(0, 20)}`))
+    
+    for (const { regex, name } of patterns) {
+      console.log(`Trying ${name} pattern...`)
+      let match: RegExpExecArray | null
+      let patternMatches = 0
+      
+      while ((match = regex.exec(extractedData.text)) !== null) {
+        let dateRaw: string
+        let descRaw: string
+        let amountRaw: string
+        
+        if (name === 'bilt-continuation' && match.length >= 7) {
+          dateRaw = match[1]   // Transaction date
+          descRaw = match[5]   // Description
+          amountRaw = match[6] // Amount
+        } else if (name === 'table' && match.length >= 7) {
+          dateRaw = match[1]   // Transaction date
+          descRaw = match[5]   // Description
+          amountRaw = match[6] // Amount
+        } else if (name === 'simple' && match.length >= 4) {
+          dateRaw = match[1]
+          descRaw = match[2]
+          amountRaw = match[3]
+        } else if (name === 'continuation' && match.length >= 4) {
+          dateRaw = match[1]
+          descRaw = match[2]
+          amountRaw = match[3]
+        } else {
+          continue
+        }
+        
+        // Clean and validate
+        descRaw = descRaw.trim()
+        if (!descRaw || descRaw.length < 3) continue
+        
+        // Skip headers and non-transaction lines
+        const descLower = descRaw.toLowerCase()
+        if (descLower.includes('date') || 
+            descLower.includes('description') || 
+            descLower.includes('amount') ||
+            descLower.includes('balance') ||
+            descLower.includes('total fees') ||
+            descLower.includes('interest charged') ||
+            descLower.includes('fees charged') ||
+            descLower.includes('page') ||
+            descLower.includes('continued')) {
+          continue
+        }
+        
+        const date = parseDate(dateRaw)
+        const amount = parseAmount(amountRaw)
+        
+        if (date && amount > 0 && amount < 50000) {
+          // Check if we already have this transaction
+          const transactionKey = `${date}-${amount}-${descRaw.substring(0, 20)}`
+          if (!foundTransactions.has(transactionKey)) {
+            expenses.push({
+              lineNumber: expenses.length + 1,
+              date,
+              description: cleanDescription(descRaw),
+              amount,
+              vendor: extractVendorFromDescription(descRaw),
+              transactionType: 'debit'
+            })
+            foundTransactions.add(transactionKey)
+            patternMatches++
+            console.log(`✅ Found via ${name} pattern: ${date} - ${descRaw} - $${amount}`)
+          }
+        }
       }
-
-      expenses.push({
-        lineNumber: expenses.length + 1,
-        date,
-        description: cleanDescription(descRaw),
-        amount,
-        vendor: extractVendorFromDescription(descRaw),
-        transactionType: 'debit'
-      })
-      console.log(`✅ Bilt REGEX transaction: ${date} - ${descRaw} - $${amount}`)
+      
+      if (patternMatches > 0) {
+        console.log(`${name} pattern found ${patternMatches} additional transactions`)
+      }
+    }
+    
+    // Special handling for fees (like late fees)
+    const feePattern = /(\d{1,2}\/\d{1,2})\s+(LATE FEE|INTEREST CHARGE|ANNUAL FEE)\s+\$?([\d,]+\.\d{2})/gi
+    let feeMatch: RegExpExecArray | null
+    while ((feeMatch = feePattern.exec(extractedData.text)) !== null) {
+      const date = parseDate(feeMatch[1])
+      const description = feeMatch[2]
+      const amount = parseAmount(feeMatch[3])
+      
+      if (date && amount > 0) {
+        const transactionKey = `${date}-${amount}-${description}`
+        if (!foundTransactions.has(transactionKey)) {
+          expenses.push({
+            lineNumber: expenses.length + 1,
+            date,
+            description,
+            amount,
+            vendor: 'BILT CREDIT CARD',
+            transactionType: 'debit'
+          })
+          console.log(`✅ Found fee: ${date} - ${description} - $${amount}`)
+        }
+      }
     }
   }
 
@@ -794,37 +862,50 @@ function extractBiltExpenses(extractedData: any): ExtractedExpense[] {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { userId, documentId, jobId, bankType = 'unknown' } = body
+    const { userId, documentId, jobId, bankType = 'unknown', textractData, isMultiPage } = body
 
     console.log('Processing expenses for document:', documentId)
     console.log('Bank type:', bankType)
     console.log('Textract job ID:', jobId)
+    console.log('Is multi-page:', isMultiPage)
     
-    if (!jobId) {
+    if (!jobId && !textractData) {
       return NextResponse.json(
-        { error: 'No Textract job ID provided' },
+        { error: 'No Textract job ID or data provided' },
         { status: 400 }
       )
     }
 
-    // Get Textract results
-    const textractCommand = new GetDocumentAnalysisCommand({ JobId: jobId })
-    const textractResult = await textractClient.send(textractCommand)
+    let textractResult: any
+    
+    // If we have pre-aggregated data (from multi-page processing), use it
+    if (textractData) {
+      console.log('Using pre-aggregated Textract data')
+      textractResult = textractData
+    } else {
+      // Otherwise, fetch the Textract results
+      const textractCommand = new GetDocumentAnalysisCommand({ JobId: jobId })
+      textractResult = await textractClient.send(textractCommand)
 
-    if (textractResult.JobStatus !== 'SUCCEEDED') {
-      return NextResponse.json(
-        { error: 'Textract job not completed' },
-        { status: 400 }
-      )
+      if (textractResult.JobStatus !== 'SUCCEEDED') {
+        return NextResponse.json(
+          { error: 'Textract job not completed' },
+          { status: 400 }
+        )
+      }
     }
 
     console.log('Textract job completed successfully')
-    console.log('Blocks found:', textractResult.Blocks?.length || 0)
+    console.log('Blocks found:', textractResult.Blocks?.length || textractResult.rawBlocks?.length || 0)
+    console.log('Total pages:', textractResult.DocumentMetadata?.Pages || textractResult.metadata?.pages || 1)
 
     // Call Python processor for bank-specific parsing
     const processorUrl = process.env.EXPENSE_PROCESSOR_URL || 'http://localhost:8000/process'
-    
+    let pythonExtracted = 0
     try {
+      const blocks = textractResult.Blocks || textractResult.rawBlocks || []
+      
+      // Pass the full textract data with blocks to Python processor
       const processorResponse = await fetch(processorUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -833,19 +914,27 @@ export async function POST(request: NextRequest) {
           documentId,
           bankType,
           jobId,
-          textractData: textractResult
+          textractData: {
+            Blocks: blocks,  // Pass the raw blocks directly
+            text: extractTextFromBlocks(blocks),
+            tables: extractTablesFromBlocks(blocks)
+          },
+          isMultiPage
         })
       })
 
       if (processorResponse.ok) {
         const result = await processorResponse.json()
         console.log('Python processor result:', result)
-        
-        return NextResponse.json({
-          success: true,
-          expensesExtracted: result.expensesExtracted,
-          expensesSaved: result.expensesSaved
-        })
+        pythonExtracted = result.expensesExtracted || 0
+        if (pythonExtracted > 0) {
+          return NextResponse.json({
+            success: true,
+            expensesExtracted: result.expensesExtracted,
+            expensesSaved: result.expensesSaved
+          })
+        }
+        console.warn(`Python processor found 0 expenses – falling back to TypeScript parser`)
       } else {
         console.error('Python processor failed:', await processorResponse.text())
       }
@@ -853,17 +942,19 @@ export async function POST(request: NextRequest) {
       console.error('Error calling Python processor:', error)
     }
 
-    // Fallback to TypeScript processing if Python processor fails
-    console.log('Falling back to TypeScript processing')
-    
+    // ---------------- Fallback to TypeScript ----------------
+
     // Convert Textract blocks to our expected format
+    const blocks = textractResult.Blocks || textractResult.rawBlocks || []
     const extractedData = {
-      text: extractTextFromBlocks(textractResult.Blocks || []),
-      tables: extractTablesFromBlocks(textractResult.Blocks || [])
+      text: extractTextFromBlocks(blocks),
+      tables: extractTablesFromBlocks(blocks),
+      pages: textractResult.DocumentMetadata?.Pages || textractResult.metadata?.pages || 1
     }
     
     console.log('Extracted data - text length:', extractedData.text?.length)
     console.log('Extracted data - tables count:', extractedData.tables?.length)
+    console.log('Extracted data - pages:', extractedData.pages)
     if (extractedData.tables?.length > 0) {
       console.log('First table rows:', extractedData.tables[0].rows?.length)
     }
@@ -935,8 +1026,16 @@ export async function POST(request: NextRequest) {
         ConditionExpression: 'attribute_not_exists(expenseId)'
       })
 
-      await docClient.send(putCommand)
-      savedExpenses.push(expenseRecord)
+      try {
+        await docClient.send(putCommand)
+        savedExpenses.push(expenseRecord)
+      } catch (error: any) {
+        if (error.__type === 'com.amazonaws.dynamodb.v20120810#ConditionalCheckFailedException') {
+          console.log(`Skipping duplicate expense: ${expenseRecord.expenseId} - ${expenseRecord.description}`)
+        } else {
+          throw error
+        }
+      }
     }
 
     return NextResponse.json({
@@ -1316,68 +1415,67 @@ function extractGenericExpenses(extractedData: any): ExtractedExpense[] {
 function parseDate(dateStr: string): string | null {
   if (!dateStr) return null
   
-  try {
-    // Clean the date string
-    const cleaned = dateStr.trim()
-    
-    // Common date formats
-    const patterns = [
-      /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/, // MM/DD/YYYY or MM/DD/YY
-      /(\d{4})-(\d{2})-(\d{2})/, // YYYY-MM-DD
-      /(\d{1,2})-(\d{1,2})-(\d{2,4})/, // MM-DD-YYYY
-      /(\d{1,2})\/(\d{1,2})$/ // MM/DD (no year - common in statements)
-    ]
-    
-    for (const pattern of patterns) {
-      const match = cleaned.match(pattern)
-      if (match) {
-        // Handle MM/DD format without year (use current year or year from context)
-        if (pattern === patterns[3]) {
-          const currentYear = new Date().getFullYear()
-          const month = match[1].padStart(2, '0')
-          const day = match[2].padStart(2, '0')
-          
-          // If month is greater than current month, assume previous year
-          const currentMonth = new Date().getMonth() + 1
-          const year = parseInt(month) > currentMonth ? currentYear - 1 : currentYear
-          
-          return `${year}-${month}-${day}`
-        }
-        
-        // Handle other formats
-        let year = match[3] || match[1]
-        let month = match[1] || match[2]
-        let day = match[2] || match[3]
-        
-        // Convert 2-digit year to 4-digit
-        if (year && year.length === 2) {
-          year = '20' + year
-        }
-        
-        // Ensure proper formatting
-        if (match[0].includes('-') && match[1].length === 4) {
-          // YYYY-MM-DD format
-          return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
-        } else {
-          // MM/DD/YYYY or MM-DD-YYYY format
-          return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
-        }
-      }
-    }
-    
-    // Try parsing month names (Jan 1, 2024 etc)
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const monthPattern = new RegExp(`(${monthNames.join('|')})\\s+(\\d{1,2}),?\\s+(\\d{4})`, 'i')
-    const monthMatch = cleaned.match(monthPattern)
-    
-    if (monthMatch) {
-      const monthIndex = monthNames.findIndex(m => m.toLowerCase() === monthMatch[1].toLowerCase()) + 1
-      return `${monthMatch[3]}-${monthIndex.toString().padStart(2, '0')}-${monthMatch[2].padStart(2, '0')}`
-    }
-    
-  } catch (error) {
-    console.error('Date parsing error:', error)
+  // Clean the date string
+  dateStr = dateStr.trim()
+  
+  // Common date formats in bank statements
+  // MM/DD/YYYY or MM/DD/YY
+  const fullDateMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/)
+  if (fullDateMatch) {
+    const [_, month, day, year] = fullDateMatch
+    const fullYear = year.length === 2 ? `20${year}` : year
+    // Return as YYYY-MM-DD string to avoid timezone issues
+    return `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
   }
+  
+  // MM/DD (assume current year)
+  const monthDayMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})$/)
+  if (monthDayMatch) {
+    const [_, month, day] = monthDayMatch
+    const currentYear = new Date().getFullYear()
+    
+    // For dates like 11/22, 12/01, etc., we need to determine the correct year
+    // If the month is greater than current month, it's probably last year
+    const currentMonth = new Date().getMonth() + 1
+    const parsedMonth = parseInt(month)
+    
+    let year = currentYear
+    // If we're in early 2025 and see November/December dates, they're from 2024
+    if (currentYear === 2025 && parsedMonth >= 11) {
+      year = 2024
+    }
+    
+    // Return as YYYY-MM-DD string to avoid timezone issues
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+  }
+  
+  // MM-DD-YYYY or MM-DD-YY
+  const dashDateMatch = dateStr.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})$/)
+  if (dashDateMatch) {
+    const [_, month, day, year] = dashDateMatch
+    const fullYear = year.length === 2 ? `20${year}` : year
+    return `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+  }
+  
+  // YYYY-MM-DD (ISO format)
+  const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (isoMatch) {
+    return dateStr // Already in correct format
+  }
+  
+  // Try parsing with Date object as last resort (but be careful with timezone)
+  try {
+    const date = new Date(dateStr + ' 12:00:00') // Add noon time to avoid timezone shifts
+    if (!isNaN(date.getTime())) {
+      const year = date.getFullYear()
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const day = date.getDate().toString().padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+  } catch (e) {
+    // Ignore parse errors
+  }
+  
   return null
 }
 

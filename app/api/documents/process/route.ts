@@ -36,48 +36,43 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Declare variables that will be used
-    let jobId: string
+    // Start enhanced processing for bank statements
+    let jobId: string | null = null
     let useEnhancedProcessing = false
-
-    // For bank statements, always use enhanced processing for multi-page documents
+    let pageJobs: any[] = []
+    
     if (documentType && ['bilt', 'bofa', 'chase-checking', 'chase-freedom', 'chase-sapphire'].includes(documentType)) {
       logger.info(`Bank statement detected (${documentType}), using enhanced page-by-page processing`)
-      useEnhancedProcessing = true
       
       try {
-        const enhancedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/documents/process-pages`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            s3Key,
-            documentId,
-            bankType: documentType
-          })
-        })
+        const { POST: processPages } = await import('@/app/api/documents/process-pages/route')
         
-        if (enhancedResponse.ok) {
-          const enhancedData = await enhancedResponse.json()
-          logger.info(`Enhanced processing initiated: ${enhancedData.message}`)
+        const pagesRequest = {
+          json: async () => ({ s3Key, documentId, bankType: documentType }),
+          method: 'POST',
+          headers: new Headers({ 'Content-Type': 'application/json' }),
+          url: `${process.env.NEXT_PUBLIC_API_URL}/api/documents/process-pages`,
+        } as NextRequest
+        
+        const pagesResponse = await processPages(pagesRequest)
+        const enhancedData = await pagesResponse.json()
+        
+        if (enhancedData.success && enhancedData.pageJobs && enhancedData.pageJobs.length > 0) {
+          useEnhancedProcessing = true
+          pageJobs = enhancedData.pageJobs
+          logger.info(`Page-by-page processing started with ${pageJobs.length} jobs`)
           
-          // For page-by-page processing, we'll get multiple job IDs
-          if (enhancedData.pageJobs && enhancedData.pageJobs.length > 0) {
-            // Use the first job ID for polling (we'll aggregate results later)
-            jobId = enhancedData.pageJobs[0].jobId
-            logger.info(`Page-by-page processing started with ${enhancedData.pageJobs.length} jobs`)
-          } else {
-            jobId = enhancedData.jobId
-          }
+          // Don't set a single jobId - we'll process all jobs
+          // jobId will remain null, indicating we need to aggregate results
         }
       } catch (error) {
-        logger.warn('Enhanced processing failed, falling back to standard', error)
-        useEnhancedProcessing = false
+        logger.error('Enhanced processing failed, falling back to standard', error)
       }
     }
 
     // Start standard Textract processing if not using enhanced
-    if (!jobId) {
-      logger.info(`Starting Textract processing for document: ${documentId}`)
+    if (!useEnhancedProcessing) {
+      logger.info(`Starting standard Textract processing for document: ${documentId}`)
       
       const textractCommand = new StartDocumentAnalysisCommand({
         DocumentLocation: {
@@ -114,139 +109,162 @@ export async function POST(request: NextRequest) {
       ContentType: 'application/json'
     }))
 
-    // Poll for completion
-    let jobStatus = 'IN_PROGRESS'
-    let attempts = 0
-    const maxAttempts = 60 // 5 minutes with 5-second intervals
+    // Wait for Textract job(s) to complete
+    let textractResult: any
     
-    logger.info(`Starting job status polling for jobId: ${jobId}`)
-
-    while (jobStatus === 'IN_PROGRESS' && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 5000)) // Wait 5 seconds
-      attempts++
+    if (useEnhancedProcessing && pageJobs.length > 0) {
+      // Wait for all page jobs to complete
+      logger.info(`Waiting for ${pageJobs.length} page jobs to complete`)
       
-      try {
+      const completedJobs = []
+      for (const pageJob of pageJobs) {
+        logger.info(`Polling page ${pageJob.pageNumber} job: ${pageJob.jobId}`)
+        
+        let pageComplete = false
+        let attempts = 0
+        const maxAttempts = 60
+        
+        while (!pageComplete && attempts < maxAttempts) {
+          const getCommand = new GetDocumentAnalysisCommand({ JobId: pageJob.jobId })
+          const result = await textractClient.send(getCommand)
+          
+          if (result.JobStatus === 'SUCCEEDED') {
+            pageComplete = true
+            completedJobs.push({
+              ...pageJob,
+              result
+            })
+            logger.info(`Page ${pageJob.pageNumber} job completed`)
+          } else if (result.JobStatus === 'FAILED') {
+            throw new Error(`Textract job failed for page ${pageJob.pageNumber}`)
+          } else {
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            attempts++
+          }
+        }
+        
+        if (!pageComplete) {
+          throw new Error(`Timeout waiting for page ${pageJob.pageNumber} job`)
+        }
+      }
+      
+      // Aggregate results from all pages
+      textractResult = await aggregatePageResults(completedJobs.map(j => ({ 
+        jobId: j.jobId, 
+        pageNumber: j.pageNumber 
+      })))
+      
+      logger.info(`All ${pageJobs.length} page jobs completed and aggregated`)
+    } else if (jobId) {
+      // Single job polling (standard processing)
+      logger.info(`Starting job status polling for jobId: ${jobId}`)
+      
+      let jobComplete = false
+      let attempts = 0
+      const maxAttempts = 60
+      
+      while (!jobComplete && attempts < maxAttempts) {
         const getCommand = new GetDocumentAnalysisCommand({ JobId: jobId })
         const result = await textractClient.send(getCommand)
-        jobStatus = result.JobStatus || 'IN_PROGRESS'
         
-        if (attempts % 6 === 0) { // Log every 30 seconds
-          logger.info(`Job status check - JobId: ${jobId}, Status: ${jobStatus}, Attempt: ${attempts}`)
+        if (result.JobStatus === 'SUCCEEDED') {
+          jobComplete = true
+          textractResult = result
+          logger.info('Textract processing completed successfully')
+        } else if (result.JobStatus === 'FAILED') {
+          throw new Error('Textract job failed')
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          attempts++
         }
+      }
+      
+      if (!jobComplete) {
+        throw new Error('Timeout waiting for Textract job')
+      }
+    } else {
+      throw new Error('No Textract job ID available')
+    }
 
-        if (jobStatus === 'SUCCEEDED') {
-          logger.info(`Textract processing completed successfully for jobId: ${jobId}`)
+    // Extract and process results
+    let extractedData: any
+    let fullTextractResults: any
+    
+    if (useEnhancedProcessing && pageJobs.length > 0) {
+      // Aggregate results from all page jobs
+      logger.info(`Aggregating results from ${pageJobs.length} page jobs`)
+      const processedData = await extractTextractData(textractResult)
+      extractedData = processedData.extractedData
+      fullTextractResults = processedData.fullTextractResults
+    } else {
+      // Single job processing
+      const processedData = await extractTextractData(textractResult)
+      extractedData = processedData.extractedData
+      fullTextractResults = processedData.fullTextractResults
+    }
+    
+    // Update DynamoDB with extracted data
+    await updateDocumentInDynamoDB(documentId, {
+      status: 'completed',
+      extractedData,
+      textractJobId: jobId,
+      processingCompletedAt: new Date().toISOString()
+    })
 
-          // Extract and process results
-          const { extractedData, fullTextractResults } = await extractTextractData(result)
-          
-          // Update DynamoDB with extracted data
-          await updateDocumentInDynamoDB(documentId, {
-            status: 'completed',
-            extractedData,
-            textractJobId: jobId,
-            processingCompletedAt: new Date().toISOString()
-          })
+    // Save full Textract results to S3
+    const fullTextractResultsKey = `textract-output/${documentId}/full-results.json`
+    const putCommand = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: fullTextractResultsKey,
+      Body: JSON.stringify(fullTextractResults)
+    })
+    await s3Client.send(putCommand)
 
-          // Save full Textract results to S3
-          const fullTextractResultsKey = `textract-output/${documentId}/full-results.json`
-          const putCommand = new PutObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: fullTextractResultsKey,
-            Body: JSON.stringify(fullTextractResults)
-          })
-          await s3Client.send(putCommand)
+    logger.info(`Document processing completed successfully for: ${documentId}`)
 
-          logger.info(`Document processing completed successfully for: ${documentId}`)
-
-          // If bank statement or similar, trigger expense processing
-          if (documentType && ['bilt', 'bofa', 'chase-checking', 'chase-freedom', 'chase-sapphire'].includes(documentType)) {
-            logger.info(`Bank statement detected (${documentType}), triggering expense processing`)
-            
-            try {
-              // Use dynamic import to call the expense processing directly
-              const { POST: processExpenses } = await import('@/app/api/tax-audit/process-expenses/route')
-              
-              // Create a mock NextRequest for the expense processing
-              const expenseRequest = {
-                json: async () => ({
-                  userId,
-                  documentId,
-                  jobId,
-                  bankType: documentType
-                }),
-                method: 'POST',
-                headers: new Headers({ 'Content-Type': 'application/json' }),
-                url: 'http://localhost/api/tax-audit/process-expenses'
-              } as NextRequest
-              
-              const expenseResponse = await processExpenses(expenseRequest)
-              
-              if (expenseResponse.ok) {
-                const expenseData = await expenseResponse.json()
-                logger.info(`Successfully processed ${expenseData.expensesExtracted} expenses`)
-              } else {
-                logger.warn('Failed to process expenses:', await expenseResponse.text())
-              }
-            } catch (error) {
-              logger.error('Error triggering expense processing:', error)
-            }
-          }
-
-          return NextResponse.json({
-            success: true,
-            jobId,
-            status: 'completed',
-            extractedData,
-            message: `Document processing completed successfully`
-          })
-
-        } else if (jobStatus === 'FAILED') {
-          const error = new Error(`Textract job failed: ${result.StatusMessage || 'Unknown error'}`)
-          logger.error('Textract job failed', error)
-
-          await updateDocumentInDynamoDB(documentId, {
-            status: 'error',
-            error: result.StatusMessage || 'Textract processing failed',
-            textractJobId: jobId
-          })
-
-          return NextResponse.json(
-            { 
-              error: "Document processing failed", 
-              details: result.StatusMessage,
-              jobId 
-            },
-            { status: 500 }
-          )
-        }
-      } catch (pollError) {
-        logger.warn(`Error during polling attempt ${attempts}`, pollError)
+    // If bank statement or similar, trigger expense processing
+    if (documentType && ['bilt', 'bofa', 'chase-checking', 'chase-freedom', 'chase-sapphire'].includes(documentType)) {
+      logger.info(`Bank statement detected (${documentType}), triggering expense processing`)
+      
+      try {
+        // Use dynamic import to call the expense processing directly
+        const { POST: processExpenses } = await import('@/app/api/tax-audit/process-expenses/route')
         
-        // Continue polling unless it's a persistent error
-        if (attempts >= maxAttempts - 5) {
-          throw pollError // Re-throw on final attempts
+        // Pass the aggregated Textract data for multi-page documents
+        const expenseRequest = {
+          json: async () => ({
+            userId,
+            documentId,
+            jobId: useEnhancedProcessing && pageJobs.length > 0 ? pageJobs[0].jobId : jobId,
+            bankType: documentType,
+            textractData: fullTextractResults, // Pass the aggregated results
+            isMultiPage: useEnhancedProcessing && pageJobs.length > 1
+          }),
+          method: 'POST',
+          headers: new Headers({ 'Content-Type': 'application/json' }),
+          url: 'http://localhost/api/tax-audit/process-expenses'
+        } as NextRequest
+        
+        const expenseResponse = await processExpenses(expenseRequest)
+        
+        if (expenseResponse.ok) {
+          const expenseData = await expenseResponse.json()
+          logger.info(`Successfully processed ${expenseData.expensesExtracted} expenses`)
+        } else {
+          logger.warn('Failed to process expenses:', await expenseResponse.text())
         }
+      } catch (error) {
+        logger.error('Error triggering expense processing:', error)
       }
     }
 
-    // Timeout case
-    if (jobStatus === 'IN_PROGRESS') {
-      logger.warn(`Textract job timed out after ${maxAttempts * 5} seconds`)
-
-      await updateDocumentInDynamoDB(documentId, {
-        status: 'processing',
-        textractJobId: jobId,
-        note: 'Processing is taking longer than expected. Check back later.'
-      })
-
-      return NextResponse.json({
-        success: true,
-        jobId,
-        status: 'processing',
-        message: `Document processing is taking longer than expected. Job ID: ${jobId}`
-      })
-    }
+    return NextResponse.json({
+      success: true,
+      jobId,
+      status: 'completed',
+      extractedData,
+      message: `Document processing completed successfully`
+    })
 
   } catch (error) {
     logger.error('Document processing failed', error)
@@ -559,4 +577,49 @@ async function updateDocumentInDynamoDB(documentId: string, data: any): Promise<
     logger.error('Failed to update document in DynamoDB', error)
     throw error
   }
+}
+
+async function aggregatePageResults(pageJobs: any[]): Promise<any> {
+  logger.info(`Aggregating results from ${pageJobs.length} page jobs`)
+
+  const allBlocks: any[] = []
+  let totalPages = 0
+  let totalConfidence = 0
+  let confidenceCount = 0
+
+  for (const pageJob of pageJobs) {
+    try {
+      const getCmd = new GetDocumentAnalysisCommand({ JobId: pageJob.jobId })
+      const res = await textractClient.send(getCmd)
+
+      if (res.JobStatus === 'SUCCEEDED' && res.Blocks) {
+        const pageOffset = totalPages
+        res.Blocks.forEach((b: any) => {
+          const newBlock = { ...b }
+          // shift page number so pages are sequential 1..N
+          if (newBlock.Page && newBlock.Page > 0) {
+            newBlock.Page = newBlock.Page + pageOffset
+          }
+          allBlocks.push(newBlock)
+          if (b.Confidence) {
+            totalConfidence += b.Confidence
+            confidenceCount++
+          }
+        })
+        totalPages += res.DocumentMetadata?.Pages || 1
+      }
+    } catch (e) {
+      logger.error(`aggregatePageResults error for job ${pageJob.jobId}`, e)
+    }
+  }
+
+  const aggregated = {
+    JobStatus: 'SUCCEEDED',
+    Blocks: allBlocks,
+    DocumentMetadata: { Pages: totalPages, Version: '1.0' },
+    AverageConfidence: confidenceCount ? totalConfidence / confidenceCount : 0
+  }
+
+  logger.info(`Aggregated ${allBlocks.length} blocks across ${totalPages} pages`)
+  return aggregated
 } 

@@ -1,94 +1,93 @@
 import { NextRequest, NextResponse } from "next/server"
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3"
-import { TextractClient, StartDocumentAnalysisCommand } from "@aws-sdk/client-textract"
+import { TextractClient, StartDocumentAnalysisCommand, FeatureType } from "@aws-sdk/client-textract"
 import { logger } from "@/lib/logger"
+import { exec } from 'child_process'
+import { promisify } from 'util'
+import path from 'path'
+
+const execAsync = promisify(exec)
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || "us-east-1",
 })
 
 const textractClient = new TextractClient({
-  region: process.env.AWS_REGION || "us-east-1",
+  region: process.env.AWS_REGION || 'us-east-1',
 })
 
 const BUCKET_NAME = process.env.DOCUMENTS_BUCKET || "patchline-documents-staging"
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { s3Key, documentId, bankType } = body
-
+    const { s3Key, documentId, bankType } = await request.json()
+    
     logger.info(`Starting page-by-page processing for document: ${documentId}`)
     logger.info(`Bank type: ${bankType}`)
-
-    // First, we need to split the PDF into individual pages
-    // For now, we'll simulate this by processing the entire document
-    // but with enhanced settings for multi-page bank statements
     
-    logger.info(`Processing ${bankType} statement with enhanced table detection`)
+    const textractClient = new TextractClient({
+      region: process.env.AWS_REGION || 'us-east-1',
+    })
     
-    // Start multiple Textract jobs with different optimization settings
+    // First, split the PDF into individual pages using Python script
+    logger.info(`Splitting PDF into individual pages: ${s3Key}`)
+    
+    const scriptPath = path.join(process.cwd(), 'backend', 'scripts', 'pdf_splitter.py')
+    const { stdout, stderr } = await execAsync(`python "${scriptPath}" "${s3Key}"`)
+    
+    if (stderr) {
+      logger.error(`PDF splitter stderr: ${stderr}`)
+    }
+    
+    const splitResult = JSON.parse(stdout)
+    if (!splitResult.success) {
+      throw new Error(`Failed to split PDF: ${splitResult.error}`)
+    }
+    
+    logger.info(`PDF split into ${splitResult.totalPages} pages`)
+    
+    // Start Textract jobs for each page
     const pageJobs = []
     
-    // Job 1: Focus on tables and forms
-    const tablesCommand = new StartDocumentAnalysisCommand({
-      DocumentLocation: {
-        S3Object: {
-          Bucket: BUCKET_NAME,
-          Name: s3Key,
+    for (const page of splitResult.pages) {
+      logger.info(`Starting Textract job for page ${page.pageNumber}`)
+      
+      const analysisParams = {
+        DocumentLocation: {
+          S3Object: {
+            Bucket: page.bucket,
+            Name: page.s3Key
+          }
         },
-      },
-      FeatureTypes: ["TABLES", "FORMS"],
-      JobTag: `${documentId}_${bankType}_tables`,
-      ClientRequestToken: `${documentId}_tables_${Date.now()}`,
-    })
-
-    const tablesResponse = await textractClient.send(tablesCommand)
-    pageJobs.push({
-      jobId: tablesResponse.JobId!,
-      type: 'tables',
-      pageRange: 'all'
-    })
-    
-    logger.info(`Started table-focused Textract job ${tablesResponse.JobId} for ${bankType} document`)
-
-    // Store enhanced processing metadata
-    const metadata = {
-      documentId,
-      bankType,
-      pageJobs,
-      processingType: 'page-by-page',
-      createdAt: new Date().toISOString(),
-      bankSpecificSettings: getBankSpecificSettings(bankType),
-      transactionIndicators: getTransactionIndicators(bankType)
+        FeatureTypes: ['TABLES' as FeatureType, 'FORMS' as FeatureType]
+      }
+      
+      const command = new StartDocumentAnalysisCommand(analysisParams)
+      const response = await textractClient.send(command)
+      
+      if (response.JobId) {
+        pageJobs.push({
+          jobId: response.JobId,
+          pageNumber: page.pageNumber,
+          s3Key: page.s3Key
+        })
+        logger.info(`Started Textract job ${response.JobId} for page ${page.pageNumber}`)
+      }
     }
-
-    await s3Client.send(new PutObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: `metadata/${documentId}_pages.json`,
-      Body: JSON.stringify(metadata),
-      ContentType: 'application/json'
-    }))
-
-    logger.info(`Page-by-page processing initiated for ${bankType} statement`)
-    logger.info(`Will extract transactions from all pages using enhanced patterns`)
-    logger.info(`Transaction indicators for ${bankType}: ${getTransactionIndicators(bankType).join(', ')}`)
-
+    
+    logger.info(`Started ${pageJobs.length} Textract jobs for ${splitResult.totalPages} pages`)
+    
     return NextResponse.json({
       success: true,
       pageJobs,
-      bankType,
-      processingType: 'page-by-page',
-      message: `Page-by-page processing started for ${bankType} document with ${pageJobs.length} jobs`
+      totalPages: splitResult.totalPages,
+      message: `Processing ${splitResult.totalPages} pages with enhanced detection`
     })
-
+    
   } catch (error) {
-    logger.error('Page-by-page processing failed', error)
+    logger.error('Error in page-by-page processing:', error)
     return NextResponse.json(
-      { 
-        error: "Failed to start page-by-page processing", 
-        details: error instanceof Error ? error.message : 'Unknown error' 
-      },
+      { error: 'Failed to process pages', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
