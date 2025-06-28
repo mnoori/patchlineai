@@ -149,6 +149,8 @@ def should_process_page(text: str, bank_type: str) -> bool:
     # Bank-specific patterns
     if bank_type == 'chase-sapphire':
         transaction_indicators.extend(['purchase', 'payment', 'cash advance'])
+    elif bank_type == 'chase-freedom':
+        transaction_indicators.extend(['purchase', 'payment', 'cash advance', 'merchant activity'])
     elif bank_type == 'bilt':
         transaction_indicators.extend(['transaction summary', 'reference number'])
     elif bank_type == 'bofa':

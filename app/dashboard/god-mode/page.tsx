@@ -129,6 +129,11 @@ const DOCUMENT_TYPES = {
     label: 'Chase Sapphire',
     folder: 'chase-sapphire',
     icon: FileText
+  },
+  'amazon-receipts': {
+    label: 'Amazon Receipts',
+    folder: 'receipts/amazon',
+    icon: FileText
   }
 }
 
@@ -1279,6 +1284,49 @@ export default function GodModePage() {
                         <Download className="h-4 w-4 mr-2" />
                         Export
                       </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={async () => {
+                          if (confirm(`Are you sure you want to delete ALL ${documents.length} documents? This will remove them from S3 and cannot be undone.`)) {
+                            try {
+                              setIsLoading(true)
+                              
+                              // Call bulk delete endpoint
+                              const response = await fetch('/api/documents/delete-all?userId=default-user', {
+                                method: 'DELETE'
+                              })
+                              
+                              if (response.ok) {
+                                const result = await response.json()
+                                
+                                // Reload documents list
+                                await loadDocuments()
+                                
+                                toast({
+                                  title: "Success",
+                                  description: result.message || `Deleted ${documents.length} documents`,
+                                })
+                              } else {
+                                throw new Error('Failed to delete documents')
+                              }
+                            } catch (error) {
+                              console.error('Error deleting all documents:', error)
+                              toast({
+                                title: "Error",
+                                description: "Failed to delete documents",
+                                variant: "destructive"
+                              })
+                            } finally {
+                              setIsLoading(false)
+                            }
+                          }
+                        }}
+                        disabled={isLoading || documents.length === 0}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete All
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -1494,7 +1542,7 @@ export default function GodModePage() {
                       <Button
                         variant="destructive"
                         onClick={async () => {
-                          if (confirm('Are you sure you want to delete all tax expense data? This cannot be undone.')) {
+                          if (confirm('Are you sure you want to delete all expenses and receipts? A backup will be created first.')) {
                             try {
                               const response = await fetch('/api/tax-audit/delete-all?userId=default-user', {
                                 method: 'DELETE'
@@ -1503,7 +1551,7 @@ export default function GodModePage() {
                                 await loadTaxExpenses()
                                 toast({
                                   title: "Success",
-                                  description: "All tax expense data has been deleted",
+                                  description: "All tax expense data has been deleted (backup created)",
                                 })
                               }
                             } catch (error) {
@@ -1517,7 +1565,65 @@ export default function GodModePage() {
                         }}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Clear All Data
+                        Clear All
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={async () => {
+                          if (confirm('Are you sure you want to delete all bank expenses? A backup will be created first.')) {
+                            try {
+                              const response = await fetch('/api/tax-audit/delete-all?userId=default-user&type=expenses', {
+                                method: 'DELETE'
+                              })
+                              if (response.ok) {
+                                await loadTaxExpenses()
+                                toast({
+                                  title: "Success",
+                                  description: "All bank expenses have been deleted (backup created)",
+                                })
+                              }
+                            } catch (error) {
+                              toast({
+                                title: "Error",
+                                description: "Failed to delete expenses",
+                                variant: "destructive"
+                              })
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Clear Expenses
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={async () => {
+                          if (confirm('Are you sure you want to delete all receipts? A backup will be created first.')) {
+                            try {
+                              const response = await fetch('/api/tax-audit/delete-all?userId=default-user&type=receipts', {
+                                method: 'DELETE'
+                              })
+                              if (response.ok) {
+                                await loadTaxExpenses()
+                                toast({
+                                  title: "Success",
+                                  description: "All receipts have been deleted (backup created)",
+                                })
+                              }
+                            } catch (error) {
+                              toast({
+                                title: "Error",
+                                description: "Failed to delete receipts",
+                                variant: "destructive"
+                              })
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Clear Receipts
                       </Button>
                     </div>
                     <div className="flex gap-2">

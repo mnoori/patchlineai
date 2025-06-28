@@ -50,6 +50,7 @@ interface TaxExpense {
   referenceNumber?: string
   createdAt: string
   updatedAt: string
+  documentType?: string
 }
 
 interface ExpenseReviewTableProps {
@@ -75,6 +76,7 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
   const [customCategories, setCustomCategories] = useState<string[]>([])
   const [newCategory, setNewCategory] = useState("")
   const [showNewCategory, setShowNewCategory] = useState(false)
+  const [activeTab, setActiveTab] = useState<"expenses" | "receipts">("expenses")
 
   // Fetch expenses
   useEffect(() => {
@@ -99,8 +101,20 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
     }
   }
 
+  // Separate expenses and receipts
+  const bankExpenses = expenses.filter(exp => 
+    exp.bankAccount && !exp.bankAccount.includes('receipt')
+  )
+  
+  const receipts = expenses.filter(exp => 
+    exp.bankAccount?.includes('receipt') || exp.documentType?.includes('receipt')
+  )
+
+  // Use the appropriate list based on active tab
+  const currentExpenses = activeTab === "expenses" ? bankExpenses : receipts
+
   // Filter expenses
-  const filteredExpenses = expenses.filter(expense => {
+  const filteredExpenses = currentExpenses.filter(expense => {
     const matchesSearch = 
       expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       expense.vendor.toLowerCase().includes(searchQuery.toLowerCase())
@@ -112,7 +126,7 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
   })
 
   // Get counts by bank account
-  const bankAccountCounts = expenses.reduce((acc, expense) => {
+  const bankAccountCounts = currentExpenses.reduce((acc, expense) => {
     const bank = expense.bankAccount || 'unknown'
     acc[bank] = (acc[bank] || 0) + 1
     return acc
@@ -345,215 +359,232 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
         </div>
       </div>
 
-      <Tabs value={selectedBankAccount} onValueChange={setSelectedBankAccount} className="w-full">
-        <TabsList className="bg-slate-900/50 border border-slate-800">
-          {BANK_ACCOUNTS.map(account => (
-            <TabsTrigger key={account.value} value={account.value}>
-              {account.label}
-              {account.value === 'all' && expenses.length > 0 && (
-                <span className="ml-2 text-xs">({expenses.length})</span>
-              )}
-              {account.value !== 'all' && bankAccountCounts[account.value] > 0 && (
-                <span className="ml-2 text-xs">({bankAccountCounts[account.value]})</span>
-              )}
-            </TabsTrigger>
-          ))}
+      {/* Main Tabs for Expenses and Receipts */}
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "expenses" | "receipts")} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 bg-slate-900/50 border border-slate-800">
+          <TabsTrigger value="expenses" className="text-lg">
+            Bank Expenses
+            <span className="ml-2 text-sm text-muted-foreground">({bankExpenses.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="receipts" className="text-lg">
+            Receipts
+            <span className="ml-2 text-sm text-muted-foreground">({receipts.length})</span>
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={selectedBankAccount} className="mt-6">
-          <div className="space-y-4">
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  placeholder="Search expenses..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-slate-900/50 border-slate-800 text-white"
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px] bg-slate-900/50 border-slate-800">
-                  <SelectValue placeholder="All Statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <TabsContent value={activeTab} className="mt-6">
+          {/* Bank Account Tabs */}
+          <Tabs value={selectedBankAccount} onValueChange={setSelectedBankAccount} className="w-full">
+            <TabsList className="bg-slate-900/50 border border-slate-800">
+              {BANK_ACCOUNTS.map(account => (
+                <TabsTrigger key={account.value} value={account.value}>
+                  {account.label}
+                  {account.value === 'all' && currentExpenses.length > 0 && (
+                    <span className="ml-2 text-xs">({currentExpenses.length})</span>
+                  )}
+                  {account.value !== 'all' && bankAccountCounts[account.value] > 0 && (
+                    <span className="ml-2 text-xs">({bankAccountCounts[account.value]})</span>
+                  )}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-            {/* Expenses Table */}
-            <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/50">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-slate-800">
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={filteredExpenses.length > 0 && selectedExpenses.size === filteredExpenses.length}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedExpenses(new Set(filteredExpenses.map(e => e.expenseId)))
-                          } else {
-                            setSelectedExpenses(new Set())
-                          }
-                        }}
-                      />
-                    </TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Vendor</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Schedule C</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredExpenses.map((expense) => (
-                    <TableRow key={expense.expenseId} className="border-slate-800">
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedExpenses.has(expense.expenseId)}
-                          onCheckedChange={(checked) => {
-                            const newSelection = new Set(selectedExpenses)
-                            if (checked) {
-                              newSelection.add(expense.expenseId)
-                            } else {
-                              newSelection.delete(expense.expenseId)
-                            }
-                            setSelectedExpenses(newSelection)
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {expense.transactionDate ? format(new Date(expense.transactionDate), 'MM/dd') : 'No date'}
-                      </TableCell>
-                      <TableCell>
-                        <span className="line-clamp-2" title={expense.description}>
-                          {expense.description}
-                        </span>
-                      </TableCell>
-                      <TableCell>{expense.vendor}</TableCell>
-                      <TableCell className="font-semibold">
-                        ${expense.amount.toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        <Select
-                          value={expense.category}
-                          onValueChange={(value) => handleCategoryChange(expense.expenseId, value)}
-                        >
-                          <SelectTrigger className="bg-slate-800 border-slate-700 w-[180px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {allCategories.map(cat => {
-                              const categoryInfo = TAX_CATEGORIES[cat]
-                              return (
-                                <SelectItem key={cat} value={cat}>
-                                  <div className="flex flex-col">
-                                    <span>{cat.replace(/-/g, ' ')}</span>
-                                    {categoryInfo && (
-                                      <span className="text-xs text-muted-foreground">
-                                        {categoryInfo.line}
-                                      </span>
-                                    )}
+            <TabsContent value={selectedBankAccount} className="mt-6">
+              <div className="space-y-4">
+                {/* Filters */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      placeholder={`Search ${activeTab}...`}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 bg-slate-900/50 border-slate-800 text-white"
+                    />
+                  </div>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[180px] bg-slate-900/50 border-slate-800">
+                      <SelectValue placeholder="All Statuses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Expenses Table */}
+                <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/50">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-slate-800">
+                        <TableHead className="w-12">
+                          <Checkbox
+                            checked={filteredExpenses.length > 0 && selectedExpenses.size === filteredExpenses.length}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedExpenses(new Set(filteredExpenses.map(e => e.expenseId)))
+                              } else {
+                                setSelectedExpenses(new Set())
+                              }
+                            }}
+                          />
+                        </TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Vendor</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Schedule C</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-center">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredExpenses.map((expense) => (
+                        <TableRow key={expense.expenseId} className="border-slate-800">
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedExpenses.has(expense.expenseId)}
+                              onCheckedChange={(checked) => {
+                                const newSelection = new Set(selectedExpenses)
+                                if (checked) {
+                                  newSelection.add(expense.expenseId)
+                                } else {
+                                  newSelection.delete(expense.expenseId)
+                                }
+                                setSelectedExpenses(newSelection)
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {expense.transactionDate ? format(new Date(expense.transactionDate), 'MM/dd') : 'No date'}
+                          </TableCell>
+                          <TableCell>
+                            <span className="line-clamp-2" title={expense.description}>
+                              {expense.description}
+                            </span>
+                          </TableCell>
+                          <TableCell>{expense.vendor}</TableCell>
+                          <TableCell className="font-semibold">
+                            ${expense.amount.toFixed(2)}
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={expense.category}
+                              onValueChange={(value) => handleCategoryChange(expense.expenseId, value)}
+                            >
+                              <SelectTrigger className="bg-slate-800 border-slate-700 w-[180px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {allCategories.map(cat => {
+                                  const categoryInfo = TAX_CATEGORIES[cat]
+                                  return (
+                                    <SelectItem key={cat} value={cat}>
+                                      <div className="flex flex-col">
+                                        <span>{cat.replace(/-/g, ' ')}</span>
+                                        {categoryInfo && (
+                                          <span className="text-xs text-muted-foreground">
+                                            {categoryInfo.line}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </SelectItem>
+                                  )
+                                })}
+                                {showNewCategory ? (
+                                  <div className="flex items-center gap-2 p-2">
+                                    <Input
+                                      value={newCategory}
+                                      onChange={(e) => setNewCategory(e.target.value)}
+                                      placeholder="New category..."
+                                      className="h-8"
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          handleAddCustomCategory()
+                                        }
+                                      }}
+                                    />
+                                    <Button
+                                      size="sm"
+                                      onClick={handleAddCustomCategory}
+                                    >
+                                      Add
+                                    </Button>
                                   </div>
-                                </SelectItem>
-                              )
-                            })}
-                            {showNewCategory ? (
-                              <div className="flex items-center gap-2 p-2">
-                                <Input
-                                  value={newCategory}
-                                  onChange={(e) => setNewCategory(e.target.value)}
-                                  placeholder="New category..."
-                                  className="h-8"
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      handleAddCustomCategory()
-                                    }
-                                  }}
-                                />
+                                ) : (
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-start"
+                                    onClick={() => setShowNewCategory(true)}
+                                  >
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add Custom Category
+                                  </Button>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {expense.scheduleCLine || getScheduleCLine(expense.category)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant="outline" 
+                              className={cn(
+                                'cursor-pointer',
+                                expense.classificationStatus === 'approved' && 'bg-green-500/10 text-green-500 border-green-500/20',
+                                expense.classificationStatus === 'rejected' && 'bg-red-500/10 text-red-500 border-red-500/20',
+                                expense.classificationStatus === 'pending' && 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                              )}
+                            >
+                              {getStatusIcon(expense.classificationStatus)}
+                              <span className="ml-1">
+                                {expense.classificationStatus.charAt(0).toUpperCase() + expense.classificationStatus.slice(1)}
+                              </span>
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex justify-center gap-1">
+                              {expense.classificationStatus !== 'approved' && (
                                 <Button
                                   size="sm"
-                                  onClick={handleAddCustomCategory}
+                                  variant="ghost"
+                                  onClick={() => handleStatusUpdate(expense.expenseId, 'approved')}
+                                  className="text-green-500 hover:text-green-400"
                                 >
-                                  Add
+                                  <CheckCircle2 className="h-4 w-4" />
                                 </Button>
-                              </div>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-start"
-                                onClick={() => setShowNewCategory(true)}
-                              >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Custom Category
-                              </Button>
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {expense.scheduleCLine || getScheduleCLine(expense.category)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant="outline" 
-                          className={cn(
-                            'cursor-pointer',
-                            expense.classificationStatus === 'approved' && 'bg-green-500/10 text-green-500 border-green-500/20',
-                            expense.classificationStatus === 'rejected' && 'bg-red-500/10 text-red-500 border-red-500/20',
-                            expense.classificationStatus === 'pending' && 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-                          )}
-                        >
-                          {getStatusIcon(expense.classificationStatus)}
-                          <span className="ml-1">
-                            {expense.classificationStatus.charAt(0).toUpperCase() + expense.classificationStatus.slice(1)}
-                          </span>
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-center gap-1">
-                          {expense.classificationStatus !== 'approved' && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleStatusUpdate(expense.expenseId, 'approved')}
-                              className="text-green-500 hover:text-green-400"
-                            >
-                              <CheckCircle2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {expense.classificationStatus !== 'rejected' && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleStatusUpdate(expense.expenseId, 'rejected')}
-                              className="text-red-500 hover:text-red-400"
-                            >
-                              <XCircle className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                              )}
+                              {expense.classificationStatus !== 'rejected' && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleStatusUpdate(expense.expenseId, 'rejected')}
+                                  className="text-red-500 hover:text-red-400"
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
 
-              {filteredExpenses.length === 0 && (
-                <div className="text-center py-8 text-slate-400">
-                  No expenses found matching your filters
+                  {filteredExpenses.length === 0 && (
+                    <div className="text-center py-8 text-slate-400">
+                      No expenses found matching your filters
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>

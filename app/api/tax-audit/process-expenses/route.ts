@@ -643,7 +643,7 @@ function extractBiltExpenses(extractedData: any): ExtractedExpense[] {
               !cellText.includes('QUETZAL') && // Currency info
               !cellText.includes('PESO') && // Currency info
               cellText !== '-' && // Not empty marker
-              cellText.trim() !== '') { // Not empty
+              cellText.trim() !== '') {
             
             // Prefer cells that look like merchant names (contain letters)
             if (/[A-Za-z]/.test(cellText)) {
@@ -948,7 +948,9 @@ export async function POST(request: NextRequest) {
               classificationStatus: expense.status || 'pending',
               confidenceScore: expense.confidence || 0.5,
               createdAt: expense.createdAt || new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+              updatedAt: new Date().toISOString(),
+              documentType: bankType?.includes('receipt') ? 'receipt' : 'bank-statement',
+              referenceNumber: expense.referenceNumber || null,
             }
 
             console.log('Saving Python expense:', expenseRecord)
@@ -1020,6 +1022,9 @@ export async function POST(request: NextRequest) {
     } else if (bankType === 'bilt') {
       console.log('Attempting Bilt-specific extraction')
       expenses = extractBiltExpenses(extractedData)
+    } else if (bankType === 'amazon-receipts') {
+      console.log('Attempting Amazon receipt extraction')
+      expenses = extractAmazonReceipt(extractedData)
     }
 
     // If bank-specific extraction didn't find anything, try generic extraction
@@ -1046,6 +1051,7 @@ export async function POST(request: NextRequest) {
         .substring(0, 16)
 
       // Create expense record
+      const now = new Date().toISOString()
       const expenseRecord = {
         expenseId,
         documentId,
@@ -1059,8 +1065,9 @@ export async function POST(request: NextRequest) {
         bankAccount: bankType,
         classificationStatus: 'pending',
         confidenceScore: classification?.confidence || 0.5,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: now,
+        updatedAt: now,
+        documentType: bankType?.includes('receipt') || bankType === 'amazon-receipts' ? 'receipt' : 'bank-statement',
       }
 
       console.log('Creating expense record:', expenseRecord)
@@ -1081,8 +1088,8 @@ export async function POST(request: NextRequest) {
         } else {
           throw error
         }
+              }
       }
-    }
 
     return NextResponse.json({
       success: true,
@@ -1427,6 +1434,195 @@ function extractExpensesFromReceipt(extractedData: any): ExtractedExpense[] {
     vendor,
     transactionType: 'debit'
   }]
+}
+
+// Extract expenses from Amazon receipts
+function extractAmazonReceipt(extractedData: any): ExtractedExpense[] {
+  const expenses: ExtractedExpense[] = []
+  
+  console.log('Extracting Amazon receipt items')
+  console.log('Text length:', extractedData.text?.length)
+  console.log('Tables found:', extractedData.tables?.length)
+  
+  // Debug: Show first part of text
+  if (extractedData.text) {
+    const lines = extractedData.text.split('\n')
+    console.log('\n=== First 20 lines of Amazon receipt (TS) ===')
+    lines.slice(0, 20).forEach((line, i) => {
+      console.log(`${i}: ${line}`)
+    })
+    console.log('=== End sample ===\n')
+  }
+  
+  // First, try to extract the order date
+  let orderDate: string | null = null
+  const orderDateMatch = extractedData.text?.match(/Order placed\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})/i)
+  if (orderDateMatch) {
+    orderDate = parseDate(orderDateMatch[1])
+    console.log('Found order date:', orderDate)
+  }
+  
+  // Look for order number
+  const orderNumberMatch = extractedData.text?.match(/Order\s*#\s*([\d-]+)/i)
+  const orderNumber = orderNumberMatch ? orderNumberMatch[1] : null
+  console.log('Found order number:', orderNumber)
+  
+  // Strategy 1: Extract item lines where description and price are on SAME line (kept)
+  const seenItems = new Set<string>() // ensure no dups
+
+  if (extractedData.text) {
+    const lines = extractedData.text.split('\n')
+
+    const isNoise = (txt: string) => {
+      const t = txt.toLowerCase()
+      return t.includes('total') || t.includes('subtotal') || t.includes('tax') || t.includes('shipping') ||
+             t.includes('grand') || t.includes('order summary') || t.includes('payment method') ||
+             t.includes('returns') || t.includes('refund') || t.includes('balance')
+    }
+
+    const addExpense = (desc: string, amt: number) => {
+      if (desc.length < 5 || isNoise(desc)) return
+      const key = `${desc.trim()}_${amt}`
+      if (seenItems.has(key)) return
+      seenItems.add(key)
+      
+      const taxCategory = TAX_CATEGORIES['other_expenses']
+      expenses.push({
+        lineNumber: expenses.length + 1,
+        date: orderDate || new Date().toISOString().split('T')[0],
+        description: desc.trim(),
+        amount: amt,
+        vendor: 'Amazon.com',
+        transactionType: 'debit'
+      })
+    }
+
+    // Pass 1: description and price on same line
+    const inlinePattern = /^(.+?)\s+\$(\d+\.\d{2})$/
+    lines.forEach((line) => {
+      const m = line.trim().match(inlinePattern)
+      if (!m) return
+      const [, d, p] = m
+      const price = parseFloat(p)
+      if (price > 0 && price < 10000 && !isNoise(d)) {
+        addExpense(d, price)
+      }
+    })
+
+    // Pass 2: price-only lines ("$XX.XX") – grab previous meaningful line as description
+    const priceOnlyPattern = /^\$?(\d+\.\d{2})$/
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
+      const m = line.match(priceOnlyPattern)
+      if (!m) continue
+      const price = parseFloat(m[1])
+      if (price <= 0 || price >= 10000) continue
+
+      // search backwards for description
+      for (let j = i - 1; j >= Math.max(0, i - 4); j--) {
+        const prev = lines[j].trim()
+        if (!prev || prev.startsWith('$') || isNoise(prev)) continue
+        addExpense(prev, price)
+        break
+      }
+    }
+  }
+
+  // Strategy 2: Extract from tables if nothing found yet
+  if (expenses.length === 0 && extractedData.tables && extractedData.tables.length > 0) {
+    console.log('No items found in text, checking tables')
+    
+    for (const table of extractedData.tables) {
+      if (!table.rows || table.rows.length < 2) continue
+      
+      for (const row of table.rows) {
+        if (!row.cells || row.cells.length < 2) continue
+        
+        const cells = row.cells.map((c: any) => c.text || '')
+        
+        // Look for cells with product descriptions and prices
+        let description = ''
+        let amount = 0
+        
+        // Find the longest text (likely the description)
+        for (const cell of cells) {
+          if (cell.length > description.length && !cell.startsWith('$')) {
+            description = cell
+          }
+        }
+        
+        // Find amounts
+        for (const cell of cells) {
+          const amountMatch = cell.match(/^\$?(\d+\.\d{2})$/)
+          if (amountMatch) {
+            const cellAmount = parseFloat(amountMatch[1])
+            if (cellAmount > 0 && cellAmount < 10000) {
+              amount = cellAmount
+            }
+          }
+        }
+        
+        if (description && amount > 0) {
+          // Additional validation
+          const descLower = description.toLowerCase()
+          if (!descLower.includes('total') && 
+              !descLower.includes('refund') && 
+              !descLower.includes('tax') &&
+              !descLower.includes('shipping') &&
+              !descLower.includes('return') &&
+              !descLower.includes('credit') &&
+              !descLower.includes('payment') &&
+              description.length > 5) {
+            
+            // Check for duplicates
+            const itemKey = `${description.trim()}_${amount}`
+            if (!seenItems.has(itemKey)) {
+              seenItems.add(itemKey)
+              
+              expenses.push({
+                lineNumber: expenses.length + 1,
+                date: orderDate || new Date().toISOString().split('T')[0],
+                description: description.trim(),
+                amount,
+                vendor: 'Amazon.com',
+                transactionType: 'debit'
+              })
+              
+              console.log(`Found Amazon item in table: ${description} - $${amount}`)
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  console.log(`Amazon receipt extraction complete - found ${expenses.length} items`)
+  
+  // Auto-categorize Amazon items based on product description
+  expenses.forEach(expense => {
+    const descLower = expense.description.toLowerCase()
+    
+    // Office supplies
+    if (descLower.includes('paper') || descLower.includes('pen') || 
+        descLower.includes('notebook') || descLower.includes('folder') ||
+        descLower.includes('stapler') || descLower.includes('tape')) {
+      expense.vendor = 'Amazon.com - Office Supplies'
+    }
+    // Tech equipment
+    else if (descLower.includes('cable') || descLower.includes('adapter') || 
+             descLower.includes('laptop') || descLower.includes('stand') ||
+             descLower.includes('monitor') || descLower.includes('keyboard') ||
+             descLower.includes('mouse') || descLower.includes('headphone')) {
+      expense.vendor = 'Amazon.com - Tech Equipment'
+    }
+    // Software/Digital
+    else if (descLower.includes('software') || descLower.includes('subscription') ||
+             descLower.includes('digital') || descLower.includes('app')) {
+      expense.vendor = 'Amazon.com - Software'
+    }
+  })
+  
+  return expenses
 }
 
 // Generic expense extraction

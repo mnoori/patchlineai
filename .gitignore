@@ -176,3 +176,7 @@ amplifytools.xcconfig
 
 # Zip files
 *.zip
+
+# Local data backups
+data/backups/
+tax_analysis/

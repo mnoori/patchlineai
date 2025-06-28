@@ -223,8 +223,8 @@ export async function POST(request: NextRequest) {
     logger.info(`Document processing completed successfully for: ${documentId}`)
 
     // If bank statement or similar, trigger expense processing
-    if (documentType && ['bilt', 'bofa', 'chase-checking', 'chase-freedom', 'chase-sapphire'].includes(documentType)) {
-      logger.info(`Bank statement detected (${documentType}), triggering expense processing`)
+    if (documentType && ['bilt', 'bofa', 'chase-checking', 'chase-freedom', 'chase-sapphire', 'amazon-receipts'].includes(documentType)) {
+      logger.info(`Document with expenses detected (${documentType}), triggering expense processing`)
       
       try {
         // Use dynamic import to call the expense processing directly
