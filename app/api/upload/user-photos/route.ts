@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { v4 as uuidv4 } from 'uuid'
+import { S3_BUCKETS, S3_PATHS, getS3Path } from '@/lib/aws/s3-config'
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'us-east-1',
-  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
-    ? {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      }
-    : undefined,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
 })
 
-const BUCKET_NAME = process.env.S3_IMAGE_BUCKET || 'patchline-content-images'
+// Use centralized bucket configuration
+const BUCKET_NAME = S3_BUCKETS.CONTENT_IMAGES
 
 export async function POST(request: NextRequest) {
   try {

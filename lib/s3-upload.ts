@@ -1,25 +1,48 @@
 /**
- * S3 Upload Utility for Nova Canvas Images
+ * S3 Upload Utility - Single source of truth for all S3 uploads
  */
 
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { CONFIG } from "@/lib/config"
+import { S3_BUCKETS, S3_PATHS, S3_SETTINGS, getS3Path } from "@/lib/aws/s3-config"
+
+export interface S3UploadOptions {
+  contentType?: string
+  metadata?: Record<string, string>
+  usePresignedUrl?: boolean
+  expiresIn?: number
+  isPublic?: boolean
+}
+
+export interface S3UploadResult {
+  url: string
+  key: string
+  bucket: string
+  etag?: string
+  versionId?: string
+}
 
 export class S3ImageUploader {
   private s3Client: S3Client
   private bucketName: string
   
-  constructor() {
+  constructor(bucketName?: string) {
+    // Use centralized configuration
+    const region = S3_BUCKETS.DEFAULT_REGION
+    
     this.s3Client = new S3Client({
-      region: CONFIG.AWS_REGION,
+      region: region,
       credentials: CONFIG.AWS_ACCESS_KEY_ID ? {
         accessKeyId: CONFIG.AWS_ACCESS_KEY_ID!,
         secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY!,
       } : undefined,
     })
     
-    // Use environment variable or default bucket name
-    this.bucketName = process.env.S3_IMAGE_BUCKET || 'patchline-content-images'
+    // Use provided bucket or default from config
+    this.bucketName = bucketName || S3_BUCKETS.CONTENT_IMAGES
+    
+    console.log(`S3 configured for region: ${region}, bucket: ${this.bucketName}`)
   }
 
   /**
@@ -28,8 +51,8 @@ export class S3ImageUploader {
   async uploadBase64Image(
     base64Data: string,
     contentType: string,
-    metadata?: Record<string, string>
-  ): Promise<string> {
+    options: S3UploadOptions = {}
+  ): Promise<S3UploadResult> {
     try {
       // Remove data URL prefix if present
       const base64Clean = base64Data.replace(/^data:image\/\w+;base64,/, '')
@@ -37,34 +60,112 @@ export class S3ImageUploader {
       // Convert base64 to buffer
       const buffer = Buffer.from(base64Clean, 'base64')
       
-      // Generate unique key
+      // Generate unique key using centralized paths
       const timestamp = Date.now()
       const randomId = Math.random().toString(36).substring(2, 9)
       const extension = this.getExtensionFromContentType(contentType)
-      const key = `generated/${contentType}/${timestamp}-${randomId}.${extension}`
+      const key = getS3Path(
+        'CONTENT_IMAGES',
+        S3_PATHS.GENERATED_CONTENT,
+        contentType,
+        `${timestamp}-${randomId}.${extension}`
+      )
       
-      // Upload to S3
+      // Build metadata
+      const metadata = {
+        ...options.metadata,
+        generatedAt: new Date().toISOString(),
+        generator: 'nova-canvas',
+        contentType: contentType
+      }
+      
+      if (options.usePresignedUrl) {
+        // Generate presigned URL for upload
+        const command = new PutObjectCommand({
+          Bucket: this.bucketName,
+          Key: key,
+          ContentType: this.getMimeType(extension),
+          Metadata: metadata
+        })
+        
+        const presignedUrl = await getSignedUrl(this.s3Client, command, {
+          expiresIn: options.expiresIn || S3_SETTINGS.SIGNED_URL_EXPIRY
+        })
+        
+        return {
+          url: presignedUrl,
+          key,
+          bucket: this.bucketName
+        }
+      } else {
+        // Direct upload
+        const command = new PutObjectCommand({
+          Bucket: this.bucketName,
+          Key: key,
+          Body: buffer,
+          ContentType: this.getMimeType(extension),
+          Metadata: metadata
+          // NO ACL - bucket handles permissions via bucket policy
+        })
+        
+        const response = await this.s3Client.send(command)
+        
+        return {
+          url: this.getObjectUrl(key, options.isPublic),
+          key,
+          bucket: this.bucketName,
+          etag: response.ETag,
+          versionId: response.VersionId
+        }
+      }
+    } catch (error) {
+      console.error('S3 upload error:', error)
+      throw new Error('Failed to upload image to S3')
+    }
+  }
+
+  /**
+   * Upload file buffer to S3
+   */
+  async uploadBuffer(
+    buffer: Buffer,
+    key: string,
+    options: S3UploadOptions = {}
+  ): Promise<S3UploadResult> {
+    try {
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: key,
         Body: buffer,
-        ContentType: this.getMimeType(extension),
-        Metadata: {
-          ...metadata,
-          generatedAt: new Date().toISOString(),
-          generator: 'nova-canvas'
-        },
-        // Make images publicly readable
-        ACL: 'public-read'
+        ContentType: options.contentType || 'application/octet-stream',
+        Metadata: options.metadata
+        // NO ACL - bucket handles permissions
       })
       
-      await this.s3Client.send(command)
-      
-      // Return public URL
-      return this.getPublicUrl(key)
+      if (options.usePresignedUrl) {
+        const presignedUrl = await getSignedUrl(this.s3Client, command, {
+          expiresIn: options.expiresIn || S3_SETTINGS.SIGNED_URL_EXPIRY
+        })
+        
+        return {
+          url: presignedUrl,
+          key,
+          bucket: this.bucketName
+        }
+      } else {
+        const response = await this.s3Client.send(command)
+        
+        return {
+          url: this.getObjectUrl(key, options.isPublic),
+          key,
+          bucket: this.bucketName,
+          etag: response.ETag,
+          versionId: response.VersionId
+        }
+      }
     } catch (error) {
       console.error('S3 upload error:', error)
-      throw new Error('Failed to upload image to S3')
+      throw new Error('Failed to upload to S3')
     }
   }
 
@@ -74,12 +175,15 @@ export class S3ImageUploader {
   async uploadMultipleImages(
     images: string[],
     contentType: string,
-    metadata?: Record<string, string>
-  ): Promise<string[]> {
+    options: S3UploadOptions = {}
+  ): Promise<S3UploadResult[]> {
     const uploadPromises = images.map((image, index) => 
       this.uploadBase64Image(image, contentType, {
-        ...metadata,
-        imageIndex: index.toString()
+        ...options,
+        metadata: {
+          ...options.metadata,
+          imageIndex: index.toString()
+        }
       })
     )
     
@@ -116,9 +220,9 @@ export class S3ImageUploader {
   }
 
   /**
-   * Get public URL for uploaded image
+   * Get object URL (public or signed)
    */
-  private getPublicUrl(key: string): string {
+  private getObjectUrl(key: string, isPublic?: boolean): string {
     // Use CloudFront if configured, otherwise direct S3 URL
     const cdnUrl = process.env.CLOUDFRONT_URL
     
@@ -127,7 +231,13 @@ export class S3ImageUploader {
     }
     
     // Direct S3 URL
-    return `https://${this.bucketName}.s3.${CONFIG.AWS_REGION}.amazonaws.com/${key}`
+    if (isPublic) {
+      return `https://${this.bucketName}.s3.${S3_BUCKETS.DEFAULT_REGION}.amazonaws.com/${key}`
+    } else {
+      // For private objects, you'd generate a signed URL here
+      // For now, return the key so the caller can generate a signed URL if needed
+      return key
+    }
   }
 
   /**

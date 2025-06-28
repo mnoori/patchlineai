@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardDescription, CardTitle } from '@/com
 import { EnhancedContentIdeaCarousel } from "../../../components/content/enhanced-content-idea-carousel"
 import type { ContentType } from "@/lib/content-types"
 import { useState, useEffect } from "react"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Sparkles } from "lucide-react"
 import { ContentPreview } from "../../../components/content-preview"
 import { ContentCreatorForm } from "../../../components/content-creator-form"
 import { cn } from "@/lib/utils"
@@ -16,6 +16,7 @@ import { SocialMediaCreator } from "../../../components/content/social-media-cre
 import { ShortVideoCreatorForm } from "../../../components/content/specialized-forms/short-video-creator-form"
 import { MusicVideoCreatorForm } from "../../../components/content/specialized-forms/music-video-creator-form"
 import { Button } from "@/components/ui/button"
+import { PersonalizedContentWorkflow } from "@/components/content/personalized-content-workflow"
 
 // Helper function to get the image URL for a topic
 function getImageForTopic(topic: string): string | undefined {
@@ -245,6 +246,32 @@ export default function ContentPage() {
             </div>
           ) : null}
         </div>
+
+        {/* Personalized Release Content Section */}
+        <Card className="border-brand-cyan/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-brand-cyan" />
+              Personalized Release Content
+            </CardTitle>
+            <CardDescription>
+              Create ready-to-post content from your photos with AI-powered background removal
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PersonalizedContentWorkflow
+              releaseTitle="Summer Vibes"
+              releaseGenre="Electronic"
+              artistName="Your Artist Name"
+              releaseDate={new Date().toISOString()}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Social Media Content Workflow - existing code */}
+        <Card className="border-brand-cyan/20">
+          {/* Social Media Content Workflow content */}
+        </Card>
       </div>
     </div>
   )

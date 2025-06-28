@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { getNovaCanvasClient } from '@/lib/nova-canvas-api'
 import { getS3Uploader } from '@/lib/s3-upload'
-
-// Initialize Bedrock client
-const client = new BedrockRuntimeClient({
-  region: process.env.AWS_REGION || 'us-east-1',
-  credentials: process.env.AWS_ACCESS_KEY_ID ? {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  } : undefined
-})
+import { resizeImageForNovaCanvasServer, cleanBase64 } from '@/lib/image-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,39 +41,96 @@ export async function POST(request: NextRequest) {
     // Convert to base64
     const imageBase64 = imageBuffer.toString('base64')
     
+    // Get Nova Canvas client
+    const novaCanvas = getNovaCanvasClient()
+    
     // Step 2: Remove background using Nova Canvas
     console.log('Removing background...')
-    const backgroundRemovedImage = await removeBackground(imageBase64)
+    // Clean and resize the image before processing
+    const cleanedImage = cleanBase64(imageBase64)
+    const resizedImage = await resizeImageForNovaCanvasServer(cleanedImage)
+    const [backgroundRemovedImage] = await novaCanvas.removeBackground(resizedImage)
     
     // Step 3: Generate a new background based on release context
     console.log('Generating new background...')
-    const newBackground = await generateReleaseBackground(releaseTitle, releaseGenre, style)
+    const [newBackground] = await generateReleaseBackground(releaseTitle, releaseGenre, style)
     
-    // Step 4: Composite the images (for now, we'll return both separately)
-    // In production, we'd use Nova Canvas inpainting to properly composite
-    console.log('Creating composite...')
-    const compositeImage = await createComposite(backgroundRemovedImage, newBackground, releaseTitle)
+    // Test different compositing methods
+    const { compositeMethod = 'client' } = data
+    
+    // Step 3: Create composite based on method
+    console.log(`Creating composite using ${compositeMethod} method...`)
+    let compositeImage = backgroundRemovedImage
+    let methodUsed = compositeMethod
+    
+    try {
+      if (compositeMethod === 'client') {
+        // Client-side compositing - return both images
+        console.log('Using client-side compositing')
+      } else if (compositeMethod === 'inpainting') {
+        // Inpainting method
+        console.log('Attempting inpainting...')
+        const inpaintResult = await novaCanvas.inpaint({
+          imageBase64: cleanBase64(backgroundRemovedImage),
+          prompt: 'Place the person naturally in the center of the scene',
+          maskPrompt: 'center area',
+          negativePrompt: 'distorted, blurry'
+        })
+        compositeImage = inpaintResult[0] || backgroundRemovedImage
+      } else if (compositeMethod === 'variation') {
+        // Image variation method
+        console.log('Attempting image variation...')
+        const variationResult = await novaCanvas.createVariation({
+          imageBase64: cleanBase64(imageBase64), // Use original image
+          prompt: 'Transform into cinematic professional photo with dramatic lighting',
+          similarityStrength: 0.7,
+          negativePrompt: 'low quality, amateur'
+        })
+        compositeImage = variationResult[0] || imageBase64
+      } else if (compositeMethod === 'outpainting') {
+        // Outpainting method
+        console.log('Attempting outpainting...')
+        // Nova Canvas outpainting using the client's outpaint method
+        const outpaintResult = await novaCanvas.outpaint({
+          imageBase64: cleanBase64(imageBase64),
+          prompt: 'Extend the environment with cinematic background',
+          maskPrompt: 'keep the center person',
+          outPaintingMode: 'DEFAULT'
+        })
+        compositeImage = outpaintResult[0] || imageBase64
+      }
+    } catch (error) {
+      console.error(`${compositeMethod} method failed:`, error)
+      methodUsed = 'client' // Fallback to client-side
+    }
     
     // Upload results to S3 if enabled
     let results: any = {
       message: 'Background removal test completed successfully',
       backgroundRemoved: `data:image/png;base64,${backgroundRemovedImage}`,
       newBackground: `data:image/png;base64,${newBackground}`,
-      composite: `data:image/png;base64,${compositeImage}`
+      composite: `data:image/png;base64,${compositeImage}`,
+      methodUsed
     }
     
     if (process.env.ENABLE_S3_UPLOAD === 'true') {
-      const s3Uploader = getS3Uploader()
-      const [bgRemovedUrl, newBgUrl, compositeUrl] = await s3Uploader.uploadMultipleImages(
-        [backgroundRemovedImage, newBackground, compositeImage],
-        'test-background-removal',
-        { test: 'true', releaseTitle, releaseGenre, style }
-      )
-      
-      results.s3Urls = {
-        backgroundRemoved: bgRemovedUrl,
-        newBackground: newBgUrl,
-        composite: compositeUrl
+      try {
+        const s3Uploader = getS3Uploader()
+        const [bgRemovedUrl, newBgUrl, compositeUrl] = await s3Uploader.uploadMultipleImages(
+          [backgroundRemovedImage, newBackground, compositeImage],
+          'test-background-removal',
+          { test: 'true', releaseTitle, releaseGenre, style }
+        )
+        
+        results.s3Urls = {
+          backgroundRemoved: bgRemovedUrl,
+          newBackground: newBgUrl,
+          composite: compositeUrl
+        }
+      } catch (s3Error) {
+        console.error('S3 upload failed:', s3Error)
+        // Don't fail the entire request if S3 upload fails
+        results.s3UploadError = 'S3 upload failed but images were generated successfully'
       }
     }
     
@@ -97,35 +145,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function removeBackground(imageBase64: string): Promise<string> {
-  try {
-    const command = new InvokeModelCommand({
-      modelId: 'amazon.nova-canvas-v1:0',
-      body: JSON.stringify({
-        taskType: 'BACKGROUND_REMOVAL',
-        backgroundRemovalParams: {
-          image: imageBase64
-        }
-      }),
-      contentType: 'application/json',
-      accept: 'application/json'
-    })
-
-    const response = await client.send(command)
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body))
-    
-    if (!responseBody.images || responseBody.images.length === 0) {
-      throw new Error('No image returned from background removal')
-    }
-    
-    return responseBody.images[0]
-  } catch (error) {
-    console.error('Background removal error:', error)
-    throw error
-  }
-}
-
-async function generateReleaseBackground(title: string, genre: string, style: string): Promise<string> {
+async function generateReleaseBackground(title: string, genre: string, style: string): Promise<string[]> {
+  const novaCanvas = getNovaCanvasClient()
+  
   const stylePrompts = {
     vibrant: 'vibrant colors, dynamic energy, abstract shapes, modern design',
     cinematic: 'cinematic lighting, dramatic atmosphere, depth of field',
@@ -135,69 +157,22 @@ async function generateReleaseBackground(title: string, genre: string, style: st
 
   const prompt = `${genre} music album background, ${title} theme, ${stylePrompts[style as keyof typeof stylePrompts] || stylePrompts.vibrant}, professional album artwork, no people, abstract background`
 
-  try {
-    const command = new InvokeModelCommand({
-      modelId: 'amazon.nova-canvas-v1:0',
-      body: JSON.stringify({
-        taskType: 'TEXT_IMAGE',
-        textToImageParams: {
-          text: prompt,
-          negativeText: 'people, faces, text, watermark, low quality'
-        },
-        imageGenerationConfig: {
-          numberOfImages: 1,
-          height: 1024,
-          width: 1024,
-          cfgScale: 8.0,
-          seed: Math.floor(Math.random() * 1000000)
-        }
-      }),
-      contentType: 'application/json',
-      accept: 'application/json'
-    })
-
-    const response = await client.send(command)
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body))
-    
-    return responseBody.images[0]
-  } catch (error) {
-    console.error('Background generation error:', error)
-    throw error
-  }
+  return novaCanvas.generateImage({
+    prompt,
+    negativePrompt: 'people, faces, text, watermark, low quality',
+    numberOfImages: 1,
+    size: { width: 1024, height: 1024 },
+    cfgScale: 8.0
+  })
 }
 
-async function createComposite(subjectImage: string, backgroundImage: string, releaseTitle: string): Promise<string> {
-  // For now, we'll use inpainting to blend the subject into the background
-  // In a full implementation, we'd use proper image compositing libraries
+async function createComposite(subjectImage: string, backgroundImage: string, releaseTitle: string): Promise<string[]> {
+  // For this test, we'll return the background image
+  // In production, you'd use a proper image manipulation library like Sharp or Canvas
+  // to composite the background-removed subject onto the new background
   
-  try {
-    const command = new InvokeModelCommand({
-      modelId: 'amazon.nova-canvas-v1:0',
-      body: JSON.stringify({
-        taskType: 'INPAINTING',
-        inPaintingParams: {
-          image: backgroundImage,
-          text: `professional music artist portrait integrated into the scene, ${releaseTitle} album cover`,
-          maskPrompt: 'center area where the subject should be placed'
-        },
-        imageGenerationConfig: {
-          numberOfImages: 1,
-          seed: Math.floor(Math.random() * 1000000)
-        }
-      }),
-      contentType: 'application/json',
-      accept: 'application/json'
-    })
-
-    const response = await client.send(command)
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body))
-    
-    // For now, return the background as we need proper compositing
-    // In production, we'd use a proper image manipulation library
-    return responseBody.images?.[0] || backgroundImage
-  } catch (error) {
-    console.error('Composite creation error:', error)
-    // Return the background if compositing fails
-    return backgroundImage
-  }
+  console.log('Note: Full compositing requires additional image manipulation libraries')
+  console.log('Returning generated background for demonstration purposes')
+  
+  return [backgroundImage]
 } 
