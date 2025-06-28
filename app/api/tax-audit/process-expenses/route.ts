@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb"
 import { TextractClient, GetDocumentAnalysisCommand } from "@aws-sdk/client-textract"
-import { findMatchingCategory, getScheduleCLine, detectBusinessType } from "@/lib/tax-categories"
+import { findMatchingCategory, getScheduleCLine } from "@/lib/tax-categories"
 import crypto from "crypto"
 
 // Initialize DynamoDB client
@@ -928,10 +928,58 @@ export async function POST(request: NextRequest) {
         console.log('Python processor result:', result)
         pythonExtracted = result.expensesExtracted || 0
         if (pythonExtracted > 0) {
+          // Process and save expenses from Python processor
+          const pythonExpenses = result.expenses || []
+          const savedExpenses = []
+          
+          for (const expense of pythonExpenses) {
+            // Create expense record with proper format
+            const expenseRecord = {
+              expenseId: expense.expenseId,
+              documentId: expense.documentId || documentId,
+              userId: expense.userId || userId,
+              transactionDate: expense.date,
+              amount: parseFloat(expense.amount), // ensure it's a number
+              description: expense.description, // Don't truncate the description
+              vendor: (expense.vendor || extractVendorFromDescription(expense.description)).substring(0, 200),
+              category: expense.category || 'other-expenses',
+              scheduleCLine: expense.scheduleCLine || getScheduleCLine(expense.category || 'other-expenses'),
+              bankAccount: expense.bankAccount || bankType,
+              classificationStatus: expense.status || 'pending',
+              confidenceScore: expense.confidence || 0.5,
+              createdAt: expense.createdAt || new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+
+            console.log('Saving Python expense:', expenseRecord)
+
+            // Save to DynamoDB
+            const putCommand = new PutCommand({
+              TableName: EXPENSES_TABLE,
+              Item: expenseRecord,
+              ConditionExpression: 'attribute_not_exists(expenseId)'
+            })
+
+            try {
+              await docClient.send(putCommand)
+              savedExpenses.push(expenseRecord)
+            } catch (error: any) {
+              if (error.__type === 'com.amazonaws.dynamodb.v20120810#ConditionalCheckFailedException') {
+                console.log(`Skipping duplicate expense: ${expenseRecord.expenseId} - ${expenseRecord.description}`)
+              } else {
+                console.error(`Error saving expense: ${error}`)
+              }
+            }
+          }
+          
           return NextResponse.json({
             success: true,
-            expensesExtracted: result.expensesExtracted,
-            expensesSaved: result.expensesSaved
+            message: `Processed ${savedExpenses.length} expenses from document via Python processor`,
+            expensesExtracted: pythonExpenses.length,
+            expensesSaved: savedExpenses.length,
+            expenses: savedExpenses,
+            bankType: bankType,
+            totalAmount: savedExpenses.reduce((sum, exp) => sum + exp.amount, 0)
           })
         }
         console.warn(`Python processor found 0 expenses – falling back to TypeScript parser`)
@@ -1004,12 +1052,10 @@ export async function POST(request: NextRequest) {
         userId,
         transactionDate: expense.date,
         amount: expense.amount, // store as number for easier aggregation
-        description: expense.description.substring(0, 500),
+        description: expense.description, // Don't truncate the description
         vendor: (expense.vendor || extractVendorFromDescription(expense.description)).substring(0, 200),
         category: classification?.category || 'other-expenses',
-        businessType: classification?.businessType || 'unknown',
-        // @ts-ignore
-        scheduleCLine: (classification as any)?.scheduleCLine || getScheduleCLine((classification?.businessType as any) || 'unknown', (classification?.category as any) || 'other-expenses'),
+        scheduleCLine: classification?.scheduleCLine || getScheduleCLine(classification?.category || 'other-expenses'),
         bankAccount: bankType,
         classificationStatus: 'pending',
         confidenceScore: classification?.confidence || 0.5,

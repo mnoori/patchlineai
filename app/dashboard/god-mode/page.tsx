@@ -34,6 +34,7 @@ import {
   Eye,
   Trash2,
   CheckCircle,
+  CheckCircle2,
   Clock,
   AlertCircle,
   Zap,
@@ -62,6 +63,7 @@ import { GodModeFeatureSelector, type GodModeFeature } from "../../../components
 import { HRRecruiterDashboard } from "../../../components/god-mode/hr/dashboard"
 import { NewsletterGeneratorDashboard } from "../../../components/god-mode/newsletter/dashboard"
 import { ExpenseReviewTable } from "../../../components/tax-audit/expense-review-table"
+import { ScheduleCReference } from "../../../components/tax-audit/schedule-c-reference"
 import { TAX_CATEGORIES } from "@/lib/tax-categories"
 import { useToast } from "@/components/ui/use-toast"
 
@@ -1410,30 +1412,30 @@ export default function GodModePage() {
 
                 <Card className="glass-effect">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Media Business</CardTitle>
-                    <Building className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+                    <Clock className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-blue-500">
-                      ${expenseSummary?.businessTypeTotals?.media?.toLocaleString() || '0'}
+                    <div className="text-2xl font-bold text-yellow-500">
+                      {expenseSummary?.pendingReview || 0}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Target: $105,903
+                      Expenses awaiting classification
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card className="glass-effect">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Consulting Business</CardTitle>
-                    <Building className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium">Approved</CardTitle>
+                    <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-purple-500">
-                      ${expenseSummary?.businessTypeTotals?.consulting?.toLocaleString() || '0'}
+                    <div className="text-2xl font-bold text-green-500">
+                      {expenseSummary?.approved || 0}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Target: $44,794
+                      Ready for tax filing
                     </p>
                   </CardContent>
                 </Card>
@@ -1561,6 +1563,9 @@ export default function GodModePage() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Schedule C Reference Guide */}
+              <ScheduleCReference />
 
               {/* Expense Review Table */}
               <Card className="glass-effect">

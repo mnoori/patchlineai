@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -20,32 +20,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  ArrowUpDown,
-  Check,
-  X,
-  Edit2,
-  Trash2,
-  DollarSign,
   Search,
   CheckCircle2,
   XCircle,
   Clock,
-  ChevronDown,
   Download,
+  Plus,
 } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
-import { TAX_CATEGORIES, getBusinessCategories, getScheduleCLine } from "@/lib/tax-categories"
+import { TAX_CATEGORIES, getAllCategories, getScheduleCLine, getCustomCategories, saveCustomCategory } from "@/lib/tax-categories"
 import * as XLSX from 'xlsx'
 
 interface TaxExpense {
@@ -57,7 +43,7 @@ interface TaxExpense {
   description: string
   vendor: string
   category: string
-  businessType: string
+  scheduleCLine?: string
   classificationStatus: 'pending' | 'approved' | 'rejected'
   confidenceScore: number
   bankAccount?: string
@@ -84,15 +70,18 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [businessFilter, setBusinessFilter] = useState("all")
   const [selectedExpenses, setSelectedExpenses] = useState<Set<string>>(new Set())
-  const [editingExpense, setEditingExpense] = useState<string | null>(null)
   const [selectedBankAccount, setSelectedBankAccount] = useState("all")
-  const [editForm, setEditForm] = useState<Partial<TaxExpense>>({})
+  const [customCategories, setCustomCategories] = useState<string[]>([])
+  const [newCategory, setNewCategory] = useState("")
+  const [showNewCategory, setShowNewCategory] = useState(false)
 
   // Fetch expenses
   useEffect(() => {
     fetchExpenses()
+    // Load custom categories
+    const custom = getCustomCategories()
+    setCustomCategories(custom)
   }, [userId])
 
   const fetchExpenses = async () => {
@@ -117,10 +106,9 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
       expense.vendor.toLowerCase().includes(searchQuery.toLowerCase())
     
     const matchesStatus = statusFilter === "all" || expense.classificationStatus === statusFilter
-    const matchesBusiness = businessFilter === "all" || expense.businessType === businessFilter
     const matchesBank = selectedBankAccount === "all" || expense.bankAccount === selectedBankAccount
     
-    return matchesSearch && matchesStatus && matchesBusiness && matchesBank
+    return matchesSearch && matchesStatus && matchesBank
   })
 
   // Get counts by bank account
@@ -130,41 +118,30 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
     return acc
   }, {} as Record<string, number>)
 
-  const handleEdit = (expense: TaxExpense) => {
-    setEditingExpense(expense.expenseId)
-    setEditForm({
-      vendor: expense.vendor,
-      category: expense.category,
-      businessType: expense.businessType,
-      description: expense.description
-    })
-  }
-
-  const handleSaveEdit = async () => {
-    if (!editingExpense) return
-
+  const handleCategoryChange = async (expenseId: string, newCategory: string) => {
     try {
       const response = await fetch(`/api/tax-audit/expenses`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          expenseId: editingExpense,
-          updates: {
-            description: editForm.description,
-            vendor: editForm.vendor,
-            category: editForm.category,
-            businessType: editForm.businessType
+          expenseId,
+          updates: { 
+            category: newCategory,
+            scheduleCLine: getScheduleCLine(newCategory)
           }
         })
       })
 
       if (response.ok) {
-        await fetchExpenses()
-        setEditingExpense(null)
-        setEditForm({})
+        // Update local state immediately for better UX
+        setExpenses(prev => prev.map(exp => 
+          exp.expenseId === expenseId 
+            ? { ...exp, category: newCategory, scheduleCLine: getScheduleCLine(newCategory) }
+            : exp
+        ))
       }
     } catch (error) {
-      console.error('Error updating expense:', error)
+      console.error('Error updating category:', error)
     }
   }
 
@@ -180,51 +157,101 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
       })
 
       if (response.ok) {
-        await fetchExpenses()
+        // Update local state immediately
+        setExpenses(prev => prev.map(exp => 
+          exp.expenseId === expenseId 
+            ? { ...exp, classificationStatus: status }
+            : exp
+        ))
       }
     } catch (error) {
       console.error('Error updating status:', error)
     }
   }
 
+  const handleBulkApprove = async () => {
+    for (const expenseId of selectedExpenses) {
+      await handleStatusUpdate(expenseId, 'approved')
+    }
+    setSelectedExpenses(new Set())
+  }
+
+  const handleBulkReject = async () => {
+    for (const expenseId of selectedExpenses) {
+      await handleStatusUpdate(expenseId, 'rejected')
+    }
+    setSelectedExpenses(new Set())
+  }
+
+  const handleAddCustomCategory = () => {
+    if (newCategory && !getAllCategories().includes(newCategory) && !customCategories.includes(newCategory)) {
+      saveCustomCategory(newCategory)
+      setCustomCategories([...customCategories, newCategory])
+      setNewCategory("")
+      setShowNewCategory(false)
+    }
+  }
+
   const handleExport = () => {
     const workbook = XLSX.utils.book_new()
     
-    // Export ALL expenses (not just approved) for review
-    const allExpenses = filteredExpenses
-    
-    if (allExpenses.length === 0) {
+    if (filteredExpenses.length === 0) {
       alert('No expenses to export')
       return
     }
     
-    // Create main sheet with all expenses (similar to table view)
-    const mainData = allExpenses.map(expense => ({
-      Date: expense.transactionDate,
-      Description: expense.description,
-      Vendor: expense.vendor,
-      Amount: expense.amount,
-      Category: expense.category.replace(/-/g, ' '),
-      Business: expense.businessType,
-      'Bank Account': expense.bankAccount || 'Unknown',
-      Status: expense.classificationStatus,
-      'Schedule C Line': expense.businessType === 'media' || expense.businessType === 'consulting' 
-        ? getScheduleCLine(expense.businessType, expense.category)
-        : 'Schedule C Line 27'
-    }))
-    
-    const mainWorksheet = XLSX.utils.json_to_sheet(mainData)
-    XLSX.utils.book_append_sheet(workbook, mainWorksheet, 'All Expenses')
-    
     // Group by category for separate tabs
-    const expensesByCategory = allExpenses.reduce((acc, expense) => {
+    const expensesByCategory = filteredExpenses.reduce((acc, expense) => {
       const category = expense.category || 'other-expenses'
       if (!acc[category]) {
         acc[category] = []
       }
       acc[category].push(expense)
       return acc
-    }, {} as Record<string, typeof allExpenses>)
+    }, {} as Record<string, typeof filteredExpenses>)
+    
+    // Create summary sheet first
+    const summaryData = Object.entries(expensesByCategory).map(([category, categoryExpenses]) => {
+      const categoryInfo = TAX_CATEGORIES[category]
+      return {
+        Category: category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        'Schedule C Line': categoryInfo?.line || 'Schedule C Line 27a',
+        'Total Count': categoryExpenses.length,
+        'Total Amount': `$${categoryExpenses.reduce((sum, exp) => sum + exp.amount, 0).toFixed(2)}`,
+        'Approved': categoryExpenses.filter(exp => exp.classificationStatus === 'approved').length,
+        'Pending': categoryExpenses.filter(exp => exp.classificationStatus === 'pending').length,
+        'Rejected': categoryExpenses.filter(exp => exp.classificationStatus === 'rejected').length
+      }
+    })
+    
+    // Add totals row
+    summaryData.push({
+      Category: 'TOTAL',
+      'Schedule C Line': '',
+      'Total Count': filteredExpenses.length,
+      'Total Amount': `$${filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0).toFixed(2)}`,
+      'Approved': filteredExpenses.filter(exp => exp.classificationStatus === 'approved').length,
+      'Pending': filteredExpenses.filter(exp => exp.classificationStatus === 'pending').length,
+      'Rejected': filteredExpenses.filter(exp => exp.classificationStatus === 'rejected').length
+    })
+    
+    const summaryWorksheet = XLSX.utils.json_to_sheet(summaryData)
+    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Summary')
+    
+    // Create main sheet with all expenses
+    const mainData = filteredExpenses.map(expense => ({
+      Date: expense.transactionDate,
+      Description: expense.description,
+      Vendor: expense.vendor,
+      Amount: `$${expense.amount.toFixed(2)}`,
+      Category: expense.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      'Schedule C Line': expense.scheduleCLine || getScheduleCLine(expense.category),
+      'Bank Account': expense.bankAccount || 'Unknown',
+      Status: expense.classificationStatus
+    }))
+    
+    const mainWorksheet = XLSX.utils.json_to_sheet(mainData)
+    XLSX.utils.book_append_sheet(workbook, mainWorksheet, 'All Expenses')
     
     // Create a sheet for each category
     Object.entries(expensesByCategory).forEach(([category, categoryExpenses]) => {
@@ -232,34 +259,31 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
         Date: expense.transactionDate,
         Description: expense.description,
         Vendor: expense.vendor,
-        Amount: expense.amount,
-        Business: expense.businessType,
+        Amount: `$${expense.amount.toFixed(2)}`,
         'Bank Account': expense.bankAccount || 'Unknown',
         Status: expense.classificationStatus
       }))
       
       const worksheet = XLSX.utils.json_to_sheet(categoryData)
       
+      // Add total row
+      const totalRow = {
+        Date: 'TOTAL',
+        Description: '',
+        Vendor: '',
+        Amount: `$${categoryExpenses.reduce((sum, exp) => sum + exp.amount, 0).toFixed(2)}`,
+        'Bank Account': '',
+        Status: ''
+      }
+      XLSX.utils.sheet_add_json(worksheet, [totalRow], { skipHeader: true, origin: -1 })
+      
       // Format category name for sheet tab (max 31 chars for Excel)
       const sheetName = category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()).substring(0, 31)
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
     })
     
-    // Create summary sheet
-    const summaryData = Object.entries(expensesByCategory).map(([category, categoryExpenses]) => ({
-      Category: category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-      'Total Count': categoryExpenses.length,
-      'Total Amount': categoryExpenses.reduce((sum, exp) => sum + exp.amount, 0),
-      'Pending': categoryExpenses.filter(exp => exp.classificationStatus === 'pending').length,
-      'Approved': categoryExpenses.filter(exp => exp.classificationStatus === 'approved').length,
-      'Rejected': categoryExpenses.filter(exp => exp.classificationStatus === 'rejected').length
-    }))
-    
-    const summaryWorksheet = XLSX.utils.json_to_sheet(summaryData)
-    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Summary')
-    
-    // Generate filename with date and time
-    const filename = `Tax_Expenses_${format(new Date(), 'yyyy-MM-dd_HH-mm')}.xlsx`
+    // Generate filename with date
+    const filename = `Tax_Expenses_${format(new Date(), 'yyyy-MM-dd')}.xlsx`
     XLSX.writeFile(workbook, filename)
   }
 
@@ -274,25 +298,11 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    const validStatus = status || 'pending' // Default to pending if undefined
-    const variants = {
-      approved: 'bg-green-500/10 text-green-500 border-green-500/20',
-      rejected: 'bg-red-500/10 text-red-500 border-red-500/20',
-      pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-    }
-
-    return (
-      <Badge variant="outline" className={cn('gap-1', variants[validStatus] || variants.pending)}>
-        {getStatusIcon(validStatus)}
-        {validStatus.charAt(0).toUpperCase() + validStatus.slice(1)}
-      </Badge>
-    )
-  }
-
   if (loading) {
     return <div className="flex justify-center p-8">Loading expenses...</div>
   }
+
+  const allCategories = [...getAllCategories(), ...customCategories]
 
   return (
     <div className="space-y-6">
@@ -303,13 +313,35 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
               Expense Review & Classification
             </h2>
             <p className="text-slate-400">
-              Review, classify, and approve expenses for your tax audit
+              Review and categorize expenses for your tax filing
             </p>
           </div>
-          <Button onClick={handleExport} variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export to Excel
-          </Button>
+          <div className="flex gap-2">
+            {selectedExpenses.size > 0 && (
+              <>
+                <Button 
+                  onClick={handleBulkApprove} 
+                  variant="outline" 
+                  className="gap-2 text-green-500 hover:text-green-400"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Approve ({selectedExpenses.size})
+                </Button>
+                <Button 
+                  onClick={handleBulkReject} 
+                  variant="outline" 
+                  className="gap-2 text-red-500 hover:text-red-400"
+                >
+                  <XCircle className="h-4 w-4" />
+                  Reject ({selectedExpenses.size})
+                </Button>
+              </>
+            )}
+            <Button onClick={handleExport} variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Export to Excel
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -352,17 +384,6 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
                   <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={businessFilter} onValueChange={setBusinessFilter}>
-                <SelectTrigger className="w-[180px] bg-slate-900/50 border-slate-800">
-                  <SelectValue placeholder="All Businesses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Businesses</SelectItem>
-                  <SelectItem value="media">Media Business</SelectItem>
-                  <SelectItem value="consulting">Consulting</SelectItem>
-                  <SelectItem value="unknown">Unknown</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Expenses Table */}
@@ -382,15 +403,14 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
                         }}
                       />
                     </TableHead>
-                    <TableHead>Date ↕</TableHead>
+                    <TableHead>Date</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Vendor</TableHead>
-                    <TableHead>Amount ↕</TableHead>
+                    <TableHead>Amount</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Business</TableHead>
                     <TableHead>Schedule C</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -411,168 +431,116 @@ export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
                         />
                       </TableCell>
                       <TableCell className="font-medium">
-                        {expense.transactionDate ? (
-                          (() => {
-                            try {
-                              const dateObj = new Date(expense.transactionDate)
-                              // Check if date is valid
-                              if (isNaN(dateObj.getTime())) {
-                                return expense.transactionDate // Return raw string if invalid
-                              }
-                              return format(dateObj, 'MMM dd, yyyy')
-                            } catch (error) {
-                              console.error('Date formatting error:', error, 'for date:', expense.transactionDate)
-                              return expense.transactionDate || 'Invalid date'
-                            }
-                          })()
-                        ) : (
-                          'No date'
-                        )}
+                        {expense.transactionDate ? format(new Date(expense.transactionDate), 'MM/dd') : 'No date'}
                       </TableCell>
                       <TableCell>
-                        {editingExpense === expense.expenseId ? (
-                          <Input
-                            value={editForm.description}
-                            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                            className="bg-slate-800 border-slate-700"
-                          />
-                        ) : (
-                          <span className="line-clamp-2">{expense.description}</span>
-                        )}
+                        <span className="line-clamp-2" title={expense.description}>
+                          {expense.description}
+                        </span>
                       </TableCell>
-                      <TableCell>
-                        {editingExpense === expense.expenseId ? (
-                          <Input
-                            value={editForm.vendor}
-                            onChange={(e) => setEditForm({ ...editForm, vendor: e.target.value })}
-                            className="bg-slate-800 border-slate-700"
-                          />
-                        ) : (
-                          expense.vendor
-                        )}
-                      </TableCell>
+                      <TableCell>{expense.vendor}</TableCell>
                       <TableCell className="font-semibold">
                         ${expense.amount.toFixed(2)}
                       </TableCell>
                       <TableCell>
-                        {editingExpense === expense.expenseId ? (
-                          <Select
-                            value={editForm.category}
-                            onValueChange={(value) => setEditForm({ ...editForm, category: value })}
-                          >
-                            <SelectTrigger className="bg-slate-800 border-slate-700">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(() => {
-                                const businessType = editForm.businessType || expense.businessType
-                                if (businessType === 'unknown') {
-                                  // Show all categories for unknown business type
-                                  const allCategories = Array.from(new Set([
-                                    ...getBusinessCategories('media'),
-                                    ...getBusinessCategories('consulting')
-                                  ]))
-                                  return allCategories.map(cat => (
-                                    <SelectItem key={cat} value={cat}>
-                                      {cat.replace(/-/g, ' ')}
-                                    </SelectItem>
-                                  ))
-                                }
-                                return getBusinessCategories(businessType as any).map(cat => (
-                                  <SelectItem key={cat} value={cat}>
-                                    {cat.replace(/-/g, ' ')}
-                                  </SelectItem>
-                                ))
-                              })()}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Badge variant="secondary">
-                            {expense.category.replace(/-/g, ' ')}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {editingExpense === expense.expenseId ? (
-                          <Select
-                            value={editForm.businessType}
-                            onValueChange={(value) => setEditForm({ ...editForm, businessType: value })}
-                          >
-                            <SelectTrigger className="bg-slate-800 border-slate-700">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="media">Media</SelectItem>
-                              <SelectItem value="consulting">Consulting</SelectItem>
-                              <SelectItem value="unknown">Unknown</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Badge variant="outline">
-                            {expense.businessType}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {expense.businessType === 'media' || expense.businessType === 'consulting' 
-                          ? getScheduleCLine(expense.businessType, expense.category)
-                          : 'Schedule C Line 27'}
-                      </TableCell>
-                      <TableCell>
-                        {getStatusBadge(expense.classificationStatus)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {editingExpense === expense.expenseId ? (
-                          <div className="flex justify-end gap-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={handleSaveEdit}
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                setEditingExpense(null)
-                                setEditForm({})
-                              }}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <ChevronDown className="h-4 w-4" />
+                        <Select
+                          value={expense.category}
+                          onValueChange={(value) => handleCategoryChange(expense.expenseId, value)}
+                        >
+                          <SelectTrigger className="bg-slate-800 border-slate-700 w-[180px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allCategories.map(cat => {
+                              const categoryInfo = TAX_CATEGORIES[cat]
+                              return (
+                                <SelectItem key={cat} value={cat}>
+                                  <div className="flex flex-col">
+                                    <span>{cat.replace(/-/g, ' ')}</span>
+                                    {categoryInfo && (
+                                      <span className="text-xs text-muted-foreground">
+                                        {categoryInfo.line}
+                                      </span>
+                                    )}
+                                  </div>
+                                </SelectItem>
+                              )
+                            })}
+                            {showNewCategory ? (
+                              <div className="flex items-center gap-2 p-2">
+                                <Input
+                                  value={newCategory}
+                                  onChange={(e) => setNewCategory(e.target.value)}
+                                  placeholder="New category..."
+                                  className="h-8"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      handleAddCustomCategory()
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  size="sm"
+                                  onClick={handleAddCustomCategory}
+                                >
+                                  Add
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-start"
+                                onClick={() => setShowNewCategory(true)}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Custom Category
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleEdit(expense)}>
-                                <Edit2 className="h-4 w-4 mr-2" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleStatusUpdate(expense.expenseId, 'approved')}
-                                className="text-green-600"
-                              >
-                                <CheckCircle2 className="h-4 w-4 mr-2" />
-                                Approve
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleStatusUpdate(expense.expenseId, 'rejected')}
-                                className="text-red-600"
-                              >
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Reject
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {expense.scheduleCLine || getScheduleCLine(expense.category)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant="outline" 
+                          className={cn(
+                            'cursor-pointer',
+                            expense.classificationStatus === 'approved' && 'bg-green-500/10 text-green-500 border-green-500/20',
+                            expense.classificationStatus === 'rejected' && 'bg-red-500/10 text-red-500 border-red-500/20',
+                            expense.classificationStatus === 'pending' && 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                          )}
+                        >
+                          {getStatusIcon(expense.classificationStatus)}
+                          <span className="ml-1">
+                            {expense.classificationStatus.charAt(0).toUpperCase() + expense.classificationStatus.slice(1)}
+                          </span>
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-center gap-1">
+                          {expense.classificationStatus !== 'approved' && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleStatusUpdate(expense.expenseId, 'approved')}
+                              className="text-green-500 hover:text-green-400"
+                            >
+                              <CheckCircle2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {expense.classificationStatus !== 'rejected' && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleStatusUpdate(expense.expenseId, 'rejected')}
+                              className="text-red-500 hover:text-red-400"
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

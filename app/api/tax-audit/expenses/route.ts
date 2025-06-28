@@ -35,9 +35,6 @@ export async function GET(request: NextRequest) {
     let expenses = result.Items || []
 
     // Apply filters
-    if (businessType) {
-      expenses = expenses.filter(exp => exp.businessType === businessType)
-    }
 
     if (category) {
       expenses = expenses.filter(exp => exp.category === category)
@@ -55,29 +52,20 @@ export async function GET(request: NextRequest) {
       expenses = expenses.filter(exp => exp.transactionDate <= endDate)
     }
 
-    // Calculate totals by category and business type
-    const categoryTotals: Record<string, Record<string, number>> = {
-      media: {},
-      consulting: {},
-      unknown: {}
-    }
-
+    // Calculate totals by category
+    const categoryTotals: Record<string, number> = {}
     const scheduleCLineTotals: Record<string, number> = {}
 
     expenses.forEach(expense => {
-      const bType: string = expense.businessType && ['media','consulting'].includes(expense.businessType) ? expense.businessType : 'unknown'
       const cat = expense.category || 'other_expenses'
       
-      if (!categoryTotals[bType]) {
-        categoryTotals[bType] = {}
+      if (!categoryTotals[cat]) {
+        categoryTotals[cat] = 0
       }
-      if (!categoryTotals[bType][cat]) {
-        categoryTotals[bType][cat] = 0
-      }
-      categoryTotals[bType][cat] += expense.amount
+      categoryTotals[cat] += expense.amount
 
       // Track by Schedule C line
-      const line = expense.scheduleCLine || 'Unknown'
+      const line = expense.scheduleCLine || 'Schedule C Line 27a'
       if (!scheduleCLineTotals[line]) {
         scheduleCLineTotals[line] = 0
       }
@@ -97,15 +85,7 @@ export async function GET(request: NextRequest) {
       approved: expenses.filter(exp => exp.classificationStatus === 'approved').length,
       rejected: expenses.filter(exp => exp.classificationStatus === 'rejected').length,
       categoryTotals,
-      scheduleCLineTotals,
-      businessTypeTotals: {
-        media: expenses.filter(exp => exp.businessType === 'media')
-          .reduce((sum, exp) => sum + exp.amount, 0),
-        consulting: expenses.filter(exp => exp.businessType === 'consulting')
-          .reduce((sum, exp) => sum + exp.amount, 0),
-        unknown: expenses.filter(exp => !['media','consulting'].includes(exp.businessType))
-          .reduce((sum, exp) => sum + exp.amount, 0)
-      }
+      scheduleCLineTotals
     }
 
     return NextResponse.json({
@@ -146,12 +126,12 @@ export async function PUT(request: NextRequest) {
     // Allowed update fields
     const allowedUpdates = [
       'category',
-      'businessType',
       'scheduleCLine',
       'classificationStatus',
       'confidenceScore',
       'manualNotes',
-      'vendor'
+      'vendor',
+      'description'
     ]
 
     Object.entries(updates).forEach(([key, value]) => {

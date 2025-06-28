@@ -44,8 +44,16 @@ class BankStatementParser:
             if match:
                 try:
                     if len(match.groups()) == 2:  # MM/DD format
-                        # Add current year
-                        date_obj = datetime.strptime(f"{date_str}/{self.current_year}", f"{date_format}/%Y")
+                        # Determine the year based on month
+                        month = int(match.group(1))
+                        current_month = datetime.now().month
+                        year = self.current_year
+                        
+                        # If we're in early 2025 and see Nov/Dec dates, they're from 2024
+                        if self.current_year == 2025 and month >= 11:
+                            year = 2024
+                        
+                        date_obj = datetime.strptime(f"{date_str}/{year}", f"{date_format}/%Y")
                     else:
                         date_obj = datetime.strptime(date_str, date_format)
                     
@@ -87,32 +95,40 @@ class BankStatementParser:
         content = f"{self.user_id}:{date}:{amount}:{description}:{self.document_id}"
         return hashlib.sha256(content.encode()).hexdigest()[:16]
     
-    def categorize_expense(self, description: str, amount: Decimal) -> Tuple[str, str]:
+    def categorize_expense(self, description: str, amount: Decimal) -> str:
         """Basic expense categorization"""
         desc_lower = description.lower()
         
+        # Interest charges - HIGHEST PRIORITY
+        if any(word in desc_lower for word in ['interest charge', 'interest charged', 'finance charge', 'interest fee']):
+            return 'interest'
+        
         # Travel-related
         if any(word in desc_lower for word in ['airbnb', 'hotel', 'flight', 'airline', 'uber', 'lyft', 'taxi']):
-            return 'travel', 'media'
+            return 'travel'
         
         # Professional services
         if any(word in desc_lower for word in ['legal', 'lawyer', 'attorney', 'accountant', 'cpa']):
-            return 'legal-professional', 'consulting'
+            return 'legal_professional'
         
         # Office expenses
         if any(word in desc_lower for word in ['office', 'supplies', 'staples', 'amazon']):
-            return 'office-expenses', 'media'
+            return 'office_expenses'
         
         # Utilities
         if any(word in desc_lower for word in ['electric', 'gas', 'water', 'internet', 'phone', 'verizon', 'att']):
-            return 'utilities', 'media'
+            return 'utilities'
         
         # Advertising
         if any(word in desc_lower for word in ['facebook', 'google', 'ads', 'marketing']):
-            return 'advertising', 'media'
+            return 'advertising'
+        
+        # Platform expenses
+        if any(word in desc_lower for word in ['aws', 'azure', 'google cloud', 'gcp', 'api', 'hosting', 'server']):
+            return 'platform_expenses'
         
         # Default
-        return 'other-expenses', 'unknown'
+        return 'other_expenses'
 
 
 class ChaseStatementParser(BankStatementParser):
@@ -122,13 +138,129 @@ class ChaseStatementParser(BankStatementParser):
         """Parse Chase statement format"""
         expenses = []
         
-        # Look for tables in Textract output
+        # First try table parsing
+        table_count = 0
         for item in textract_data.get('Blocks', []):
             if item['BlockType'] == 'TABLE':
+                table_count += 1
                 table_expenses = self._parse_table(item, textract_data)
                 expenses.extend(table_expenses)
         
+        print(f"Found {table_count} tables, extracted {len(expenses)} expenses from tables")
+        
+        # If no expenses from tables, try text parsing
+        if len(expenses) == 0:
+            print("No expenses from tables, trying text parsing")
+            text_expenses = self._parse_text_transactions(textract_data)
+            expenses.extend(text_expenses)
+        
         return expenses
+    
+    def _parse_text_transactions(self, textract_data: Dict) -> List[Dict]:
+        """Parse transactions from text blocks"""
+        expenses = []
+        lines = []
+        
+        # Extract all text lines
+        for block in textract_data.get('Blocks', []):
+            if block['BlockType'] == 'LINE':
+                text = block.get('Text', '').strip()
+                if text:
+                    lines.append(text)
+        
+        print(f"Processing {len(lines)} text lines")
+        
+        # Look for transaction patterns
+        in_transaction_section = False
+        
+        for i, line in enumerate(lines):
+            line_lower = line.lower()
+            
+            # Check for transaction section markers
+            if any(marker in line_lower for marker in ['purchase', 'payment', 'transaction detail']):
+                in_transaction_section = True
+                print(f"Found transaction section: {line}")
+                continue
+            
+            # Check for end of transaction section
+            if in_transaction_section and any(marker in line_lower for marker in ['total', 'balance', 'interest', 'fee']):
+                in_transaction_section = False
+                continue
+            
+            # Try to parse transaction - Chase Sapphire format
+            # Pattern 1: MM/DD Description Amount
+            pattern1 = r'^(\d{1,2}/\d{1,2})\s+(.+?)\s+(\$?[\d,]+\.\d{2})$'
+            match = re.match(pattern1, line)
+            
+            if match:
+                date_str, description, amount_str = match.groups()
+                date = self.extract_date(date_str)
+                amount = self.extract_amount(amount_str)
+                
+                if date and amount and amount > 0:
+                    category = self.categorize_expense(description, amount)
+                    
+                    expense = {
+                        'expenseId': self.generate_expense_id(date, str(amount), description),
+                        'userId': self.user_id,
+                        'documentId': self.document_id,
+                        'date': date,
+                        'description': description,
+                        'vendor': self._extract_vendor(description),
+                        'amount': str(amount),
+                        'category': category,
+                        'bankAccount': self.bank_type,
+                        'status': 'pending',
+                        'confidence': 0.8,
+                        'createdAt': datetime.utcnow().isoformat()
+                    }
+                    expenses.append(expense)
+                    print(f"Found transaction: {date} - {description} - ${amount}")
+            
+            # Pattern 2: Check if date is on one line and description/amount on next
+            if i + 1 < len(lines) and re.match(r'^\d{1,2}/\d{1,2}$', line):
+                date = self.extract_date(line)
+                next_line = lines[i + 1]
+                
+                # Try to extract description and amount from next line
+                desc_amount_match = re.match(r'^(.+?)\s+(\$?[\d,]+\.\d{2})$', next_line)
+                if date and desc_amount_match:
+                    description, amount_str = desc_amount_match.groups()
+                    amount = self.extract_amount(amount_str)
+                    
+                    if amount and amount > 0:
+                        category = self.categorize_expense(description, amount)
+                        
+                        expense = {
+                            'expenseId': self.generate_expense_id(date, str(amount), description),
+                            'userId': self.user_id,
+                            'documentId': self.document_id,
+                            'date': date,
+                            'description': description,
+                            'vendor': self._extract_vendor(description),
+                            'amount': str(amount),
+                            'category': category,
+                            'bankAccount': self.bank_type,
+                            'status': 'pending',
+                            'confidence': 0.7,
+                            'createdAt': datetime.utcnow().isoformat()
+                        }
+                        expenses.append(expense)
+                        print(f"Found multi-line transaction: {date} - {description} - ${amount}")
+        
+        print(f"Extracted {len(expenses)} expenses from text")
+        return expenses
+    
+    def _extract_vendor(self, description: str) -> str:
+        """Extract vendor name from description"""
+        # Remove common suffixes and clean up
+        vendor = description.split(' ')[0] if description else 'Unknown'
+        
+        # Remove transaction codes and clean up
+        vendor = re.sub(r'\d{4,}', '', vendor)  # Remove long numbers
+        vendor = re.sub(r'[*#]', '', vendor)    # Remove special chars
+        
+        return vendor.strip() or 'Unknown'
     
     def _parse_table(self, table_block: Dict, full_data: Dict) -> List[Dict]:
         """Parse a table from Chase statement"""
@@ -162,25 +294,35 @@ class ChaseStatementParser(BankStatementParser):
             if len(row_cells) >= 3:
                 date_text = self._get_cell_text(row_cells[0], full_data)
                 desc_text = self._get_cell_text(row_cells[1], full_data) if len(row_cells) > 1 else ""
-                amount_text = self._get_cell_text(row_cells[-1], full_data)  # Amount usually in last column
+                
+                # For Chase Sapphire, amount might be in different columns
+                amount = None
+                amount_text = ""
+                
+                # Check last few columns for amount
+                for i in range(len(row_cells) - 1, max(1, len(row_cells) - 4), -1):
+                    cell_text = self._get_cell_text(row_cells[i], full_data)
+                    test_amount = self.extract_amount(cell_text)
+                    if test_amount and test_amount > 0:
+                        amount = test_amount
+                        amount_text = cell_text
+                        break
                 
                 # Parse the extracted data
                 date = self.extract_date(date_text)
-                amount = self.extract_amount(amount_text)
                 
                 if date and amount and desc_text:
-                    category, business = self.categorize_expense(desc_text, amount)
+                    category = self.categorize_expense(desc_text, amount)
                     
                     expense = {
                         'expenseId': self.generate_expense_id(date, str(amount), desc_text),
                         'userId': self.user_id,
                         'documentId': self.document_id,
                         'date': date,
-                        'description': desc_text[:500],  # Limit description length
-                        'vendor': desc_text.split()[0] if desc_text else 'Unknown',
+                        'description': desc_text,
+                        'vendor': self._extract_vendor(desc_text),
                         'amount': str(amount),
                         'category': category,
-                        'business': business,
                         'bankAccount': self.bank_type,
                         'status': 'pending',
                         'confidence': 0.8,
@@ -188,6 +330,7 @@ class ChaseStatementParser(BankStatementParser):
                     }
                     
                     expenses.append(expense)
+                    print(f"Table transaction: {date} - {desc_text} - ${amount}")
         
         return expenses
     
@@ -262,18 +405,17 @@ class BiltStatementParser(BankStatementParser):
             amount_decimal = self.extract_amount(amount)
             
             if date and amount_decimal:
-                category, business = self.categorize_expense(description, amount_decimal)
+                category = self.categorize_expense(description, amount_decimal)
                 
                 return {
                     'expenseId': self.generate_expense_id(date, str(amount_decimal), description),
                     'userId': self.user_id,
                     'documentId': self.document_id,
                     'date': date,
-                    'description': description[:500],
+                    'description': description,
                     'vendor': description.split()[0] if description else 'Unknown',
                     'amount': str(amount_decimal),
                     'category': category,
-                    'business': business,
                     'bankAccount': self.bank_type,
                     'referenceNumber': ref_num,
                     'status': 'pending',
