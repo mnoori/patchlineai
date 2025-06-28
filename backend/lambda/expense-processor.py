@@ -481,24 +481,31 @@ class AmazonReceiptParser(BankStatementParser):
         print(f"Amazon receipt - Order date: {order_date}, Order #: {order_number}")
         
         # Debug: Print first few lines to see structure
-        print("\n=== First 20 lines of Amazon receipt ===")
-        for i, line in enumerate(full_text[:20]):
+        print("\n=== First 30 lines of Amazon receipt ===")
+        for i, line in enumerate(full_text[:30]):
             print(f"{i}: {line}")
         print("=== End sample ===\n")
         
         # Parse individual items
-        # Strategy 1: Look for price patterns in text
+        # Global duplicate tracking across all strategies
         seen_items = set()  # Track items to avoid duplicates
+        seen_amounts = set()  # Track amounts to avoid duplicate prices
         
         for i, line in enumerate(full_text):
-            # Skip summary lines and refund/return messages
+            # Skip summary lines and refund/return messages - NEVER extract totals
             line_lower = line.lower()
-            if any(skip in line_lower for skip in ['grand total', 'refund total', 'subtotal', 
-                                                    'shipping', 'tax', 'order summary', 
+            
+            # ABSOLUTELY NEVER process any line with "total" anywhere
+            if 'total' in line_lower:
+                print(f"SKIPPED LINE {i}: Contains 'total' - '{line}'")
+                continue
+                
+            if any(skip in line_lower for skip in ['subtotal', 'shipping', 'tax', 'order summary', 
                                                     'payment method', 'ship to', 'return window',
                                                     'refund has been', 'when will i get', 'your return',
                                                     'returns are easy', 'return policy', 'customer service',
-                                                    'gift options', 'delivery instructions']):
+                                                    'gift options', 'delivery instructions', 'balance',
+                                                    'estimated', 'summary', 'discount', 'promotion']):
                 continue
             
             # Pattern: Item description $XX.XX
@@ -508,42 +515,130 @@ class AmazonReceiptParser(BankStatementParser):
                 amount = Decimal(price_str)
                 
                 print(f"DEBUG: Found potential item - Line {i}: {line}")
-                print(f"  Description: {description}, Amount: ${amount}")
+                print(f"  Description: '{description}', Amount: ${amount}")
                 
-                # Validate it's a reasonable item price and description
-                if (0 < amount < 10000 and len(description) > 5 and 
-                    not any(word in description.lower() for word in ['total', 'balance', 'refund', 'return', 
-                                                                      'credit', 'payment', 'shipping', 'tax'])):
+                # Debug: Check if this looks like an address
+                if any(addr_word in description.lower() for addr_word in ['brooklyn', 'ny', 'fleet', 'pl', 'united states']):
+                    print(f"  WARNING: This looks like an address, not a product!")
+                
+                # More strict validation for description
+                desc_lower = description.lower().strip()
+                
+                # NEVER extract any line with "total" - this is critical
+                if 'total' in desc_lower:
+                    print(f"  SKIPPED: Contains 'total' - '{description}'")
+                    continue
+                
+                # NEVER extract addresses or personal info
+                address_keywords = ['brooklyn', 'ny ', 'new york', 'united states', 'fleet pl', 
+                                  'mehdi noori', 'zip code', 'street', 'avenue', 'blvd', 'road']
+                if any(addr in desc_lower for addr in address_keywords):
+                    print(f"  SKIPPED: Contains address/personal info - '{description}'")
+                    continue
+                
+                # Skip if description contains other summary keywords
+                summary_keywords = ['balance', 'refund', 'return', 'credit', 'payment', 
+                                  'shipping', 'tax', 'subtotal', 'discount', 'promotion', 'coupon',
+                                  'fee', 'charge', 'adjustment', 'summary', 'estimated']
+                
+                # Skip if description is too short or contains summary keywords
+                if (len(description.strip()) <= 8 or  # Increased minimum length
+                    any(keyword in desc_lower for keyword in summary_keywords) or
+                    desc_lower.endswith(':') or  # Skip lines ending with colon
+                    re.match(r'^[^a-zA-Z]*$', description.strip())):  # Skip lines with no letters
+                    print(f"  SKIPPED: Description validation failed - '{description}'")
+                    continue
+                
+                # Validate it's a reasonable item price
+                if not (0 < amount < 10000):
+                    print(f"  SKIPPED: Price validation failed - ${amount}")
+                    continue
+                
+                # Create a unique key to avoid duplicates
+                item_key = f"{description.strip()}_{amount}"
+                amount_key = f"{amount}_{order_date}"
+                if item_key in seen_items or amount_key in seen_amounts:
+                    print(f"  SKIPPED: Duplicate item or amount")
+                    continue
+                seen_items.add(item_key)
+                seen_amounts.add(amount_key)
+                
+                category = self._categorize_amazon_item(description)
+                
+                expense = {
+                    'expenseId': self.generate_expense_id(order_date or str(datetime.now().date()), 
+                                                        str(amount), description),
+                    'userId': self.user_id,
+                    'documentId': self.document_id,
+                    'date': order_date or str(datetime.now().date()),
+                    'description': description.strip(),
+                    'vendor': self._get_amazon_vendor_category(description),
+                    'amount': str(amount),
+                    'category': category,
+                    'bankAccount': 'amazon-receipts',
+                    'orderNumber': order_number,
+                    'status': 'pending',
+                    'confidence': 0.9,
+                    'createdAt': datetime.utcnow().isoformat()
+                }
+                expenses.append(expense)
+                print(f"  ADDED: Amazon item: {description} - ${amount}")
+            else:
+                # Also check for multi-line product descriptions
+                # Look for lines that are clearly product names (very specific criteria)
+                if (len(line) > 30 and  # Must be quite long
+                    not line.startswith('$') and  # Not a price line
+                    not any(skip in line_lower for skip in ['sold by', 'ship to', 'order placed', 
+                                                           'payment method', 'return', 'refund', 'visa ending',
+                                                           'brooklyn', 'ny ', 'new york', 'united states',
+                                                           'mehdi noori', 'fleet pl', 'total']) and
+                    re.search(r'[a-zA-Z]', line) and  # Contains letters
+                    not line_lower.endswith(':') and  # Not a header line
+                    not re.match(r'^[A-Z\s,\d-]+$', line) and  # Not all caps (likely address/name)
+                    (',' in line and '-' in line) and  # Must have both comma AND dash (product descriptions)
+                    len(line.split()) >= 6 and  # Must have at least 6 words
+                    any(product_word in line_lower for product_word in ['stand', 'tripod', 'projector', 'laptop', 
+                                                                       'equipment', 'holder', 'cable', 'adapter'])):  # Must contain product-like words
                     
-                    # Create a unique key to avoid duplicates
-                    item_key = f"{description.strip()}_{amount}"
-                    if item_key in seen_items:
-                        print(f"  SKIPPED: Duplicate")
-                        continue
-                    seen_items.add(item_key)
-                    
-                    category = self._categorize_amazon_item(description)
-                    
-                    expense = {
-                        'expenseId': self.generate_expense_id(order_date or str(datetime.now().date()), 
-                                                            str(amount), description),
-                        'userId': self.user_id,
-                        'documentId': self.document_id,
-                        'date': order_date or str(datetime.now().date()),
-                        'description': description.strip(),
-                        'vendor': self._get_amazon_vendor_category(description),
-                        'amount': str(amount),
-                        'category': category,
-                        'bankAccount': 'amazon-receipts',
-                        'orderNumber': order_number,
-                        'status': 'pending',
-                        'confidence': 0.9,
-                        'createdAt': datetime.utcnow().isoformat()
-                    }
-                    expenses.append(expense)
-                    print(f"  ADDED: Amazon item: {description} - ${amount}")
-                else:
-                    print(f"  SKIPPED: Failed validation")
+                    # Look ahead for a price in the next few lines
+                    for j in range(i+1, min(len(full_text), i+4)):
+                        next_line = full_text[j].strip()
+                        # Look for standalone price
+                        standalone_price_match = re.match(r'^\$(\d+\.\d{2})$', next_line)
+                        if standalone_price_match:
+                            amount = Decimal(standalone_price_match.group(1))
+                            if 0 < amount < 10000:
+                                description = line.strip()
+                                
+                                # Skip if we already have this item
+                                item_key = f"{description}_{amount}"
+                                amount_key = f"{amount}_{order_date}"
+                                if item_key in seen_items or amount_key in seen_amounts:
+                                    break
+                                seen_items.add(item_key)
+                                seen_amounts.add(amount_key)
+                                
+                                category = self._categorize_amazon_item(description)
+                                
+                                expense = {
+                                    'expenseId': self.generate_expense_id(order_date or str(datetime.now().date()), 
+                                                                        str(amount), description),
+                                    'userId': self.user_id,
+                                    'documentId': self.document_id,
+                                    'date': order_date or str(datetime.now().date()),
+                                    'description': description,
+                                    'vendor': self._get_amazon_vendor_category(description),
+                                    'amount': str(amount),
+                                    'category': category,
+                                    'bankAccount': 'amazon-receipts',
+                                    'orderNumber': order_number,
+                                    'status': 'pending',
+                                    'confidence': 0.85,
+                                    'createdAt': datetime.utcnow().isoformat()
+                                }
+                                expenses.append(expense)
+                                print(f"  ADDED: Multi-line Amazon item: {description} - ${amount}")
+                                break
             
             # Strategy 2: Look for "Sold by" pattern
             if ('sold by' in line_lower or 'supplied by' in line_lower):
@@ -557,6 +652,7 @@ class AmazonReceiptParser(BankStatementParser):
                         not prev_line.startswith('$') and
                         'sold by' not in prev_line.lower() and
                         'supplied by' not in prev_line.lower() and
+                        'total' not in prev_line.lower() and  # NEVER use lines with "total" as product names
                         not any(skip in prev_line.lower() for skip in ['return', 'refund', 'your order', 
                                                                          'ship to', 'delivery'])):
                         product_name = prev_line
@@ -587,11 +683,18 @@ class AmazonReceiptParser(BankStatementParser):
                                     amount = Decimal(price_match.group(1))
                                 
                                 if 0 < amount < 10000:
+                                    # FINAL CHECK: Never allow any "total" items
+                                    if 'total' in product_name.lower():
+                                        print(f"    FINAL CHECK: Rejected product with 'total' - '{product_name}'")
+                                        break
+                                        
                                     # Check for duplicates
                                     item_key = f"{product_name.strip()}_{amount}"
-                                    if item_key in seen_items:
+                                    amount_key = f"{amount}_{order_date}"
+                                    if item_key in seen_items or amount_key in seen_amounts:
                                         break
                                     seen_items.add(item_key)
+                                    seen_amounts.add(amount_key)
                                     
                                     category = self._categorize_amazon_item(product_name)
                                     
@@ -622,7 +725,7 @@ class AmazonReceiptParser(BankStatementParser):
             if block['BlockType'] == 'TABLE':
                 table_count += 1
                 print(f"Processing table {table_count}")
-                table_expenses = self._parse_amazon_table(block, textract_data, order_date, order_number)
+                table_expenses = self._parse_amazon_table(block, textract_data, order_date, order_number, seen_items, seen_amounts)
                 if table_expenses:
                     print(f"  Found {len(table_expenses)} items in table")
                 expenses.extend(table_expenses)
@@ -640,7 +743,8 @@ class AmazonReceiptParser(BankStatementParser):
         # Tech equipment
         if any(word in desc_lower for word in ['cable', 'adapter', 'laptop', 'stand', 'monitor', 
                                                 'keyboard', 'mouse', 'headphone', 'microphone',
-                                                'camera', 'tripod', 'light']):
+                                                'camera', 'tripod', 'light', 'projector', 'equipment',
+                                                'speaker', 'audio', 'video', 'recording']):
             return 'depreciation'  # Equipment that can be depreciated
         
         # Office supplies
@@ -663,7 +767,8 @@ class AmazonReceiptParser(BankStatementParser):
         """Get vendor subcategory for Amazon items"""
         desc_lower = description.lower()
         
-        if any(word in desc_lower for word in ['cable', 'adapter', 'laptop', 'monitor', 'keyboard']):
+        if any(word in desc_lower for word in ['cable', 'adapter', 'laptop', 'monitor', 'keyboard', 
+                                               'tripod', 'projector', 'stand', 'equipment', 'camera']):
             return 'Amazon.com - Tech Equipment'
         elif any(word in desc_lower for word in ['paper', 'pen', 'notebook', 'folder']):
             return 'Amazon.com - Office Supplies'
@@ -672,7 +777,7 @@ class AmazonReceiptParser(BankStatementParser):
         else:
             return 'Amazon.com'
     
-    def _parse_amazon_table(self, table_block: Dict, full_data: Dict, order_date: str, order_number: str) -> List[Dict]:
+    def _parse_amazon_table(self, table_block: Dict, full_data: Dict, order_date: str, order_number: str, seen_items: set, seen_amounts: set) -> List[Dict]:
         """Parse Amazon receipt tables"""
         expenses = []
         
@@ -723,11 +828,40 @@ class AmazonReceiptParser(BankStatementParser):
                             description = cell_texts[i-1].strip()
                 
                 if price and description and price > 0 and price < 10000:
-                    # Validate description
-                    desc_lower = description.lower()
-                    if (len(description) > 5 and 
-                        not any(skip in desc_lower for skip in ['total', 'subtotal', 'tax', 
-                                                                'shipping', 'refund', 'balance'])):
+                    # More strict validation for table descriptions
+                    desc_lower = description.lower().strip()
+                    
+                    # NEVER extract any line with "total" - this is critical for tables too
+                    if 'total' in desc_lower:
+                        print(f"    SKIPPED table item: Contains 'total' - '{description}'")
+                        continue
+                    
+                    # NEVER extract addresses or personal info from tables
+                    address_keywords = ['brooklyn', 'ny ', 'new york', 'united states', 'fleet pl', 
+                                      'mehdi noori', 'zip code', 'street', 'avenue', 'blvd', 'road']
+                    if any(addr in desc_lower for addr in address_keywords):
+                        print(f"    SKIPPED table item: Contains address/personal info - '{description}'")
+                        continue
+                    
+                    # Skip summary lines and invalid descriptions
+                    summary_keywords = ['subtotal', 'tax', 'shipping', 'refund', 'balance',
+                                      'discount', 'promotion', 'coupon', 'fee', 'charge', 'adjustment',
+                                      'summary', 'estimated']
+                    
+                    if (len(description.strip()) > 8 and  # Increased minimum length
+                        not any(keyword in desc_lower for keyword in summary_keywords) and
+                        not desc_lower.endswith(':') and  # Skip lines ending with colon
+                        not re.match(r'^[^a-zA-Z]*$', description.strip()) and  # Must contain letters
+                        len([c for c in description if c.isalpha()]) >= 5):  # At least 5 letters
+                        
+                        # Check for duplicates in table too
+                        item_key = f"{description.strip()}_{price}"
+                        amount_key = f"{price}_{order_date}"
+                        if item_key in seen_items or amount_key in seen_amounts:
+                            print(f"    SKIPPED table item: Duplicate - '{description}'")
+                            continue
+                        seen_items.add(item_key)
+                        seen_amounts.add(amount_key)
                         
                         category = self._categorize_amazon_item(description)
                         
@@ -737,7 +871,7 @@ class AmazonReceiptParser(BankStatementParser):
                             'userId': self.user_id,
                             'documentId': self.document_id,
                             'date': order_date or str(datetime.now().date()),
-                            'description': description,
+                            'description': description.strip(),
                             'vendor': self._get_amazon_vendor_category(description),
                             'amount': str(price),
                             'category': category,
@@ -749,6 +883,8 @@ class AmazonReceiptParser(BankStatementParser):
                         }
                         expenses.append(expense)
                         print(f"    FOUND item in table: {description} - ${price}")
+                    else:
+                        print(f"    SKIPPED table item: '{description}' - failed validation")
         
         return expenses
     
