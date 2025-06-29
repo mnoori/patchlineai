@@ -1,0 +1,8 @@
+{
+  "userId": "test",
+  "documentId": "test",
+  "bankType": "gmail-receipts",
+  "textractData": {
+    "text": "Your Meta ads receipt\nAccount ID: 434492877229135\nDate: December 25, 2024\nCampaign: Holiday DJ Equipment Promo\nAd Set: Music Producer Targeting\nObjective: Traffic\nAmount: $10.05\nThis receipt is for advertising on Meta platforms."
+  }
+} 

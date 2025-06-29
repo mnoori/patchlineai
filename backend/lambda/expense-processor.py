@@ -6,6 +6,34 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Dict, Any, Optional, Tuple
 import boto3
+import logging
+import sys
+
+# Add the backend/scripts directory to the Python path
+# This allows us to import the config module directly
+scripts_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'scripts')
+if scripts_path not in sys.path:
+    sys.path.append(scripts_path)
+
+# Import BEDROCK_MODELS at the top level with proper fallback
+BEDROCK_MODELS = {}
+try:
+    from config import BEDROCK_MODELS
+    # Use the inference profile ARN specified for 'claude-4-sonnet' in the config
+    # This is the correct way to invoke a model with provisioned throughput.
+    CLAUDE_4_SONNET_MODEL_ID = BEDROCK_MODELS['claude-4-sonnet']['inference_profile'] or BEDROCK_MODELS['claude-4-sonnet']['id']
+    # Expose a single variable that the rest of the module relies on
+    MODEL_ID_TO_USE = os.environ.get('BEDROCK_MODEL_ID', CLAUDE_4_SONNET_MODEL_ID)
+    logging.info(f"Successfully imported Bedrock model config. Primary model: {MODEL_ID_TO_USE}")
+except ImportError as e:
+    logging.error(f"Could not import Bedrock config from backend/scripts/config.py: {e}")
+    logging.error("Falling back to a hardcoded model ID. This may not be what you want.")
+    MODEL_ID_TO_USE = 'amazon.nova-micro-v1:0'
+    # Define minimal BEDROCK_MODELS for fallback
+    BEDROCK_MODELS = {
+        'nova-micro': {'id': 'amazon.nova-micro-v1:0', 'inference_profile': None},
+        'nova-premier': {'id': 'amazon.nova-premier-v1:0', 'inference_profile': 'arn:aws:bedrock:us-east-1::inference-profile/us.amazon.nova-premier-v1:0'}
+    }
 
 # Initialize Bedrock client with proper credential handling
 try:
@@ -35,6 +63,57 @@ except Exception as e:
     print(f"Warning: Could not initialize Bedrock client: {e}")
     bedrock_runtime = None
 
+# UPDATE: try multiple model IDs for Bedrock → Sonnet
+MODEL_CANDIDATES = [
+    os.environ.get('BEDROCK_MODEL_ID'),                    # Explicit override
+    MODEL_ID_TO_USE,                                       # Preferred model (likely inference profile)
+    # Use inference profiles from config when available
+    BEDROCK_MODELS.get('claude-4-sonnet', {}).get('inference_profile'),
+    BEDROCK_MODELS.get('claude-3-7-sonnet', {}).get('inference_profile'),
+    BEDROCK_MODELS.get('nova-premier', {}).get('inference_profile'),
+    # Fallback to models that always work with direct IDs
+    'amazon.nova-premier-v1:0',
+    'amazon.nova-micro-v1:0',
+    'anthropic.claude-3-haiku-20240307-v1:0',              # Usually available with on-demand
+]
+
+# Remove Nones and preserve order while dropping duplicates
+_seen = set()
+MODEL_CANDIDATES = [m for m in MODEL_CANDIDATES if m and (m not in _seen and not _seen.add(m))]
+
+# ---------------------------------------------------------------------------
+# Helper – Build request body for Bedrock models (Anthropic vs Amazon)
+# ---------------------------------------------------------------------------
+
+def _build_bedrock_request(model_id: str, prompt: str) -> Tuple[dict, str]:
+    """Return (body_dict, content_type) for bedrock_runtime.invoke_model.
+
+    Anthropic (Claude) models expect the conversational `messages` schema, whereas
+    Amazon Titan/Nova models expect the `inputText` schema. We inspect the model
+    ID prefix to choose the correct payload format.
+    """
+    if "anthropic" in model_id:
+        body = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 512,
+            "temperature": 0.1,
+            "top_p": 0.9
+        }
+        return body, "application/json"
+
+    # Default – assume Amazon Titan/Nova semantics
+    body = {
+        "inputText": prompt,
+        "textGenerationConfig": {
+            "maxTokenCount": 256,
+            "temperature": 0.1,
+            "topP": 0.9,
+            "stopSequences": []
+        }
+    }
+    return body, "application/json"
+
 def generate_smart_fallback_description(receipt_text: str, vendor: str = None, amount: float = None) -> str:
     """Generate a smart description without using Bedrock"""
     text_lower = receipt_text.lower()
@@ -44,20 +123,82 @@ def generate_smart_fallback_description(receipt_text: str, vendor: str = None, a
     
     # Meta/Facebook ads
     if vendor == "Meta" or 'facebook' in text_lower:
+        print(f"\n=== META ADS FALLBACK PROCESSING ===")
+        print(f"Receipt text length: {len(receipt_text)}")
+        print(f"Full text preview: {receipt_text[:1000]}...")
+        
         # Look for account ID
         account_match = re.search(r'Account ID[:\s_]*(\d+)', receipt_text, re.IGNORECASE)
         account_id = account_match.group(1) if account_match else None
+        print(f"Account ID found: {account_id}")
         
-        # Look for campaign name
-        campaign_match = re.search(r'Campaign[:\s]*([^\n]+)', receipt_text, re.IGNORECASE)
-        if campaign_match:
-            campaign_name = campaign_match.group(1).strip()
-            details.append(campaign_name)
+        # Look for campaign name with multiple patterns
+        campaign_name = None
+        campaign_patterns = [
+            r'Campaign[:\s]*([^\n\r]+)',
+            r'Campaign Name[:\s]*([^\n\r]+)',
+            r'Ad Campaign[:\s]*([^\n\r]+)',
+            r'Campaign Title[:\s]*([^\n\r]+)',
+            r'For campaign[:\s]*([^\n\r]+)',
+            r'campaign[:\s]*"([^"]+)"',
+            r'Campaign:\s*([A-Za-z0-9\s\-_]+)'
+        ]
+        
+        for pattern in campaign_patterns:
+            campaign_match = re.search(pattern, receipt_text, re.IGNORECASE)
+            if campaign_match:
+                campaign_name = campaign_match.group(1).strip()
+                print(f"Campaign found with pattern '{pattern}': {campaign_name}")
+                break
         
         # Look for ad set
-        adset_match = re.search(r'Ad Set[:\s]*([^\n]+)', receipt_text, re.IGNORECASE)
-        if adset_match:
-            details.append(adset_match.group(1).strip())
+        adset_name = None
+        adset_patterns = [
+            r'Ad Set[:\s]*([^\n\r]+)',
+            r'Ad Set Name[:\s]*([^\n\r]+)',
+            r'Adset[:\s]*([^\n\r]+)'
+        ]
+        
+        for pattern in adset_patterns:
+            adset_match = re.search(pattern, receipt_text, re.IGNORECASE)
+            if adset_match:
+                adset_name = adset_match.group(1).strip()
+                print(f"Ad Set found: {adset_name}")
+                break
+        
+        # Look for objective or campaign type
+        objective = None
+        objective_patterns = [
+            r'Objective[:\s]*([^\n\r]+)',
+            r'Campaign Objective[:\s]*([^\n\r]+)',
+            r'Goal[:\s]*([^\n\r]+)',
+            r'Purpose[:\s]*([^\n\r]+)'
+        ]
+        
+        for pattern in objective_patterns:
+            obj_match = re.search(pattern, receipt_text, re.IGNORECASE)
+            if obj_match:
+                objective = obj_match.group(1).strip()
+                print(f"Objective found: {objective}")
+                break
+        
+        # Look for targeting details (but be more careful about extraction)
+        targeting_info = []
+        if 'location' in text_lower and 'targeting' in text_lower:
+            location_match = re.search(r'Location[:\s]*([A-Za-z\s,]+)', receipt_text, re.IGNORECASE)
+            if location_match:
+                location = location_match.group(1).strip()
+                # Only add if it looks like a real location (no email addresses, etc.)
+                if '@' not in location and len(location) < 50:
+                    targeting_info.append(f"Location: {location}")
+        
+        if 'age' in text_lower and 'targeting' in text_lower:
+            age_match = re.search(r'Age[:\s]*(\d+[-\s]*\d*)', receipt_text, re.IGNORECASE)
+            if age_match:
+                age = age_match.group(1).strip()
+                # Only add if it looks like actual age targeting
+                if len(age) < 20 and not '@' in age:
+                    targeting_info.append(f"Age: {age}")
         
         # Extract date for billing period
         date_match = re.search(r'Date[:\s]*([A-Za-z]+\s+\d{1,2},\s+\d{4})', receipt_text, re.IGNORECASE)
@@ -69,39 +210,50 @@ def generate_smart_fallback_description(receipt_text: str, vendor: str = None, a
             except:
                 billing_period = ""
         
-        # Create IRS-compliant descriptions using "Advertising" for Schedule C Line 8
-        if 'results' in text_lower:
-            base = "Advertising - Meta Business Platform - AI Music Customer Acquisition Campaign"
-        elif 'boost' in text_lower:
-            base = "Advertising - Meta Post Promotion - Live Performance Event Marketing"
-        elif 'instagram' in text_lower and 'story' in text_lower:
-            base = "Advertising - Instagram Stories - Creative Services Brand Awareness"
-        elif 'instagram' in text_lower:
-            base = "Advertising - Instagram Business Ads - Patchline AI Platform Promotion"
-        elif 'facebook' in text_lower:
-            base = "Advertising - Facebook Business Ads - AI Music Technology Marketing"
+        # Build specific description based on actual campaign data
+        if campaign_name:
+            # Use actual campaign name
+            if 'music' in campaign_name.lower():
+                base = f"Advertising - Meta Ads - Music Campaign: {campaign_name[:40]}"
+            elif 'patchline' in campaign_name.lower() or 'ai' in campaign_name.lower():
+                base = f"Advertising - Meta Ads - AI Platform: {campaign_name[:40]}"
+            elif 'event' in campaign_name.lower() or 'performance' in campaign_name.lower():
+                base = f"Advertising - Meta Ads - Event Marketing: {campaign_name[:40]}"
+            else:
+                base = f"Advertising - Meta Ads - {campaign_name[:50]}"
+        elif objective:
+            # Use campaign objective
+            base = f"Advertising - Meta Ads - {objective[:50]} Campaign"
+        elif adset_name:
+            # Use ad set name
+            base = f"Advertising - Meta Ads - {adset_name[:50]}"
         else:
-            base = "Advertising - Meta Business Platform - Digital Marketing Services"
+            # Create description based on receipt content
+            if 'results' in text_lower:
+                base = "Advertising - Meta Ads - Performance Marketing Campaign"
+            elif 'boost' in text_lower:
+                base = "Advertising - Meta Ads - Post Boost Campaign"
+            elif 'instagram' in text_lower and 'story' in text_lower:
+                base = "Advertising - Instagram Stories - Brand Awareness Campaign"
+            elif 'instagram' in text_lower:
+                base = "Advertising - Instagram Ads - Business Promotion Campaign"
+            elif 'facebook' in text_lower:
+                base = "Advertising - Facebook Ads - Business Marketing Campaign"
+            else:
+                base = "Advertising - Meta Business Platform - Digital Marketing Campaign"
         
         # Add billing period
         base += billing_period
         
         # Add account ID if found (last 6 digits only for brevity)
         if account_id:
-            base += f" (ID: {account_id[-6:]})"
+            base += f" (Acct: {account_id[-6:]})"
         
-        # Add campaign name if available
-        if details and campaign_name:
-            # Clean up campaign name for IRS
-            if 'music' in campaign_name.lower():
-                return f"{base} - Music Technology Campaign"[:150]
-            elif 'ai' in campaign_name.lower() or 'patchline' in campaign_name.lower():
-                return f"{base} - AI Platform Launch Campaign"[:150]
-            elif 'event' in campaign_name.lower() or 'performance' in campaign_name.lower():
-                return f"{base} - Live Performance Marketing"[:150]
-            else:
-                return f"{base} - {campaign_name[:30]}"[:150]
+        # Add targeting info if available
+        if targeting_info:
+            base += f" - {', '.join(targeting_info[:2])}"  # Limit to first 2 targeting details
         
+        print(f"Final Meta description: {base}")
         return base[:150]
     
     # Midjourney
@@ -368,102 +520,155 @@ def generate_smart_fallback_description(receipt_text: str, vendor: str = None, a
 
 
 def generate_receipt_description(receipt_text: str, vendor: str = None, amount: float = None) -> str:
-    """Generate a concise description for a receipt using Nova Micro"""
-    # Check if Bedrock is available
-    if not bedrock_runtime:
-        print("Bedrock runtime not available, using smart fallback")
-        return generate_smart_fallback_description(receipt_text, vendor, amount)
+    """Generate a concise description for a receipt using Bedrock LLMs"""
+    global MODEL_ID_TO_USE
+    
+    logging.info("\n[AI] STARTING AI DESCRIPTION GENERATION")
+    logging.info(f"[AI] Bedrock client status: {'Available' if bedrock_runtime else 'Not available'}")
+    logging.info(f"[AI] Input vendor: {vendor}")
+    logging.info(f"[AI] Input amount: ${amount}")
+    logging.info(f"[AI] Input text length: {len(receipt_text)} characters")
     
     try:
-        print(f"\n=== Calling Nova Micro for description generation ===")
-        print(f"Vendor: {vendor}, Amount: ${amount}")
-        print(f"Text preview (first 200 chars): {receipt_text[:200]}...")
+        logging.info("\n[AI] Preparing Bedrock prompt for description generation ===")
+        logging.info(f"[AI] Vendor: {vendor}, Amount: ${amount}")
+        logging.info(f"[AI] Text preview (first 200 chars): {receipt_text[:200]}...")
         
-        prompt = f"""You are a tax defense attorney preparing expense descriptions for IRS audit defense. Create a description that will EXACTLY match bank statement entries and withstand scrutiny.
+        prompt = f"""You are a tax defense attorney creating UNIQUE expense descriptions for IRS audit defense. Extract SPECIFIC details from the receipt to create a DISTINCT description.
 
-RECEIPT DATA:
-{receipt_text[:1500]}
+RECEIPT CONTENT:
+{receipt_text[:2000]}
 
-VENDOR: {vendor or 'Unknown'}
-AMOUNT: ${amount or 0:.2f}
+TRANSACTION INFO:
+- Vendor: {vendor or 'Unknown'}
+- Amount: ${amount or 0:.2f}
 
-BUSINESS PROFILE:
+BUSINESS CONTEXT:
 - Entity: Algoryx Art & Tech Lab (DBA Patchline AI)
 - Industry: AI-powered music technology, creative software development, live performance
-- Business Activities: AI music platform development, live DJ/VJ performances, creative AI consulting
-- Tax Status: Startup with $150,000 net operating loss requiring detailed documentation
+- Tax Status: Startup requiring detailed documentation for $150K NOL
 
-AUDIT DEFENSE REQUIREMENTS:
-1. **EXACT MATCHING**: Description must match bank statement transaction descriptions for reconciliation
-2. **BUSINESS NECESSITY**: Must demonstrate "ordinary and necessary" business expense under IRC Section 162
-3. **SPECIFICITY**: Include specific business purpose, not generic descriptions
-4. **BILLING PERIODS**: For subscriptions, include exact billing period (e.g., "December 2024 Monthly")
-5. **SCHEDULE C COMPLIANCE**: Use exact Schedule C terminology for categorization
-6. **SUPPORTING DETAILS**: Include service/product details that justify business use
-7. **AUDIT TRAIL**: Include reference numbers, account IDs, or other identifying information when available
+CRITICAL INSTRUCTIONS:
+1. **EXTRACT UNIQUE DETAILS**: Find specific campaign names, ad sets, objectives, targeting details, or service descriptions from the receipt
+2. **NO GENERIC DESCRIPTIONS**: Do not use generic terms like "AI Music Customer Acquisition Campaign"
+3. **USE ACTUAL DATA**: Use the real campaign name, ad set name, or specific service details mentioned in the receipt
+4. **DIFFERENT RECEIPTS = DIFFERENT DESCRIPTIONS**: Each receipt should have a unique description based on its specific content
 
-CRITICAL FORMATTING:
+FOR META/FACEBOOK ADS:
+- Extract actual campaign name (look for "Campaign:", "Campaign Name:", "For campaign:", etc.)
+- Extract ad set name if available
+- Extract objective or goal if mentioned
+- Extract targeting details (location, age, interests)
+- Include account ID (last 6 digits)
+- Include billing period if mentioned
+
+FOR OTHER SERVICES:
+- Extract specific plan names, subscription types, billing periods
+- Include specific features or services mentioned
+- Extract order numbers, invoice numbers, or reference codes
+
+EXAMPLES OF WHAT TO LOOK FOR:
+- Campaign: "Holiday Music Launch 2024" → "Advertising - Meta Ads - Holiday Music Launch 2024 Campaign"
+- Ad Set: "DJ Equipment Targeting" → "Advertising - Meta Ads - DJ Equipment Targeting Ad Set"  
+- Service: "Midjourney Pro Plan" → "Office Expenses - Midjourney Pro Monthly - AI Visual Content Generation"
+
+OUTPUT FORMAT REQUIREMENTS:
+- Return ONLY the expense description line
+- NO explanatory text before or after
+- NO "Based on..." or "This description..." commentary
+- Format: [Category] - [Vendor/Platform] - [Specific Details] - [Account/Reference Info]
 - Maximum 150 characters
-- Start with Schedule C category when applicable
-- Include billing period for recurring expenses
-- Use business-specific terminology
-- Include account/reference numbers if available
+- Professional, IRS-compliant language
 
-ENHANCED EXAMPLES:
-- "Advertising - Meta Business Platform - December 2024 Campaign - AI Music Promotion (Acct: 123456)"
-- "Office Expenses - CapCut Pro Monthly - December 2024 - Video Content Production Software"
-- "Utilities - Cloud Storage 2TB - December 2024 - Client Project Files & Creative Assets"
-- "Equipment - Midjourney Pro Annual License - AI Visual Content Generation for Live Performances"
-- "Professional Services - Adobe Creative Cloud - December 2024 - Video/Audio Production Suite"
+Generate the expense description:"""
 
-MATCHING PRIORITY: The description should be recognizable when cross-referenced with bank statements showing the same vendor and amount.
+        # -------------------------------------------------------------------
+        # Attempt model invocation – iterate over candidate models until one
+        # responds without an error. This allows graceful downgrade if the
+        # preferred Claude Sonnet 4 model is unavailable in the account.
+        # -------------------------------------------------------------------
 
-Generate the audit-ready description:"""
+        candidate_models = [MODEL_ID_TO_USE] + [m for m in MODEL_CANDIDATES if m not in (MODEL_ID_TO_USE, None)]
+        logging.info(f"[AI] Candidate models to try (ordered): {candidate_models}")
 
-        print(f"Calling Bedrock with model: anthropic.claude-3-5-sonnet-20241022-v2:0")
-        
-        response = bedrock_runtime.invoke_model(
-            modelId='anthropic.claude-3-5-sonnet-20241022-v2:0',  # Updated to Sonnet 3.5 v2
-            body=json.dumps({
-                'anthropic_version': 'bedrock-2023-05-31',
-                'messages': [
-                    {
-                        'role': 'user',
-                        'content': prompt
-                    }
-                ],
-                'max_tokens': 200,
-                'temperature': 0.2,  # Lower temperature for consistency
-                'top_p': 0.9
-            }),
-            contentType='application/json',
-            accept='application/json'
-        )
-        
-        response_body = json.loads(response['body'].read())
-        print(f"Bedrock response: {json.dumps(response_body, indent=2)}")
-        
-        description = response_body.get('content', [{}])[0].get('text', '').strip()
-        
-        print(f"Generated description: '{description}'")
-        
-        # Fallback if no description generated
+        description = ""
+        last_error = None
+
+        for model_id in candidate_models:
+            try:
+                logging.info(f"[AI] Attempting Bedrock call with model: {model_id}")
+                body, content_type = _build_bedrock_request(model_id, prompt)
+
+                response = bedrock_runtime.invoke_model(
+                    modelId=model_id,
+                    body=json.dumps(body),
+                    contentType=content_type,
+                    accept='application/json'
+                )
+
+                logging.info(f"[AI] Received response from Bedrock (model {model_id})")
+
+                raw_body = response["body"].read()
+                response_json = json.loads(raw_body)
+
+                # Parse response according to provider
+                if "anthropic" in model_id:
+                    # Claude response format: {"content": [{"text": "...", "type": "text"}]}
+                    description = response_json.get('content', [{}])[0].get('text', '').strip()
+                else:
+                    # Titan / Nova format
+                    description = response_json.get('results', [{}])[0].get('outputText', '').strip()
+
+                if description:
+                    MODEL_ID_TO_USE = model_id  # cache the working model for next call
+                    break  # success – exit loop
+            except Exception as ex:
+                last_error = ex
+                logging.error(f"[AI] Error invoking model {model_id}: {ex}")
+                continue  # try next candidate
+
+        # If all models failed or returned empty, raise last error to trigger fallback
         if not description:
-            print("No description generated, using smart fallback")
-            return generate_smart_fallback_description(receipt_text, vendor, amount)
-            
-        # Ensure it's not too long
-        if len(description) > 100:
-            description = description[:97] + "..."
-            
+            raise RuntimeError(f"All Bedrock model attempts failed. Last error: {last_error}")
+
+        logging.info(f"[AI] AI Generated description: '{description}' (len={len(description)})")
+ 
+        # Clean up the description - extract just the main description line
+        # Remove any preamble or explanation text
+        lines = description.split('\n')
+        clean_description = None
+        
+        for line in lines:
+            line = line.strip()
+            # Look for the actual description line (usually starts with a category or contains '-')
+            if line and not line.lower().startswith(('based on', 'this description', 'here is', 'the following')):
+                # Check if it looks like an expense description
+                if any(cat in line for cat in ['Advertising', 'Office Expenses', 'Utilities', 'Professional', 'Contract', 'Travel', 'Meals', 'Other']) or '-' in line:
+                    # Remove any markdown formatting
+                    clean_description = line.strip('*').strip()
+                    break
+        
+        # Use cleaned description if found, otherwise use original
+        if clean_description:
+            description = clean_description
+            logging.info(f"[AI] Cleaned description: '{description}'")
+        
+        # Ensure description is not excessively long
+        if len(description) > 120:
+            description = description[:117] + "..."
+
         return description
         
     except Exception as e:
-        print(f"Error generating description with Nova Micro: {e}")
+        logging.error(f"[AI] CRITICAL ERROR in AI description generation: {e}")
+        logging.error(f"[AI] Exception type: {type(e).__name__}")
         import traceback
-        print(f"Traceback: {traceback.format_exc()}")
+        logging.error(f"[AI] Full traceback: {traceback.format_exc()}")
+        logging.info(f"[AI] Falling back to smart fallback description...")
         # Fallback to smart description
-        return generate_smart_fallback_description(receipt_text, vendor, amount)
+        fallback_desc = generate_smart_fallback_description(receipt_text, vendor, amount)
+        logging.info(f"[AI] Fallback description: {fallback_desc}")
+        return fallback_desc
 
 dynamodb = boto3.resource('dynamodb')
 textract = boto3.client('textract')
@@ -1373,6 +1578,12 @@ class GmailReceiptParser(BankStatementParser):
     
     def parse_textract_output(self, textract_data: Dict) -> List[Dict]:
         """Parse Gmail receipt format"""
+        logging.info("\n========================================")
+        logging.info(f"GMAIL RECEIPT PARSER - ENTRY POINT")
+        logging.info("========================================")
+        logging.info(f"Document ID: {self.document_id}")
+        logging.info(f"User ID: {self.user_id}")
+        
         expenses = []
         
         # Extract all text first
@@ -1385,17 +1596,18 @@ class GmailReceiptParser(BankStatementParser):
         
         text_content = '\n'.join(full_text)
         
-        print(f"Gmail receipt - Processing {len(full_text)} lines")
+        logging.info(f"Gmail receipt - Processing {len(full_text)} lines")
+        logging.info(f"Total text content length: {len(text_content)} characters")
         
         # Debug: Print first few lines to see structure
-        print("\n=== First 20 lines of Gmail receipt ===")
+        logging.info("\n=== First 20 lines of Gmail receipt ===")
         for i, line in enumerate(full_text[:20]):
-            print(f"{i}: {line}")
-        print("=== End sample ===\n")
+            logging.info(f"{i}: {line}")
+        logging.info("=== End sample ===\n")
         
         # Detect receipt type and extract accordingly
         receipt_type = self._detect_receipt_type(text_content)
-        print(f"Detected receipt type: {receipt_type}")
+        logging.info(f"Detected receipt type: {receipt_type}")
         
         if receipt_type == 'midjourney':
             return self._parse_midjourney_receipt(full_text, text_content)
@@ -1733,14 +1945,24 @@ class GmailReceiptParser(BankStatementParser):
             # If vendor is too long, it's probably captured extra text
             vendor = vendor.split('\n')[0].split(',')[0].strip()[:50]
         
-        # Generate intelligent description using Nova Micro
+        # DEBUG: Print the full text content being sent to AI
+        logging.info("\n[AI_CALL] ABOUT TO CALL AI DESCRIPTION GENERATION")
+        logging.info("====================================================")
+        logging.info(f"[AI_CALL] Text length: {len(text_content)} characters")
+        logging.info(f"[AI_CALL] Vendor detected: {vendor}")
+        logging.info(f"[AI_CALL] Amount detected: {amount}")
+        logging.info(f"[AI_CALL] Is Meta receipt: {'meta' in text_content.lower() or 'facebook' in text_content.lower()}")
+        logging.info("====================================================")
+        
+        # Generate intelligent description using Claude Sonnet
+        logging.info("[AI_CALL] Calling generate_receipt_description() NOW...")
         description = generate_receipt_description(
             text_content, 
             vendor=vendor,
             amount=float(amount) if amount else None
         )
         
-        print(f"Generated description: {description}")
+        logging.info(f"[AI_CALL] RETURNED FROM AI: '{description}'")
         
         # If we have amount and date, create the expense
         if amount and date:
@@ -1762,7 +1984,7 @@ class GmailReceiptParser(BankStatementParser):
                 'createdAt': datetime.utcnow().isoformat()
             }
             expenses.append(expense)
-            print(f"Added generic expense: {description} - ${amount} on {date}")
+            logging.info(f"Added generic expense: {description} - ${amount} on {date}")
         
         return expenses
     

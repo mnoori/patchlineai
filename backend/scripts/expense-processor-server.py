@@ -2,6 +2,28 @@ from flask import Flask, request, jsonify
 import sys
 import os
 from pathlib import Path
+import logging
+from logging.handlers import RotatingFileHandler
+from waitress import serve
+
+# --- Setup Logging ---
+log_file_path = Path(__file__).parent / 'expense-processor.log'
+# Clear log file for a clean debugging session
+if log_file_path.exists():
+    try:
+        os.remove(log_file_path)
+    except OSError as e:
+        print(f"Error removing log file: {e}")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] - %(message)s',
+    handlers=[
+        logging.FileHandler(log_file_path, encoding='utf-8'),
+        logging.StreamHandler(sys.stdout) # Keep logging to console as well
+    ]
+)
+# --- End Logging Setup ---
 
 # Load environment variables from .env.local if it exists
 def load_env_file():
@@ -15,7 +37,7 @@ def load_env_file():
     
     for env_path in possible_paths:
         if env_path.exists():
-            print(f"Loading environment variables from: {env_path}")
+            logging.info(f"Loading environment variables from: {env_path}")
             with open(env_path, 'r') as f:
                 for line in f:
                     line = line.strip()
@@ -24,11 +46,24 @@ def load_env_file():
                         # Remove quotes if present
                         value = value.strip().strip('"').strip("'")
                         os.environ[key.strip()] = value
-            print(f"Loaded AWS credentials: AWS_ACCESS_KEY_ID={'*' * 10 if os.environ.get('AWS_ACCESS_KEY_ID') else 'NOT FOUND'}")
+            # Check for credentials with fallback logic
+            aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID') or os.environ.get('ACCESS_KEY_ID')
+            aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY') or os.environ.get('SECRET_ACCESS_KEY')
+            
+            if aws_access_key and aws_secret_key:
+                credential_source = 'AWS_ACCESS_KEY_ID' if os.environ.get('AWS_ACCESS_KEY_ID') else 'ACCESS_KEY_ID'
+                logging.info(f"[SUCCESS] Loaded AWS credentials: {credential_source}={'*' * 10}")
+                logging.info(f"[SUCCESS] Secret key found: {'*' * 10}")
+            else:
+                logging.warning(f"[FAILURE] AWS credentials NOT FOUND:")
+                logging.warning(f"   AWS_ACCESS_KEY_ID: {'Found' if os.environ.get('AWS_ACCESS_KEY_ID') else 'NOT FOUND'}")
+                logging.warning(f"   ACCESS_KEY_ID: {'Found' if os.environ.get('ACCESS_KEY_ID') else 'NOT FOUND'}")
+                logging.warning(f"   AWS_SECRET_ACCESS_KEY: {'Found' if os.environ.get('AWS_SECRET_ACCESS_KEY') else 'NOT FOUND'}")
+                logging.warning(f"   SECRET_ACCESS_KEY: {'Found' if os.environ.get('SECRET_ACCESS_KEY') else 'NOT FOUND'}")
             return
     
-    print("Warning: No .env.local file found. AWS credentials may not be available.")
-    print("Checked paths:", [str(p) for p in possible_paths])
+    logging.warning("Warning: No .env.local file found. AWS credentials may not be available.")
+    logging.warning(f"Checked paths: {[str(p) for p in possible_paths]}")
 
 # Load environment variables before importing expense processor
 load_env_file()
@@ -51,15 +86,27 @@ app = Flask(__name__)
 @app.route('/process', methods=['POST'])
 def process_expenses():
     try:
+        logging.info("\n========================================")
+        logging.info(f"EXPENSE PROCESSOR SERVER - NEW REQUEST")
+        logging.info("========================================")
+        
         data = request.json
         user_id = data.get('userId', 'default-user')
         document_id = data.get('documentId')
         bank_type = data.get('bankType', 'unknown')
         textract_data = data.get('textractData', {})
         
-        print(f"Processing expenses for document {document_id}")
-        print(f"Bank type: {bank_type}")
-        print(f"Textract blocks: {len(textract_data.get('Blocks', []))}")
+        logging.info(f"Request Details:")
+        logging.info(f"   User ID: {user_id}")
+        logging.info(f"   Document ID: {document_id}")
+        logging.info(f"   Bank Type: {bank_type}")
+        logging.info(f"   Textract Blocks: {len(textract_data.get('Blocks', []))}")
+        logging.info(f"   Text Length: {len(textract_data.get('text', ''))}")
+        
+        if bank_type == 'gmail-receipts':
+            logging.info(f"GMAIL RECEIPTS DETECTED - This should trigger AI description generation")
+            
+        logging.info(f"Starting expense parsing...")
         
         # Get the appropriate parser
         parser = get_parser(bank_type, user_id, document_id)
@@ -88,9 +135,20 @@ def process_expenses():
                     synthetic_blocks.append(table_block)
             textract_data['Blocks'] = synthetic_blocks
         
+        logging.info(f"Calling parser.parse_textract_output()...")
         expenses = parser.parse_textract_output(textract_data)
         
-        print(f"Extracted {len(expenses)} expenses")
+        logging.info(f"Parser completed!")
+        logging.info(f"Extracted {len(expenses)} expenses")
+        
+        # Log each expense description to see what was generated
+        for i, expense in enumerate(expenses):
+            logging.info(f"   Expense {i+1}: {expense.get('description', 'NO DESCRIPTION')}")
+            logging.info(f"   Amount: ${expense.get('amount', 'N/A')}")
+            logging.info(f"   Vendor: {expense.get('vendor', 'N/A')}")
+            logging.info("")
+        
+        logging.info(f"Returning response to TypeScript layer...")
         
         # Return expenses without saving to DynamoDB (that's handled by the TypeScript code)
         return jsonify({
@@ -102,8 +160,8 @@ def process_expenses():
         
     except Exception as e:
         import traceback
-        print(f"Error processing expenses: {str(e)}")
-        print(traceback.format_exc())
+        logging.error(f"Error processing expenses: {str(e)}")
+        logging.error(traceback.format_exc())
         return jsonify({
             'success': False,
             'error': str(e),
@@ -115,5 +173,5 @@ def health():
     return jsonify({'status': 'healthy', 'service': 'expense-processor'})
 
 if __name__ == '__main__':
-    print("Starting expense processor server on port 8000...")
-    app.run(port=8000, debug=True) 
+    logging.info("Starting expense processor server on port 8000 with Waitress...")
+    serve(app, host='127.0.0.1', port=8000) 
