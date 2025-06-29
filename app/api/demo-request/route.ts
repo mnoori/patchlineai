@@ -3,16 +3,69 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
 import { v4 as uuidv4 } from 'uuid'
 
-// Initialize AWS clients
-const dynamoClient = new DynamoDBClient({
-  region: process.env.AWS_REGION || 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-})
+// Initialize AWS clients with proper error handling
+let docClient: DynamoDBDocumentClient | null = null
 
-const docClient = DynamoDBDocumentClient.from(dynamoClient)
+try {
+  // Check for both AWS_ prefixed and non-prefixed versions
+  const accessKeyId = process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID
+  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY
+  const region = process.env.AWS_REGION || process.env.REGION_AWS || 'us-east-1'
+  
+  // Only initialize if we have credentials
+  if (accessKeyId && secretAccessKey) {
+    const dynamoClient = new DynamoDBClient({
+      region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
+    })
+    docClient = DynamoDBDocumentClient.from(dynamoClient)
+  }
+} catch (error) {
+  console.error('Failed to initialize AWS client:', error)
+}
+
+// Simple email notification function
+async function sendNotificationEmail(demoRequest: any) {
+  try {
+    // For now, we'll use a webhook or external service
+    // You can replace this with your preferred email service
+    
+    // Option 1: Use a webhook service like Zapier or Make
+    if (process.env.DEMO_REQUEST_WEBHOOK_URL) {
+      const response = await fetch(process.env.DEMO_REQUEST_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: 'mehdi@patchline.ai',
+          subject: `New Demo Request from ${demoRequest.name}`,
+          data: demoRequest,
+        }),
+      })
+      
+      if (!response.ok) {
+        console.error('Failed to send webhook notification')
+      }
+    }
+    
+    // Option 2: Log to console for manual monitoring
+    console.log('📧 NEW DEMO REQUEST NOTIFICATION:')
+    console.log('================================')
+    console.log(`From: ${demoRequest.name} (${demoRequest.email})`)
+    console.log(`Company: ${demoRequest.company}`)
+    console.log(`Role: ${demoRequest.role}`)
+    console.log(`Message: ${demoRequest.message}`)
+    console.log(`Newsletter: ${demoRequest.newsletter ? 'Yes' : 'No'}`)
+    console.log('================================')
+    
+  } catch (error) {
+    console.error('Error sending notification:', error)
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,18 +95,32 @@ export async function POST(request: NextRequest) {
       source: 'website',
     }
 
-    // Store in DynamoDB
-    const tableName = process.env.DEMO_REQUESTS_TABLE || 'DemoRequests-production'
-    
-    await docClient.send(
-      new PutCommand({
-        TableName: tableName,
-        Item: demoRequest,
-      })
-    )
+    // Try to store in DynamoDB if available
+    if (docClient) {
+      // Use the dedicated DemoRequests table
+      const tableName = process.env.DEMO_REQUESTS_TABLE || 'DemoRequests-production'
+      
+      try {
+        await docClient.send(
+          new PutCommand({
+            TableName: tableName,
+            Item: demoRequest,
+          })
+        )
+        console.log('Demo request stored in DynamoDB:', demoRequest.id)
+      } catch (dbError) {
+        console.error('Failed to store in DynamoDB:', dbError)
+        // Continue anyway - we'll still log it
+      }
+    } else {
+      console.log('DynamoDB not configured - logging demo request only')
+    }
 
-    // TODO: Add email notification via SES or another service
-    console.log('New demo request:', demoRequest)
+    // Send notification
+    await sendNotificationEmail(demoRequest)
+
+    // Always log the request for now
+    console.log('New demo request:', JSON.stringify(demoRequest, null, 2))
 
     return NextResponse.json({
       success: true,

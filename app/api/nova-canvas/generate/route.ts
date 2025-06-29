@@ -44,14 +44,18 @@ export async function POST(request: NextRequest) {
     
     if (uploadToS3) {
       const s3Uploader = getS3Uploader()
-      images = await s3Uploader.uploadMultipleImages(
+      const uploadResults = await s3Uploader.uploadMultipleImages(
         base64Images,
         options.contentType || 'general',
         {
-          prompt: prompt.substring(0, 100),
-          style: options.style || 'standard'
+          metadata: {
+            prompt: prompt.substring(0, 100),
+            style: options.style || 'standard'
+          }
         }
       )
+      // Extract URLs from upload results
+      images = uploadResults.map(result => result.url)
     } else {
       // Return base64 data URLs
       images = base64Images.map(img => `data:image/png;base64,${img}`)

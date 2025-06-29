@@ -77,17 +77,17 @@ export default function Home() {
                   Flagship Product
                 </Badge>
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                  Meet <span className="text-brand-cyan">{ariaAgent.displayName}</span> — Your Agentic Record Label
+                  Meet <span className="text-brand-cyan font-bold">{ariaAgent.displayName}</span> — Your Agentic Record Label
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                  <span className="text-brand-cyan">{ariaAgent.displayName}</span> is our most advanced offering - an AI-first infrastructure that orchestrates all your agents 
+                  <span className="text-brand-cyan font-bold">{ariaAgent.displayName}</span> is our most advanced offering - an AI-first infrastructure that orchestrates all your agents 
                   to create autonomous label operations. From talent discovery to revenue distribution,{" "}
-                  <span className="text-brand-cyan">{ariaAgent.displayName}</span> handles the complex workflows while you maintain creative control.
+                  <span className="text-brand-cyan font-bold">{ariaAgent.displayName}</span> handles the complex workflows while you maintain creative control.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Button asChild variant="gradient" size="lg" className="group">
                     <Link href="/aria" className="flex items-center">
-                      <span>Explore {ariaAgent.displayName}</span>
+                      <span>Explore <span className="font-bold">{ariaAgent.displayName}</span></span>
                       <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Button>

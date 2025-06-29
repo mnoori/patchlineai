@@ -96,7 +96,7 @@ export function PersonalizedContentWorkflow({
         return
       }
 
-      const files = await listDriveFiles()
+      const files = await listDriveFiles(auth.access_token, "mimeType contains 'image/'")
       const imageFiles = files.filter((file: any) => 
         file.mimeType?.startsWith('image/')
       )
@@ -155,8 +155,11 @@ export function PersonalizedContentWorkflow({
         if (!auth) {
           throw new Error('Google Drive authentication required')
         }
-        const fileData = await getDriveFile(selectedImage.id, auth)
-        imageBase64 = fileData.base64
+        const fileBlob = await getDriveFile(auth.access_token, selectedImage.id)
+        // Convert blob to base64
+        const arrayBuffer = await fileBlob.arrayBuffer()
+        const base64String = Buffer.from(arrayBuffer).toString('base64')
+        imageBase64 = `data:${fileBlob.type};base64,${base64String}`
       }
 
       // Clean and resize the image for Nova Canvas

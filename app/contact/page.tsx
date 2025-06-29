@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -12,32 +12,94 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { GradientOrbs, Card } from "@/components/brand"
-import { Mail, MapPin, CheckCircle, Sparkles, ArrowRight } from "lucide-react"
+import { Mail, MapPin, CheckCircle, Sparkles, ArrowRight, Heart, Music } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
-// Typewriter effect component
-function TypewriterText({ text, onComplete }: { text: string; onComplete?: () => void }) {
-  const [displayedText, setDisplayedText] = useState("")
-  const [currentIndex, setCurrentIndex] = useState(0)
-
-  useEffect(() => {
-    if (currentIndex < text.length) {
-      const timer = setTimeout(() => {
-        setDisplayedText(prev => prev + text[currentIndex])
-        setCurrentIndex(prev => prev + 1)
-      }, 30)
-      return () => clearTimeout(timer)
-    } else if (onComplete) {
-      onComplete()
-    }
-  }, [currentIndex, text, onComplete])
-
-  return <span>{displayedText}</span>
+// Animated dot pattern background - tunnel/corridor effect
+function DotPatternBackground() {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {/* Center gradient fade - static */}
+      <div 
+        className="absolute inset-0 z-10"
+        style={{
+          background: `radial-gradient(circle at center, 
+            rgba(1, 1, 2, 1) 0%, 
+            rgba(1, 1, 2, 0.9) 20%, 
+            rgba(1, 1, 2, 0.7) 40%, 
+            rgba(1, 1, 2, 0.3) 60%, 
+            transparent 80%)`
+        }}
+      />
+      
+      {/* Static dot pattern - no animation for stability */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 50% 50%, rgba(0, 230, 228, 0.3) 1px, transparent 1px),
+            radial-gradient(circle at 50% 50%, rgba(0, 230, 228, 0.25) 1px, transparent 1px),
+            radial-gradient(circle at 50% 50%, rgba(0, 230, 228, 0.2) 1px, transparent 1px),
+            radial-gradient(circle at 50% 50%, rgba(0, 230, 228, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: '30px 30px, 45px 45px, 60px 60px, 75px 75px',
+          backgroundPosition: 'center',
+        }}
+      />
+      
+      {/* Single animated ring for subtle movement */}
+      <motion.div
+        className="absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: [0, 0.3, 0],
+          scale: [0.8, 1.3],
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeOut",
+        }}
+      >
+        <div 
+          className="absolute inset-0"
+          style={{
+            border: '1px solid rgba(0, 230, 228, 0.3)',
+            borderRadius: '50%',
+            width: '200px',
+            height: '200px',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      </motion.div>
+      
+      {/* Perspective lines - static */}
+      <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+        {[...Array(8)].map((_, i) => {
+          const angle = (i * 45) * Math.PI / 180
+          const x = 50 + Math.cos(angle) * 50
+          const y = 50 + Math.sin(angle) * 50
+          return (
+            <line
+              key={i}
+              x1="50"
+              y1="50"
+              x2={x}
+              y2={y}
+              stroke="rgba(0, 230, 228, 0.3)"
+              strokeWidth="0.5"
+            />
+          )
+        })}
+      </svg>
+    </div>
+  )
 }
 
 export default function ContactPage() {
   const [stage, setStage] = useState<'greeting' | 'form' | 'submitted'>('greeting')
-  const [showForm, setShowForm] = useState(false)
   const [formSubmitted, setFormSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -83,8 +145,9 @@ export default function ContactPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main className="flex-1 pt-16 relative">
-        {/* Distorted orb background */}
-        <GradientOrbs variant="vibrant" className="opacity-60" />
+        {/* Brand-compliant animated background */}
+        <DotPatternBackground />
+        <GradientOrbs variant="dispersed" className="opacity-50" />
         
         <section className="relative py-20 min-h-[calc(100vh-4rem)]">
           <div className="container relative z-10">
@@ -92,41 +155,74 @@ export default function ContactPage() {
               {stage === 'greeting' && (
                 <motion.div
                   key="greeting"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.1 }}
+                  transition={{ duration: 0.5, type: "spring" }}
                   className="max-w-4xl mx-auto text-center"
                 >
-                  <div className="mb-8">
-                    <div className="inline-flex items-center justify-center p-4 rounded-full bg-brand-cyan/10 backdrop-blur-sm mb-6">
-                      <Sparkles className="h-8 w-8 text-brand-cyan animate-pulse" />
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-bold mb-8 font-heading">
-                      <TypewriterText 
-                        text="Hello! I'm ARIA, your AI music business orchestrator." 
-                        onComplete={() => setTimeout(() => setShowForm(true), 500)}
-                      />
-                    </h1>
-                    {showForm && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <p className="text-xl text-muted-foreground mb-8">
-                          <TypewriterText text="I'd love to learn about your music business needs and show you how Patchline can transform your workflow." />
-                        </p>
-                        <Button
-                          onClick={() => setStage('form')}
-                          className="bg-brand-cyan hover:bg-brand-cyan/90 text-black group"
-                          size="lg"
-                        >
-                          <span>Let's Get Started</span>
-                          <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </Button>
-                      </motion.div>
-                    )}
-                  </div>
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    className="inline-flex items-center justify-center p-6 rounded-full bg-gradient-to-br from-brand-cyan/20 to-brand-cyan/5 backdrop-blur-xl mb-8 shadow-2xl"
+                  >
+                    <motion.div
+                      animate={{ 
+                        rotate: 360,
+                      }}
+                      transition={{ 
+                        duration: 20, 
+                        repeat: Infinity, 
+                        ease: "linear" 
+                      }}
+                    >
+                      <Sparkles className="h-12 w-12 text-brand-cyan" />
+                    </motion.div>
+                  </motion.div>
+                  
+                  <motion.h1 
+                    className="text-4xl md:text-5xl font-bold mb-3 font-heading"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Hey, I'm <span className="text-brand-cyan font-bold">ARIA</span>
+                  </motion.h1>
+                  
+                  <motion.p 
+                    className="text-lg text-muted-foreground mb-8"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    Nice to meet you!
+                  </motion.p>
+
+                  <motion.p 
+                    className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    Let's take some of those tedious tasks off your plate...
+                  </motion.p>
+
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      onClick={() => setStage('form')}
+                      className="bg-gradient-to-r from-brand-cyan to-brand-bright-blue hover:from-brand-cyan/90 hover:to-brand-bright-blue/90 text-black group px-8 py-6 text-lg rounded-full shadow-2xl"
+                    >
+                      <span className="font-semibold">Let's Talk About Your Needs</span>
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                  </motion.div>
                 </motion.div>
               )}
 
@@ -138,12 +234,25 @@ export default function ContactPage() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="max-w-5xl mx-auto"
                 >
-                  <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold mb-4">Request Your Demo</h2>
+                  <motion.div 
+                    className="text-center mb-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-brand-cyan/20 flex items-center justify-center">
+                        <Sparkles className="h-5 w-5 text-brand-cyan" />
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        <span className="font-bold text-brand-cyan">ARIA</span> is here with you
+                      </span>
+                    </div>
+                    <h2 className="text-3xl font-bold mb-4">Great! Let's get to know each other</h2>
                     <p className="text-lg text-muted-foreground">
-                      Tell me about yourself and I'll connect you with the right team member
+                      I'd love to learn about your music journey and how I can help make your life easier
                     </p>
-                  </div>
+                  </motion.div>
 
                   <div className="grid md:grid-cols-3 gap-8">
                     <div className="md:col-span-2">
@@ -347,33 +456,68 @@ export default function ContactPage() {
               {stage === 'submitted' && (
                 <motion.div
                   key="submitted"
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
                   className="max-w-2xl mx-auto text-center"
                 >
-                  <Card variant="glass" className="p-12 backdrop-blur-xl border-white/10">
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", duration: 0.5 }}
-                      className="mx-auto w-16 h-16 rounded-full bg-brand-cyan/20 flex items-center justify-center mb-6"
-                    >
-                      <CheckCircle className="h-8 w-8 text-brand-cyan" />
-                    </motion.div>
-                    <h2 className="text-3xl font-bold mb-4 font-heading">Thank You!</h2>
-                    <p className="text-lg text-muted-foreground mb-8">
-                      <TypewriterText text="Your demo request has been received. I've notified our team and they'll be in touch within 24 hours to schedule your personalized demo." />
-                    </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                      <Button asChild className="bg-brand-cyan hover:bg-brand-cyan/90 text-black">
-                        <Link href="/">Return to Homepage</Link>
-                      </Button>
-                      <Button asChild variant="outline" className="border-brand-cyan text-brand-cyan hover:bg-brand-cyan/10">
-                        <Link href="/features">Explore Features</Link>
-                      </Button>
-                    </div>
-                  </Card>
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", duration: 0.5, delay: 0.2 }}
+                  >
+                    <Card variant="glass" className="p-12 backdrop-blur-xl border-white/10">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", duration: 0.5 }}
+                        className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-brand-cyan/30 to-brand-bright-blue/30 flex items-center justify-center mb-6"
+                      >
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <CheckCircle className="h-10 w-10 text-brand-cyan" />
+                        </motion.div>
+                      </motion.div>
+                      
+                      <motion.h2 
+                        className="text-3xl font-bold mb-4 font-heading"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <span className="bg-gradient-to-r from-brand-cyan to-brand-bright-blue bg-clip-text text-transparent">
+                          Request Received!
+                        </span>
+                      </motion.h2>
+                      
+                      <motion.p 
+                        className="text-lg text-muted-foreground mb-8"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        Our team will reach out within 24 hours to schedule your personalized demo.
+                      </motion.p>
+                      
+                      <motion.div 
+                        className="flex flex-col sm:flex-row items-center justify-center gap-4"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                      >
+                        <Button asChild className="bg-gradient-to-r from-brand-cyan to-brand-bright-blue hover:from-brand-cyan/90 hover:to-brand-bright-blue/90 text-black">
+                          <Link href="/">Return Home</Link>
+                        </Button>
+                        <Button asChild variant="outline" className="border-brand-cyan text-brand-cyan hover:bg-brand-cyan/10">
+                          <Link href="/features">Explore Features</Link>
+                        </Button>
+                      </motion.div>
+                    </Card>
+                  </motion.div>
+
+
                 </motion.div>
               )}
             </AnimatePresence>

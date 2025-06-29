@@ -116,11 +116,19 @@ export async function POST(request: NextRequest) {
     if (process.env.ENABLE_S3_UPLOAD === 'true') {
       try {
         const s3Uploader = getS3Uploader()
-        const [bgRemovedUrl, newBgUrl, compositeUrl] = await s3Uploader.uploadMultipleImages(
+        const uploadResults = await s3Uploader.uploadMultipleImages(
           [backgroundRemovedImage, newBackground, compositeImage],
           'test-background-removal',
-          { test: 'true', releaseTitle, releaseGenre, style }
+          { 
+            metadata: { 
+              test: 'true', 
+              releaseTitle, 
+              releaseGenre, 
+              style 
+            } 
+          }
         )
+        const [bgRemovedUrl, newBgUrl, compositeUrl] = uploadResults.map(result => result.url)
         
         results.s3Urls = {
           backgroundRemoved: bgRemovedUrl,

@@ -10,7 +10,7 @@
 // DEVELOPMENT MODE TOGGLE
 // Set this to false when deploying to production
 // ======================================================================
-export const IS_DEVELOPMENT_MODE = true
+export const IS_DEVELOPMENT_MODE = false
 
 // ======================================================================
 // AUTHENTICATION BYPASS
