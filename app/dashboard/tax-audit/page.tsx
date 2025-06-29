@@ -264,6 +264,7 @@ export default function TaxAuditPage() {
                   <TabsList className="bg-slate-900/50 border border-slate-800">
                     <TabsTrigger value="expenses">Expenses</TabsTrigger>
                     <TabsTrigger value="upload">Upload Documents</TabsTrigger>
+                    <TabsTrigger value="irs-ready">IRS Ready</TabsTrigger>
                     <TabsTrigger value="tax-package">Tax Package</TabsTrigger>
                   </TabsList>
 
@@ -286,6 +287,13 @@ export default function TaxAuditPage() {
                         Go to Document Upload
                       </Button>
                     </div>
+                  </TabsContent>
+
+                  <TabsContent value="irs-ready" className="mt-6">
+                    <ExpenseReviewTable 
+                      userId="default-user" 
+                      irsReadyView={true}
+                    />
                   </TabsContent>
 
                   <TabsContent value="tax-package" className="mt-6">

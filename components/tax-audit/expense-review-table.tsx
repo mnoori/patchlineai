@@ -55,6 +55,7 @@ interface TaxExpense {
 
 interface ExpenseReviewTableProps {
   userId: string
+  irsReadyView?: boolean
 }
 
 const BANK_ACCOUNTS = [
@@ -66,7 +67,7 @@ const BANK_ACCOUNTS = [
   { value: 'chase-sapphire', label: 'Chase Sapphire' }
 ]
 
-export function ExpenseReviewTable({ userId }: ExpenseReviewTableProps) {
+export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseReviewTableProps) {
   const [expenses, setExpenses] = useState<TaxExpense[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")

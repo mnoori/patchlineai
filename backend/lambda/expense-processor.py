@@ -2,7 +2,7 @@ import json
 import os
 import re
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List, Dict, Any, Optional, Tuple
 import boto3
@@ -128,7 +128,7 @@ def generate_smart_fallback_description(receipt_text: str, vendor: str = None, a
         print(f"Full text preview: {receipt_text[:1000]}...")
         
         # Look for account ID
-        account_match = re.search(r'Account ID[:\s_]*(\d+)', receipt_text, re.IGNORECASE)
+        account_match = re.search(r'Account ID[:\s]*(\d+)', receipt_text, re.IGNORECASE)
         account_id = account_match.group(1) if account_match else None
         print(f"Account ID found: {account_id}")
         
@@ -544,43 +544,59 @@ TRANSACTION INFO:
 - Amount: ${amount or 0:.2f}
 
 BUSINESS CONTEXT:
-- Entity: Algoryx Art & Tech Lab (DBA Patchline AI)
-- Industry: AI-powered music technology, creative software development, live performance
-- Tax Status: Startup requiring detailed documentation for $150K NOL
+- Entity: Algoryx Art & Technology Lab (DBA Patchline AI)
+- Industry: AI-powered music technology, creative AI research, audiovisual performances
+- Business Activities:
+  * Live AI-generated audiovisual performances
+  * Creative AI software development (Patchline AI platform)
+  * Content creation for professional channels
+  * Industry networking and client development
+  * Technical demonstrations and showcases
+- Location: Professional studio facility in Brooklyn, NY
 
-CRITICAL INSTRUCTIONS:
-1. **EXTRACT UNIQUE DETAILS**: Find specific campaign names, ad sets, objectives, targeting details, or service descriptions from the receipt
-2. **NO GENERIC DESCRIPTIONS**: Do not use generic terms like "AI Music Customer Acquisition Campaign"
-3. **USE ACTUAL DATA**: Use the real campaign name, ad set name, or specific service details mentioned in the receipt
-4. **DIFFERENT RECEIPTS = DIFFERENT DESCRIPTIONS**: Each receipt should have a unique description based on its specific content
+CRITICAL IRS REQUIREMENTS:
+1. ALWAYS position purchases as professional business operations (NOT hobby/personal)
+2. Use formal business language - we operate like a $10M technology company
+3. Include verifiable identifiers (order numbers, campaign IDs, dates)
+4. Connect every expense to revenue-generating activities
+5. Be specific but professional - avoid casual language
 
-FOR META/FACEBOOK ADS:
-- Extract actual campaign name (look for "Campaign:", "Campaign Name:", "For campaign:", etc.)
-- Extract ad set name if available
-- Extract objective or goal if mentioned
-- Extract targeting details (location, age, interests)
-- Include account ID (last 6 digits)
-- Include billing period if mentioned
+FORMAT STRICTLY AS:
+[Category] - [Business Purpose] - [Specific Item/Service] - [Identifier]
 
-FOR OTHER SERVICES:
-- Extract specific plan names, subscription types, billing periods
-- Include specific features or services mentioned
-- Extract order numbers, invoice numbers, or reference codes
+CATEGORY MAPPING:
+- Advertising/Marketing = "Advertising - [Purpose]"
+- Software/Subscriptions = "Other Expenses - [Service Type]"
+- Equipment/Supplies = "Office Expenses - [Business Function]"
+- Transportation = "Travel - [Business Purpose]"
+- Meals/Entertainment = "Meals - [Business Context]"
 
-EXAMPLES OF WHAT TO LOOK FOR:
-- Campaign: "Holiday Music Launch 2024" → "Advertising - Meta Ads - Holiday Music Launch 2024 Campaign"
-- Ad Set: "DJ Equipment Targeting" → "Advertising - Meta Ads - DJ Equipment Targeting Ad Set"  
-- Service: "Midjourney Pro Plan" → "Office Expenses - Midjourney Pro Monthly - AI Visual Content Generation"
+BUSINESS PURPOSE EXAMPLES:
+- "Client Development Materials" (for event supplies)
+- "Studio Infrastructure" (for cables/equipment)
+- "Content Production Tools" (for software)
+- "Professional Development" (for courses/training)
+- "Market Research Operations" (for competitor analysis)
+- "Brand Asset Development" (for design tools)
+- "Live Performance Materials" (for event/show supplies)
 
-OUTPUT FORMAT REQUIREMENTS:
-- Return ONLY the expense description line
-- NO explanatory text before or after
-- NO "Based on..." or "This description..." commentary
-- Format: [Category] - [Vendor/Platform] - [Specific Details] - [Account/Reference Info]
-- Maximum 150 characters
-- Professional, IRS-compliant language
+CRITICAL: Read the actual product names carefully. Don't assume "Airloons" is AI-related - it's balloons!
 
-Generate the expense description:"""
+EXTRACT FROM RECEIPT:
+1. For Meta/Facebook Ads: Find campaign name, objective, and ID
+2. For Amazon: Extract ACTUAL product names (e.g., "Monoprice 16AWG Cable", "LED Light Balloons", NOT generic "Business Supplies")
+3. For Software: Specify subscription type and business use
+4. For Transportation: Time of day indicates purpose (evening = client event, day = meetings)
+5. For Equipment: Connect to studio operations or content production
+
+Generate ONE LINE description. Be SPECIFIC with actual receipt details but PROFESSIONAL in tone.
+Maximum 120 characters to avoid truncation.
+Think: How would a Fortune 500 company describe this expense?
+
+IMPORTANT: 
+- If receipt shows specific products, USE THEM (e.g., "16AWG Audio Cables" not "Business Supplies")
+- If multiple similar items, consolidate professionally (e.g., "Studio Lighting Equipment Set" not individual bulbs)
+- For Amazon orders, the receipt text includes actual product names - USE THEM!"""
 
         # -------------------------------------------------------------------
         # Attempt model invocation – iterate over candidate models until one
@@ -1102,475 +1118,21 @@ class BiltStatementParser(BankStatementParser):
 
 
 class AmazonReceiptParser(BankStatementParser):
-    """Parser for Amazon receipts"""
+    """Parser for Amazon receipts - now uses Gmail email prints"""
     
     def parse_textract_output(self, textract_data: Dict) -> List[Dict]:
-        """Parse Amazon receipt format"""
-        expenses = []
+        """Parse Amazon receipt - redirect to Gmail parser for email prints"""
+        logging.info("Amazon Receipt Parser - Redirecting to Gmail parser for email prints")
         
-        # Extract order information
-        order_date = None
-        order_number = None
+        # Use the Gmail parser since we're processing email prints
+        gmail_parser = GmailReceiptParser('gmail-receipts', self.user_id, self.document_id)
+        expenses = gmail_parser.parse_textract_output(textract_data)
         
-        # Extract all text first
-        full_text = []
-        for block in textract_data.get('Blocks', []):
-            if block['BlockType'] == 'LINE':
-                text = block.get('Text', '').strip()
-                if text:
-                    full_text.append(text)
-        
-        text_content = '\n'.join(full_text)
-        
-        # Find order date
-        order_date_match = re.search(r'Order placed\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})', text_content, re.IGNORECASE)
-        if order_date_match:
-            date_str = order_date_match.group(1)
-            # Parse date like "July 23, 2024"
-            try:
-                date_obj = datetime.strptime(date_str, '%B %d, %Y')
-                order_date = date_obj.strftime('%Y-%m-%d')
-            except:
-                try:
-                    date_obj = datetime.strptime(date_str, '%b %d, %Y')
-                    order_date = date_obj.strftime('%Y-%m-%d')
-                except:
-                    pass
-        
-        # Find order number
-        order_num_match = re.search(r'Order\s*#\s*([\d-]+)', text_content, re.IGNORECASE)
-        if order_num_match:
-            order_number = order_num_match.group(1)
-        
-        print(f"Amazon receipt - Order date: {order_date}, Order #: {order_number}")
-        
-        # Debug: Print first few lines to see structure
-        print("\n=== First 30 lines of Amazon receipt ===")
-        for i, line in enumerate(full_text[:30]):
-            print(f"{i}: {line}")
-        print("=== End sample ===\n")
-        
-        # Parse individual items
-        # Global duplicate tracking across all strategies
-        seen_items = set()  # Track items to avoid duplicates
-        seen_amounts = set()  # Track amounts to avoid duplicate prices
-        
-        for i, line in enumerate(full_text):
-            # Skip summary lines and refund/return messages - NEVER extract totals
-            line_lower = line.lower()
-            
-            # ABSOLUTELY NEVER process any line with "total" anywhere
-            if 'total' in line_lower:
-                print(f"SKIPPED LINE {i}: Contains 'total' - '{line}'")
-                continue
-                
-            if any(skip in line_lower for skip in ['subtotal', 'shipping', 'tax', 'order summary', 
-                                                    'payment method', 'ship to', 'return window',
-                                                    'refund has been', 'when will i get', 'your return',
-                                                    'returns are easy', 'return policy', 'customer service',
-                                                    'gift options', 'delivery instructions', 'balance',
-                                                    'estimated', 'summary', 'discount', 'promotion']):
-                continue
-            
-            # Pattern: Item description $XX.XX
-            price_match = re.match(r'^(.+?)\s+\$(\d+\.\d{2})$', line)
-            if price_match:
-                description, price_str = price_match.groups()
-                amount = Decimal(price_str)
-                
-                print(f"DEBUG: Found potential item - Line {i}: {line}")
-                print(f"  Description: '{description}', Amount: ${amount}")
-                
-                # Debug: Check if this looks like an address
-                if any(addr_word in description.lower() for addr_word in ['brooklyn', 'ny', 'fleet', 'pl', 'united states']):
-                    print(f"  WARNING: This looks like an address, not a product!")
-                
-                # More strict validation for description
-                desc_lower = description.lower().strip()
-                
-                # NEVER extract any line with "total" - this is critical
-                if 'total' in desc_lower:
-                    print(f"  SKIPPED: Contains 'total' - '{description}'")
-                    continue
-                
-                # NEVER extract addresses or personal info
-                address_keywords = ['brooklyn', 'ny ', 'new york', 'united states', 'fleet pl', 
-                                  'mehdi noori', 'zip code', 'street', 'avenue', 'blvd', 'road']
-                if any(addr in desc_lower for addr in address_keywords):
-                    print(f"  SKIPPED: Contains address/personal info - '{description}'")
-                    continue
-                
-                # Skip if description contains other summary keywords
-                summary_keywords = ['balance', 'refund', 'return', 'credit', 'payment', 
-                                  'shipping', 'tax', 'subtotal', 'discount', 'promotion', 'coupon',
-                                  'fee', 'charge', 'adjustment', 'summary', 'estimated']
-                
-                # Skip if description is too short or contains summary keywords
-                if (len(description.strip()) <= 8 or  # Increased minimum length
-                    any(keyword in desc_lower for keyword in summary_keywords) or
-                    desc_lower.endswith(':') or  # Skip lines ending with colon
-                    re.match(r'^[^a-zA-Z]*$', description.strip())):  # Skip lines with no letters
-                    print(f"  SKIPPED: Description validation failed - '{description}'")
-                    continue
-                
-                # Validate it's a reasonable item price
-                if not (0 < amount < 10000):
-                    print(f"  SKIPPED: Price validation failed - ${amount}")
-                    continue
-                
-                # Create a unique key to avoid duplicates
-                item_key = f"{description.strip()}_{amount}"
-                amount_key = f"{amount}_{order_date}"
-                if item_key in seen_items or amount_key in seen_amounts:
-                    print(f"  SKIPPED: Duplicate item or amount")
-                    continue
-                seen_items.add(item_key)
-                seen_amounts.add(amount_key)
-                
-                category = self._categorize_amazon_item(description)
-                
-                expense = {
-                    'expenseId': self.generate_expense_id(order_date or str(datetime.now().date()), 
-                                                        str(amount), description),
-                    'userId': self.user_id,
-                    'documentId': self.document_id,
-                    'date': order_date or str(datetime.now().date()),
-                    'description': description.strip(),
-                    'vendor': self._get_amazon_vendor_category(description),
-                    'amount': str(amount),
-                    'category': category,
-                    'bankAccount': 'amazon-receipts',
-                    'orderNumber': order_number,
-                    'status': 'pending',
-                    'confidence': 0.9,
-                    'createdAt': datetime.utcnow().isoformat()
-                }
-                expenses.append(expense)
-                print(f"  ADDED: Amazon item: {description} - ${amount}")
-            else:
-                # Also check for multi-line product descriptions
-                # Look for lines that are clearly product names (very specific criteria)
-                if (len(line) > 30 and  # Must be quite long
-                    not line.startswith('$') and  # Not a price line
-                    not any(skip in line_lower for skip in ['sold by', 'ship to', 'order placed', 
-                                                           'payment method', 'return', 'refund', 'visa ending',
-                                                           'brooklyn', 'ny ', 'new york', 'united states',
-                                                           'mehdi noori', 'fleet pl', 'total']) and
-                    re.search(r'[a-zA-Z]', line) and  # Contains letters
-                    not line_lower.endswith(':') and  # Not a header line
-                    not re.match(r'^[A-Z\s,\d-]+$', line) and  # Not all caps (likely address/name)
-                    (',' in line and '-' in line) and  # Must have both comma AND dash (product descriptions)
-                    len(line.split()) >= 6 and  # Must have at least 6 words
-                    any(product_word in line_lower for product_word in ['stand', 'tripod', 'projector', 'laptop', 
-                                                                       'equipment', 'holder', 'cable', 'adapter'])):  # Must contain product-like words
-                    
-                    # Look ahead for a price in the next few lines
-                    for j in range(i+1, min(len(full_text), i+4)):
-                        next_line = full_text[j].strip()
-                        # Look for standalone price
-                        standalone_price_match = re.match(r'^\$(\d+\.\d{2})$', next_line)
-                        if standalone_price_match:
-                            amount = Decimal(standalone_price_match.group(1))
-                            if 0 < amount < 10000:
-                                description = line.strip()
-                                
-                                # Skip if we already have this item
-                                item_key = f"{description}_{amount}"
-                                amount_key = f"{amount}_{order_date}"
-                                if item_key in seen_items or amount_key in seen_amounts:
-                                    break
-                                seen_items.add(item_key)
-                                seen_amounts.add(amount_key)
-                                
-                                category = self._categorize_amazon_item(description)
-                                
-                                expense = {
-                                    'expenseId': self.generate_expense_id(order_date or str(datetime.now().date()), 
-                                                                        str(amount), description),
-                                    'userId': self.user_id,
-                                    'documentId': self.document_id,
-                                    'date': order_date or str(datetime.now().date()),
-                                    'description': description,
-                                    'vendor': self._get_amazon_vendor_category(description),
-                                    'amount': str(amount),
-                                    'category': category,
-                                    'bankAccount': 'amazon-receipts',
-                                    'orderNumber': order_number,
-                                    'status': 'pending',
-                                    'confidence': 0.85,
-                                    'createdAt': datetime.utcnow().isoformat()
-                                }
-                                expenses.append(expense)
-                                print(f"  ADDED: Multi-line Amazon item: {description} - ${amount}")
-                                break
-            
-            # Strategy 2: Look for "Sold by" pattern
-            if ('sold by' in line_lower or 'supplied by' in line_lower):
-                print(f"DEBUG: Found 'Sold by' pattern at line {i}: {line}")
-                # Look for product name in previous lines
-                product_name = None
-                for j in range(max(0, i-5), i):
-                    prev_line = full_text[j].strip()
-                    # Skip metadata lines and return/refund messages
-                    if (prev_line and len(prev_line) > 10 and 
-                        not prev_line.startswith('$') and
-                        'sold by' not in prev_line.lower() and
-                        'supplied by' not in prev_line.lower() and
-                        'total' not in prev_line.lower() and  # NEVER use lines with "total" as product names
-                        not any(skip in prev_line.lower() for skip in ['return', 'refund', 'your order', 
-                                                                         'ship to', 'delivery'])):
-                        product_name = prev_line
-                        print(f"  Potential product name from line {j}: {prev_line}")
-                        break
-                
-                # Look for price in next few lines
-                if product_name:
-                    print(f"  Looking for price after line {i}")
-                    for j in range(i+1, min(len(full_text), i+5)):
-                        next_line = full_text[j].strip()
-                        print(f"    Checking line {j}: {next_line}")
-                        # Match standalone price or price with quantity
-                        price_patterns = [
-                            r'^\$(\d+\.\d{2})$',  # Just price
-                            r'^(\d+)\s+\$(\d+\.\d{2})$',  # Quantity Price
-                            r'^\$(\d+\.\d{2})\s+each$'  # Price each
-                        ]
-                        
-                        for pattern in price_patterns:
-                            price_match = re.match(pattern, next_line)
-                            if price_match:
-                                print(f"    MATCHED pattern: {pattern}")
-                                if pattern == price_patterns[1]:  # Quantity Price pattern
-                                    quantity, price_str = price_match.groups()
-                                    amount = Decimal(price_str)
-                                else:
-                                    amount = Decimal(price_match.group(1))
-                                
-                                if 0 < amount < 10000:
-                                    # FINAL CHECK: Never allow any "total" items
-                                    if 'total' in product_name.lower():
-                                        print(f"    FINAL CHECK: Rejected product with 'total' - '{product_name}'")
-                                        break
-                                        
-                                    # Check for duplicates
-                                    item_key = f"{product_name.strip()}_{amount}"
-                                    amount_key = f"{amount}_{order_date}"
-                                    if item_key in seen_items or amount_key in seen_amounts:
-                                        break
-                                    seen_items.add(item_key)
-                                    seen_amounts.add(amount_key)
-                                    
-                                    category = self._categorize_amazon_item(product_name)
-                                    
-                                    expense = {
-                                        'expenseId': self.generate_expense_id(order_date or str(datetime.now().date()), 
-                                                                            str(amount), product_name),
-                                        'userId': self.user_id,
-                                        'documentId': self.document_id,
-                                        'date': order_date or str(datetime.now().date()),
-                                        'description': product_name.strip(),
-                                        'vendor': self._get_amazon_vendor_category(product_name),
-                                        'amount': str(amount),
-                                        'category': category,
-                                        'bankAccount': 'amazon-receipts',
-                                        'orderNumber': order_number,
-                                        'status': 'pending',
-                                        'confidence': 0.85,
-                                        'createdAt': datetime.utcnow().isoformat()
-                                    }
-                                    expenses.append(expense)
-                                    print(f"Found Amazon item (alt): {product_name} - ${amount}")
-                                    break
-        
-        # Also check tables
-        print(f"\nChecking tables for Amazon items...")
-        table_count = 0
-        for block in textract_data.get('Blocks', []):
-            if block['BlockType'] == 'TABLE':
-                table_count += 1
-                print(f"Processing table {table_count}")
-                table_expenses = self._parse_amazon_table(block, textract_data, order_date, order_number, seen_items, seen_amounts)
-                if table_expenses:
-                    print(f"  Found {len(table_expenses)} items in table")
-                expenses.extend(table_expenses)
-        
-        if table_count == 0:
-            print("No tables found in document")
-        
-        print(f"\nAmazon receipt extraction complete - found {len(expenses)} items")
-        return expenses
-    
-    def _categorize_amazon_item(self, description: str) -> str:
-        """Categorize Amazon items based on description"""
-        desc_lower = description.lower()
-        
-        # Tech equipment
-        if any(word in desc_lower for word in ['cable', 'adapter', 'laptop', 'stand', 'monitor', 
-                                                'keyboard', 'mouse', 'headphone', 'microphone',
-                                                'camera', 'tripod', 'light', 'projector', 'equipment',
-                                                'speaker', 'audio', 'video', 'recording']):
-            return 'depreciation'  # Equipment that can be depreciated
-        
-        # Office supplies
-        if any(word in desc_lower for word in ['paper', 'pen', 'notebook', 'folder', 'stapler', 
-                                                'tape', 'marker', 'envelope']):
-            return 'office_expenses'
-        
-        # Software/subscriptions
-        if any(word in desc_lower for word in ['software', 'subscription', 'license', 'app']):
-            return 'other_expenses'  # Software subscriptions
-        
-        # Shipping supplies
-        if any(word in desc_lower for word in ['box', 'bubble', 'mailer', 'packaging']):
-            return 'supplies'
-        
-        # Default to office expenses for Amazon purchases
-        return 'office_expenses'
-    
-    def _get_amazon_vendor_category(self, description: str) -> str:
-        """Get vendor subcategory for Amazon items"""
-        desc_lower = description.lower()
-        
-        if any(word in desc_lower for word in ['cable', 'adapter', 'laptop', 'monitor', 'keyboard', 
-                                               'tripod', 'projector', 'stand', 'equipment', 'camera']):
-            return 'Amazon.com - Tech Equipment'
-        elif any(word in desc_lower for word in ['paper', 'pen', 'notebook', 'folder']):
-            return 'Amazon.com - Office Supplies'
-        elif any(word in desc_lower for word in ['software', 'subscription', 'digital']):
-            return 'Amazon.com - Software'
-        else:
-            return 'Amazon.com'
-    
-    def _parse_amazon_table(self, table_block: Dict, full_data: Dict, order_date: str, order_number: str, seen_items: set, seen_amounts: set) -> List[Dict]:
-        """Parse Amazon receipt tables"""
-        expenses = []
-        
-        # Get all cells in the table
-        cells = []
-        for relationship in table_block.get('Relationships', []):
-            if relationship['Type'] == 'CHILD':
-                for cell_id in relationship['Ids']:
-                    cell_block = self._get_block_by_id(cell_id, full_data)
-                    if cell_block and cell_block['BlockType'] == 'CELL':
-                        cells.append(cell_block)
-        
-        # Group cells by row
-        rows = {}
-        for cell in cells:
-            row_index = cell.get('RowIndex', 0)
-            if row_index not in rows:
-                rows[row_index] = []
-            rows[row_index].append(cell)
-        
-        print(f"  Table has {len(rows)} rows")
-        
-        # Process each row
-        for row_index in sorted(rows.keys()):
-            row_cells = sorted(rows[row_index], key=lambda x: x.get('ColumnIndex', 0))
-            
-            # Extract text from all cells
-            cell_texts = [self._get_cell_text(cell, full_data) for cell in row_cells]
-            row_text = ' | '.join(cell_texts)
-            print(f"  Row {row_index}: {row_text}")
-            
-            # Look for product and price patterns
-            # Amazon tables might have: [Product Description] [Quantity] [Price]
-            if len(cell_texts) >= 2:
-                # Check if any cell contains a price
-                price = None
-                description = None
-                
-                for i, text in enumerate(cell_texts):
-                    # Check for price patterns
-                    price_match = re.match(r'^\$?(\d+\.\d{2})$', text.strip())
-                    if price_match and not price:
-                        price = Decimal(price_match.group(1))
-                        # Description is usually in first column or before price
-                        if i > 0 and cell_texts[0].strip():
-                            description = cell_texts[0].strip()
-                        elif i > 1 and cell_texts[i-1].strip():
-                            description = cell_texts[i-1].strip()
-                
-                if price and description and price > 0 and price < 10000:
-                    # More strict validation for table descriptions
-                    desc_lower = description.lower().strip()
-                    
-                    # NEVER extract any line with "total" - this is critical for tables too
-                    if 'total' in desc_lower:
-                        print(f"    SKIPPED table item: Contains 'total' - '{description}'")
-                        continue
-                    
-                    # NEVER extract addresses or personal info from tables
-                    address_keywords = ['brooklyn', 'ny ', 'new york', 'united states', 'fleet pl', 
-                                      'mehdi noori', 'zip code', 'street', 'avenue', 'blvd', 'road']
-                    if any(addr in desc_lower for addr in address_keywords):
-                        print(f"    SKIPPED table item: Contains address/personal info - '{description}'")
-                        continue
-                    
-                    # Skip summary lines and invalid descriptions
-                    summary_keywords = ['subtotal', 'tax', 'shipping', 'refund', 'balance',
-                                      'discount', 'promotion', 'coupon', 'fee', 'charge', 'adjustment',
-                                      'summary', 'estimated']
-                    
-                    if (len(description.strip()) > 8 and  # Increased minimum length
-                        not any(keyword in desc_lower for keyword in summary_keywords) and
-                        not desc_lower.endswith(':') and  # Skip lines ending with colon
-                        not re.match(r'^[^a-zA-Z]*$', description.strip()) and  # Must contain letters
-                        len([c for c in description if c.isalpha()]) >= 5):  # At least 5 letters
-                        
-                        # Check for duplicates in table too
-                        item_key = f"{description.strip()}_{price}"
-                        amount_key = f"{price}_{order_date}"
-                        if item_key in seen_items or amount_key in seen_amounts:
-                            print(f"    SKIPPED table item: Duplicate - '{description}'")
-                            continue
-                        seen_items.add(item_key)
-                        seen_amounts.add(amount_key)
-                        
-                        category = self._categorize_amazon_item(description)
-                        
-                        expense = {
-                            'expenseId': self.generate_expense_id(order_date or str(datetime.now().date()), 
-                                                                str(price), description),
-                            'userId': self.user_id,
-                            'documentId': self.document_id,
-                            'date': order_date or str(datetime.now().date()),
-                            'description': description.strip(),
-                            'vendor': self._get_amazon_vendor_category(description),
-                            'amount': str(price),
-                            'category': category,
-                            'bankAccount': 'amazon-receipts',
-                            'orderNumber': order_number,
-                            'status': 'pending',
-                            'confidence': 0.85,
-                            'createdAt': datetime.utcnow().isoformat()
-                        }
-                        expenses.append(expense)
-                        print(f"    FOUND item in table: {description} - ${price}")
-                    else:
-                        print(f"    SKIPPED table item: '{description}' - failed validation")
+        # Update the bank account to show these came through Amazon receipts category
+        for expense in expenses:
+            expense['bankAccount'] = 'amazon-receipts'
         
         return expenses
-    
-    def _get_block_by_id(self, block_id: str, full_data: Dict) -> Optional[Dict]:
-        """Get a block by its ID"""
-        for block in full_data.get('Blocks', []):
-            if block.get('Id') == block_id:
-                return block
-        return None
-    
-    def _get_cell_text(self, cell: Dict, full_data: Dict) -> str:
-        """Get text content from a cell"""
-        text_parts = []
-        
-        for relationship in cell.get('Relationships', []):
-            if relationship['Type'] == 'CHILD':
-                for child_id in relationship['Ids']:
-                    child_block = self._get_block_by_id(child_id, full_data)
-                    if child_block and child_block['BlockType'] in ['WORD', 'LINE']:
-                        text_parts.append(child_block.get('Text', ''))
-        
-        return ' '.join(text_parts)
 
 
 class GmailReceiptParser(BankStatementParser):
@@ -1803,29 +1365,191 @@ class GmailReceiptParser(BankStatementParser):
         """Parse generic receipt format - extract date, description, and total"""
         expenses = []
         
+        # Check if this is an Amazon email receipt
+        is_amazon_email = ('amazon.com' in text_content.lower() and 
+                          'order confirmation' in text_content.lower())
+        
+        if is_amazon_email:
+            logging.info("Detected Amazon email receipt - looking for multiple orders")
+            
+            # Find all order sections by looking for "Order Total:" patterns
+            order_sections = []
+            current_section = []
+            in_order_section = False
+            
+            for i, line in enumerate(lines):
+                # Start a new section when we see "Order Confirmation" or similar
+                if 'order confirmation' in line.lower() or 'order #' in line.lower():
+                    if current_section and in_order_section:
+                        order_sections.append(current_section)
+                    current_section = [line]
+                    in_order_section = True
+                elif in_order_section:
+                    current_section.append(line)
+                    # End section after Order Total
+                    if 'order total:' in line.lower() and i + 1 < len(lines):
+                        # Include the amount line
+                        current_section.append(lines[i + 1])
+                        order_sections.append(current_section)
+                        current_section = []
+                        in_order_section = False
+            
+            # Don't forget the last section
+            if current_section and in_order_section:
+                order_sections.append(current_section)
+            
+            logging.info(f"Found {len(order_sections)} order sections in Amazon email")
+            
+            # Process each order section
+            for section_num, section in enumerate(order_sections, 1):
+                section_text = '\n'.join(section)
+                logging.info(f"\nProcessing order section {section_num}:")
+                logging.info(f"Section preview: {section_text[:200]}...")
+                
+                # Extract order details from this section
+                amount = None
+                order_number = None
+                date = None
+                description_parts = []
+                
+                # Look for order number
+                for line in section:
+                    if 'order #' in line.lower() or line.strip().startswith('114-'):
+                        order_match = re.search(r'(114-\d+-\d+)', line)
+                        if order_match:
+                            order_number = order_match.group(1)
+                            logging.info(f"Found order number: {order_number}")
+                
+                # Look for amount (after "Order Total:")
+                for i, line in enumerate(section):
+                    if 'order total:' in line.lower() and i + 1 < len(section):
+                        amount_line = section[i + 1].strip()
+                        amount_match = re.search(r'\$(\d+\.\d{2})', amount_line)
+                        if amount_match:
+                            amount = Decimal(amount_match.group(1))
+                            logging.info(f"Found order total: ${amount}")
+                
+                # Look for product descriptions
+                for i, line in enumerate(section):
+                    # Skip metadata lines
+                    if (line.strip() and 
+                        not any(skip in line.lower() for skip in ['order total', 'order #', 'ship to', 
+                                                                   'arriving', 'order confirmation',
+                                                                   'mehdi', 'brooklyn', 'view or manage']) and
+                        not line.strip().startswith('$') and
+                        len(line.strip()) > 10):
+                        # This might be a product description
+                        if ('qty' in line.lower() or 
+                            any(word in line.lower() for word in ['kit', 'pack', 'set', 'item', 'product']) or
+                            '...' in line):  # Amazon truncates with ...
+                            description_parts.append(line.strip())
+                            logging.info(f"Found product description: {line.strip()}")
+                        # Also check for product names that appear before Qty
+                        elif i + 1 < len(section) and 'qty' in section[i + 1].lower():
+                            description_parts.append(line.strip())
+                            logging.info(f"Found product name before Qty: {line.strip()}")
+                
+                # Get date from email header if not found
+                if not date:
+                    date_match = re.search(r'([A-Za-z]+, [A-Za-z]+ \d{1,2}, \d{4})', text_content)
+                    if date_match:
+                        date_str = date_match.group(1)
+                        date = self._parse_date_flexible(date_str)
+                        logging.info(f"Using email date: {date}")
+                
+                if amount and order_number:
+                    # Build description from parts
+                    product_desc = ' & '.join(description_parts) if description_parts else f"Business Supplies"
+                    
+                    # Generate AI description
+                    ai_description = generate_receipt_description(
+                        f"Amazon.com email receipt\nOrder: {order_number}\nProducts: {product_desc}\nTotal: ${amount}",
+                        vendor="Amazon.com",
+                        amount=float(amount)
+                    )
+                    
+                    expense = {
+                        'expenseId': self.generate_expense_id(date or str(datetime.now().date()), 
+                                                            str(amount), ai_description),
+                        'userId': self.user_id,
+                        'documentId': self.document_id,
+                        'date': date or str(datetime.now().date()),
+                        'description': ai_description,
+                        'vendor': 'Amazon.com',
+                        'amount': str(amount),
+                        'category': 'office_expenses',  # Default for Amazon
+                        'bankAccount': 'gmail-receipts',
+                        'orderNumber': order_number,
+                        'status': 'pending',
+                        'confidence': 0.95,
+                        'createdAt': datetime.utcnow().isoformat()
+                    }
+                    expenses.append(expense)
+                    logging.info(f"Added Amazon order: {ai_description} - ${amount}")
+                else:
+                    logging.warning(f"Could not extract complete details from order section {section_num}")
+            
+            return expenses
+        
+        # Original generic receipt parsing for non-Amazon emails
         # Try to extract key information
         amount = None
         date = None
         description = None
         vendor = None
         
-        # Look for total amount - various patterns
-        amount_patterns = [
-            r'Total[:\s]*\$(\d+\.\d{2})',
-            r'Grand Total[:\s]*\$(\d+\.\d{2})',
-            r'Amount[:\s]*\$(\d+\.\d{2})',
-            r'Total Due[:\s]*\$(\d+\.\d{2})',
-            r'Total Paid[:\s]*\$(\d+\.\d{2})',
-            r'Payment[:\s]*\$(\d+\.\d{2})',
-            r'\$(\d+\.\d{2})\s*(?:USD)?$'  # Standalone amount at end of line
+        # Special handling for Beatport receipts
+        if 'beatport' in text_content.lower():
+            vendor = "Beatport"
+            logging.info("Detected Beatport receipt - looking for order total")
+        
+        # Look for amount - prioritize total amounts over individual items
+        # First, try to find the FINAL total (after taxes/fees)
+        final_amount_patterns = [
+            r'(?:Grand\s+)?Total[:\s]+\$?(\d+\.\d{2})',  # Total: $X.XX or Grand Total: $X.XX
+            r'Order\s+Total[:\s]+\$?(\d+\.\d{2})',       # Order Total: $X.XX
+            r'Amount\s+(?:Paid|Charged|Due)[:\s]+\$?(\d+\.\d{2})',  # Amount Paid/Charged/Due
+            r'Total\s+(?:Paid|Charged|Due)[:\s]+\$?(\d+\.\d{2})',   # Total Paid/Charged/Due
+            r'(?:You\s+)?Paid[:\s]+\$?(\d+\.\d{2})',     # Paid: $X.XX or You Paid: $X.XX
+            r'Charged[:\s]+\$?(\d+\.\d{2})',             # Charged: $X.XX
         ]
         
-        for pattern in amount_patterns:
-            amount_match = re.search(pattern, text_content, re.IGNORECASE | re.MULTILINE)
-            if amount_match:
-                amount = Decimal(amount_match.group(1))
-                print(f"Found amount: ${amount}")
-                break
+        # For receipts with multiple totals, we want the LAST one (usually after taxes)
+        all_amounts = []
+        for pattern in final_amount_patterns:
+            for match in re.finditer(pattern, text_content, re.IGNORECASE):
+                amount_value = Decimal(match.group(1))
+                position = match.start()
+                all_amounts.append((amount_value, position, match.group(0)))
+                logging.info(f"Found potential total: {match.group(0)} = ${amount_value} at position {position}")
+        
+        # If we found total amounts, use the one that appears last in the document
+        if all_amounts:
+            # Sort by position (latest in document)
+            all_amounts.sort(key=lambda x: x[1], reverse=True)
+            amount = all_amounts[0][0]
+            logging.info(f"Selected final total: ${amount} (appeared last in document)")
+        else:
+            # Fallback to generic amount patterns if no total found
+            amount_patterns = [
+                r'\$(\d+\.\d{2})',
+                r'Total[:\s]+\$?(\d+\.\d{2})',
+                r'Amount[:\s]+\$?(\d+\.\d{2})',
+                r'Charged[:\s]+\$?(\d+\.\d{2})'
+            ]
+            
+            # For generic patterns, also prefer amounts that appear later in the document
+            for pattern in amount_patterns:
+                matches = list(re.finditer(pattern, text_content, re.IGNORECASE))
+                if matches:
+                    # Use the last match (likely the total)
+                    last_match = matches[-1]
+                    amount = Decimal(last_match.group(1))
+                    logging.info(f"Found amount using fallback pattern: ${amount}")
+                    break
+        
+        if amount:
+            print(f"Found amount: ${amount}")
         
         # Look for date - various patterns
         date_patterns = [
@@ -1859,11 +1583,11 @@ class GmailReceiptParser(BankStatementParser):
         
         # First check if this is a known service where we should ignore store names
         text_lower = text_content.lower()
-        known_services = ['instacart', 'uber eats', 'doordash', 'grubhub', 'postmates']
+        known_services = ['instacart', 'uber eats', 'doordash', 'grubhub', 'postmates', 'lyft', 'uber']
         for service in known_services:
             if service in text_lower:
-                vendor = service.title().replace(' ', '')  # e.g., "Instacart", "UberEats"
-                print(f"Found known delivery service: {vendor}")
+                vendor = service.title().replace(' ', '')  # e.g., "Instacart", "UberEats", "Lyft"
+                print(f"Found known service: {vendor}")
                 break
         
         # Check for CapCut/PIPO specifically
@@ -1923,7 +1647,16 @@ class GmailReceiptParser(BankStatementParser):
                             'spotify.com': 'Spotify',
                             'instacart.com': 'Instacart',
                             'capcut.com': 'CapCut',
-                            'pipo.sg': 'CapCut'  # PIPO (SG) PTE LTD is CapCut
+                            'pipo.sg': 'CapCut',  # PIPO (SG) PTE LTD is CapCut
+                            'lyftmail.com': 'Lyft',
+                            'uber.com': 'Uber',
+                            'beatport.com': 'Beatport',
+                            'beatport-em.com': 'Beatport',
+                            'virtualdj.com': 'Virtual DJ',
+                            'elevenlabs.io': 'Eleven Labs',
+                            'midjourney.com': 'Midjourney',
+                            'runway.ml': 'Runway',
+                            'runwayml.com': 'Runway'
                         }
                         
                         if domain in domain_vendor_map:
@@ -1990,15 +1723,26 @@ class GmailReceiptParser(BankStatementParser):
     
     def _parse_date_flexible(self, date_str: str) -> Optional[str]:
         """Parse date from various formats"""
+        # Clean up the date string first
+        # Handle "Wed, Dec 25, 2024 at 4:38 AM" format
+        if ' at ' in date_str:
+            date_str = date_str.split(' at ')[0]  # Remove time portion
+        
+        # Remove day of week if present (e.g., "Wed, ")
+        if ',' in date_str and len(date_str.split(',')) > 2:
+            parts = date_str.split(',', 1)
+            if len(parts[0]) <= 4:  # Likely a day abbreviation
+                date_str = parts[1].strip()
+        
         # Try different date formats
         formats = [
-            '%B %d, %Y',      # January 1, 2024
-            '%b %d, %Y',      # Jan 1, 2024
-            '%m/%d/%Y',       # 01/01/2024
-            '%d/%m/%Y',       # 01/01/2024 (European)
-            '%Y-%m-%d',       # 2024-01-01
-            '%d-%m-%Y',       # 01-01-2024
-            '%m-%d-%Y'        # 01-01-2024
+            '%B %d, %Y',      # December 25, 2024
+            '%b %d, %Y',      # Dec 25, 2024
+            '%m/%d/%Y',       # 12/25/2024
+            '%d/%m/%Y',       # 25/12/2024 (European)
+            '%Y-%m-%d',       # 2024-12-25
+            '%d-%m-%Y',       # 25-12-2024
+            '%m-%d-%Y'        # 12-25-2024
         ]
         
         for fmt in formats:
@@ -2008,6 +1752,7 @@ class GmailReceiptParser(BankStatementParser):
             except:
                 continue
         
+        logging.warning(f"Could not parse date: '{date_str}'")
         return None
     
     def _categorize_generic_expense(self, vendor: str, description: str) -> str:
