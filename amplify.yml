@@ -37,30 +37,50 @@ frontend:
         # Build the application
         - echo "Building Patchline AI Platform..."
         - echo "Optimizing build for Amplify environment..."
-        # Create a minimal tsconfig for production that skips lib checking
+        # Create a standalone minimal tsconfig for production
         - |
           cat > tsconfig.production.json << 'EOF'
           {
-            "extends": "./tsconfig.json",
             "compilerOptions": {
+              "target": "ES2017",
+              "lib": ["dom", "dom.iterable", "esnext"],
+              "allowJs": true,
               "skipLibCheck": true,
+              "strict": false,
+              "noEmit": true,
               "incremental": false,
-              "tsBuildInfoFile": null
+              "module": "esnext",
+              "esModuleInterop": true,
+              "moduleResolution": "node",
+              "resolveJsonModule": true,
+              "isolatedModules": true,
+              "jsx": "preserve",
+              "baseUrl": ".",
+              "paths": {
+                "@/*": ["./*"]
+              }
             },
+            "include": [
+              "next-env.d.ts",
+              "**/*.ts",
+              "**/*.tsx"
+            ],
             "exclude": [
               "node_modules",
               "scripts/**/*",
               "__tests__/**/*",
               "backend/**/*",
               "documentation/**/*",
-              ".next/**/*"
+              ".next/**/*",
+              "**/*.test.ts",
+              "**/*.test.tsx"
             ]
           }
           EOF
-        - mv tsconfig.json tsconfig.backup.json
+        - mv tsconfig.json tsconfig.original.json
         - mv tsconfig.production.json tsconfig.json
         - pnpm run build
-        - mv tsconfig.backup.json tsconfig.json
+        - mv tsconfig.original.json tsconfig.json
         
         # Prune global pnpm store to shrink cache upload size
         - pnpm store prune
