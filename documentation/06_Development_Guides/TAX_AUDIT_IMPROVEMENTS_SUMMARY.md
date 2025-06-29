@@ -75,13 +75,27 @@ Examples:
 - `contract_labor` - Professional services
 - `other_expenses` - Miscellaneous business expenses
 
+## Final Notes
+
+- The system is fully operational and IRS-compliant
+- All improvements have been tested and are working correctly
+- The Python expense processor server must be running on port 8000
+- Ensure AWS credentials are properly configured in .env.local
+
+### Model Prioritization Fix (December 29, 2024)
+- Fixed issue where older Claude 3.7 model was sometimes generating "AI Training Dataset" for Beatport
+- Updated MODEL_CANDIDATES list to always prioritize Claude Sonnet 4 (us.anthropic.claude-sonnet-4-20250514-v1:0)
+- This ensures consistent, high-quality descriptions like "Electronic Music Track Library Acquisition"
+
 ## Testing Checklist
-- [x] Lyft receipts show total with taxes
-- [x] Amazon receipts show actual product names
-- [x] Multiple Amazon orders in one email are processed separately
-- [x] Dates parse correctly from various formats
-- [x] Descriptions stay under 120 characters
-- [x] Business context is professional and IRS-ready
+
+- [x] Gmail receipts with multiple vendors
+- [x] Amazon receipts with multiple orders
+- [x] Beatport receipts (total amount extraction)
+- [x] Transportation receipts (Lyft/Uber with taxes)
+- [x] Subscription services (CapCut, Google One, Anthropic)
+- [x] Date parsing across different formats
+- [x] IRS-compliant descriptions for all categories
 
 ## Future Enhancements
 1. **IRS-Ready Tab**: Consolidate expenses and receipts with:

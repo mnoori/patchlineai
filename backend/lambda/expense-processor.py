@@ -67,12 +67,18 @@ except Exception as e:
 MODEL_CANDIDATES = [
     os.environ.get('BEDROCK_MODEL_ID'),                    # Explicit override
     MODEL_ID_TO_USE,                                       # Preferred model (likely inference profile)
-    # Use inference profiles from config when available
+    # Use inference profiles from config when available - PRIORITIZE CLAUDE 4 SONNET
     BEDROCK_MODELS.get('claude-4-sonnet', {}).get('inference_profile'),
+    'us.anthropic.claude-sonnet-4-20250514-v1:0',         # Direct Claude 4 Sonnet ID
+    'anthropic.claude-sonnet-4-20250514-v1:0',            # Alternative Claude 4 Sonnet ID
+    # Then try Claude 3.7 Sonnet as fallback
     BEDROCK_MODELS.get('claude-3-7-sonnet', {}).get('inference_profile'),
+    'us.anthropic.claude-3-7-sonnet-20250219-v1:0',       # Direct Claude 3.7 Sonnet ID
+    # Then Nova Premier
     BEDROCK_MODELS.get('nova-premier', {}).get('inference_profile'),
-    # Fallback to models that always work with direct IDs
+    'arn:aws:bedrock:us-east-1::inference-profile/us.amazon.nova-premier-v1:0',
     'amazon.nova-premier-v1:0',
+    # Fallback to smaller models
     'amazon.nova-micro-v1:0',
     'anthropic.claude-3-haiku-20240307-v1:0',              # Usually available with on-demand
 ]
