@@ -18,6 +18,7 @@ const nextConfig = {
   // The CI workflow and local development should still run `pnpm type-check` so we don't lose safety.
   typescript: {
     ignoreBuildErrors: true,
+    tsconfigPath: './tsconfig.json',
   },
   
   // Optimize images

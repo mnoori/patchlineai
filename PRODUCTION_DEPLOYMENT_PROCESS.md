@@ -93,7 +93,21 @@ git push origin amplify-production-ready:master --force
 2. **Alternative**: Use WSL (Windows Subsystem for Linux) for local builds
 3. **Workaround**: Build in development mode locally, deploy in production mode
 
-**Current Status**: TypeScript errors fixed, ready for Amplify deployment
+**Current Status**: ✅ RESOLVED - Next.js moved to main dependencies
+
+### Issue 3: Amplify Package.json Error
+**Error**: `Cannot read 'next' version in package.json`
+**Status**: ✅ RESOLVED
+**Root Cause**: Next.js was in devDependencies instead of dependencies
+**Solution**: Move Next.js from devDependencies to dependencies in package.json
+
+### Issue 4: PNPM Lockfile Outdated
+**Error**: `Cannot install with "frozen-lockfile" because pnpm-lock.yaml is not up to date`
+**Status**: ✅ RESOLVED
+**Root Cause**: Moving Next.js between dependencies sections requires lockfile update
+**Solution**: Run `pnpm install` locally and commit updated `pnpm-lock.yaml`
+
+**Current Status**: All issues resolved, Amplify deployment should now succeed
 
 ### Issue 2: S3 Upload Type Mismatches
 **Error**: `Type 'S3UploadResult[]' is not assignable to type 'string[]'`

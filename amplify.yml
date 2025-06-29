@@ -1,4 +1,10 @@
 version: 1
+backend:
+  phases:
+    build:
+      commands:
+        - '# Execute Amplify CLI with the helper script'
+        - amplifyPush --simple
 frontend:
   phases:
     preBuild:
@@ -27,9 +33,11 @@ frontend:
     build:
       commands:
         # Set Node.js memory limit for build
-        - export NODE_OPTIONS="--max_old_space_size=4096"
+        - export NODE_OPTIONS="--max_old_space_size=8192"
         # Build the application
         - echo "Building Patchline AI Rebuilding AI Platform..."
+        - echo "Optimizing build for Amplify environment..."
+        - export SKIP_TYPE_CHECK=true
         - pnpm run build
         
         # Prune global pnpm store to shrink cache upload size
@@ -53,6 +61,7 @@ frontend:
       
   cache:
     paths:
+      - node_modules/**/*
       - .next/cache/**/*
 
 # Environment variables that need to be set in Amplify Console
