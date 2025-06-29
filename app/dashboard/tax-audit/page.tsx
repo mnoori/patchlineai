@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { ExpenseReviewTable } from "@/components/tax-audit/expense-review-table"
+import { IrsReadyReport } from "@/components/tax-audit/irs-ready-report"
 import { CategorySidebar } from "@/components/tax-audit/category-sidebar"
+import type { BusinessSummary, CategoryTotal } from "@/components/tax-audit/category-sidebar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
@@ -142,7 +144,14 @@ export default function TaxAuditPage() {
     const createCategoryTotals = (businessType: 'media' | 'consulting') => {
       const categories = expenses
         .filter(exp => exp.businessType === businessType)
-        .reduce((acc: any, exp: any) => {
+        .reduce((acc: Record<string, {
+          category: string
+          amount: number
+          count: number
+          approved: number
+          pending: number
+          rejected: number
+        }>, exp: any) => {
           if (!acc[exp.category]) {
             acc[exp.category] = {
               category: exp.category,
@@ -173,14 +182,14 @@ export default function TaxAuditPage() {
     
     return [
       {
-        businessType: 'media',
+        businessType: 'media' as const,
         totalAmount: summary.businessTypeTotals?.media || 0,
         totalExpenses: expenses.filter(exp => exp.businessType === 'media').length,
         categoryTotals: createCategoryTotals('media'),
         targetBudget: 105903 // From TAX_CATEGORIES
       },
       {
-        businessType: 'consulting',
+        businessType: 'consulting' as const,
         totalAmount: summary.businessTypeTotals?.consulting || 0,
         totalExpenses: expenses.filter(exp => exp.businessType === 'consulting').length,
         categoryTotals: createCategoryTotals('consulting'),
@@ -290,10 +299,7 @@ export default function TaxAuditPage() {
                   </TabsContent>
 
                   <TabsContent value="irs-ready" className="mt-6">
-                    <ExpenseReviewTable 
-                      userId="default-user" 
-                      irsReadyView={true}
-                    />
+                    <IrsReadyReport userId="default-user" />
                   </TabsContent>
 
                   <TabsContent value="tax-package" className="mt-6">

@@ -26,7 +26,7 @@ import {
 import { cn } from "@/lib/utils"
 import { TAX_CATEGORIES } from "@/lib/tax-categories"
 
-interface CategoryTotal {
+export interface CategoryTotal {
   category: string
   amount: number
   count: number
@@ -35,7 +35,7 @@ interface CategoryTotal {
   rejected: number
 }
 
-interface BusinessSummary {
+export interface BusinessSummary {
   businessType: 'media' | 'consulting'
   totalAmount: number
   totalExpenses: number
@@ -152,8 +152,8 @@ export function CategorySidebar({
       {/* Business Type Breakdowns */}
       <Accordion type="multiple" defaultValue={['media', 'consulting']} className="space-y-3">
         {businessSummaries.map((summary) => {
-          const config = TAX_CATEGORIES[summary.businessType]
           const budgetUtilization = getPercentage(summary.totalAmount, summary.targetBudget)
+          const businessName = summary.businessType === 'media' ? 'Media & Entertainment' : 'Consulting & Services'
           
           return (
             <AccordionItem
@@ -166,7 +166,7 @@ export function CategorySidebar({
                   <div className="flex items-center gap-3">
                     <Building className="h-5 w-5" />
                     <div className="text-left">
-                      <h3 className="font-semibold">{config.name}</h3>
+                      <h3 className="font-semibold">{businessName}</h3>
                       <p className="text-sm text-muted-foreground">
                         {summary.totalExpenses} expenses
                       </p>
@@ -197,7 +197,7 @@ export function CategorySidebar({
                   <div className="space-y-3">
                     <h4 className="text-sm font-medium">Category Breakdown</h4>
                     {summary.categoryTotals.map((catTotal) => {
-                      const categoryConfig = config.categories[catTotal.category]
+                      const categoryConfig = TAX_CATEGORIES[catTotal.category]
                       const percentage = getPercentage(catTotal.amount, summary.totalAmount)
                       
                       return (
@@ -209,10 +209,10 @@ export function CategorySidebar({
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <p className="font-medium text-sm">
-                                {catTotal.category.replace(/_/g, ' ')}
+                                {catTotal.category.replace(/-/g, ' ').replace(/_/g, ' ')}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {categoryConfig?.line || 'Unknown'}
+                                {categoryConfig?.line || 'Schedule C Line 27a'}
                               </p>
                             </div>
                             <div className="text-right">
@@ -310,7 +310,7 @@ export function CategorySidebar({
                       }
                     })
                   })
-                  return largest.category.replace(/_/g, ' ')
+                  return largest.category.replace(/-/g, ' ').replace(/_/g, ' ')
                 })()}
               </span>
             </div>

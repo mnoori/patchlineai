@@ -63,6 +63,7 @@ import { GodModeFeatureSelector, type GodModeFeature } from "../../../components
 import { HRRecruiterDashboard } from "../../../components/god-mode/hr/dashboard"
 import { NewsletterGeneratorDashboard } from "../../../components/god-mode/newsletter/dashboard"
 import { ExpenseReviewTable } from "../../../components/tax-audit/expense-review-table"
+import { IrsReadyReport } from "../../../components/tax-audit/irs-ready-report"
 import { ScheduleCReference } from "../../../components/tax-audit/schedule-c-reference"
 import { TAX_CATEGORIES } from "@/lib/tax-categories"
 import { useToast } from "@/components/ui/use-toast"
@@ -978,8 +979,8 @@ export default function GodModePage() {
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="upload">Upload & Process</TabsTrigger>
               <TabsTrigger value="documents">Document Library</TabsTrigger>
-              <TabsTrigger value="insights">Business Insights</TabsTrigger>
               <TabsTrigger value="tax-prep">Tax Preparation</TabsTrigger>
+              <TabsTrigger value="irs-ready">IRS Ready</TabsTrigger>
             </TabsList>
 
             {/* Upload Tab */}
@@ -1392,58 +1393,6 @@ export default function GodModePage() {
               </div>
             </TabsContent>
 
-            {/* Business Insights Tab */}
-            <TabsContent value="insights" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Expense Breakdown */}
-                <Card className="glass-effect">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <PieChart className="h-5 w-5" />
-                      Expense Breakdown
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center p-3 rounded-lg bg-blue-500/10">
-                        <span>Patchline AI</span>
-                        <span className="font-semibold">${patchlineExpenses.reduce((sum, doc) => sum + (doc.extractedData.amount || 0), 0).toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 rounded-lg bg-purple-500/10">
-                        <span>Art & Tech Lab</span>
-                        <span className="font-semibold">${artLabExpenses.reduce((sum, doc) => sum + (doc.extractedData.amount || 0), 0).toLocaleString()}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Tax Deductions */}
-                <Card className="glass-effect">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Receipt className="h-5 w-5" />
-                      Potential Tax Deductions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span>Schedule C Eligible</span>
-                        <span className="font-semibold text-green-400">${totalBusinessExpenses.toLocaleString()}</span>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Based on {businessExpenses.length} business expense documents
-                      </div>
-                      <Button className="w-full bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-black font-semibold">
-                        <Download className="h-4 w-4 mr-2" />
-                        Export Tax Summary
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
             {/* Tax Preparation Tab */}
             <TabsContent value="tax-prep" className="space-y-6">
               {/* Summary Cards */}
@@ -1696,6 +1645,11 @@ export default function GodModePage() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* IRS Ready Tab */}
+            <TabsContent value="irs-ready" className="space-y-6">
+              <IrsReadyReport userId="default-user" />
             </TabsContent>
           </Tabs>
         </div>
