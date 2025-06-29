@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
-
+import { Button } from "@/components/brand"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/logo"
@@ -101,4 +101,3 @@ export function Navbar() {
     </header>
   )
 }
-import { Button } from "@/components/brand"

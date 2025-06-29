@@ -238,7 +238,7 @@ export default function FeaturesPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
-                <Link href="/contact">Book a Demo</Link>
+                <Link href="/contact">Request a Demo</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="min-w-[200px]">
                 <Link href="/dashboard">Try for Free</Link>

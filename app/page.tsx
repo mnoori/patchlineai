@@ -57,10 +57,10 @@ export default function Home() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-12">
                 <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
-                  <Link href="/contact">Book a Demo</Link>
+                  <Link href="/contact">Request a Demo</Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="min-w-[200px]">
-                  <Link href="#demo">Watch Video</Link>
+                  <Link href="/features">Explore Features</Link>
                 </Button>
               </div>
             </div>
@@ -262,7 +262,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
-                  <Link href="/contact">Book a Demo</Link>
+                  <Link href="/contact">Request a Demo</Link>
                 </Button>
               </div>
             </div>
