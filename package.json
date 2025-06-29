@@ -4,10 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "SKIP_TYPE_CHECK=true next build",
+    "build": "next build",
+    "build:analyze": "cross-env ANALYZE=true next build",
     "build:with-types": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analyze": "node scripts/analyze-bundle.js",
+    "clean": "rm -rf .next node_modules/.cache"
   },
   "dependencies": {
     "@aws-amplify/auth": "^6.13.0",
@@ -69,7 +72,6 @@
     "@types/js-yaml": "^4.0.9",
     "@types/qrcode": "^1.5.5",
     "aws-amplify": "^6.15.0",
-    "aws-cdk-lib": "^2.200.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -87,12 +89,11 @@
     "js-yaml": "^4.1.0",
     "lru-cache": "^11.1.0",
     "lucide-react": "^0.292.0",
+    "next": "^14.2.29",
     "next-themes": "^0.4.6",
     "node-cache": "^5.1.2",
     "path": "^0.12.7",
-    "pdf-parse": "^1.1.1",
     "pino-pretty": "^13.0.0",
-    "puppeteer": "^24.10.0",
     "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-day-picker": "^9.7.0",
@@ -111,17 +112,17 @@
     "use-sync-external-store": "^1.5.0",
     "uuid": "^9.0.0",
     "vaul": "^1.1.2",
-    "xlsx": "^0.18.5",
     "zod": "^3.25.56",
-    "zustand": "^5.0.5",
-    "next": "^14.2.29"
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.3.4",
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@types/uuid": "^9.0.0",
     "autoprefixer": "^10.4.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.0.0",
     "node-fetch": "^2.7.0",
@@ -129,7 +130,8 @@
     "source-map-js": "^1.2.1",
     "styled-jsx": "^5.1.7",
     "tailwindcss": "^3.3.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "webpack-bundle-analyzer": "^4.10.2"
   },
   "description": "A powerful multi-agent system for music industry professionals that combines specialized AI agents to handle email communication, legal document analysis, and artist discovery.",
   "main": "amplify-config.js",
@@ -147,5 +149,11 @@
   "bugs": {
     "url": "https://github.com/mnoori/patchlineai/issues"
   },
-  "homepage": "https://github.com/mnoori/patchlineai#readme"
+  "homepage": "https://github.com/mnoori/patchlineai#readme",
+  "optionalDependencies": {
+    "aws-cdk-lib": "^2.200.1",
+    "pdf-parse": "^1.1.1",
+    "puppeteer": "^24.10.0",
+    "xlsx": "^0.18.5"
+  }
 }

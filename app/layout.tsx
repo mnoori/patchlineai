@@ -52,6 +52,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Preconnect to external domains for faster resource loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://imagedelivery.net" />
+        <link rel="preconnect" href="https://soundcharts.com" />
+        {/* DNS prefetch for APIs */}
+        <link rel="dns-prefetch" href="https://api.spotify.com" />
+        <link rel="dns-prefetch" href="https://www.googleapis.com" />
+      </head>
       <body className="font-sans" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"

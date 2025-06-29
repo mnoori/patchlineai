@@ -32,13 +32,35 @@ frontend:
         
     build:
       commands:
-        # Set Node.js memory limit for build
-        - export NODE_OPTIONS="--max_old_space_size=8192"
+        # Set Node.js memory limit for build (16GB instance)
+        - export NODE_OPTIONS="--max_old_space_size=14336"
         # Build the application
-        - echo "Building Patchline AI Rebuilding AI Platform..."
+        - echo "Building Patchline AI Platform..."
         - echo "Optimizing build for Amplify environment..."
-        - export SKIP_TYPE_CHECK=true
+        # Create a minimal tsconfig for production that skips lib checking
+        - |
+          cat > tsconfig.production.json << 'EOF'
+          {
+            "extends": "./tsconfig.json",
+            "compilerOptions": {
+              "skipLibCheck": true,
+              "incremental": false,
+              "tsBuildInfoFile": null
+            },
+            "exclude": [
+              "node_modules",
+              "scripts/**/*",
+              "__tests__/**/*",
+              "backend/**/*",
+              "documentation/**/*",
+              ".next/**/*"
+            ]
+          }
+          EOF
+        - mv tsconfig.json tsconfig.backup.json
+        - mv tsconfig.production.json tsconfig.json
         - pnpm run build
+        - mv tsconfig.backup.json tsconfig.json
         
         # Prune global pnpm store to shrink cache upload size
         - pnpm store prune
