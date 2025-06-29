@@ -134,6 +134,11 @@ const DOCUMENT_TYPES = {
     label: 'Amazon Receipts',
     folder: 'receipts/amazon',
     icon: FileText
+  },
+  'gmail-receipts': {
+    label: 'Gmail Receipts',
+    folder: 'receipts/gmail',
+    icon: FileText
   }
 }
 

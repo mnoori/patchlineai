@@ -1,6 +1,38 @@
 from flask import Flask, request, jsonify
 import sys
 import os
+from pathlib import Path
+
+# Load environment variables from .env.local if it exists
+def load_env_file():
+    """Load environment variables from .env.local file"""
+    # Try multiple possible locations for .env.local
+    possible_paths = [
+        Path(__file__).parent.parent.parent / '.env.local',  # Project root
+        Path(__file__).parent.parent / '.env.local',         # Backend folder
+        Path.cwd() / '.env.local'                            # Current directory
+    ]
+    
+    for env_path in possible_paths:
+        if env_path.exists():
+            print(f"Loading environment variables from: {env_path}")
+            with open(env_path, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        # Remove quotes if present
+                        value = value.strip().strip('"').strip("'")
+                        os.environ[key.strip()] = value
+            print(f"Loaded AWS credentials: AWS_ACCESS_KEY_ID={'*' * 10 if os.environ.get('AWS_ACCESS_KEY_ID') else 'NOT FOUND'}")
+            return
+    
+    print("Warning: No .env.local file found. AWS credentials may not be available.")
+    print("Checked paths:", [str(p) for p in possible_paths])
+
+# Load environment variables before importing expense processor
+load_env_file()
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import from the lambda directory using a different approach

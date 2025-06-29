@@ -949,7 +949,7 @@ export async function POST(request: NextRequest) {
               confidenceScore: expense.confidence || 0.5,
               createdAt: expense.createdAt || new Date().toISOString(),
               updatedAt: new Date().toISOString(),
-              documentType: bankType?.includes('receipt') ? 'receipt' : 'bank-statement',
+              documentType: bankType?.includes('receipt') || bankType === 'amazon-receipts' || bankType === 'gmail-receipts' ? 'receipt' : 'bank-statement',
               referenceNumber: expense.referenceNumber || null,
             }
 
@@ -1025,6 +1025,11 @@ export async function POST(request: NextRequest) {
     } else if (bankType === 'amazon-receipts') {
       console.log('Attempting Amazon receipt extraction')
       expenses = extractAmazonReceipt(extractedData)
+    } else if (bankType === 'gmail-receipts') {
+      console.log('Attempting Gmail receipt extraction')
+      // Gmail receipts will be handled by the Python processor
+      // The Python processor already has the GmailReceiptParser
+      console.log('Gmail receipts will be processed by Python processor')
     }
 
     // If bank-specific extraction didn't find anything, try generic extraction
@@ -1067,7 +1072,7 @@ export async function POST(request: NextRequest) {
         confidenceScore: classification?.confidence || 0.5,
         createdAt: now,
         updatedAt: now,
-        documentType: bankType?.includes('receipt') || bankType === 'amazon-receipts' ? 'receipt' : 'bank-statement',
+        documentType: bankType?.includes('receipt') || bankType === 'amazon-receipts' || bankType === 'gmail-receipts' ? 'receipt' : 'bank-statement',
       }
 
       console.log('Creating expense record:', expenseRecord)
@@ -1486,7 +1491,6 @@ function extractAmazonReceipt(extractedData: any): ExtractedExpense[] {
       if (seenItems.has(key)) return
       seenItems.add(key)
       
-      const taxCategory = TAX_CATEGORIES['other_expenses']
       expenses.push({
         lineNumber: expenses.length + 1,
         date: orderDate || new Date().toISOString().split('T')[0],

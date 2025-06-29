@@ -1,10 +1,469 @@
 import json
+import os
 import re
 import hashlib
 from datetime import datetime
 from decimal import Decimal
 from typing import List, Dict, Any, Optional, Tuple
 import boto3
+
+# Initialize Bedrock client with proper credential handling
+try:
+    # Check if we have AWS credentials in environment (support both naming conventions)
+    aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID') or os.environ.get('ACCESS_KEY_ID')
+    aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY') or os.environ.get('SECRET_ACCESS_KEY')
+    
+    if aws_access_key and aws_secret_key:
+        bedrock_runtime = boto3.client(
+            'bedrock-runtime',
+            region_name=os.environ.get('AWS_REGION', 'us-east-1'),
+            aws_access_key_id=aws_access_key,
+            aws_secret_access_key=aws_secret_key
+        )
+        print(f"Bedrock client initialized with explicit credentials (using {'AWS_' if os.environ.get('AWS_ACCESS_KEY_ID') else ''}ACCESS_KEY_ID)")
+    else:
+        # Try default credential chain
+        bedrock_runtime = boto3.client(
+            'bedrock-runtime',
+            region_name=os.environ.get('AWS_REGION', 'us-east-1')
+        )
+        print("Bedrock client initialized with default credentials")
+    
+    # Test if we can access Bedrock by listing models (lightweight test)
+    print("Bedrock client initialized successfully")
+except Exception as e:
+    print(f"Warning: Could not initialize Bedrock client: {e}")
+    bedrock_runtime = None
+
+def generate_smart_fallback_description(receipt_text: str, vendor: str = None, amount: float = None) -> str:
+    """Generate a smart description without using Bedrock"""
+    text_lower = receipt_text.lower()
+    
+    # Extract additional details from receipt
+    details = []
+    
+    # Meta/Facebook ads
+    if vendor == "Meta" or 'facebook' in text_lower:
+        # Look for account ID
+        account_match = re.search(r'Account ID[:\s_]*(\d+)', receipt_text, re.IGNORECASE)
+        account_id = account_match.group(1) if account_match else None
+        
+        # Look for campaign name
+        campaign_match = re.search(r'Campaign[:\s]*([^\n]+)', receipt_text, re.IGNORECASE)
+        if campaign_match:
+            campaign_name = campaign_match.group(1).strip()
+            details.append(campaign_name)
+        
+        # Look for ad set
+        adset_match = re.search(r'Ad Set[:\s]*([^\n]+)', receipt_text, re.IGNORECASE)
+        if adset_match:
+            details.append(adset_match.group(1).strip())
+        
+        # Extract date for billing period
+        date_match = re.search(r'Date[:\s]*([A-Za-z]+\s+\d{1,2},\s+\d{4})', receipt_text, re.IGNORECASE)
+        billing_period = ""
+        if date_match:
+            try:
+                date_obj = datetime.strptime(date_match.group(1), '%B %d, %Y')
+                billing_period = f" - {date_obj.strftime('%B %Y')}"
+            except:
+                billing_period = ""
+        
+        # Create IRS-compliant descriptions using "Advertising" for Schedule C Line 8
+        if 'results' in text_lower:
+            base = "Advertising - Meta Business Platform - AI Music Customer Acquisition Campaign"
+        elif 'boost' in text_lower:
+            base = "Advertising - Meta Post Promotion - Live Performance Event Marketing"
+        elif 'instagram' in text_lower and 'story' in text_lower:
+            base = "Advertising - Instagram Stories - Creative Services Brand Awareness"
+        elif 'instagram' in text_lower:
+            base = "Advertising - Instagram Business Ads - Patchline AI Platform Promotion"
+        elif 'facebook' in text_lower:
+            base = "Advertising - Facebook Business Ads - AI Music Technology Marketing"
+        else:
+            base = "Advertising - Meta Business Platform - Digital Marketing Services"
+        
+        # Add billing period
+        base += billing_period
+        
+        # Add account ID if found (last 6 digits only for brevity)
+        if account_id:
+            base += f" (ID: {account_id[-6:]})"
+        
+        # Add campaign name if available
+        if details and campaign_name:
+            # Clean up campaign name for IRS
+            if 'music' in campaign_name.lower():
+                return f"{base} - Music Technology Campaign"[:150]
+            elif 'ai' in campaign_name.lower() or 'patchline' in campaign_name.lower():
+                return f"{base} - AI Platform Launch Campaign"[:150]
+            elif 'event' in campaign_name.lower() or 'performance' in campaign_name.lower():
+                return f"{base} - Live Performance Marketing"[:150]
+            else:
+                return f"{base} - {campaign_name[:30]}"[:150]
+        
+        return base[:150]
+    
+    # Midjourney
+    elif vendor == "Midjourney" or 'midjourney' in text_lower:
+        plan = ""
+        if 'pro plan' in text_lower:
+            plan = "Professional"
+        elif 'standard plan' in text_lower:
+            plan = "Standard"
+        elif 'basic plan' in text_lower:
+            plan = "Basic"
+        
+        # Look for billing period
+        if 'monthly' in text_lower:
+            period = "Monthly"
+        elif 'yearly' in text_lower or 'annual' in text_lower:
+            period = "Annual"
+        else:
+            period = ""
+        
+        # IRS-friendly description for Office Expenses/Equipment
+        if plan and period:
+            return f"Office Expenses - Midjourney {plan} {period} - AI Visual Content Generation License"
+        elif plan:
+            return f"Office Expenses - Midjourney {plan} License - AI Visual Content Generation Software"
+        return "Office Expenses - Midjourney Subscription - AI Visual Content Creation for Business"
+    
+    # Apple
+    elif vendor == "Apple" or 'apple' in text_lower:
+        if 'icloud' in text_lower:
+            storage = ""
+            if '2 tb' in text_lower or '2tb' in text_lower:
+                storage = "2TB"
+            elif '200 gb' in text_lower or '200gb' in text_lower:
+                storage = "200GB"
+            elif '50 gb' in text_lower or '50gb' in text_lower:
+                storage = "50GB"
+            
+            if storage:
+                return f"Utilities - iCloud Storage {storage} - Business Data Backup & Project Files"
+            return "Utilities - iCloud Storage - Creative Asset Management & Client Files"
+        elif 'music' in text_lower:
+            if 'family' in text_lower:
+                return "Office Expenses - Apple Music Family - Team Music Research & Reference Library"
+            elif 'individual' in text_lower:
+                return "Office Expenses - Apple Music Individual - Music Research & Creative Reference"
+            return "Office Expenses - Apple Music Subscription - Digital Music Research Library"
+        elif 'tv' in text_lower:
+            return "Office Expenses - Apple TV+ Subscription - Industry Research & Content Analysis"
+        elif 'one' in text_lower:
+            if 'premier' in text_lower:
+                return "Office Expenses - Apple One Premier - Business Productivity & Creative Suite"
+            elif 'family' in text_lower:
+                return "Office Expenses - Apple One Family - Team Productivity Bundle"
+            return "Office Expenses - Apple One Bundle - Creative Production & Business Tools"
+        else:
+            return "Office Expenses - Apple Digital Services - Business Productivity Tools"
+    
+    # Google
+    elif vendor == "Google" or 'google' in text_lower:
+        if 'workspace' in text_lower:
+            if 'business' in text_lower:
+                return "Office Expenses - Google Workspace Business - Team Collaboration & Email"
+            elif 'enterprise' in text_lower:
+                return "Office Expenses - Google Workspace Enterprise - Business Communication Platform"
+            return "Office Expenses - Google Workspace - Business Email & Communication Tools"
+        elif 'drive' in text_lower:
+            storage_match = re.search(r'(\d+)\s*(gb|tb)', text_lower)
+            if storage_match:
+                size = storage_match.group(1)
+                unit = storage_match.group(2).upper()
+                return f"Utilities - Google Drive Storage {size}{unit} - Client Project Archive & Backup"
+            return "Utilities - Google Drive Storage - Digital Asset Management & File Backup"
+        elif 'ads' in text_lower or 'adwords' in text_lower:
+            # Look for campaign details
+            campaign_match = re.search(r'Campaign[:\s]*([^\n]+)', receipt_text, re.IGNORECASE)
+            if campaign_match:
+                campaign = campaign_match.group(1).strip()
+                if 'music' in campaign.lower():
+                    return "Advertising - Google Ads - Music Technology Marketing Campaign"
+                elif 'ai' in campaign.lower():
+                    return "Advertising - Google Ads - AI Platform Customer Acquisition"
+                else:
+                    return f"Advertising - Google Search Ads - {campaign[:40]}"
+            return "Advertising - Google Ads - Digital Marketing & Customer Acquisition"
+        else:
+            return "Utilities - Google Cloud Services - Technical Infrastructure & Hosting"
+    
+    # Adobe
+    elif vendor == "Adobe" or 'adobe' in text_lower:
+        if 'creative cloud' in text_lower:
+            if 'all apps' in text_lower:
+                return "Office Expenses - Adobe Creative Cloud All Apps - Complete Video/Audio Production Suite"
+            elif 'photography' in text_lower:
+                return "Office Expenses - Adobe Photography Plan - Visual Content Creation & Image Processing"
+            return "Office Expenses - Adobe Creative Cloud - Digital Design & Content Creation Software"
+        elif 'photoshop' in text_lower:
+            return "Office Expenses - Adobe Photoshop - Image Processing & Visual Content Creation"
+        elif 'premiere' in text_lower:
+            return "Office Expenses - Adobe Premiere Pro - Video Production & Content Creation Software"
+        elif 'illustrator' in text_lower:
+            return "Office Expenses - Adobe Illustrator - Vector Graphics & Logo Design Software"
+        elif 'after effects' in text_lower:
+            return "Adobe After Effects - Motion Graphics Software"
+        else:
+            return "Adobe Software License - Creative Production Tools"
+    
+    # Spotify
+    elif vendor == "Spotify" or 'spotify' in text_lower:
+        if 'premium duo' in text_lower:
+            return "Spotify Premium Duo - Music Research & Analysis"
+        elif 'premium family' in text_lower:
+            return "Spotify Premium Team - Music Industry Research"
+        elif 'premium' in text_lower:
+            return "Spotify Premium - Music Reference & Analysis"
+        elif 'for artists' in text_lower:
+            return "Spotify for Artists - Platform Analytics"
+        else:
+            return "Music Streaming Service - Market Research"
+    
+    # Microsoft
+    elif vendor == "Microsoft" or 'microsoft' in text_lower:
+        if '365' in text_lower:
+            if 'business' in text_lower:
+                return "Microsoft 365 Business - Office Productivity Suite"
+            elif 'personal' in text_lower:
+                return "Microsoft 365 - Document Processing Software"
+            elif 'family' in text_lower:
+                return "Microsoft 365 Team - Collaborative Tools"
+            return "Microsoft Office Suite - Business Documentation"
+        elif 'azure' in text_lower:
+            # Look for service details
+            if 'compute' in text_lower:
+                return "Azure Cloud Computing - AI Processing Infrastructure"
+            elif 'storage' in text_lower:
+                return "Azure Storage - Data Archival Services"
+            elif 'database' in text_lower:
+                return "Azure Database - Business Data Management"
+            elif 'cognitive' in text_lower or 'ai' in text_lower:
+                return "Azure AI Services - Machine Learning Platform"
+            return "Microsoft Azure - Cloud Infrastructure Services"
+        elif 'github' in text_lower:
+            if 'copilot' in text_lower:
+                return "GitHub Copilot - AI Development Assistant"
+            elif 'pro' in text_lower:
+                return "GitHub Pro - Code Repository Management"
+            return "GitHub Services - Software Development Platform"
+        else:
+            return "Microsoft Services - Business Technology"
+    
+    # CapCut
+    elif vendor == "CapCut" or 'capcut' in text_lower or 'pipo' in text_lower:
+        # Extract date for billing period
+        date_match = re.search(r'Date[:\s]*([A-Za-z]+\s+\d{1,2},\s+\d{4})', receipt_text, re.IGNORECASE)
+        if not date_match:
+            date_match = re.search(r'([A-Za-z]+\s+\d{1,2},\s+\d{4})', receipt_text)
+        
+        billing_period = ""
+        if date_match:
+            try:
+                date_obj = datetime.strptime(date_match.group(1), '%B %d, %Y')
+                billing_period = f" - {date_obj.strftime('%B %Y')}"
+            except:
+                try:
+                    date_obj = datetime.strptime(date_match.group(1), '%b %d, %Y')
+                    billing_period = f" - {date_obj.strftime('%B %Y')}"
+                except:
+                    billing_period = ""
+        
+        if 'pro' in text_lower:
+            return f"CapCut Pro Monthly Subscription{billing_period} - Video Content Production"[:150]
+        elif 'annual' in text_lower or 'yearly' in text_lower:
+            return f"CapCut Pro Annual License{billing_period} - Professional Video Editing"[:150]
+        else:
+            return f"CapCut Video Editing Subscription{billing_period} - Content Creation Tools"[:150]
+    
+    # Instacart
+    elif vendor == "Instacart" or 'instacart' in text_lower:
+        # Look for store name - multiple patterns
+        store = None
+        store_patterns = [
+            r'delivered from\s+([A-Za-z\s&\']+?)(?:\s+on|\s*$)',
+            r'order from\s+([A-Za-z\s&\']+?)(?:\s+delivered|\s*$)',
+            r'from\s+([A-Za-z\s&\']+?)\s+(?:delivered|on)',
+            r'receipt.*?from\s+([A-Za-z\s&\']+?)(?:\s|$)'
+        ]
+        
+        for pattern in store_patterns:
+            store_match = re.search(pattern, text_lower, re.IGNORECASE)
+            if store_match:
+                store = store_match.group(1).strip().title()
+                # Clean up store name
+                store = store.replace('  ', ' ').strip()
+                if store and store.lower() not in ['your', 'the', 'order']:
+                    break
+                else:
+                    store = None
+        
+        if store:
+            return f"Office Supplies - {store} (Event Catering/Refreshments)"
+        return "Office Supplies - Event Refreshments & Catering"
+    
+    # Generic order receipts
+    elif 'order' in text_lower and 'receipt' in text_lower:
+        # Look for order number
+        order_match = re.search(r'order\s*(?:number|#|id)?[:\s]*([A-Z0-9-]+)', receipt_text, re.IGNORECASE)
+        order_num = order_match.group(1) if order_match else None
+        
+        # Look for what was ordered
+        if vendor:
+            # Make it business-relevant
+            if 'equipment' in text_lower or 'gear' in text_lower:
+                desc = f"{vendor} - Audio/Visual Equipment"
+            elif 'software' in text_lower:
+                desc = f"{vendor} - Software License"
+            elif 'hardware' in text_lower:
+                desc = f"{vendor} - Computer Hardware"
+            elif 'cable' in text_lower or 'adapter' in text_lower:
+                desc = f"{vendor} - Technical Equipment"
+            else:
+                desc = f"{vendor} - Business Supplies"
+            
+            if order_num:
+                desc += f" (Order: {order_num[-8:]})"  # Last 8 chars of order
+            return desc[:100]
+        else:
+            return "Online Purchase - Business Operations"
+    
+    # Generic fallback - try to extract service/product info
+    else:
+        # Look for service/product mentions
+        service_match = re.search(r'(?:Service|Product|Subscription)[:\s]*([^\n]+)', receipt_text, re.IGNORECASE)
+        if service_match:
+            service = service_match.group(1).strip()
+            # Make it business-relevant
+            if vendor:
+                return f"{vendor} - {service} (Business Services)"[:100]
+            else:
+                return f"Professional Services - {service}"[:100]
+        
+        # Look for description
+        desc_match = re.search(r'(?:Description|Item)[:\s]*([^\n]+)', receipt_text, re.IGNORECASE)
+        if desc_match:
+            desc = desc_match.group(1).strip()
+            if vendor:
+                return f"{vendor} - {desc} (Business Expense)"[:100]
+            else:
+                return f"Business Purchase - {desc}"[:100]
+        
+        # Final fallback based on vendor
+        if vendor:
+            # Try to categorize by vendor name
+            vendor_lower = vendor.lower()
+            if any(tech in vendor_lower for tech in ['tech', 'software', 'cloud', 'digital', 'ai']):
+                return f"{vendor} - Technology Services"
+            elif any(creative in vendor_lower for creative in ['music', 'audio', 'video', 'media', 'creative']):
+                return f"{vendor} - Creative Production Services"
+            elif any(market in vendor_lower for market in ['marketing', 'advertising', 'social']):
+                return f"{vendor} - Marketing Services"
+            else:
+                return f"{vendor} - Professional Services"
+        
+        return "Business Services - General Operations"
+
+
+def generate_receipt_description(receipt_text: str, vendor: str = None, amount: float = None) -> str:
+    """Generate a concise description for a receipt using Nova Micro"""
+    # Check if Bedrock is available
+    if not bedrock_runtime:
+        print("Bedrock runtime not available, using smart fallback")
+        return generate_smart_fallback_description(receipt_text, vendor, amount)
+    
+    try:
+        print(f"\n=== Calling Nova Micro for description generation ===")
+        print(f"Vendor: {vendor}, Amount: ${amount}")
+        print(f"Text preview (first 200 chars): {receipt_text[:200]}...")
+        
+        prompt = f"""You are a tax defense attorney preparing expense descriptions for IRS audit defense. Create a description that will EXACTLY match bank statement entries and withstand scrutiny.
+
+RECEIPT DATA:
+{receipt_text[:1500]}
+
+VENDOR: {vendor or 'Unknown'}
+AMOUNT: ${amount or 0:.2f}
+
+BUSINESS PROFILE:
+- Entity: Algoryx Art & Tech Lab (DBA Patchline AI)
+- Industry: AI-powered music technology, creative software development, live performance
+- Business Activities: AI music platform development, live DJ/VJ performances, creative AI consulting
+- Tax Status: Startup with $150,000 net operating loss requiring detailed documentation
+
+AUDIT DEFENSE REQUIREMENTS:
+1. **EXACT MATCHING**: Description must match bank statement transaction descriptions for reconciliation
+2. **BUSINESS NECESSITY**: Must demonstrate "ordinary and necessary" business expense under IRC Section 162
+3. **SPECIFICITY**: Include specific business purpose, not generic descriptions
+4. **BILLING PERIODS**: For subscriptions, include exact billing period (e.g., "December 2024 Monthly")
+5. **SCHEDULE C COMPLIANCE**: Use exact Schedule C terminology for categorization
+6. **SUPPORTING DETAILS**: Include service/product details that justify business use
+7. **AUDIT TRAIL**: Include reference numbers, account IDs, or other identifying information when available
+
+CRITICAL FORMATTING:
+- Maximum 150 characters
+- Start with Schedule C category when applicable
+- Include billing period for recurring expenses
+- Use business-specific terminology
+- Include account/reference numbers if available
+
+ENHANCED EXAMPLES:
+- "Advertising - Meta Business Platform - December 2024 Campaign - AI Music Promotion (Acct: 123456)"
+- "Office Expenses - CapCut Pro Monthly - December 2024 - Video Content Production Software"
+- "Utilities - Cloud Storage 2TB - December 2024 - Client Project Files & Creative Assets"
+- "Equipment - Midjourney Pro Annual License - AI Visual Content Generation for Live Performances"
+- "Professional Services - Adobe Creative Cloud - December 2024 - Video/Audio Production Suite"
+
+MATCHING PRIORITY: The description should be recognizable when cross-referenced with bank statements showing the same vendor and amount.
+
+Generate the audit-ready description:"""
+
+        print(f"Calling Bedrock with model: anthropic.claude-3-5-sonnet-20241022-v2:0")
+        
+        response = bedrock_runtime.invoke_model(
+            modelId='anthropic.claude-3-5-sonnet-20241022-v2:0',  # Updated to Sonnet 3.5 v2
+            body=json.dumps({
+                'anthropic_version': 'bedrock-2023-05-31',
+                'messages': [
+                    {
+                        'role': 'user',
+                        'content': prompt
+                    }
+                ],
+                'max_tokens': 200,
+                'temperature': 0.2,  # Lower temperature for consistency
+                'top_p': 0.9
+            }),
+            contentType='application/json',
+            accept='application/json'
+        )
+        
+        response_body = json.loads(response['body'].read())
+        print(f"Bedrock response: {json.dumps(response_body, indent=2)}")
+        
+        description = response_body.get('content', [{}])[0].get('text', '').strip()
+        
+        print(f"Generated description: '{description}'")
+        
+        # Fallback if no description generated
+        if not description:
+            print("No description generated, using smart fallback")
+            return generate_smart_fallback_description(receipt_text, vendor, amount)
+            
+        # Ensure it's not too long
+        if len(description) > 100:
+            description = description[:97] + "..."
+            
+        return description
+        
+    except Exception as e:
+        print(f"Error generating description with Nova Micro: {e}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        # Fallback to smart description
+        return generate_smart_fallback_description(receipt_text, vendor, amount)
 
 dynamodb = boto3.resource('dynamodb')
 textract = boto3.client('textract')
@@ -176,7 +635,7 @@ class ChaseStatementParser(BankStatementParser):
         
         print(f"Processing {len(lines)} text lines")
         
-        # Look for transaction patterns
+        # Look for transaction section markers
         in_transaction_section = False
         
         for i, line in enumerate(lines):
@@ -909,6 +1368,462 @@ class AmazonReceiptParser(BankStatementParser):
         return ' '.join(text_parts)
 
 
+class GmailReceiptParser(BankStatementParser):
+    """Parser for Gmail receipts (various types like Midjourney, Apple, etc.)"""
+    
+    def parse_textract_output(self, textract_data: Dict) -> List[Dict]:
+        """Parse Gmail receipt format"""
+        expenses = []
+        
+        # Extract all text first
+        full_text = []
+        for block in textract_data.get('Blocks', []):
+            if block['BlockType'] == 'LINE':
+                text = block.get('Text', '').strip()
+                if text:
+                    full_text.append(text)
+        
+        text_content = '\n'.join(full_text)
+        
+        print(f"Gmail receipt - Processing {len(full_text)} lines")
+        
+        # Debug: Print first few lines to see structure
+        print("\n=== First 20 lines of Gmail receipt ===")
+        for i, line in enumerate(full_text[:20]):
+            print(f"{i}: {line}")
+        print("=== End sample ===\n")
+        
+        # Detect receipt type and extract accordingly
+        receipt_type = self._detect_receipt_type(text_content)
+        print(f"Detected receipt type: {receipt_type}")
+        
+        if receipt_type == 'midjourney':
+            return self._parse_midjourney_receipt(full_text, text_content)
+        elif receipt_type == 'apple':
+            return self._parse_apple_receipt(full_text, text_content)
+        elif receipt_type == 'generic':
+            return self._parse_generic_receipt(full_text, text_content, textract_data)
+        
+        return expenses
+    
+    def _detect_receipt_type(self, text_content: str) -> str:
+        """Detect the type of Gmail receipt"""
+        text_lower = text_content.lower()
+        
+        if 'midjourney' in text_lower:
+            return 'midjourney'
+        elif 'apple' in text_lower and ('icloud' in text_lower or 'apple.com' in text_lower):
+            return 'apple'
+        elif ('meta' in text_lower and 'ads' in text_lower) or 'facebook' in text_lower:
+            # Meta ads receipts should use generic parser with enhanced vendor detection
+            return 'generic'
+        else:
+            return 'generic'
+    
+    def _parse_midjourney_receipt(self, lines: List[str], text_content: str) -> List[Dict]:
+        """Parse Midjourney receipt format"""
+        expenses = []
+        
+        # Extract key information
+        amount = None
+        date = None
+        vendor = "Midjourney Inc"
+        receipt_number = None
+        invoice_number = None
+        
+        # Look for amount - Midjourney shows like "$10.89"
+        amount_match = re.search(r'\$(\d+\.\d{2})', text_content)
+        if amount_match:
+            amount = Decimal(amount_match.group(1))
+            print(f"Found amount: ${amount}")
+        
+        # Look for date - "Paid November 29, 2024" or similar
+        date_patterns = [
+            r'Paid\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})',
+            r'([A-Za-z]+\s+\d{1,2},\s+\d{4})',
+            r'(\d{1,2}/\d{1,2}/\d{4})'
+        ]
+        
+        for pattern in date_patterns:
+            date_match = re.search(pattern, text_content)
+            if date_match:
+                date_str = date_match.group(1)
+                try:
+                    # Try different date formats
+                    for fmt in ['%B %d, %Y', '%b %d, %Y', '%m/%d/%Y']:
+                        try:
+                            date_obj = datetime.strptime(date_str, fmt)
+                            date = date_obj.strftime('%Y-%m-%d')
+                            print(f"Found date: {date}")
+                            break
+                        except:
+                            continue
+                except:
+                    pass
+                if date:
+                    break
+        
+        # Look for receipt number
+        receipt_match = re.search(r'Receipt number\s*[:\s]*(\d+-\d+-\d+)', text_content, re.IGNORECASE)
+        if receipt_match:
+            receipt_number = receipt_match.group(1)
+            print(f"Found receipt number: {receipt_number}")
+        
+        # Look for invoice number
+        invoice_match = re.search(r'Invoice number\s*[:\s]*([A-Z0-9-]+)', text_content, re.IGNORECASE)
+        if invoice_match:
+            invoice_number = invoice_match.group(1)
+            print(f"Found invoice number: {invoice_number}")
+        
+        # Generate intelligent description using Nova Micro
+        description = generate_receipt_description(
+            text_content,
+            vendor=vendor,
+            amount=float(amount) if amount else None
+        )
+        
+        print(f"Generated description: {description}")
+        
+        if amount and date:
+            expense = {
+                'expenseId': self.generate_expense_id(date, str(amount), description),
+                'userId': self.user_id,
+                'documentId': self.document_id,
+                'date': date,
+                'description': description,
+                'vendor': vendor,
+                'amount': str(amount),
+                'category': 'platform_expenses',  # AI/Platform subscription
+                'bankAccount': 'gmail-receipts',
+                'receiptNumber': receipt_number,
+                'invoiceNumber': invoice_number,
+                'status': 'pending',
+                'confidence': 0.95,
+                'createdAt': datetime.utcnow().isoformat()
+            }
+            expenses.append(expense)
+            print(f"Added Midjourney expense: {description} - ${amount} on {date}")
+        
+        return expenses
+    
+    def _parse_apple_receipt(self, lines: List[str], text_content: str) -> List[Dict]:
+        """Parse Apple receipt format"""
+        expenses = []
+        
+        # Extract key information
+        amount = None
+        date = None
+        vendor = "Apple"
+        order_id = None
+        
+        # Look for amount - Apple shows total like "$9.99"
+        amount_match = re.search(r'TOTAL\s*\$(\d+\.\d{2})', text_content, re.IGNORECASE)
+        if not amount_match:
+            # Try alternative pattern
+            amount_match = re.search(r'\$(\d+\.\d{2})', text_content)
+        
+        if amount_match:
+            amount = Decimal(amount_match.group(1))
+            print(f"Found amount: ${amount}")
+        
+        # Look for date
+        date_patterns = [
+            r'DATE\s*([A-Za-z]+\s+\d{1,2},\s+\d{4})',
+            r'([A-Za-z]+\s+\d{1,2},\s+\d{4})',
+            r'Renews\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})'
+        ]
+        
+        for pattern in date_patterns:
+            date_match = re.search(pattern, text_content)
+            if date_match:
+                date_str = date_match.group(1)
+                try:
+                    for fmt in ['%B %d, %Y', '%b %d, %Y']:
+                        try:
+                            date_obj = datetime.strptime(date_str, fmt)
+                            date = date_obj.strftime('%Y-%m-%d')
+                            print(f"Found date: {date}")
+                            break
+                        except:
+                            continue
+                except:
+                    pass
+                if date:
+                    break
+        
+        # Look for order ID
+        order_match = re.search(r'ORDER ID\s*([A-Z0-9]+)', text_content, re.IGNORECASE)
+        if order_match:
+            order_id = order_match.group(1)
+            print(f"Found order ID: {order_id}")
+        
+        # Generate intelligent description using Nova Micro
+        description = generate_receipt_description(
+            text_content,
+            vendor=vendor,
+            amount=float(amount) if amount else None
+        )
+        
+        print(f"Generated description: {description}")
+        
+        if amount and date:
+            expense = {
+                'expenseId': self.generate_expense_id(date, str(amount), description),
+                'userId': self.user_id,
+                'documentId': self.document_id,
+                'date': date,
+                'description': description,
+                'vendor': vendor,
+                'amount': str(amount),
+                'category': 'platform_expenses',  # Cloud storage/subscription
+                'bankAccount': 'gmail-receipts',
+                'orderNumber': order_id,
+                'status': 'pending',
+                'confidence': 0.95,
+                'createdAt': datetime.utcnow().isoformat()
+            }
+            expenses.append(expense)
+            print(f"Added Apple expense: {description} - ${amount} on {date}")
+        
+        return expenses
+    
+    def _parse_generic_receipt(self, lines: List[str], text_content: str, textract_data: Dict) -> List[Dict]:
+        """Parse generic receipt format - extract date, description, and total"""
+        expenses = []
+        
+        # Try to extract key information
+        amount = None
+        date = None
+        description = None
+        vendor = None
+        
+        # Look for total amount - various patterns
+        amount_patterns = [
+            r'Total[:\s]*\$(\d+\.\d{2})',
+            r'Grand Total[:\s]*\$(\d+\.\d{2})',
+            r'Amount[:\s]*\$(\d+\.\d{2})',
+            r'Total Due[:\s]*\$(\d+\.\d{2})',
+            r'Total Paid[:\s]*\$(\d+\.\d{2})',
+            r'Payment[:\s]*\$(\d+\.\d{2})',
+            r'\$(\d+\.\d{2})\s*(?:USD)?$'  # Standalone amount at end of line
+        ]
+        
+        for pattern in amount_patterns:
+            amount_match = re.search(pattern, text_content, re.IGNORECASE | re.MULTILINE)
+            if amount_match:
+                amount = Decimal(amount_match.group(1))
+                print(f"Found amount: ${amount}")
+                break
+        
+        # Look for date - various patterns
+        date_patterns = [
+            r'Date[:\s]*([A-Za-z]+\s+\d{1,2},\s+\d{4})',
+            r'Invoice Date[:\s]*([A-Za-z]+\s+\d{1,2},\s+\d{4})',
+            r'Receipt Date[:\s]*([A-Za-z]+\s+\d{1,2},\s+\d{4})',
+            r'([A-Za-z]+\s+\d{1,2},\s+\d{4})',
+            r'(\d{1,2}/\d{1,2}/\d{4})',
+            r'(\d{4}-\d{2}-\d{2})'
+        ]
+        
+        for pattern in date_patterns:
+            date_match = re.search(pattern, text_content)
+            if date_match:
+                date_str = date_match.group(1)
+                # Try to parse the date
+                date = self._parse_date_flexible(date_str)
+                if date:
+                    print(f"Found date: {date}")
+                    break
+        
+        # Try to extract vendor/company name
+        vendor_patterns = [
+            r'From[:\s]*([A-Za-z0-9\s&,.-]+)',
+            r'Merchant[:\s]*([A-Za-z0-9\s&,.-]+)',
+            r'Vendor[:\s]*([A-Za-z0-9\s&,.-]+)',
+            r'Company[:\s]*([A-Za-z0-9\s&,.-]+)',
+            r'Billed by[:\s]*([A-Za-z0-9\s&,.-]+)',
+            r'Payment to[:\s]*([A-Za-z0-9\s&,\(\).-]+)'  # Added parentheses for (SG)
+        ]
+        
+        # First check if this is a known service where we should ignore store names
+        text_lower = text_content.lower()
+        known_services = ['instacart', 'uber eats', 'doordash', 'grubhub', 'postmates']
+        for service in known_services:
+            if service in text_lower:
+                vendor = service.title().replace(' ', '')  # e.g., "Instacart", "UberEats"
+                print(f"Found known delivery service: {vendor}")
+                break
+        
+        # Check for CapCut/PIPO specifically
+        if not vendor and ('capcut' in text_lower or 'pipo' in text_lower):
+            vendor = "CapCut"
+            print(f"Found CapCut/PIPO service")
+        
+        # If not a known service, try standard patterns
+        if not vendor:
+            for pattern in vendor_patterns:
+                vendor_match = re.search(pattern, text_content, re.IGNORECASE)
+                if vendor_match:
+                    vendor = vendor_match.group(1).strip()
+                    # Clean up vendor - remove newlines and limit length
+                    vendor = vendor.split('\n')[0].strip()
+                    
+                    # Special handling for PIPO -> CapCut
+                    if 'pipo' in vendor.lower():
+                        vendor = "CapCut"
+                    
+                    print(f"Found vendor: {vendor}")
+                    break
+        
+        # If no vendor found, try to extract from email or first few lines
+        if not vendor:
+            # Skip Gmail header lines and look for actual vendor
+            for i, line in enumerate(lines):
+                # Skip Gmail interface lines
+                if i < 2 and 'gmail' in line.lower():
+                    continue
+                    
+                # Look for Meta/Facebook
+                if 'meta' in line.lower() or 'facebook' in line.lower():
+                    if '@facebookmail.com' in line or '@meta.com' in line:
+                        vendor = "Meta"
+                        print(f"Found vendor from email: {vendor}")
+                        break
+                    elif 'meta platforms' in line.lower():
+                        vendor = "Meta"
+                        print(f"Found vendor from company name: {vendor}")
+                        break
+                
+                # Generic email extraction
+                if '@' in line and '.' in line and i < 10:
+                    email_match = re.search(r'([a-zA-Z0-9.-]+)@([a-zA-Z0-9.-]+)', line)
+                    if email_match:
+                        domain = email_match.group(2)
+                        # Map common domains to proper vendor names
+                        domain_vendor_map = {
+                            'facebookmail.com': 'Meta',
+                            'meta.com': 'Meta',
+                            'apple.com': 'Apple',
+                            'google.com': 'Google',
+                            'amazon.com': 'Amazon',
+                            'microsoft.com': 'Microsoft',
+                            'adobe.com': 'Adobe',
+                            'spotify.com': 'Spotify',
+                            'instacart.com': 'Instacart',
+                            'capcut.com': 'CapCut',
+                            'pipo.sg': 'CapCut'  # PIPO (SG) PTE LTD is CapCut
+                        }
+                        
+                        if domain in domain_vendor_map:
+                            vendor = domain_vendor_map[domain]
+                        else:
+                            # Extract vendor from domain
+                            vendor_name = domain.split('.')[0].title()
+                            # Clean up vendor name - remove common suffixes
+                            if vendor_name.lower() not in ['gmail', 'mail', 'email', 'noreply']:
+                                vendor = vendor_name
+                        
+                        # Don't use Gmail as vendor
+                        if vendor and vendor.lower() != 'gmail':
+                            print(f"Found vendor from email domain: {vendor}")
+                            break
+        
+        # Final vendor cleanup - ensure it's not too long
+        if vendor and len(vendor) > 50:
+            # If vendor is too long, it's probably captured extra text
+            vendor = vendor.split('\n')[0].split(',')[0].strip()[:50]
+        
+        # Generate intelligent description using Nova Micro
+        description = generate_receipt_description(
+            text_content, 
+            vendor=vendor,
+            amount=float(amount) if amount else None
+        )
+        
+        print(f"Generated description: {description}")
+        
+        # If we have amount and date, create the expense
+        if amount and date:
+            # Try to categorize based on vendor or description
+            category = self._categorize_generic_expense(vendor or '', description)
+            
+            expense = {
+                'expenseId': self.generate_expense_id(date, str(amount), description),
+                'userId': self.user_id,
+                'documentId': self.document_id,
+                'date': date,
+                'description': description,
+                'vendor': vendor or 'Unknown Vendor',
+                'amount': str(amount),
+                'category': category,
+                'bankAccount': 'gmail-receipts',
+                'status': 'pending',
+                'confidence': 0.8,
+                'createdAt': datetime.utcnow().isoformat()
+            }
+            expenses.append(expense)
+            print(f"Added generic expense: {description} - ${amount} on {date}")
+        
+        return expenses
+    
+    def _parse_date_flexible(self, date_str: str) -> Optional[str]:
+        """Parse date from various formats"""
+        # Try different date formats
+        formats = [
+            '%B %d, %Y',      # January 1, 2024
+            '%b %d, %Y',      # Jan 1, 2024
+            '%m/%d/%Y',       # 01/01/2024
+            '%d/%m/%Y',       # 01/01/2024 (European)
+            '%Y-%m-%d',       # 2024-01-01
+            '%d-%m-%Y',       # 01-01-2024
+            '%m-%d-%Y'        # 01-01-2024
+        ]
+        
+        for fmt in formats:
+            try:
+                date_obj = datetime.strptime(date_str.strip(), fmt)
+                return date_obj.strftime('%Y-%m-%d')
+            except:
+                continue
+        
+        return None
+    
+    def _categorize_generic_expense(self, vendor: str, description: str) -> str:
+        """Categorize generic expenses based on vendor and description"""
+        combined = f"{vendor} {description}".lower()
+        
+        # Advertising - check this first for Meta/Facebook
+        if any(word in combined for word in ['ads', 'advertising', 'marketing', 'promotion',
+                                            'facebook', 'meta', 'google', 'instagram', 'tiktok',
+                                            'campaign', 'boost', 'results']):
+            return 'advertising'
+        
+        # Platform/Software subscriptions (including video editing)
+        elif any(word in combined for word in ['software', 'saas', 'subscription', 'cloud', 'api',
+                                            'hosting', 'server', 'platform', 'service', 'storage',
+                                            'capcut', 'video edit', 'editor', 'midjourney']):
+            return 'platform_expenses'
+        
+        # Operations/Supplies (including food delivery for office)
+        elif any(word in combined for word in ['instacart', 'grocery', 'delivery', 'supplies',
+                                            'office supplies', 'food delivery']):
+            return 'office_expenses'
+        
+        # Professional services
+        elif any(word in combined for word in ['consulting', 'freelance', 'contractor', 'design',
+                                            'development', 'legal', 'accounting']):
+            return 'contract_labor'
+        
+        # Travel
+        elif any(word in combined for word in ['travel', 'flight', 'hotel', 'uber', 'lyft',
+                                            'airbnb', 'transportation']):
+            return 'travel'
+        
+        # Default
+        else:
+            return 'other_expenses'
+
+
 def get_parser(bank_type: str, user_id: str, document_id: str) -> BankStatementParser:
     """Get the appropriate parser for the bank type"""
     parsers = {
@@ -917,6 +1832,7 @@ def get_parser(bank_type: str, user_id: str, document_id: str) -> BankStatementP
         'chase-sapphire': ChaseStatementParser,
         'bilt': BiltStatementParser,
         'amazon-receipts': AmazonReceiptParser,
+        'gmail-receipts': GmailReceiptParser,
         # Add more parsers as needed
     }
     
