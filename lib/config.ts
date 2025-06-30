@@ -8,9 +8,9 @@
 
 // ======================================================================
 // DEVELOPMENT MODE TOGGLE
-// Set this to false when deploying to production
+// Automatically determined by NODE_ENV - no manual changes needed!
 // ======================================================================
-export const IS_DEVELOPMENT_MODE = false
+export const IS_DEVELOPMENT_MODE = process.env.NODE_ENV === 'development'
 
 // ======================================================================
 // AUTHENTICATION BYPASS

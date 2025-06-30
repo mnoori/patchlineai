@@ -198,6 +198,22 @@ const nextConfig = {
     maxInactiveAge: 60 * 1000,
     pagesBufferLength: 5,
   },
+  
+  // Output configuration for Amplify
+  output: 'standalone',
+  
+  // Environment variables
+  env: {
+    // Debug system configuration
+    DEBUG_MODE: process.env.DEBUG_MODE || 'prod',
+    S3_DEBUG_BUCKET: process.env.S3_DEBUG_BUCKET || 'patchline-files-us-east-1',
+    
+    // AWS configuration
+    AWS_REGION: process.env.AWS_REGION || 'us-east-1',
+    
+    // Application configuration
+    APP_ENV: process.env.NODE_ENV || 'production',
+  },
 }
 
 export default withBundleAnalyzer(nextConfig)

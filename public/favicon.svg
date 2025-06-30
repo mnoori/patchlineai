@@ -1,36 +1,10 @@
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  viewBox="0 0 24 24"
-  width="32"
-  height="32"
->
-  <!-- Outer rounded square (patchbay module) -->
-  <rect x="2" y="2" width="20" height="20" rx="3" fill="#0F172A" stroke="#06b6d4" stroke-width="1.75" />
-  
-  <!-- Jack input holes -->
-  <circle cx="7" cy="7" r="2" fill="#1E293B" stroke="#06b6d4" stroke-width="1.5" />
-  <circle cx="17" cy="7" r="2" fill="#1E293B" stroke="#06b6d4" stroke-width="1.5" />
-  <circle cx="7" cy="17" r="2" fill="#1E293B" stroke="#06b6d4" stroke-width="1.5" />
-  <circle cx="17" cy="17" r="2" fill="#1E293B" stroke="#06b6d4" stroke-width="1.5" />
-  
-  <!-- TRS Cable - going from top-left to bottom-right -->
-  <path 
-    d="M7 7 C 9 9, 15 15, 17 17" 
-    stroke="#06b6d4" 
-    stroke-width="1.5" 
-    fill="none" 
-  />
-  
-  <!-- Cable highlights/sheen -->
-  <path 
-    d="M7.5 6.5 C 9.5 8.5, 15.5 14.5, 17.5 16.5" 
-    stroke="white" 
-    stroke-width="0.5" 
-    stroke-opacity="0.3" 
-    fill="none" 
-  />
-  
-  <!-- Jack connectors (cable ends) -->
-  <circle cx="7" cy="7" r="1" fill="gold" stroke="#06b6d4" stroke-width="0.5" />
-  <circle cx="17" cy="17" r="1" fill="gold" stroke="#06b6d4" stroke-width="0.5" />
-</svg> 
+<svg width="248" height="172" viewBox="0 0 248 172" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_2001_427)">
+<path d="M90.8693 63.49C91.1008 57.2565 92.1813 51.0619 92.0269 44.8283C91.4481 22.4006 72.3605 2.01167 50.2245 0.141604C28.0885 -1.72846 5.91388 15.1541 1.60501 37.1533C-2.70385 59.1525 11.4189 83.2815 32.5774 90.0995C42.2241 93.2033 52.6169 93.0085 62.4694 95.359C84.0909 100.515 102.047 118.891 106.857 140.786C108.195 146.89 108.632 153.318 111.449 158.889C118.395 172.616 138.408 175.759 148.66 164.214C152.197 160.227 154.641 155.409 157.637 151.006C169.818 133.072 191.838 122.475 213.305 124.202C218.785 124.644 224.328 125.825 229.705 124.735C241.41 122.358 248.883 107.735 244.033 96.7226C239.184 85.71 223.415 81.5413 213.833 88.7359C209.074 92.3072 206.167 97.7745 202.668 102.606C187.234 123.968 157.457 133.462 132.672 124.903C107.886 116.345 90.0847 90.4371 90.8436 64.0095C90.8436 63.8407 90.8436 63.6718 90.8565 63.49H90.8693Z" fill="#010103"/>
+</g>
+<defs>
+<clipPath id="clip0_2001_427">
+<rect width="247.762" height="171.292" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -13,6 +13,9 @@ export interface S3UploadOptions {
   usePresignedUrl?: boolean
   expiresIn?: number
   isPublic?: boolean
+  genre?: string
+  style?: string
+  mood?: string
 }
 
 export interface S3UploadResult {
@@ -182,7 +185,10 @@ export class S3ImageUploader {
         ...options,
         metadata: {
           ...options.metadata,
-          imageIndex: index.toString()
+          imageIndex: index.toString(),
+          ...(options.genre && { genre: options.genre }),
+          ...(options.style && { style: options.style }),
+          ...(options.mood && { mood: options.mood })
         }
       })
     )

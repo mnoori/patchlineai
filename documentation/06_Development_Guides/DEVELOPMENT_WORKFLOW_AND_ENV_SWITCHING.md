@@ -2,59 +2,62 @@
 
 ## 1. Overview
 
-This guide provides the official procedure for switching between local development and production modes. Following these steps is crucial to prevent build failures in the Amplify production environment.
+This guide provides the official procedure for working with the Patchline AI platform in both local development and production environments. The workflow has been simplified to eliminate manual configuration changes.
 
-The key issue is the management of `tsconfig.json`. The production build on Amplify uses a specific, stripped-down version of this file for performance and memory reasons. A developer's local `tsconfig.json` can easily conflict with this.
+## 2. Key Changes (As of December 2024)
 
-## 2. The Golden Rule
+- **Automatic Mode Detection**: The application now automatically detects whether it's running in development or production based on `NODE_ENV`
+- **No Manual Config Changes**: You no longer need to edit `lib/config.ts` before deploying
+- **Single Next.js Config**: We use only `next.config.mjs` (deleted `next.config.js`)
+- **Turbopack Support**: You can now use `pnpm dev --turbo` for faster development
 
-**DO NOT commit changes to `tsconfig.json` without team consensus.**
+## 3. The Golden Rules
 
-The `tsconfig.json` in the repository is the standard for local development. The production build will always generate its own configuration.
+1. **DO NOT commit changes to `tsconfig.json` without team consensus**
+2. **DO NOT manually change `IS_DEVELOPMENT_MODE` in `lib/config.ts`**
+3. **DO NOT create a `next.config.js` file (use only `next.config.mjs`)**
 
-## 3. Switching to Development Mode
+## 4. Development Workflow
 
-When you start working on a new feature, you'll be in development mode.
+### Starting Development
 
-1.  **Ensure `lib/config.ts` is in development mode:**
+```bash
+# Install dependencies
+pnpm install
 
-    ```typescript
-    // lib/config.ts
-    export const IS_DEVELOPMENT_MODE = true;
-    ```
+# Run development server (standard)
+pnpm dev
 
-    **Note:** This change should **NEVER** be committed to the main branch. Use a feature branch.
+# Run development server with Turbopack (faster)
+pnpm dev --turbo
+```
 
-2.  **Run the development server:**
-    ```bash
-    pnpm dev
-    ```
+The application will automatically run in development mode. No configuration changes needed!
 
-Next.js might automatically modify `tsconfig.json` for you. These changes are usually safe for local development but should not be committed.
+## 5. Deployment Workflow
 
-## 4. Switching to Production Mode (for Deployment)
+### Deploying to Production
 
-When you are ready to deploy, you must ensure your branch is clean and configured for production.
+When you're ready to deploy, simply push your changes:
 
-1.  **Revert any changes to `tsconfig.json`:**
-    ```bash
-    git checkout tsconfig.json
-    ```
+```bash
+# Ensure tsconfig.json is clean (if you made any changes)
+git checkout tsconfig.json
 
-2.  **Set `lib/config.ts` to production mode:**
-    ```typescript
-    // lib/config.ts
-    export const IS_DEVELOPMENT_MODE = false;
-    ```
+# Commit your feature changes
+git add .
+git commit -m "feat: Your feature description"
 
-3.  **Commit and Push:**
-    ```bash
-    git add lib/config.ts
-    git commit -m "feat: Ready for production deployment"
-    git push origin your-branch
-    ```
+# Push to your branch
+git push origin your-branch
 
-The Amplify build process (`amplify.yml`) will handle the rest.
+# Merge to master (or create PR)
+git checkout master
+git merge your-branch
+git push origin master
+```
+
+The application will automatically run in production mode on Amplify. No configuration changes needed!
 
 ## 5. How the Production Build Works
 
