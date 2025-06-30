@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import { DynamoDBDocumentClient, QueryCommand, UpdateCommand, DeleteCommand, ScanCommand } from "@aws-sdk/lib-dynamodb"
+import { DynamoDBDocumentClient, QueryCommand, UpdateCommand, DeleteCommand, ScanCommand, GetCommand, BatchGetCommand } from "@aws-sdk/lib-dynamodb"
 import { TAX_CATEGORIES } from "@/lib/tax-categories"
 
 // Initialize DynamoDB client
@@ -10,6 +10,7 @@ const client = new DynamoDBClient({
 const docClient = DynamoDBDocumentClient.from(client)
 
 const TAX_EXPENSES_TABLE = process.env.TAX_EXPENSES_TABLE || "TaxExpenses-dev"
+const DOCUMENTS_TABLE = process.env.DOCUMENTS_TABLE || "Documents-staging"
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,8 +35,47 @@ export async function GET(request: NextRequest) {
     const result = await docClient.send(queryCommand)
     let expenses = result.Items || []
 
-    // Apply filters
+    // Get unique document IDs
+    const documentIds = [...new Set(expenses.map(exp => exp.documentId).filter(Boolean))]
+    
+    // Batch get documents to get filenames
+    const documentsMap = new Map()
+    if (documentIds.length > 0) {
+      // DynamoDB BatchGetItem has a limit of 100 items per request
+      const chunks = []
+      for (let i = 0; i < documentIds.length; i += 100) {
+        chunks.push(documentIds.slice(i, i + 100))
+      }
 
+      for (const chunk of chunks) {
+        const batchGetCommand = new BatchGetCommand({
+          RequestItems: {
+            [DOCUMENTS_TABLE]: {
+              Keys: chunk.map(id => ({ documentId: id }))
+            }
+          }
+        })
+
+        const batchResult = await docClient.send(batchGetCommand)
+        const documents = batchResult.Responses?.[DOCUMENTS_TABLE] || []
+        
+        documents.forEach(doc => {
+          documentsMap.set(doc.documentId, doc)
+        })
+      }
+    }
+
+    // Add filename to each expense
+    expenses = expenses.map(expense => {
+      const document = documentsMap.get(expense.documentId)
+      return {
+        ...expense,
+        filename: document?.filename || 'Unknown',
+        documentType: document?.documentType || expense.documentType
+      }
+    })
+
+    // Apply filters
     if (category) {
       expenses = expenses.filter(exp => exp.category === category)
     }

@@ -1,0 +1,39 @@
+# Python dependencies for tax processing scripts
+
+# AWS SDK
+boto3>=1.26.0
+botocore>=1.29.0
+
+# Data processing
+pandas>=2.0.0
+openpyxl>=3.1.0  # For Excel export
+
+# Text matching
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.20.0  # Speed up fuzzy matching
+
+# PDF processing
+PyPDF2>=3.0.0
+pdf2image>=1.16.0
+
+# Date handling
+python-dateutil>=2.8.0
+
+# Logging
+colorlog>=6.7.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# OCR and text extraction
+pytesseract>=0.3.10
+Pillow>=10.0.0
+
+# System and process management
+psutil>=5.9.0
+
+# Terminal colors (Windows support)
+colorama>=0.4.6
+
+# HTTP requests
+requests>=2.31.0 

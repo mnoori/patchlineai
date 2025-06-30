@@ -27,6 +27,12 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import {
   AlertCircle,
   CheckCircle2,
   Link2,
@@ -36,13 +42,19 @@ import {
   FileText,
   Receipt,
   DollarSign,
-  Calendar,
+  Calendar as CalendarIcon,
   Building,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  X,
+  Eye,
 } from "lucide-react"
-import { format, differenceInDays, parseISO } from "date-fns"
+import { format, differenceInDays, parseISO, isWithinInterval, addDays, subDays } from "date-fns"
 import { cn } from "@/lib/utils"
 import { TAX_CATEGORIES, getScheduleCLine } from "@/lib/tax-categories"
 import * as XLSX from 'xlsx'
+import { DateRange } from "react-day-picker"
 
 interface TaxExpense {
   expenseId: string
@@ -61,6 +73,8 @@ interface TaxExpense {
   createdAt: string
   updatedAt: string
   documentType?: string
+  filename?: string
+  rawText?: string // Raw text from Textract for better matching
 }
 
 interface MatchedExpense {
@@ -69,6 +83,14 @@ interface MatchedExpense {
   matchConfidence: number
   matchReason?: string
   isMatched: boolean
+  matchDetails?: {
+    amountMatch: boolean
+    dateMatch: boolean
+    vendorMatch: boolean
+    orderNumberMatch: boolean
+    dateDiff?: number
+    amountDiff?: number
+  }
 }
 
 interface IrsReadyReportProps {
@@ -82,6 +104,17 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
   const [filterType, setFilterType] = useState("all") // all, matched, unmatched, review-needed
   const [selectedMatch, setSelectedMatch] = useState<MatchedExpense | null>(null)
   const [showMatchDialog, setShowMatchDialog] = useState(false)
+  
+  // Advanced filters
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  const [vendorFilter, setVendorFilter] = useState("")
+  const [categoryFilter, setSelectedCategory] = useState("all")
+  const [amountRange, setAmountRange] = useState<{ min?: number; max?: number }>({})
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 25
 
   // Fetch all expenses
   useEffect(() => {
@@ -104,98 +137,151 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
   }
 
   // Separate bank expenses and receipts
-  const bankExpenses = expenses.filter(exp => 
-    exp.bankAccount && !exp.bankAccount.includes('receipt')
+  const bankExpenses = useMemo(() => 
+    expenses.filter(exp => exp.bankAccount && !exp.bankAccount.includes('receipt')),
+    [expenses]
   )
   
-  const receipts = expenses.filter(exp => 
-    exp.bankAccount?.includes('receipt') || exp.documentType?.includes('receipt')
+  const receipts = useMemo(() => 
+    expenses.filter(exp => exp.bankAccount?.includes('receipt') || exp.documentType?.includes('receipt')),
+    [expenses]
   )
 
-  // Match expenses with receipts
+  // Enhanced matching algorithm
   const matchedExpenses = useMemo(() => {
     const matches: MatchedExpense[] = []
     const usedReceipts = new Set<string>()
 
-    // For each bank expense, try to find a matching receipt
+    // Smart matching with improved algorithm
     bankExpenses.forEach(bankExpense => {
       let bestMatch: TaxExpense | undefined
       let highestConfidence = 0
       let matchReason = ""
+      let matchDetails: MatchedExpense['matchDetails'] = {
+        amountMatch: false,
+        dateMatch: false,
+        vendorMatch: false,
+        orderNumberMatch: false
+      }
 
       receipts.forEach(receipt => {
         if (usedReceipts.has(receipt.expenseId)) return
 
         let confidence = 0
         let reasons: string[] = []
+        let currentMatchDetails = { ...matchDetails }
 
-        // Check amount match (exact or within 1%)
+        // Enhanced amount matching
         const amountDiff = Math.abs(bankExpense.amount - receipt.amount)
         const amountPercent = amountDiff / bankExpense.amount
         
         if (amountDiff === 0) {
-          confidence += 40
-          reasons.push("exact amount match")
-        } else if (amountPercent <= 0.01) {
           confidence += 35
-          reasons.push("amount within 1%")
-        } else if (amountPercent <= 0.05) {
-          confidence += 25
-          reasons.push("amount within 5%")
+          reasons.push("exact amount")
+          currentMatchDetails.amountMatch = true
+        } else if (amountDiff <= 0.02) { // Within 2 cents
+          confidence += 32
+          reasons.push("amount ±$0.02")
+          currentMatchDetails.amountMatch = true
+        } else if (amountPercent <= 0.01) { // Within 1%
+          confidence += 28
+          reasons.push("amount ±1%")
+          currentMatchDetails.amountMatch = true
         }
+        currentMatchDetails.amountDiff = amountDiff
 
-        // Check date proximity
+        // Enhanced date matching with ±1 day tolerance
         const bankDate = parseISO(bankExpense.transactionDate)
         const receiptDate = parseISO(receipt.transactionDate)
         const daysDiff = Math.abs(differenceInDays(bankDate, receiptDate))
         
         if (daysDiff === 0) {
-          confidence += 30
-          reasons.push("same date")
-        } else if (daysDiff <= 2) {
           confidence += 25
-          reasons.push(`${daysDiff} day difference`)
-        } else if (daysDiff <= 5) {
-          confidence += 15
-          reasons.push(`${daysDiff} day difference`)
-        }
-
-        // Check vendor match
-        const bankVendor = bankExpense.vendor.toLowerCase()
-        const receiptVendor = receipt.vendor.toLowerCase()
-        
-        if (bankVendor === receiptVendor) {
-          confidence += 30
-          reasons.push("exact vendor match")
-        } else if (
-          bankVendor.includes(receiptVendor) || 
-          receiptVendor.includes(bankVendor) ||
-          (bankVendor.includes('amazon') && receiptVendor.includes('amazon'))
-        ) {
+          reasons.push("same date")
+          currentMatchDetails.dateMatch = true
+        } else if (daysDiff === 1) {
           confidence += 20
-          reasons.push("partial vendor match")
+          reasons.push("±1 day")
+          currentMatchDetails.dateMatch = true
+          // Extra confidence if amounts match exactly with ±1 day
+          if (amountDiff === 0) {
+            confidence += 10
+            reasons.push("strong match")
+          }
+        } else if (daysDiff <= 3) {
+          confidence += 10
+          reasons.push(`${daysDiff} days apart`)
+        }
+        currentMatchDetails.dateDiff = daysDiff
+
+        // Enhanced vendor matching
+        const bankVendor = bankExpense.vendor.toLowerCase().trim()
+        const receiptVendor = receipt.vendor.toLowerCase().trim()
+        
+        // Normalize common vendor variations
+        const normalizeVendor = (v: string) => 
+          v.replace(/[^a-z0-9]/g, '').replace(/inc|llc|corp|ltd/g, '')
+        
+        const normalizedBankVendor = normalizeVendor(bankVendor)
+        const normalizedReceiptVendor = normalizeVendor(receiptVendor)
+        
+        if (bankVendor === receiptVendor || normalizedBankVendor === normalizedReceiptVendor) {
+          confidence += 25
+          reasons.push("vendor match")
+          currentMatchDetails.vendorMatch = true
+        } else if (
+          normalizedBankVendor.includes(normalizedReceiptVendor) || 
+          normalizedReceiptVendor.includes(normalizedBankVendor)
+        ) {
+          confidence += 15
+          reasons.push("partial vendor")
+          currentMatchDetails.vendorMatch = true
         }
 
-        // Check for order numbers in descriptions
-        const orderNumberRegex = /\d{3}-\d{7}-\d{7}/g
-        const bankOrderNumbers = bankExpense.description.match(orderNumberRegex) || []
-        const receiptOrderNumbers = receipt.description.match(orderNumberRegex) || []
+        // Enhanced order/reference number matching
+        const extractNumbers = (text: string) => {
+          const patterns = [
+            /\d{3}-\d{7}-\d{7}/g, // Amazon
+            /\b\d{10,}\b/g, // Long numbers
+            /[A-Z0-9]{8,}/g, // Alphanumeric IDs
+          ]
+          const numbers: string[] = []
+          patterns.forEach(pattern => {
+            const matches = text.match(pattern)
+            if (matches) numbers.push(...matches)
+          })
+          return numbers
+        }
+
+        const bankNumbers = extractNumbers(bankExpense.description)
+        const receiptNumbers = extractNumbers(receipt.description)
         
-        if (bankOrderNumbers.length > 0 && receiptOrderNumbers.length > 0) {
-          const matchingOrders = bankOrderNumbers.filter(num => 
-            receiptOrderNumbers.includes(num)
+        const matchingNumbers = bankNumbers.filter(num => receiptNumbers.includes(num))
+        if (matchingNumbers.length > 0) {
+          confidence += 15
+          reasons.push("reference match")
+          currentMatchDetails.orderNumberMatch = true
+        }
+
+        // Use raw text if available for additional matching
+        if (receipt.rawText && bankExpense.description) {
+          const commonKeywords = ['invoice', 'order', 'payment', 'transaction']
+          const matchedKeywords = commonKeywords.filter(keyword => 
+            receipt.rawText!.toLowerCase().includes(keyword) && 
+            bankExpense.description.toLowerCase().includes(keyword)
           )
-          if (matchingOrders.length > 0) {
-            confidence += 20
-            reasons.push("order number match")
+          if (matchedKeywords.length > 0) {
+            confidence += 5 * matchedKeywords.length
+            reasons.push("keyword match")
           }
         }
 
-        // If this is a better match than previous ones
-        if (confidence > highestConfidence && confidence >= 50) {
+        // Update best match if confidence is higher
+        if (confidence > highestConfidence && confidence >= 40) { // Lowered threshold
           bestMatch = receipt
           highestConfidence = confidence
           matchReason = reasons.join(", ")
+          matchDetails = currentMatchDetails
         }
       })
 
@@ -207,7 +293,8 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
           receipt: bestMatch,
           matchConfidence: highestConfidence,
           matchReason,
-          isMatched: true
+          isMatched: true,
+          matchDetails
         })
       } else {
         matches.push({
@@ -234,31 +321,81 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
     return matches
   }, [bankExpenses, receipts])
 
-  // Filter matched expenses based on filter type
-  const filteredExpenses = matchedExpenses.filter(match => {
-    const matchesSearch = 
-      match.bankExpense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      match.bankExpense.vendor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (match.receipt && match.receipt.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  // Apply filters
+  const filteredExpenses = useMemo(() => {
+    return matchedExpenses.filter(match => {
+      // Search filter
+      const matchesSearch = 
+        match.bankExpense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        match.bankExpense.vendor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        match.bankExpense.filename?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (match.receipt && (
+          match.receipt.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          match.receipt.filename?.toLowerCase().includes(searchQuery.toLowerCase())
+        ))
 
-    const matchesFilter = 
-      filterType === "all" ||
-      (filterType === "matched" && match.isMatched) ||
-      (filterType === "unmatched" && !match.isMatched) ||
-      (filterType === "review-needed" && match.isMatched && match.matchConfidence < 80)
+      // Status filter
+      const matchesFilter = 
+        filterType === "all" ||
+        (filterType === "matched" && match.isMatched) ||
+        (filterType === "unmatched" && !match.isMatched) ||
+        (filterType === "review-needed" && match.isMatched && match.matchConfidence < 80)
 
-    return matchesSearch && matchesFilter
-  })
+      // Category filter
+      const matchesCategory = 
+        categoryFilter === "all" || 
+        match.bankExpense.category === categoryFilter
+
+      // Vendor filter
+      const matchesVendor = 
+        !vendorFilter || 
+        match.bankExpense.vendor.toLowerCase().includes(vendorFilter.toLowerCase())
+
+      // Date range filter
+      let matchesDate = true
+      if (dateRange?.from) {
+        const expenseDate = parseISO(match.bankExpense.transactionDate)
+        if (dateRange.to) {
+          matchesDate = isWithinInterval(expenseDate, { start: dateRange.from, end: dateRange.to })
+        } else {
+          matchesDate = expenseDate >= dateRange.from
+        }
+      }
+
+      // Amount range filter
+      let matchesAmount = true
+      if (amountRange.min !== undefined) {
+        matchesAmount = match.bankExpense.amount >= amountRange.min
+      }
+      if (matchesAmount && amountRange.max !== undefined) {
+        matchesAmount = match.bankExpense.amount <= amountRange.max
+      }
+
+      return matchesSearch && matchesFilter && matchesCategory && matchesVendor && matchesDate && matchesAmount
+    })
+  }, [matchedExpenses, searchQuery, filterType, categoryFilter, vendorFilter, dateRange, amountRange])
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedExpenses = filteredExpenses.slice(startIndex, endIndex)
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, filterType, categoryFilter, vendorFilter, dateRange, amountRange])
 
   // Calculate statistics
-  const stats = {
+  const stats = useMemo(() => ({
     totalTransactions: bankExpenses.length,
     totalReceipts: receipts.length,
     matched: matchedExpenses.filter(m => m.isMatched).length,
     unmatched: matchedExpenses.filter(m => !m.isMatched).length,
     highConfidence: matchedExpenses.filter(m => m.isMatched && m.matchConfidence >= 80).length,
-    reviewNeeded: matchedExpenses.filter(m => m.isMatched && m.matchConfidence < 80).length
-  }
+    reviewNeeded: matchedExpenses.filter(m => m.isMatched && m.matchConfidence < 80).length,
+    totalAmount: filteredExpenses.reduce((sum, m) => sum + m.bankExpense.amount, 0)
+  }), [bankExpenses, receipts, matchedExpenses, filteredExpenses])
 
   const handleExport = () => {
     const workbook = XLSX.utils.book_new()
@@ -269,11 +406,15 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
       'Bank Description': match.bankExpense.description,
       'Bank Vendor': match.bankExpense.vendor,
       'Bank Amount': `$${match.bankExpense.amount.toFixed(2)}`,
+      'Bank Source File': match.bankExpense.filename || 'Unknown',
       'Receipt Description': match.receipt?.description || 'No receipt',
       'Receipt Vendor': match.receipt?.vendor || '-',
       'Receipt Amount': match.receipt ? `$${match.receipt.amount.toFixed(2)}` : '-',
+      'Receipt Source File': match.receipt?.filename || '-',
       'Match Confidence': match.isMatched ? `${match.matchConfidence}%` : 'Unmatched',
       'Match Reason': match.matchReason || '-',
+      'Date Difference': match.matchDetails?.dateDiff !== undefined ? `${match.matchDetails.dateDiff} days` : '-',
+      'Amount Difference': match.matchDetails?.amountDiff !== undefined ? `$${match.matchDetails.amountDiff.toFixed(2)}` : '-',
       'Category': match.bankExpense.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       'Schedule C Line': match.bankExpense.scheduleCLine || getScheduleCLine(match.bankExpense.category),
       'Status': match.bankExpense.classificationStatus
@@ -291,7 +432,7 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
       { Metric: 'High Confidence Matches (≥80%)', Value: stats.highConfidence },
       { Metric: 'Review Needed (<80%)', Value: stats.reviewNeeded },
       { Metric: '', Value: '' },
-      { Metric: 'Total Deductible Amount', Value: `$${filteredExpenses.reduce((sum, m) => sum + m.bankExpense.amount, 0).toFixed(2)}` }
+      { Metric: 'Total Deductible Amount', Value: `$${stats.totalAmount.toFixed(2)}` }
     ]
     
     const summaryWorksheet = XLSX.utils.json_to_sheet(summaryData)
@@ -313,7 +454,14 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
   }
 
   if (loading) {
-    return <div className="flex justify-center p-8">Loading IRS report data...</div>
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="text-muted-foreground">Loading IRS report data...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -340,6 +488,7 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
             <span className="text-sm">Matched</span>
           </div>
           <div className="text-2xl font-bold text-green-400">{stats.matched}</div>
+          <div className="text-xs text-slate-400">{((stats.matched / stats.totalTransactions) * 100).toFixed(0)}% coverage</div>
         </div>
         <div className="bg-slate-900/50 backdrop-blur rounded-lg p-4 border border-slate-800">
           <div className="flex items-center gap-2 text-orange-400 mb-2">
@@ -352,31 +501,160 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
 
       {/* Filters */}
       <div className="bg-slate-900/50 backdrop-blur rounded-lg p-4 border border-slate-800">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input
-              placeholder="Search transactions..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-slate-900/50 border-slate-800 text-white"
-            />
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                placeholder="Search transactions, vendors, or filenames..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-slate-900/50 border-slate-800 text-white"
+              />
+            </div>
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[180px] bg-slate-900/50 border-slate-800">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Transactions</SelectItem>
+                <SelectItem value="matched">Matched Only</SelectItem>
+                <SelectItem value="unmatched">Unmatched Only</SelectItem>
+                <SelectItem value="review-needed">Review Needed</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className={cn(
+                "gap-2",
+                showAdvancedFilters && "bg-slate-800"
+              )}
+            >
+              <Filter className="h-4 w-4" />
+              Advanced Filters
+            </Button>
+            <Button onClick={handleExport} variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Export Report
+            </Button>
           </div>
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-[180px] bg-slate-900/50 border-slate-800">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Transactions</SelectItem>
-              <SelectItem value="matched">Matched Only</SelectItem>
-              <SelectItem value="unmatched">Unmatched Only</SelectItem>
-              <SelectItem value="review-needed">Review Needed</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button onClick={handleExport} variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export Report
-          </Button>
+
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Date Range Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-300">Date Range</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateRange && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateRange?.from ? (
+                          dateRange.to ? (
+                            <>
+                              {format(dateRange.from, "LLL dd, y")} -{" "}
+                              {format(dateRange.to, "LLL dd, y")}
+                            </>
+                          ) : (
+                            format(dateRange.from, "LLL dd, y")
+                          )
+                        ) : (
+                          <span>Pick a date range</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange?.from}
+                        selected={dateRange}
+                        onSelect={setDateRange}
+                        numberOfMonths={2}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Category Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-300">Category</label>
+                  <Select value={categoryFilter} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="bg-slate-900/50 border-slate-800">
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {Object.keys(TAX_CATEGORIES).map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Vendor Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-300">Vendor</label>
+                  <Input
+                    placeholder="Filter by vendor..."
+                    value={vendorFilter}
+                    onChange={(e) => setVendorFilter(e.target.value)}
+                    className="bg-slate-900/50 border-slate-800 text-white"
+                  />
+                </div>
+
+                {/* Amount Range */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-300">Amount Range</label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      placeholder="Min"
+                      value={amountRange.min || ''}
+                      onChange={(e) => setAmountRange({ ...amountRange, min: e.target.value ? parseFloat(e.target.value) : undefined })}
+                      className="bg-slate-900/50 border-slate-800 text-white"
+                    />
+                    <span className="text-slate-400 self-center">to</span>
+                    <Input
+                      type="number"
+                      placeholder="Max"
+                      value={amountRange.max || ''}
+                      onChange={(e) => setAmountRange({ ...amountRange, max: e.target.value ? parseFloat(e.target.value) : undefined })}
+                      className="bg-slate-900/50 border-slate-800 text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Clear Filters */}
+              <div className="flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setDateRange(undefined)
+                    setVendorFilter("")
+                    setSelectedCategory("all")
+                    setAmountRange({})
+                  }}
+                  className="text-muted-foreground"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Clear Filters
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -384,36 +662,45 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
       <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/50">
         <Table>
           <TableHeader>
-            <TableRow className="border-slate-800">
+            <TableRow className="border-slate-800 hover:bg-transparent">
               <TableHead>Date</TableHead>
               <TableHead>Bank Transaction</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Receipt Match</TableHead>
               <TableHead>Confidence</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredExpenses.map((match) => (
+            {paginatedExpenses.map((match) => (
               <TableRow 
                 key={match.bankExpense.expenseId} 
                 className={cn(
-                  "border-slate-800 cursor-pointer hover:bg-slate-800/50",
+                  "border-slate-800 hover:bg-slate-800/50",
                   !match.isMatched && "bg-red-950/20"
                 )}
-                onClick={() => {
-                  setSelectedMatch(match)
-                  setShowMatchDialog(true)
-                }}
               >
                 <TableCell className="font-medium">
-                  {format(new Date(match.bankExpense.transactionDate), 'MM/dd')}
+                  {format(new Date(match.bankExpense.transactionDate), 'MM/dd/yy')}
                 </TableCell>
                 <TableCell>
-                  <div>
-                    <div className="font-medium line-clamp-1">{match.bankExpense.description}</div>
-                    <div className="text-sm text-slate-400">{match.bankExpense.vendor}</div>
+                  <div className="space-y-1">
+                    <div className="font-medium line-clamp-2">{match.bankExpense.description}</div>
+                    <div className="text-sm text-slate-400">
+                      <span className="font-medium">{match.bankExpense.vendor}</span>
+                      {match.bankExpense.filename && (
+                        <>
+                          <span className="mx-1">•</span>
+                          <span className="text-xs" title={match.bankExpense.filename}>
+                            {match.bankExpense.filename.length > 30 
+                              ? `...${match.bankExpense.filename.slice(-30)}`
+                              : match.bankExpense.filename
+                            }
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell className="font-semibold">
@@ -421,30 +708,80 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
                 </TableCell>
                 <TableCell>
                   {match.receipt ? (
-                    <div>
-                      <div className="text-sm line-clamp-1">{match.receipt.description}</div>
+                    <div className="space-y-1">
+                      <div className="text-sm line-clamp-2">{match.receipt.description}</div>
                       <div className="text-xs text-slate-400">
-                        ${match.receipt.amount.toFixed(2)} on {format(new Date(match.receipt.transactionDate), 'MM/dd')}
+                        <span>${match.receipt.amount.toFixed(2)}</span>
+                        <span className="mx-1">•</span>
+                        <span>{format(new Date(match.receipt.transactionDate), 'MM/dd/yy')}</span>
+                        {match.receipt.filename && (
+                          <>
+                            <span className="mx-1">•</span>
+                            <span title={match.receipt.filename}>
+                              {match.receipt.filename.length > 25 
+                                ? `...${match.receipt.filename.slice(-25)}`
+                                : match.receipt.filename
+                              }
+                            </span>
+                          </>
+                        )}
                       </div>
+                      {match.matchDetails && (
+                        <div className="flex gap-1 mt-1">
+                          {match.matchDetails.amountMatch && (
+                            <Badge variant="outline" className="text-xs bg-green-950/50 border-green-800">
+                              <DollarSign className="h-3 w-3 mr-1" />
+                              {match.matchDetails.amountDiff === 0 ? 'Exact' : `±$${match.matchDetails.amountDiff?.toFixed(2)}`}
+                            </Badge>
+                          )}
+                          {match.matchDetails.dateMatch && (
+                            <Badge variant="outline" className="text-xs bg-blue-950/50 border-blue-800">
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              {match.matchDetails.dateDiff === 0 ? 'Same day' : `±${match.matchDetails.dateDiff}d`}
+                            </Badge>
+                          )}
+                          {match.matchDetails.vendorMatch && (
+                            <Badge variant="outline" className="text-xs bg-purple-950/50 border-purple-800">
+                              <Building className="h-3 w-3 mr-1" />
+                              Vendor
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <span className="text-slate-500">No receipt found</span>
                   )}
                 </TableCell>
                 <TableCell>
-                  {getConfidenceBadge(match.matchConfidence)}
+                  <div className="space-y-1">
+                    {getConfidenceBadge(match.matchConfidence)}
+                    {match.matchReason && (
+                      <div className="text-xs text-slate-400" title={match.matchReason}>
+                        {match.matchReason.length > 30 
+                          ? `${match.matchReason.slice(0, 30)}...`
+                          : match.matchReason
+                        }
+                      </div>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="text-xs">
                     {match.bankExpense.category.replace(/-/g, ' ')}
                   </Badge>
                 </TableCell>
-                <TableCell>
-                  {match.bankExpense.classificationStatus === 'approved' ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4 text-yellow-500" />
-                  )}
+                <TableCell className="text-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedMatch(match)
+                      setShowMatchDialog(true)
+                    }}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -452,76 +789,201 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
         </Table>
       </div>
 
+      {/* Pagination Controls */}
+      {filteredExpenses.length > 0 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-slate-400">
+            Showing {startIndex + 1} to {Math.min(endIndex, filteredExpenses.length)} of {filteredExpenses.length} entries
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            
+            {/* Page Numbers */}
+            <div className="flex items-center gap-1">
+              {/* First page */}
+              <Button
+                variant={currentPage === 1 ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCurrentPage(1)}
+                className="min-w-[2rem]"
+              >
+                1
+              </Button>
+
+              {/* Ellipsis if needed */}
+              {currentPage > 3 && (
+                <span className="px-2 text-slate-400">...</span>
+              )}
+
+              {/* Current page and neighbors */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => 
+                  page !== 1 && 
+                  page !== totalPages && 
+                  Math.abs(page - currentPage) <= 1
+                )
+                .map(page => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className="min-w-[2rem]"
+                  >
+                    {page}
+                  </Button>
+                ))}
+
+              {/* Ellipsis if needed */}
+              {currentPage < totalPages - 2 && totalPages > 1 && (
+                <span className="px-2 text-slate-400">...</span>
+              )}
+
+              {/* Last page */}
+              {totalPages > 1 && (
+                <Button
+                  variant={currentPage === totalPages ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="min-w-[2rem]"
+                >
+                  {totalPages}
+                </Button>
+              )}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Match Details Dialog */}
       <Dialog open={showMatchDialog} onOpenChange={setShowMatchDialog}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Transaction Match Details</DialogTitle>
             <DialogDescription>
-              Review the match between bank transaction and receipt
+              Detailed view of the matched transaction and receipt
             </DialogDescription>
           </DialogHeader>
           {selectedMatch && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Bank Transaction */}
-              <div className="border border-slate-800 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <DollarSign className="h-4 w-4 text-blue-400" />
-                  <h3 className="font-semibold">Bank Transaction</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="text-slate-400">Date:</span> {format(new Date(selectedMatch.bankExpense.transactionDate), 'MMM dd, yyyy')}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-sm text-muted-foreground">Bank Transaction</h3>
+                <div className="bg-slate-900/50 rounded-lg p-4 space-y-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm text-slate-400">Date:</span>
+                      <p className="font-medium">{format(new Date(selectedMatch.bankExpense.transactionDate), 'MMMM d, yyyy')}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-slate-400">Amount:</span>
+                      <p className="font-medium">${selectedMatch.bankExpense.amount.toFixed(2)}</p>
+                    </div>
                   </div>
                   <div>
-                    <span className="text-slate-400">Amount:</span> ${selectedMatch.bankExpense.amount.toFixed(2)}
+                    <span className="text-sm text-slate-400">Description:</span>
+                    <p className="font-medium">{selectedMatch.bankExpense.description}</p>
                   </div>
-                  <div className="col-span-2">
-                    <span className="text-slate-400">Description:</span> {selectedMatch.bankExpense.description}
+                  <div>
+                    <span className="text-sm text-slate-400">Vendor:</span>
+                    <p className="font-medium">{selectedMatch.bankExpense.vendor}</p>
                   </div>
-                  <div className="col-span-2">
-                    <span className="text-slate-400">Vendor:</span> {selectedMatch.bankExpense.vendor}
+                  <div>
+                    <span className="text-sm text-slate-400">Source File:</span>
+                    <p className="font-medium text-xs">{selectedMatch.bankExpense.filename || 'Unknown'}</p>
                   </div>
                 </div>
               </div>
 
               {/* Receipt */}
               {selectedMatch.receipt && (
-                <div className="border border-slate-800 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Receipt className="h-4 w-4 text-green-400" />
-                    <h3 className="font-semibold">Receipt</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="text-slate-400">Date:</span> {format(new Date(selectedMatch.receipt.transactionDate), 'MMM dd, yyyy')}
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm text-muted-foreground">Matched Receipt</h3>
+                  <div className="bg-slate-900/50 rounded-lg p-4 space-y-2">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-sm text-slate-400">Date:</span>
+                        <p className="font-medium">{format(new Date(selectedMatch.receipt.transactionDate), 'MMMM d, yyyy')}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-slate-400">Amount:</span>
+                        <p className="font-medium">${selectedMatch.receipt.amount.toFixed(2)}</p>
+                      </div>
                     </div>
                     <div>
-                      <span className="text-slate-400">Amount:</span> ${selectedMatch.receipt.amount.toFixed(2)}
+                      <span className="text-sm text-slate-400">Description:</span>
+                      <p className="font-medium">{selectedMatch.receipt.description}</p>
                     </div>
-                    <div className="col-span-2">
-                      <span className="text-slate-400">Description:</span> {selectedMatch.receipt.description}
+                    <div>
+                      <span className="text-sm text-slate-400">Vendor:</span>
+                      <p className="font-medium">{selectedMatch.receipt.vendor}</p>
                     </div>
-                    <div className="col-span-2">
-                      <span className="text-slate-400">Vendor:</span> {selectedMatch.receipt.vendor}
+                    <div>
+                      <span className="text-sm text-slate-400">Source File:</span>
+                      <p className="font-medium text-xs">{selectedMatch.receipt.filename || 'Unknown'}</p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Match Details */}
-              {selectedMatch.isMatched && (
-                <div className="border border-slate-800 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold">Match Analysis</h3>
-                    {getConfidenceBadge(selectedMatch.matchConfidence)}
-                  </div>
-                  <div className="text-sm">
-                    <div className="mb-2">
-                      <span className="text-slate-400">Confidence Score:</span> {selectedMatch.matchConfidence}%
+              {/* Match Analysis */}
+              {selectedMatch.isMatched && selectedMatch.matchDetails && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm text-muted-foreground">Match Analysis</h3>
+                  <div className="bg-slate-900/50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm text-slate-400">Overall Confidence</span>
+                      {getConfidenceBadge(selectedMatch.matchConfidence)}
                     </div>
-                    <div>
-                      <span className="text-slate-400">Match Criteria:</span> {selectedMatch.matchReason}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Amount Match</span>
+                        {selectedMatch.matchDetails.amountMatch ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <X className="h-4 w-4 text-red-500" />
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Date Match (±1 day)</span>
+                        {selectedMatch.matchDetails.dateMatch ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <X className="h-4 w-4 text-red-500" />
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Vendor Match</span>
+                        {selectedMatch.matchDetails.vendorMatch ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <X className="h-4 w-4 text-red-500" />
+                        )}
+                      </div>
+                      {selectedMatch.matchReason && (
+                        <div className="pt-2 border-t border-slate-800">
+                          <span className="text-sm text-slate-400">Match Criteria:</span>
+                          <p className="text-sm">{selectedMatch.matchReason}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

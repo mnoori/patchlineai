@@ -1,0 +1,7 @@
+# Requirements for process-new-receipts.py
+boto3>=1.26.0
+requests>=2.28.0
+python-dotenv>=0.19.0
+
+# Optional but recommended for better performance
+urllib3>=1.26.0 

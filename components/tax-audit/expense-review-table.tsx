@@ -22,17 +22,27 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import {
   Search,
   CheckCircle2,
   XCircle,
   Clock,
   Download,
   Plus,
+  Filter,
+  CalendarIcon,
+  X,
 } from "lucide-react"
-import { format } from "date-fns"
+import { format, startOfMonth, endOfMonth } from "date-fns"
 import { cn } from "@/lib/utils"
 import { TAX_CATEGORIES, getAllCategories, getScheduleCLine, getCustomCategories, saveCustomCategory } from "@/lib/tax-categories"
 import * as XLSX from 'xlsx'
+import { DateRange } from "react-day-picker"
 
 interface TaxExpense {
   expenseId: string
@@ -51,6 +61,7 @@ interface TaxExpense {
   createdAt: string
   updatedAt: string
   documentType?: string
+  filename?: string
 }
 
 interface ExpenseReviewTableProps {
@@ -78,6 +89,16 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
   const [newCategory, setNewCategory] = useState("")
   const [showNewCategory, setShowNewCategory] = useState(false)
   const [activeTab, setActiveTab] = useState<"expenses" | "receipts">("expenses")
+  
+  // Advanced filters
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  const [vendorFilter, setVendorFilter] = useState("")
+  const [filenameFilter, setFilenameFilter] = useState("")
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 25
 
   // Fetch expenses
   useEffect(() => {
@@ -90,10 +111,16 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
   const fetchExpenses = async () => {
     try {
       setLoading(true)
+      console.log('Fetching expenses for user:', userId)
       const response = await fetch(`/api/tax-audit/expenses?userId=${userId}`)
+      console.log('Response status:', response.status)
       if (response.ok) {
         const data = await response.json()
+        console.log('Loaded expenses:', data.expenses?.length || 0, 'items')
+        console.log('First few expenses:', data.expenses?.slice(0, 3))
         setExpenses(data.expenses || [])
+      } else {
+        console.error('Failed to fetch expenses:', response.statusText)
       }
     } catch (error) {
       console.error('Error fetching expenses:', error)
@@ -118,13 +145,40 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
   const filteredExpenses = currentExpenses.filter(expense => {
     const matchesSearch = 
       expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      expense.vendor.toLowerCase().includes(searchQuery.toLowerCase())
+      expense.vendor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (expense.filename && expense.filename.toLowerCase().includes(searchQuery.toLowerCase()))
     
     const matchesStatus = statusFilter === "all" || expense.classificationStatus === statusFilter
     const matchesBank = selectedBankAccount === "all" || expense.bankAccount === selectedBankAccount
     
-    return matchesSearch && matchesStatus && matchesBank
+    // Advanced filters
+    const matchesVendor = !vendorFilter || expense.vendor.toLowerCase().includes(vendorFilter.toLowerCase())
+    const matchesFilename = !filenameFilter || (expense.filename && expense.filename.toLowerCase().includes(filenameFilter.toLowerCase()))
+    
+    // Date range filter
+    let matchesDate = true
+    if (dateRange?.from) {
+      const expenseDate = new Date(expense.transactionDate)
+      if (dateRange.to) {
+        matchesDate = expenseDate >= dateRange.from && expenseDate <= dateRange.to
+      } else {
+        matchesDate = expenseDate >= dateRange.from
+      }
+    }
+    
+    return matchesSearch && matchesStatus && matchesBank && matchesVendor && matchesFilename && matchesDate
   })
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedExpenses = filteredExpenses.slice(startIndex, endIndex)
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, statusFilter, selectedBankAccount, vendorFilter, filenameFilter, dateRange, activeTab])
 
   // Get counts by bank account
   const bankAccountCounts = currentExpenses.reduce((acc, expense) => {
@@ -319,6 +373,10 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
 
   const allCategories = [...getAllCategories(), ...customCategories]
 
+  // Get unique source files
+  const uniqueSourceFiles = [...new Set(expenses.filter(e => e.filename).map(e => e.filename))]
+  const totalSourceFiles = uniqueSourceFiles.length
+
   return (
     <div className="space-y-6">
       <div className="bg-slate-900/50 backdrop-blur rounded-lg p-6 border border-slate-800">
@@ -330,6 +388,11 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
             <p className="text-slate-400">
               Review and categorize expenses for your tax filing
             </p>
+            {totalSourceFiles > 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Processed {totalSourceFiles} unique source files • {expenses.length} total transactions
+              </p>
+            )}
           </div>
           <div className="flex gap-2">
             {selectedExpenses.size > 0 && (
@@ -414,7 +477,104 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
                       <SelectItem value="rejected">Rejected</SelectItem>
                     </SelectContent>
                   </Select>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                    className={cn(
+                      "gap-2",
+                      showAdvancedFilters && "bg-slate-800"
+                    )}
+                  >
+                    <Filter className="h-4 w-4" />
+                    Advanced Filters
+                  </Button>
                 </div>
+
+                {/* Advanced Filters Panel */}
+                {showAdvancedFilters && (
+                  <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Date Range Filter */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Date Range</label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal bg-slate-900/50 border-slate-800",
+                                !dateRange && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {dateRange?.from ? (
+                                dateRange.to ? (
+                                  <>
+                                    {format(dateRange.from, "LLL dd, y")} -{" "}
+                                    {format(dateRange.to, "LLL dd, y")}
+                                  </>
+                                ) : (
+                                  format(dateRange.from, "LLL dd, y")
+                                )
+                              ) : (
+                                <span>Pick a date range</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              initialFocus
+                              mode="range"
+                              defaultMonth={dateRange?.from}
+                              selected={dateRange}
+                              onSelect={setDateRange}
+                              numberOfMonths={2}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      {/* Vendor Filter */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Vendor</label>
+                        <Input
+                          placeholder="Filter by vendor..."
+                          value={vendorFilter}
+                          onChange={(e) => setVendorFilter(e.target.value)}
+                          className="bg-slate-900/50 border-slate-800"
+                        />
+                      </div>
+
+                      {/* Filename Filter */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Source File</label>
+                        <Input
+                          placeholder="Filter by filename..."
+                          value={filenameFilter}
+                          onChange={(e) => setFilenameFilter(e.target.value)}
+                          className="bg-slate-900/50 border-slate-800"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Clear Filters Button */}
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setDateRange(undefined)
+                          setVendorFilter("")
+                          setFilenameFilter("")
+                        }}
+                        className="gap-2"
+                      >
+                        <X className="h-4 w-4" />
+                        Clear Filters
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Expenses Table */}
                 <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/50">
@@ -423,12 +583,16 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
                       <TableRow className="border-slate-800">
                         <TableHead className="w-12">
                           <Checkbox
-                            checked={filteredExpenses.length > 0 && selectedExpenses.size === filteredExpenses.length}
+                            checked={paginatedExpenses.length > 0 && paginatedExpenses.every(exp => selectedExpenses.has(exp.expenseId))}
                             onCheckedChange={(checked) => {
                               if (checked) {
-                                setSelectedExpenses(new Set(filteredExpenses.map(e => e.expenseId)))
+                                const newSelection = new Set(selectedExpenses)
+                                paginatedExpenses.forEach(exp => newSelection.add(exp.expenseId))
+                                setSelectedExpenses(newSelection)
                               } else {
-                                setSelectedExpenses(new Set())
+                                const newSelection = new Set(selectedExpenses)
+                                paginatedExpenses.forEach(exp => newSelection.delete(exp.expenseId))
+                                setSelectedExpenses(newSelection)
                               }
                             }}
                           />
@@ -439,12 +603,13 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
                         <TableHead>Amount</TableHead>
                         <TableHead>Category</TableHead>
                         <TableHead>Schedule C</TableHead>
+                        <TableHead>Source File</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-center">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredExpenses.map((expense) => (
+                      {paginatedExpenses.map((expense) => (
                         <TableRow key={expense.expenseId} className="border-slate-800">
                           <TableCell>
                             <Checkbox
@@ -533,6 +698,15 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
                             {expense.scheduleCLine || getScheduleCLine(expense.category)}
                           </TableCell>
                           <TableCell>
+                            {expense.filename ? (
+                              <span className="line-clamp-2" title={expense.filename}>
+                                {expense.filename}
+                              </span>
+                            ) : (
+                              'No file'
+                            )}
+                          </TableCell>
+                          <TableCell>
                             <Badge 
                               variant="outline" 
                               className={cn(
@@ -580,6 +754,80 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
                   {filteredExpenses.length === 0 && (
                     <div className="text-center py-8 text-slate-400">
                       No expenses found matching your filters
+                    </div>
+                  )}
+
+                  {/* Pagination Controls */}
+                  {filteredExpenses.length > 0 && (
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="text-sm text-slate-400">
+                        Showing {startIndex + 1} to {Math.min(endIndex, filteredExpenses.length)} of {filteredExpenses.length} entries
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(1)}
+                          disabled={currentPage === 1}
+                        >
+                          First
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(currentPage - 1)}
+                          disabled={currentPage === 1}
+                        >
+                          Previous
+                        </Button>
+                        
+                        {/* Page Numbers */}
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            let pageNum
+                            if (totalPages <= 5) {
+                              pageNum = i + 1
+                            } else if (currentPage <= 3) {
+                              pageNum = i + 1
+                            } else if (currentPage >= totalPages - 2) {
+                              pageNum = totalPages - 4 + i
+                            } else {
+                              pageNum = currentPage - 2 + i
+                            }
+                            
+                            if (pageNum < 1 || pageNum > totalPages) return null
+                            
+                            return (
+                              <Button
+                                key={pageNum}
+                                variant={currentPage === pageNum ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setCurrentPage(pageNum)}
+                                className="w-10"
+                              >
+                                {pageNum}
+                              </Button>
+                            )
+                          })}
+                        </div>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                        >
+                          Next
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(totalPages)}
+                          disabled={currentPage === totalPages}
+                        >
+                          Last
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>

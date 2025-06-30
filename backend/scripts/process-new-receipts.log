@@ -1,0 +1,3 @@
+2025-06-29 22:16:48 [INFO] - Found credentials in shared credentials file: ~/.aws/credentials
+2025-06-29 22:16:48 [ERROR] - AWS_ACCESS_KEY_ID not found in environment
+2025-06-29 22:16:48 [ERROR] - Attempted to load from: C:\Users\mehdi\code\patchline_v1\backend\scripts\..\..\.env.local

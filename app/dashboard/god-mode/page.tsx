@@ -696,6 +696,7 @@ export default function GodModePage() {
     setActiveTab("upload")
     setUploadedFiles([])
     setPendingFiles([])
+    setSelectedDocumentType("")
   }
 
   const handleBackToFeatures = () => {
@@ -1048,7 +1049,7 @@ export default function GodModePage() {
 
                     {/* Actions */}
                     <div className="flex gap-2 mt-6">
-                      <Button
+                      <Button 
                         variant="outline"
                         onClick={() => {
                           setShowUploadConfig(false)
