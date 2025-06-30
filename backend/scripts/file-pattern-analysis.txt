@@ -1,0 +1,2073 @@
+File Pattern Analysis
+====================
+Analyzed: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy
+Total files: 462
+Unique patterns: 321
+
+
+Pattern 1: Reciepts\creativecloud / invoice (NUM)
+Files: 24
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (1).pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (1).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (10).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (11).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (12).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (18).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (19).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (2).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (20).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (21).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (22).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (23).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (24).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (25).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (26).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (27).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (28).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (29).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (3).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (4).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (5).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (6).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (7).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (8).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice (9).pdf
+
+Pattern 2: Reciepts\splice / splice_invoice_ORDERNUM
+Files: 18
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202404201820.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202404201820.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202404231822.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202405201821.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202405231822.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202406201821.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202406231822.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202407201821.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202407231822.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202408201822.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202408231822.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202409201821.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202409231822.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202410201821.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202410231822.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202411201821.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202411231822.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202412201821.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\splice\splice_invoice_202412231822.pdf
+
+Pattern 3: Bank Statement\Checking\BofA / estmt_DATE
+Files: 12
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-01-05.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-01-05.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-02-05.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-03-06.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-04-05.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-05-07.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-06-04.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-07-08.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-08-07.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-09-05.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-10-07.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-11-04.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\BofA\eStmt_2024-12-05.pdf
+
+Pattern 4: Reciepts\NEW-UnIdentified / gmail - your google play order receipt from MONTH NUM, NUM
+Files: 12
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Apr 17, 2024.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Apr 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Aug 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Dec 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Feb 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Jan 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Jul 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Jun 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Mar 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from May 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Nov 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Oct 17, 2024.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Google Play Order Receipt from Sep 17, 2024.pdf
+
+Pattern 5: Reciepts\Platforms / gmail - your receipt from midjourney inc #NUM-NUM-NUM
+Files: 12
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2027-9425-0284.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2027-9425-0284.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2132-6343-7810.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2199-5866-7008.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2278-9512-8517.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2348-2158-8129.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2414-6265-4791.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2476-0442-4490.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2489-1967-0990.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2577-6637-9549.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2652-7869-3152.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2922-3630-4897.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Midjourney Inc #2984-9226-6004.pdf
+
+Pattern 6: Bank Statement\Credit Cards\Bilt / bilt-MONTH
+Files: 11
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-April.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-April.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-Aug.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-Dec.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-Feb.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-Jan.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-July.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-June.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-March.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-May.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-Nov.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-Oct.pdf
+
+Pattern 7: Bank Statement\Credit Cards\Chase Saphire / chase-saphire-MONTH
+Files: 11
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-April.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-April.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-Aug.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-Dec.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-Feb.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-Jan.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-July.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-June.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-March.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-May.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-Nov.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-Oct.pdf
+
+Pattern 8: Bank Statement\Checking\Chase Checking / chase-checking-MONTH
+Files: 10
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-April.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-April.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-Aug.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-CHecking-Dec.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-Feb.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-checking-Jan.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-July.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-June.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-May.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-Nov.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-Oct.pdf
+
+Pattern 9: Bank Statement\Credit Cards\Chase Freedom / chase-freedom-MONTH
+Files: 10
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-April.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-April.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-Aug.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-Dec.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-Feb.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-July.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-June.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-March.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-May.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-Nov.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-Oct.pdf
+
+Pattern 10: Reciepts\NEW-UnIdentified / ORDERNUM_ORDERNUM
+Files: 6
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\8671584413615205_20240531.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\8671584413615205_20240531.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\8671584413615205_20240630.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\8671584413615205_20240731.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\8671584413615205_20240831.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\8671584413615205_20240930.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\8671584413615205_20250131.pdf
+
+Pattern 11: Reciepts\Platforms / gmail - your receipt from runway ai, inc. #NUM-NUM
+Files: 6
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Runway AI, Inc. #2101-3018.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Runway AI, Inc. #2101-3018.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Runway AI, Inc. #2259-7460.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Runway AI, Inc. #2322-2208.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Runway AI, Inc. #2635-0197.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Runway AI, Inc. #2765-0725.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Runway AI, Inc. #2846-7063.pdf
+
+Pattern 12: Reciepts\Platforms / gmail - rekordbox_ delivery information for _cloud option_ (mycommerce order no. ORDERNUM)
+Files: 5
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - rekordbox_ Delivery information for _Cloud Option_ (MyCommerce order no. 941786760).pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - rekordbox_ Delivery information for _Cloud Option_ (MyCommerce order no. 941786760).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - rekordbox_ Delivery information for _Cloud Option_ (MyCommerce order no. 942352305).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - rekordbox_ Delivery information for _Cloud Option_ (MyCommerce order no. 942870562).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - rekordbox_ Delivery information for _Cloud Option_ (MyCommerce order no. 943250783).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - rekordbox_ Delivery information for _Cloud Option_ (MyCommerce order no. 943600320).pdf
+
+Pattern 13: Reciepts\Platforms / gmail - your receipt from eleven labs inc. #NUM-NUM
+Files: 4
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Eleven Labs Inc. #2158-1126.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Eleven Labs Inc. #2158-1126.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Eleven Labs Inc. #2344-4306.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Eleven Labs Inc. #2524-4609.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Eleven Labs Inc. #2639-7944.pdf
+
+Pattern 14: Reciepts\Platforms / gmail - your receipt from elevenlabs #NUM-NUM
+Files: 4
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from ElevenLabs #2245-3222.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from ElevenLabs #2245-3222.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from ElevenLabs #2311-5860.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from ElevenLabs #2458-2615.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from ElevenLabs #2850-9834.pdf
+
+Pattern 15: Reciepts\Education / gmail - you paid to cosmic academy llc for invoice NUM
+Files: 3
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - You paid to Cosmic Academy LLC for invoice 4148.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - You paid to Cosmic Academy LLC for invoice 4148.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - You paid to Cosmic Academy LLC for invoice 4188.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - You paid to Cosmic Academy LLC for invoice 4240.pdf
+
+Pattern 16: Reciepts\Education / gmail - your ny international creative center co., ltd. receipt [#NUM-NUM]
+Files: 3
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Your NY INTERNATIONAL CREATIVE CENTER CO., LTD. receipt [#1083-5880].pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Your NY INTERNATIONAL CREATIVE CENTER CO., LTD. receipt [#1083-5880].pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Your NY INTERNATIONAL CREATIVE CENTER CO., LTD. receipt [#1233-4689].pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Your NY INTERNATIONAL CREATIVE CENTER CO., LTD. receipt [#1459-8567].pdf
+
+Pattern 17: Reciepts\Education / gmail - your receipt from ny international creative center co., ltd. #NUM-NUM
+Files: 3
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Your receipt from NY INTERNATIONAL CREATIVE CENTER CO., LTD. #2376-3973.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Your receipt from NY INTERNATIONAL CREATIVE CENTER CO., LTD. #2376-3973.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Your receipt from NY INTERNATIONAL CREATIVE CENTER CO., LTD. #2459-9314.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Your receipt from NY INTERNATIONAL CREATIVE CENTER CO., LTD. #2940-4976.pdf
+
+Pattern 18: Reciepts\Education / gmail - invoice from cosmic academy llc (NUM)
+Files: 2
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Invoice from Cosmic Academy LLC (4148).pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Invoice from Cosmic Academy LLC (4148).pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Invoice from Cosmic Academy LLC (4240).pdf
+
+Pattern 19: Reciepts\NEW-UnIdentified / gmail - thank you for your order ORDERNUM
+Files: 2
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Thank You for Your Order 4719439.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Thank You for Your Order 4719439.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Thank You for Your Order 4805539.pdf
+
+Pattern 20: Reciepts\NEW-UnIdentified / gmail - [loopmasters] order confirmation #lm-ORDERNUM
+Files: 2
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - [LoopMasters] Order confirmation #lm-17943186.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - [LoopMasters] Order confirmation #lm-17943186.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - [LoopMasters] Order confirmation #lm-17981358.pdf
+
+Pattern 21: Reciepts\Platforms / gmail - your receipt from neural frames #NUM-NUM
+Files: 2
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from neural frames #2053-0686.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from neural frames #2053-0686.pdf
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from neural frames #2851-4621.pdf
+
+Pattern 22: Bank Statement\Checking\Chase Checking / cashe-checking-MONTH
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Cashe-Checking-March.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Cashe-Checking-March.pdf
+
+Pattern 23: Bank Statement\Checking\Chase Checking / chase-checking-sept
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-Sept.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Checking\Chase Checking\Chase-Checking-Sept.pdf
+
+Pattern 24: Bank Statement\Credit Cards\Bilt / bilt-sept
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-Sept.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Bilt\Bilt-Sept.pdf
+
+Pattern 25: Bank Statement\Credit Cards\Chase Freedom / chase-freedom-jan25
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-Jan25.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-Jan25.pdf
+
+Pattern 26: Bank Statement\Credit Cards\Chase Freedom / chase-freedom-sept
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-Sept.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Freedom\Chase-Freedom-Sept.pdf
+
+Pattern 27: Bank Statement\Credit Cards\Chase Saphire / chase-saphire-jan0
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-Jan0.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-Jan0.pdf
+
+Pattern 28: Bank Statement\Credit Cards\Chase Saphire / chase-saphire-sept
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-Sept.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Bank Statement\Credit Cards\Chase Saphire\Chase-Saphire-Sept.pdf
+
+Pattern 29: Other\Rent / signeddocumentORDERNUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Other\Rent\signedDocument32312861.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Other\Rent\signedDocument32312861.pdf
+
+Pattern 30: Reciepts\Advertising / gmail - mehdi, here is your order receipt_17
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Mehdi, Here is your order receipt_17.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Mehdi, Here is your order receipt_17.pdf
+
+Pattern 31: Reciepts\Advertising / gmail - your instagram ads receipt (account id_ ORDERNUM)
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Instagram ads receipt (Account ID_ 908144600005596).pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Instagram ads receipt (Account ID_ 908144600005596).pdf
+
+Pattern 32: Reciepts\Advertising / gmail - your instagram ads receipt (account id_ ORDERNUM)_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Instagram ads receipt (Account ID_ 908144600005596)_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Instagram ads receipt (Account ID_ 908144600005596)_2.pdf
+
+Pattern 33: Reciepts\Advertising / gmail - your instagram ads receipt (account id_ ORDERNUM)_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Instagram ads receipt (Account ID_ 908144600005596)_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Instagram ads receipt (Account ID_ 908144600005596)_3.pdf
+
+Pattern 34: Reciepts\Advertising / gmail - your instagram ads receipt (account id_ ORDERNUM)_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Instagram ads receipt (Account ID_ 908144600005596)_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Instagram ads receipt (Account ID_ 908144600005596)_4.pdf
+
+Pattern 35: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135).pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135).pdf
+
+Pattern 36: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_11
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_11.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_11.pdf
+
+Pattern 37: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_12
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_12.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_12.pdf
+
+Pattern 38: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_13
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_13.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_13.pdf
+
+Pattern 39: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_14
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_14.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_14.pdf
+
+Pattern 40: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_15
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_15.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_15.pdf
+
+Pattern 41: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_16
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_16.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_16.pdf
+
+Pattern 42: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_17
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_17.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_17.pdf
+
+Pattern 43: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_18
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_18.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_18.pdf
+
+Pattern 44: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_19
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_19.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_19.pdf
+
+Pattern 45: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_2.pdf
+
+Pattern 46: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_20
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_20.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_20.pdf
+
+Pattern 47: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_21
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_21.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_21.pdf
+
+Pattern 48: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_22
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_22.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_22.pdf
+
+Pattern 49: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_23
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_23.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_23.pdf
+
+Pattern 50: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_24
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_24.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_24.pdf
+
+Pattern 51: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_25
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_25.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_25.pdf
+
+Pattern 52: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_26
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_26.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_26.pdf
+
+Pattern 53: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_27
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_27.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_27.pdf
+
+Pattern 54: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_28
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_28.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_28.pdf
+
+Pattern 55: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_29
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_29.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_29.pdf
+
+Pattern 56: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_3.pdf
+
+Pattern 57: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_30
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_30.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_30.pdf
+
+Pattern 58: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_31
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_31.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_31.pdf
+
+Pattern 59: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_32
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_32.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_32.pdf
+
+Pattern 60: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_33
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_33.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_33.pdf
+
+Pattern 61: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_34
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_34.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_34.pdf
+
+Pattern 62: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_35
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_35.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_35.pdf
+
+Pattern 63: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_36
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_36.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_36.pdf
+
+Pattern 64: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_37
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_37.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_37.pdf
+
+Pattern 65: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_38
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_38.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_38.pdf
+
+Pattern 66: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_39
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_39.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_39.pdf
+
+Pattern 67: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_4.pdf
+
+Pattern 68: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_40
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_40.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_40.pdf
+
+Pattern 69: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_41
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_41.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_41.pdf
+
+Pattern 70: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_42
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_42.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_42.pdf
+
+Pattern 71: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_43
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_43.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_43.pdf
+
+Pattern 72: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_44
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_44.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_44.pdf
+
+Pattern 73: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_45
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_45.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_45.pdf
+
+Pattern 74: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_46
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_46.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_46.pdf
+
+Pattern 75: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_47
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_47.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_47.pdf
+
+Pattern 76: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_48
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_48.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_48.pdf
+
+Pattern 77: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_49
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_49.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_49.pdf
+
+Pattern 78: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_5
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_5.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_5.pdf
+
+Pattern 79: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_50
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_50.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_50.pdf
+
+Pattern 80: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_6
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_6.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_6.pdf
+
+Pattern 81: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_7
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf
+
+Pattern 82: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_8
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_8.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_8.pdf
+
+Pattern 83: Reciepts\Advertising / gmail - your meta ads receipt (account id_ ORDERNUM)_9
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_9.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Advertising\Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_9.pdf
+
+Pattern 84: Reciepts\Amazon / gmail - your amazon.com order #NUM-ORDERNUM-ORDERNUM has shipped
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order #114-2330287-2897802 has shipped.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order #114-2330287-2897802 has shipped.pdf
+
+Pattern 85: Reciepts\Amazon / gmail - your amazon.com order of NUM x _led stage wash light bar ..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of 2 x _LED Stage Wash Light Bar ..._ and 7 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of 2 x _LED Stage Wash Light Bar ..._ and 7 more items_.pdf
+
+Pattern 86: Reciepts\Amazon / gmail - your amazon.com order of _airloons NUM.5in standard..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Airloons 9.5in Standard..._ and 3 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Airloons 9.5in Standard..._ and 3 more items_.pdf
+
+Pattern 87: Reciepts\Amazon / gmail - your amazon.com order of _amazon basics NUM.NUM aux to NUM..._ has shipped!
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Amazon Basics 3.5 Aux to 2..._ has shipped!.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Amazon Basics 3.5 Aux to 2..._ has shipped!.pdf
+
+Pattern 88: Reciepts\Amazon / gmail - your amazon.com order of _aquateak kaitm petite ..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _AquaTeak KaiTM Petite ..._ and 4 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _AquaTeak KaiTM Petite ..._ and 4 more items_.pdf
+
+Pattern 89: Reciepts\Amazon / gmail - your amazon.com order of _chauvet dj led lighting..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _CHAUVET DJ LED Lighting..._ and 2 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _CHAUVET DJ LED Lighting..._ and 2 more items_.pdf
+
+Pattern 90: Reciepts\Amazon / gmail - your amazon.com order of _d-line 157in cord cover..._ and NUM more item_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _D-Line 157in Cord Cover..._ and 1 more item_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _D-Line 157in Cord Cover..._ and 1 more item_.pdf
+
+Pattern 91: Reciepts\Amazon / gmail - your amazon.com order of _dashsafe smoke machine, fog..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Dashsafe Smoke Machine, Fog..._ and 2 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Dashsafe Smoke Machine, Fog..._ and 2 more items_.pdf
+
+Pattern 92: Reciepts\Amazon / gmail - your amazon.com order of _delamu 157in paintable cord..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Delamu 157in Paintable Cord..._ and 4 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Delamu 157in Paintable Cord..._ and 4 more items_.pdf
+
+Pattern 93: Reciepts\Amazon / gmail - your amazon.com order of _dynavista full motion..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _DYNAVISTA Full Motion..._ and 2 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _DYNAVISTA Full Motion..._ and 2 more items_.pdf
+
+Pattern 94: Reciepts\Amazon / gmail - your amazon.com order of _le'aokuu mens genuine..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Le'aokuu Mens Genuine..._ and 16 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Le'aokuu Mens Genuine..._ and 16 more items_.pdf
+
+Pattern 95: Reciepts\Amazon / gmail - your amazon.com order of _led stage wash light bar ...__
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _LED Stage Wash Light Bar ...__.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _LED Stage Wash Light Bar ...__.pdf
+
+Pattern 96: Reciepts\Amazon / gmail - your amazon.com order of _linen leather desk..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Linen Leather Desk..._ and 3 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Linen Leather Desk..._ and 3 more items_.pdf
+
+Pattern 97: Reciepts\Amazon / gmail - your amazon.com order of _liquid stands dual piano..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Liquid Stands Dual Piano..._ and 3 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Liquid Stands Dual Piano..._ and 3 more items_.pdf
+
+Pattern 98: Reciepts\Amazon / gmail - your amazon.com order of _luxonis oak-d pro poe..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Luxonis Oak-D Pro PoE..._ and 2 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Luxonis Oak-D Pro PoE..._ and 2 more items_.pdf
+
+Pattern 99: Reciepts\Amazon / gmail - your amazon.com order of _meccanixity mic stand..._ has shipped!
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _MECCANIXITY Mic Stand..._ has shipped!.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _MECCANIXITY Mic Stand..._ has shipped!.pdf
+
+Pattern 100: Reciepts\Amazon / gmail - your amazon.com order of _monoprice ORDERNUM 10ft 16awg..._ and NUM more item_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Monoprice 105300 10ft 16AWG..._ and 1 more item_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Monoprice 105300 10ft 16AWG..._ and 1 more item_.pdf
+
+Pattern 101: Reciepts\Amazon / gmail - your amazon.com order of _oiiio men's patch ripped..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _OIIIO Men's Patch Ripped..._ and 19 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _OIIIO Men's Patch Ripped..._ and 19 more items_.pdf
+
+Pattern 102: Reciepts\Amazon / gmail - your amazon.com order of _phyto phytophanère NUM..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _PHYTO Phytophanère 100..._ and 8 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _PHYTO Phytophanère 100..._ and 8 more items_.pdf
+
+Pattern 103: Reciepts\Amazon / gmail - your amazon.com order of _pinsai NUM pack rechargeable...__
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _PINSAI 2 Pack Rechargeable...__.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _PINSAI 2 Pack Rechargeable...__.pdf
+
+Pattern 104: Reciepts\Amazon / gmail - your amazon.com order of _projector stand- laptop...__
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Projector Stand- Laptop...__.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Projector Stand- Laptop...__.pdf
+
+Pattern 105: Reciepts\Amazon / gmail - your amazon.com order of _qyxinc super clamp with 1_4..._ and NUM more item_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _QYXINC Super Clamp with 1_4..._ and 1 more item_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _QYXINC Super Clamp with 1_4..._ and 1 more item_.pdf
+
+Pattern 106: Reciepts\Amazon / gmail - your amazon.com order of _qyxinc super clamp with 1_4...__
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _QYXINC Super Clamp with 1_4...__.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _QYXINC Super Clamp with 1_4...__.pdf
+
+Pattern 107: Reciepts\Amazon / gmail - your amazon.com order of _rode sc4 NUM.5mm trs to trrs..._ has shipped!
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Rode SC4 3.5mm TRS to TRRS..._ has shipped!.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Rode SC4 3.5mm TRS to TRRS..._ has shipped!.pdf
+
+Pattern 108: Reciepts\Amazon / gmail - your amazon.com order of _zacro bike basket..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Zacro Bike Basket..._ and 5 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order of _Zacro Bike Basket..._ and 5 more items_.pdf
+
+Pattern 109: Reciepts\Amazon / gmail - your amazon.com order
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Amazon\Gmail - Your Amazon.com order.pdf
+
+Pattern 110: Reciepts\creativecloud / invoice
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\creativecloud\invoice.pdf
+
+Pattern 111: Reciepts\Education / gmail - invoice tni-DATE10 from the node institute
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Invoice TNI-2024-01-0010 from The NODE Institute.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Invoice TNI-2024-01-0010 from The NODE Institute.pdf
+
+Pattern 112: Reciepts\Education / gmail - order #NUM confirmed
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Order #26741 confirmed.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Order #26741 confirmed.pdf
+
+Pattern 113: Reciepts\Education / gmail - reminder from cosmic academy llc (NUM)
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Reminder from Cosmic Academy LLC (4240).pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Reminder from Cosmic Academy LLC (4240).pdf
+
+Pattern 114: Reciepts\Education / gmail - reminder from cosmic academy llc (NUM)_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Reminder from Cosmic Academy LLC (4240)_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Reminder from Cosmic Academy LLC (4240)_2.pdf
+
+Pattern 115: Reciepts\Education / gmail - your austere, llc receipt [#NUM-NUM]
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Your AUSTERE, LLC receipt [#1032-7704].pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Education\Gmail - Your AUSTERE, LLC receipt [#1032-7704].pdf
+
+Pattern 116: Reciepts\Meals / gmail - open house pay tab - dumbo 2_28_24
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Meals\Gmail - Open House Pay Tab - Dumbo 2_28_24.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Meals\Gmail - Open House Pay Tab - Dumbo 2_28_24.pdf
+
+Pattern 117: Reciepts\NEW-UnIdentified / ORDERNUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\3633723.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\3633723.pdf
+
+Pattern 118: Reciepts\NEW-UnIdentified / bkd-ORDERNUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\BKD-73650371904.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\BKD-73650371904.pdf
+
+Pattern 119: Reciepts\NEW-UnIdentified / doc-NUM-2s-payments.googleusercontent.com_efe_doc_fa_f1knorvo2qql0mmtj1oujfv5dl7ea2oq_gijndff42gto4qsiqira9vq5rhm5roc1_ORDERNUM_epd_00l3fmuss015tnrulsk96fub1rbpkr36vacffgkl1jid2bbbrutu419t2a39kdru946uhqgncjep72e5omnqi88rkpt0_aco329wzvovqgbaaujlqz5
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\doc-08-2s-payments.googleusercontent.com_efe_doc_fa_f1knorvo2qql0mmtj1oujfv5dl7ea2oq_gijndff42gto4qsiqira9vq5rhm5roc1_1751248275000_epd_00l3fmuss015tnrulsk96fub1rbpkr36vacffgkl1jid2bbbrutu419t2a39kdru946uhqgncjep72e5omnqi88rkpt0_ACo329wZVOVQGBAauJLQz5.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\doc-08-2s-payments.googleusercontent.com_efe_doc_fa_f1knorvo2qql0mmtj1oujfv5dl7ea2oq_gijndff42gto4qsiqira9vq5rhm5roc1_1751248275000_epd_00l3fmuss015tnrulsk96fub1rbpkr36vacffgkl1jid2bbbrutu419t2a39kdru946uhqgncjep72e5omnqi88rkpt0_ACo329wZVOVQGBAauJLQz5.pdf
+
+Pattern 120: Reciepts\NEW-UnIdentified / gmail - dropbox payment received, account upgraded
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Dropbox payment received, account upgraded.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Dropbox payment received, account upgraded.pdf
+
+Pattern 121: Reciepts\NEW-UnIdentified / gmail - plugin boutique - order no. ORDERNUM & how to retrieve your licence
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Plugin Boutique - Order No. 50872683 & How to retrieve your licence.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Plugin Boutique - Order No. 50872683 & How to retrieve your licence.pdf
+
+Pattern 122: Reciepts\NEW-UnIdentified / gmail - sonic academy payment receipt
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Sonic Academy payment receipt.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Sonic Academy payment receipt.pdf
+
+Pattern 123: Reciepts\NEW-UnIdentified / gmail - soundswitch free trial purchase confirmation_9
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Free Trial Purchase Confirmation_9.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Free Trial Purchase Confirmation_9.pdf
+
+Pattern 124: Reciepts\NEW-UnIdentified / gmail - soundswitch renewal confirmation
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation.pdf
+
+Pattern 125: Reciepts\NEW-UnIdentified / gmail - soundswitch renewal confirmation_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_2.pdf
+
+Pattern 126: Reciepts\NEW-UnIdentified / gmail - soundswitch renewal confirmation_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_3.pdf
+
+Pattern 127: Reciepts\NEW-UnIdentified / gmail - soundswitch renewal confirmation_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_4.pdf
+
+Pattern 128: Reciepts\NEW-UnIdentified / gmail - soundswitch renewal confirmation_5
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_5.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_5.pdf
+
+Pattern 129: Reciepts\NEW-UnIdentified / gmail - soundswitch renewal confirmation_6
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_6.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_6.pdf
+
+Pattern 130: Reciepts\NEW-UnIdentified / gmail - soundswitch renewal confirmation_7
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_7.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_7.pdf
+
+Pattern 131: Reciepts\NEW-UnIdentified / gmail - soundswitch renewal confirmation_8
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_8.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - SoundSwitch Renewal Confirmation_8.pdf
+
+Pattern 132: Reciepts\NEW-UnIdentified / gmail - thank you for your order
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Thank you for your order.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Thank you for your order.pdf
+
+Pattern 133: Reciepts\NEW-UnIdentified / gmail - you're upgraded_ new bitly subscription a-sORDERNUM was created and activated
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - You're upgraded_ new Bitly subscription A-S00305425 was created and activated.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - You're upgraded_ new Bitly subscription A-S00305425 was created and activated.pdf
+
+Pattern 134: Reciepts\NEW-UnIdentified / gmail - your bill is now available online
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online.pdf
+
+Pattern 135: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_10
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_10.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_10.pdf
+
+Pattern 136: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_11
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_11.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_11.pdf
+
+Pattern 137: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_12
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_12.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_12.pdf
+
+Pattern 138: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_13
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_13.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_13.pdf
+
+Pattern 139: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_2.pdf
+
+Pattern 140: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_3.pdf
+
+Pattern 141: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_4.pdf
+
+Pattern 142: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_5
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_5.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_5.pdf
+
+Pattern 143: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_6
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_6.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_6.pdf
+
+Pattern 144: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_8
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_8.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_8.pdf
+
+Pattern 145: Reciepts\NEW-UnIdentified / gmail - your bill is now available online_9
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_9.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your bill is now available online_9.pdf
+
+Pattern 146: Reciepts\NEW-UnIdentified / gmail - your canva invoice
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Canva invoice.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Canva invoice.pdf
+
+Pattern 147: Reciepts\NEW-UnIdentified / gmail - your canva invoice_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Canva invoice_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Canva invoice_2.pdf
+
+Pattern 148: Reciepts\NEW-UnIdentified / gmail - your canva invoice_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Canva invoice_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Canva invoice_3.pdf
+
+Pattern 149: Reciepts\NEW-UnIdentified / gmail - your canva invoice_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Canva invoice_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Canva invoice_4.pdf
+
+Pattern 150: Reciepts\NEW-UnIdentified / gmail - your payment refund was successfully processed
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your payment refund was successfully processed.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your payment refund was successfully processed.pdf
+
+Pattern 151: Reciepts\NEW-UnIdentified / gmail - your vocalfy order is now complete
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Vocalfy order is now complete.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Vocalfy order is now complete.pdf
+
+Pattern 152: Reciepts\NEW-UnIdentified / gmail - your vocalfy order is now complete_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Vocalfy order is now complete_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Vocalfy order is now complete_2.pdf
+
+Pattern 153: Reciepts\NEW-UnIdentified / gmail - your vocalfy order is now complete_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Vocalfy order is now complete_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Gmail - Your Vocalfy order is now complete_3.pdf
+
+Pattern 154: Reciepts\NEW-UnIdentified / invoice-NUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Invoice-26741.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\Invoice-26741.pdf
+
+Pattern 155: Reciepts\NEW-UnIdentified / xfer_invoice_xfORDERNUM-ORDERNUMma
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\xfer_invoice_xf692306-1209949ma.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\NEW-UnIdentified\xfer_invoice_xf692306-1209949ma.pdf
+
+Pattern 156: Reciepts\Operations / gmail - confirmation_ your dell service contract
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Confirmation_ Your Dell Service Contract.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Confirmation_ Your Dell Service Contract.pdf
+
+Pattern 157: Reciepts\Operations / gmail - confirming your order _ dell purchase id_ ORDERNUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Confirming your order _ Dell Purchase ID_ 2008387721930.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Confirming your order _ Dell Purchase ID_ 2008387721930.pdf
+
+Pattern 158: Reciepts\Operations / gmail - we have your order _ dell purchase id_ ORDERNUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - We have your order _ Dell Purchase ID_ 2008386717574.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - We have your order _ Dell Purchase ID_ 2008386717574.pdf
+
+Pattern 159: Reciepts\Operations / gmail - your dumbo house membership renewal
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your DUMBO House Membership Renewal.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your DUMBO House Membership Renewal.pdf
+
+Pattern 160: Reciepts\Operations / gmail - your dumbo house_ membership processing fee reminder
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your DUMBO House_ Membership Processing Fee Reminder.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your DUMBO House_ Membership Processing Fee Reminder.pdf
+
+Pattern 161: Reciepts\Operations / gmail - your dumbo house_ membership processing fee reminder_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your DUMBO House_ Membership Processing Fee Reminder_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your DUMBO House_ Membership Processing Fee Reminder_2.pdf
+
+Pattern 162: Reciepts\Operations / gmail - your dumbo house_ membership processing fee reminder_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your DUMBO House_ Membership Processing Fee Reminder_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your DUMBO House_ Membership Processing Fee Reminder_3.pdf
+
+Pattern 163: Reciepts\Operations / gmail - your dumbo house_ membership processing fee reminder_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your DUMBO House_ Membership Processing Fee Reminder_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your DUMBO House_ Membership Processing Fee Reminder_4.pdf
+
+Pattern 164: Reciepts\Operations / gmail - your instacart order receipt
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your Instacart order receipt.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Operations\Gmail - Your Instacart order receipt.pdf
+
+Pattern 165: Reciepts\Other / gmail - your order lORDERNUM confirmation
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\Gmail - Your Order L2134781460 Confirmation.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\Gmail - Your Order L2134781460 Confirmation.pdf
+
+Pattern 166: Reciepts\Other / gmail - your order lORDERNUM has shipped
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\Gmail - Your Order L2134781460 Has Shipped.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\Gmail - Your Order L2134781460 Has Shipped.pdf
+
+Pattern 167: Reciepts\Other / gmail - your order of akai apc40 mkii 2010s - black on reverb
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\Gmail - Your order of Akai APC40 MKII 2010s - Black on Reverb.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\Gmail - Your order of Akai APC40 MKII 2010s - Black on Reverb.pdf
+
+Pattern 168: Reciepts\Other / gmail - your samash.com store order confirmation - order #ORDERNUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\Gmail - Your SamAsh.com Store order confirmation - Order #2001495123.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\Gmail - Your SamAsh.com Store order confirmation - Order #2001495123.pdf
+
+Pattern 169: Reciepts\Other / invoice-ORDERNUM-DATE
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\invoice-3404067-2024-04-20.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\invoice-3404067-2024-04-20.pdf
+
+Pattern 170: Reciepts\Other / order_ORDERNUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\Order_8721986.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Other\Order_8721986.pdf
+
+Pattern 171: Reciepts\Platforms / gmail - mehdi noori, here is your receipt for the order virORDERNUM-NUM-NUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi Noori, here is your receipt for the order VIR241222-7445-21108.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi Noori, here is your receipt for the order VIR241222-7445-21108.pdf
+
+Pattern 172: Reciepts\Platforms / gmail - mehdi, here is your order receipt
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt.pdf
+
+Pattern 173: Reciepts\Platforms / gmail - mehdi, here is your order receipt_10
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_10.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_10.pdf
+
+Pattern 174: Reciepts\Platforms / gmail - mehdi, here is your order receipt_11
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_11.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_11.pdf
+
+Pattern 175: Reciepts\Platforms / gmail - mehdi, here is your order receipt_12
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_12.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_12.pdf
+
+Pattern 176: Reciepts\Platforms / gmail - mehdi, here is your order receipt_13
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_13.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_13.pdf
+
+Pattern 177: Reciepts\Platforms / gmail - mehdi, here is your order receipt_14
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_14.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_14.pdf
+
+Pattern 178: Reciepts\Platforms / gmail - mehdi, here is your order receipt_15
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_15.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_15.pdf
+
+Pattern 179: Reciepts\Platforms / gmail - mehdi, here is your order receipt_16
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_16.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_16.pdf
+
+Pattern 180: Reciepts\Platforms / gmail - mehdi, here is your order receipt_17
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_17.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_17.pdf
+
+Pattern 181: Reciepts\Platforms / gmail - mehdi, here is your order receipt_18
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_18.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_18.pdf
+
+Pattern 182: Reciepts\Platforms / gmail - mehdi, here is your order receipt_19
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_19.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_19.pdf
+
+Pattern 183: Reciepts\Platforms / gmail - mehdi, here is your order receipt_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_2.pdf
+
+Pattern 184: Reciepts\Platforms / gmail - mehdi, here is your order receipt_20
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_20.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_20.pdf
+
+Pattern 185: Reciepts\Platforms / gmail - mehdi, here is your order receipt_21
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_21.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_21.pdf
+
+Pattern 186: Reciepts\Platforms / gmail - mehdi, here is your order receipt_22
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_22.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_22.pdf
+
+Pattern 187: Reciepts\Platforms / gmail - mehdi, here is your order receipt_23
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_23.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_23.pdf
+
+Pattern 188: Reciepts\Platforms / gmail - mehdi, here is your order receipt_24
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_24.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_24.pdf
+
+Pattern 189: Reciepts\Platforms / gmail - mehdi, here is your order receipt_25
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_25.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_25.pdf
+
+Pattern 190: Reciepts\Platforms / gmail - mehdi, here is your order receipt_26
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_26.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_26.pdf
+
+Pattern 191: Reciepts\Platforms / gmail - mehdi, here is your order receipt_27
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_27.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_27.pdf
+
+Pattern 192: Reciepts\Platforms / gmail - mehdi, here is your order receipt_28
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_28.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_28.pdf
+
+Pattern 193: Reciepts\Platforms / gmail - mehdi, here is your order receipt_29
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_29.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_29.pdf
+
+Pattern 194: Reciepts\Platforms / gmail - mehdi, here is your order receipt_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_3.pdf
+
+Pattern 195: Reciepts\Platforms / gmail - mehdi, here is your order receipt_30
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_30.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_30.pdf
+
+Pattern 196: Reciepts\Platforms / gmail - mehdi, here is your order receipt_31
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_31.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_31.pdf
+
+Pattern 197: Reciepts\Platforms / gmail - mehdi, here is your order receipt_32
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_32.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_32.pdf
+
+Pattern 198: Reciepts\Platforms / gmail - mehdi, here is your order receipt_33
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_33.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_33.pdf
+
+Pattern 199: Reciepts\Platforms / gmail - mehdi, here is your order receipt_34
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_34.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_34.pdf
+
+Pattern 200: Reciepts\Platforms / gmail - mehdi, here is your order receipt_35
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_35.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_35.pdf
+
+Pattern 201: Reciepts\Platforms / gmail - mehdi, here is your order receipt_36
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_36.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_36.pdf
+
+Pattern 202: Reciepts\Platforms / gmail - mehdi, here is your order receipt_37
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_37.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_37.pdf
+
+Pattern 203: Reciepts\Platforms / gmail - mehdi, here is your order receipt_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_4.pdf
+
+Pattern 204: Reciepts\Platforms / gmail - mehdi, here is your order receipt_5
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_5.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_5.pdf
+
+Pattern 205: Reciepts\Platforms / gmail - mehdi, here is your order receipt_6
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_6.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_6.pdf
+
+Pattern 206: Reciepts\Platforms / gmail - mehdi, here is your order receipt_7
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_7.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_7.pdf
+
+Pattern 207: Reciepts\Platforms / gmail - mehdi, here is your order receipt_8
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_8.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_8.pdf
+
+Pattern 208: Reciepts\Platforms / gmail - mehdi, here is your order receipt_9
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_9.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Mehdi, Here is your order receipt_9.pdf
+
+Pattern 209: Reciepts\Platforms / gmail - order confirmation
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation.pdf
+
+Pattern 210: Reciepts\Platforms / gmail - order confirmation_resolume
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume.pdf
+
+Pattern 211: Reciepts\Platforms / gmail - order confirmation_resolume2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume2.pdf
+
+Pattern 212: Reciepts\Platforms / gmail - order confirmation_resolume3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume3.pdf
+
+Pattern 213: Reciepts\Platforms / gmail - order confirmation_resolume4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume4.pdf
+
+Pattern 214: Reciepts\Platforms / gmail - order confirmation_resolume5
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume5.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume5.pdf
+
+Pattern 215: Reciepts\Platforms / gmail - order confirmation_resolume6
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume6.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Order Confirmation_resolume6.pdf
+
+Pattern 216: Reciepts\Platforms / gmail - receipt for your payment to apple services
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services.pdf
+
+Pattern 217: Reciepts\Platforms / gmail - receipt for your payment to apple services_10
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_10.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_10.pdf
+
+Pattern 218: Reciepts\Platforms / gmail - receipt for your payment to apple services_11
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_11.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_11.pdf
+
+Pattern 219: Reciepts\Platforms / gmail - receipt for your payment to apple services_12
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_12.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_12.pdf
+
+Pattern 220: Reciepts\Platforms / gmail - receipt for your payment to apple services_13
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_13.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_13.pdf
+
+Pattern 221: Reciepts\Platforms / gmail - receipt for your payment to apple services_15
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_15.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_15.pdf
+
+Pattern 222: Reciepts\Platforms / gmail - receipt for your payment to apple services_16
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_16.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_16.pdf
+
+Pattern 223: Reciepts\Platforms / gmail - receipt for your payment to apple services_19
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_19.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_19.pdf
+
+Pattern 224: Reciepts\Platforms / gmail - receipt for your payment to apple services_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_2.pdf
+
+Pattern 225: Reciepts\Platforms / gmail - receipt for your payment to apple services_20
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_20.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_20.pdf
+
+Pattern 226: Reciepts\Platforms / gmail - receipt for your payment to apple services_21
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_21.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_21.pdf
+
+Pattern 227: Reciepts\Platforms / gmail - receipt for your payment to apple services_22
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_22.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_22.pdf
+
+Pattern 228: Reciepts\Platforms / gmail - receipt for your payment to apple services_23
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_23.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_23.pdf
+
+Pattern 229: Reciepts\Platforms / gmail - receipt for your payment to apple services_24
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_24.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_24.pdf
+
+Pattern 230: Reciepts\Platforms / gmail - receipt for your payment to apple services_25
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_25.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_25.pdf
+
+Pattern 231: Reciepts\Platforms / gmail - receipt for your payment to apple services_26
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_26.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_26.pdf
+
+Pattern 232: Reciepts\Platforms / gmail - receipt for your payment to apple services_27
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_27.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_27.pdf
+
+Pattern 233: Reciepts\Platforms / gmail - receipt for your payment to apple services_28
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_28.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_28.pdf
+
+Pattern 234: Reciepts\Platforms / gmail - receipt for your payment to apple services_29
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_29.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_29.pdf
+
+Pattern 235: Reciepts\Platforms / gmail - receipt for your payment to apple services_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_3.pdf
+
+Pattern 236: Reciepts\Platforms / gmail - receipt for your payment to apple services_30
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_30.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_30.pdf
+
+Pattern 237: Reciepts\Platforms / gmail - receipt for your payment to apple services_31
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_31.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_31.pdf
+
+Pattern 238: Reciepts\Platforms / gmail - receipt for your payment to apple services_32
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_32.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_32.pdf
+
+Pattern 239: Reciepts\Platforms / gmail - receipt for your payment to apple services_33
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_33.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_33.pdf
+
+Pattern 240: Reciepts\Platforms / gmail - receipt for your payment to apple services_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_4.pdf
+
+Pattern 241: Reciepts\Platforms / gmail - receipt for your payment to apple services_43
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_43.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_43.pdf
+
+Pattern 242: Reciepts\Platforms / gmail - receipt for your payment to apple services_44
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_44.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_44.pdf
+
+Pattern 243: Reciepts\Platforms / gmail - receipt for your payment to apple services_45
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_45.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_45.pdf
+
+Pattern 244: Reciepts\Platforms / gmail - receipt for your payment to apple services_46
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_46.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_46.pdf
+
+Pattern 245: Reciepts\Platforms / gmail - receipt for your payment to apple services_47
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_47.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_47.pdf
+
+Pattern 246: Reciepts\Platforms / gmail - receipt for your payment to apple services_48
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_48.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_48.pdf
+
+Pattern 247: Reciepts\Platforms / gmail - receipt for your payment to apple services_49
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_49.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_49.pdf
+
+Pattern 248: Reciepts\Platforms / gmail - receipt for your payment to apple services_5
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_5.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_5.pdf
+
+Pattern 249: Reciepts\Platforms / gmail - receipt for your payment to apple services_50
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_50.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_50.pdf
+
+Pattern 250: Reciepts\Platforms / gmail - receipt for your payment to apple services_51
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_51.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_51.pdf
+
+Pattern 251: Reciepts\Platforms / gmail - receipt for your payment to apple services_52
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_52.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_52.pdf
+
+Pattern 252: Reciepts\Platforms / gmail - receipt for your payment to apple services_53
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_53.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_53.pdf
+
+Pattern 253: Reciepts\Platforms / gmail - receipt for your payment to apple services_54
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_54.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_54.pdf
+
+Pattern 254: Reciepts\Platforms / gmail - receipt for your payment to apple services_55
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_55.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_55.pdf
+
+Pattern 255: Reciepts\Platforms / gmail - receipt for your payment to apple services_56
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_56.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_56.pdf
+
+Pattern 256: Reciepts\Platforms / gmail - receipt for your payment to apple services_57
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_57.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_57.pdf
+
+Pattern 257: Reciepts\Platforms / gmail - receipt for your payment to apple services_58
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_58.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_58.pdf
+
+Pattern 258: Reciepts\Platforms / gmail - receipt for your payment to apple services_59
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_59.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_59.pdf
+
+Pattern 259: Reciepts\Platforms / gmail - receipt for your payment to apple services_6
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_6.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_6.pdf
+
+Pattern 260: Reciepts\Platforms / gmail - receipt for your payment to apple services_60
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_60.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_60.pdf
+
+Pattern 261: Reciepts\Platforms / gmail - receipt for your payment to apple services_61
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_61.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_61.pdf
+
+Pattern 262: Reciepts\Platforms / gmail - receipt for your payment to apple services_62
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_62.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_62.pdf
+
+Pattern 263: Reciepts\Platforms / gmail - receipt for your payment to apple services_63
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_63.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_63.pdf
+
+Pattern 264: Reciepts\Platforms / gmail - receipt for your payment to apple services_67
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_67.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_67.pdf
+
+Pattern 265: Reciepts\Platforms / gmail - receipt for your payment to apple services_69
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_69.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_69.pdf
+
+Pattern 266: Reciepts\Platforms / gmail - receipt for your payment to apple services_7
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_7.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_7.pdf
+
+Pattern 267: Reciepts\Platforms / gmail - receipt for your payment to apple services_70
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_70.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_70.pdf
+
+Pattern 268: Reciepts\Platforms / gmail - receipt for your payment to apple services_71
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_71.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_71.pdf
+
+Pattern 269: Reciepts\Platforms / gmail - receipt for your payment to apple services_72
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_72.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_72.pdf
+
+Pattern 270: Reciepts\Platforms / gmail - receipt for your payment to apple services_73
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_73.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_73.pdf
+
+Pattern 271: Reciepts\Platforms / gmail - receipt for your payment to apple services_74
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_74.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_74.pdf
+
+Pattern 272: Reciepts\Platforms / gmail - receipt for your payment to apple services_75
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_75.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_75.pdf
+
+Pattern 273: Reciepts\Platforms / gmail - receipt for your payment to apple services_8
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_8.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_8.pdf
+
+Pattern 274: Reciepts\Platforms / gmail - receipt for your payment to apple services_9
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_9.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to Apple Services_9.pdf
+
+Pattern 275: Reciepts\Platforms / gmail - receipt for your payment to pipo (sg) pte ltd_ capcut
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to PIPO (SG) PTE LTD_ CAPCUT.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to PIPO (SG) PTE LTD_ CAPCUT.pdf
+
+Pattern 276: Reciepts\Platforms / gmail - receipt for your payment to pipo (sg) pte ltd_ capcut_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to PIPO (SG) PTE LTD_ CAPCUT_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Receipt for Your Payment to PIPO (SG) PTE LTD_ CAPCUT_2.pdf
+
+Pattern 277: Reciepts\Platforms / gmail - renewal receipt for order ORDERNUM_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Renewal receipt for order #3024213656_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Renewal receipt for order #3024213656_.pdf
+
+Pattern 278: Reciepts\Platforms / gmail - your amazon.com order of _dji osmo pocket NUM, vlogging..._ and NUM more items_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Amazon.com order of _DJI Osmo Pocket 3, Vlogging..._ and 12 more items_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Amazon.com order of _DJI Osmo Pocket 3, Vlogging..._ and 12 more items_.pdf
+
+Pattern 279: Reciepts\Platforms / gmail - your amazon.com order of _optoma gt2000hdr compact..._ has shipped!
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Amazon.com order of _Optoma GT2000HDR Compact..._ has shipped!.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Amazon.com order of _Optoma GT2000HDR Compact..._ has shipped!.pdf
+
+Pattern 280: Reciepts\Platforms / gmail - your google play order receipt from MONTH NUM, NUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Google Play Order Receipt from Dec 17, 2024.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Google Play Order Receipt from Dec 17, 2024.pdf
+
+Pattern 281: Reciepts\Platforms / gmail - your landr audio inc. receipt [#NUM-NUM]
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your LANDR AUDIO INC. receipt [#1543-0573].pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your LANDR AUDIO INC. receipt [#1543-0573].pdf
+
+Pattern 282: Reciepts\Platforms / gmail - your next pro plan has started
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Next Pro plan has started.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Next Pro plan has started.pdf
+
+Pattern 283: Reciepts\Platforms / gmail - your receipt from anthropic #NUM-NUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Anthropic #2681-7791.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Anthropic #2681-7791.pdf
+
+Pattern 284: Reciepts\Platforms / gmail - your receipt from apple_
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_.pdf
+
+Pattern 285: Reciepts\Platforms / gmail - your receipt from apple_10
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_10.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_10.pdf
+
+Pattern 286: Reciepts\Platforms / gmail - your receipt from apple_15
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_15.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_15.pdf
+
+Pattern 287: Reciepts\Platforms / gmail - your receipt from apple_16
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_16.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_16.pdf
+
+Pattern 288: Reciepts\Platforms / gmail - your receipt from apple_17
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_17.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_17.pdf
+
+Pattern 289: Reciepts\Platforms / gmail - your receipt from apple_19
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_19.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_19.pdf
+
+Pattern 290: Reciepts\Platforms / gmail - your receipt from apple_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_2.pdf
+
+Pattern 291: Reciepts\Platforms / gmail - your receipt from apple_20
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_20.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_20.pdf
+
+Pattern 292: Reciepts\Platforms / gmail - your receipt from apple_22
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_22.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_22.pdf
+
+Pattern 293: Reciepts\Platforms / gmail - your receipt from apple_23
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_23.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_23.pdf
+
+Pattern 294: Reciepts\Platforms / gmail - your receipt from apple_24
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_24.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_24.pdf
+
+Pattern 295: Reciepts\Platforms / gmail - your receipt from apple_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_3.pdf
+
+Pattern 296: Reciepts\Platforms / gmail - your receipt from apple_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your receipt from Apple_4.pdf
+
+Pattern 297: Reciepts\Platforms / gmail - your webflow receipt
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt.pdf
+
+Pattern 298: Reciepts\Platforms / gmail - your webflow receipt_10
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_10.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_10.pdf
+
+Pattern 299: Reciepts\Platforms / gmail - your webflow receipt_11
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_11.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_11.pdf
+
+Pattern 300: Reciepts\Platforms / gmail - your webflow receipt_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_2.pdf
+
+Pattern 301: Reciepts\Platforms / gmail - your webflow receipt_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_3.pdf
+
+Pattern 302: Reciepts\Platforms / gmail - your webflow receipt_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_4.pdf
+
+Pattern 303: Reciepts\Platforms / gmail - your webflow receipt_5
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_5.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_5.pdf
+
+Pattern 304: Reciepts\Platforms / gmail - your webflow receipt_6
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_6.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_6.pdf
+
+Pattern 305: Reciepts\Platforms / gmail - your webflow receipt_7
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_7.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_7.pdf
+
+Pattern 306: Reciepts\Platforms / gmail - your webflow receipt_8
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_8.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_8.pdf
+
+Pattern 307: Reciepts\Platforms / gmail - your webflow receipt_9
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_9.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Platforms\Gmail - Your Webflow receipt_9.pdf
+
+Pattern 308: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud.pdf
+
+Pattern 309: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_10
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_10.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_10.pdf
+
+Pattern 310: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_11
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_11.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_11.pdf
+
+Pattern 311: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_12
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_12.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_12.pdf
+
+Pattern 312: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_13
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_13.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_13.pdf
+
+Pattern 313: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_2
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_2.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_2.pdf
+
+Pattern 314: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_3
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_3.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_3.pdf
+
+Pattern 315: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_4
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_4.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_4.pdf
+
+Pattern 316: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_5
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_5.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_5.pdf
+
+Pattern 317: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_7
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_7.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_7.pdf
+
+Pattern 318: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_8
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_8.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_8.pdf
+
+Pattern 319: Reciepts\soundcloud / stream algoryx music _ listen to songs, albums, playlists for free on soundcloud_9
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_9.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\soundcloud\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud_9.pdf
+
+Pattern 320: Reciepts\Travel\To SohoHouse / gmail - your ride with muhammad on MONTH NUM
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Travel\To SohoHouse\Gmail - Your ride with Muhammad on December 28.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Travel\To SohoHouse\Gmail - Your ride with Muhammad on December 28.pdf
+
+Pattern 321: Reciepts\Travel\To SohoHouse / gmail - [personal] your friday evening trip with uber
+Files: 1
+Sample: C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Travel\To SohoHouse\Gmail - [Personal] Your Friday evening trip with Uber.pdf
+All files in this pattern:
+  - C:\Users\mehdi\Dropbox\2024 Tax Audit\Expenses - Copy\Reciepts\Travel\To SohoHouse\Gmail - [Personal] Your Friday evening trip with Uber.pdf

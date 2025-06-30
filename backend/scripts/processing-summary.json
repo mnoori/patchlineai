@@ -1,0 +1,24 @@
+{
+  "total_expenses": 2176,
+  "unique_document_ids": 402,
+  "documents_in_table": 143,
+  "mapped_files": 3,
+  "unmapped_documents": 399,
+  "processed_files": [
+    "Chase-Freedom-Dec.pdf",
+    "Chase-Freedom-June.pdf",
+    "Chase-Freedom-Nov.pdf"
+  ],
+  "sample_unmapped_ids": [
+    "doc_1751236915825_trxun1i",
+    "doc_1751235351046_b1jvx4d",
+    "doc_1751235692194_s22rda",
+    "doc_1751254257981_lpv6hk",
+    "doc_1751250979691_nolryf",
+    "doc_1751286440594_9eskb9",
+    "doc_1751236323645_rc3pjp",
+    "doc_1751236552325_272fwp",
+    "doc_1751236036215_hid0f2",
+    "doc_1751237757875_rz7ebe"
+  ]
+}

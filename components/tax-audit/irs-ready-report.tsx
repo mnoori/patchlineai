@@ -136,16 +136,67 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
     }
   }
 
-  // Separate bank expenses and receipts
+  // Separate bank expenses and receipts with updated logic
   const bankExpenses = useMemo(() => 
-    expenses.filter(exp => exp.bankAccount && !exp.bankAccount.includes('receipt')),
+    expenses.filter(exp => {
+      // Bank accounts that contain actual transactions
+      const bankAccounts = ['bilt', 'chase-freedom', 'chase-sapphire']
+      return exp.bankAccount && bankAccounts.some(bank => exp.bankAccount!.includes(bank))
+    }),
     [expenses]
   )
   
   const receipts = useMemo(() => 
-    expenses.filter(exp => exp.bankAccount?.includes('receipt') || exp.documentType?.includes('receipt')),
+    expenses.filter(exp => {
+      // Receipt-type accounts or document types
+      const receiptAccounts = ['gmail-receipts', 'amazon-receipts', 'creative-cloud-receipts', 'platform-receipts']
+      return (
+        (exp.bankAccount && receiptAccounts.some(receipt => exp.bankAccount!.includes(receipt))) ||
+        exp.documentType?.includes('receipt') ||
+        exp.bankAccount?.includes('receipt')
+      )
+    }),
     [expenses]
   )
+
+  // Vendor normalization map for common variations
+  const vendorNormalizationMap: Record<string, string[]> = {
+    'apple': ['apple services', 'apple.com', 'itunes', 'app store', 'apple inc', 'mehdi.noori7'], // TEMPORARY FIX for email extraction issue
+    'amazon': ['amazon.com', 'amzn', 'amazon marketplace', 'amazon web services', 'aws'],
+    'google': ['google cloud', 'google ads', 'google workspace', 'youtube'],
+    'meta': ['facebook', 'instagram', 'meta platforms', 'facebk'],
+    'adobe': ['creative cloud', 'adobe systems', 'adobe inc'],
+    'spotify': ['spotify usa', 'spotify ab', 'spotify technology'],
+    'beatport': ['beatport llc', 'beatport.com'],
+  }
+
+  // Enhanced vendor matching function
+  const vendorsMatch = (vendor1: string, vendor2: string): boolean => {
+    const v1 = vendor1.toLowerCase().trim()
+    const v2 = vendor2.toLowerCase().trim()
+    
+    // Direct match
+    if (v1 === v2) return true
+    
+    // Check normalization map
+    for (const [key, variations] of Object.entries(vendorNormalizationMap)) {
+      const allVariations = [key, ...variations]
+      const v1Matches = allVariations.some(v => v1.includes(v))
+      const v2Matches = allVariations.some(v => v2.includes(v))
+      if (v1Matches && v2Matches) return true
+    }
+    
+    // Existing normalization logic
+    const normalizeVendor = (v: string) => 
+      v.replace(/[^a-z0-9]/g, '').replace(/inc|llc|corp|ltd|usa|ab/g, '')
+    
+    const normalized1 = normalizeVendor(v1)
+    const normalized2 = normalizeVendor(v2)
+    
+    return normalized1 === normalized2 || 
+           normalized1.includes(normalized2) || 
+           normalized2.includes(normalized1)
+  }
 
   // Enhanced matching algorithm
   const matchedExpenses = useMemo(() => {
@@ -214,27 +265,10 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
         }
         currentMatchDetails.dateDiff = daysDiff
 
-        // Enhanced vendor matching
-        const bankVendor = bankExpense.vendor.toLowerCase().trim()
-        const receiptVendor = receipt.vendor.toLowerCase().trim()
-        
-        // Normalize common vendor variations
-        const normalizeVendor = (v: string) => 
-          v.replace(/[^a-z0-9]/g, '').replace(/inc|llc|corp|ltd/g, '')
-        
-        const normalizedBankVendor = normalizeVendor(bankVendor)
-        const normalizedReceiptVendor = normalizeVendor(receiptVendor)
-        
-        if (bankVendor === receiptVendor || normalizedBankVendor === normalizedReceiptVendor) {
+        // Enhanced vendor matching using our improved function
+        if (vendorsMatch(bankExpense.vendor, receipt.vendor)) {
           confidence += 25
           reasons.push("vendor match")
-          currentMatchDetails.vendorMatch = true
-        } else if (
-          normalizedBankVendor.includes(normalizedReceiptVendor) || 
-          normalizedReceiptVendor.includes(normalizedBankVendor)
-        ) {
-          confidence += 15
-          reasons.push("partial vendor")
           currentMatchDetails.vendorMatch = true
         }
 
@@ -244,13 +278,21 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
             /\d{3}-\d{7}-\d{7}/g, // Amazon
             /\b\d{10,}\b/g, // Long numbers
             /[A-Z0-9]{8,}/g, // Alphanumeric IDs
+            /\b[A-Z0-9]{17}\b/g, // PayPal transaction IDs (17 chars)
+            /Transaction ID:?\s*([A-Z0-9]+)/gi, // Extract transaction IDs
           ]
           const numbers: string[] = []
           patterns.forEach(pattern => {
             const matches = text.match(pattern)
-            if (matches) numbers.push(...matches)
+            if (matches) {
+              // Clean up transaction ID matches
+              const cleaned = matches.map(m => 
+                m.replace(/Transaction ID:?\s*/i, '').trim()
+              )
+              numbers.push(...cleaned)
+            }
           })
-          return numbers
+          return [...new Set(numbers)] // Remove duplicates
         }
 
         const bankNumbers = extractNumbers(bankExpense.description)
@@ -261,6 +303,28 @@ export function IrsReadyReport({ userId }: IrsReadyReportProps) {
           confidence += 15
           reasons.push("reference match")
           currentMatchDetails.orderNumberMatch = true
+        }
+
+        // Special handling for recurring subscriptions
+        const subscriptionVendors = ['apple', 'spotify', 'adobe', 'google', 'netflix', 'amazon prime']
+        const bankVendorLower = bankExpense.vendor.toLowerCase()
+        const receiptVendorLower = receipt.vendor.toLowerCase()
+        const isSubscription = subscriptionVendors.some(v => 
+          bankVendorLower.includes(v) || receiptVendorLower.includes(v)
+        )
+
+        if (isSubscription && Math.abs(daysDiff) <= 5) {
+          // More lenient date matching for subscriptions
+          confidence += 5
+          reasons.push("subscription timing")
+          
+          // Check for recurring amounts
+          const commonSubscriptionAmounts = [0.99, 1.29, 4.99, 9.99, 14.99, 19.99, 21.24, 99.99]
+          if (commonSubscriptionAmounts.includes(bankExpense.amount) || 
+              commonSubscriptionAmounts.includes(receipt.amount)) {
+            confidence += 5
+            reasons.push("subscription amount")
+          }
         }
 
         // Use raw text if available for additional matching

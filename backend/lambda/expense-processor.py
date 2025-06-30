@@ -462,6 +462,48 @@ def generate_smart_fallback_description(receipt_text: str, vendor: str = None, a
             return f"Office Supplies - {store} (Event Catering/Refreshments)"
         return "Office Supplies - Event Refreshments & Catering"
     
+    # Adobe Creative Cloud
+    elif vendor == "Adobe" or 'creative cloud' in text_lower or 'adobe' in text_lower:
+        # Look for specific product
+        product = None
+        if 'creative cloud files' in text_lower:
+            product = "Creative Cloud Storage"
+        elif 'all apps' in text_lower:
+            product = "Creative Cloud All Apps"
+        elif 'photography' in text_lower:
+            product = "Photography Plan"
+        elif 'photoshop' in text_lower:
+            product = "Photoshop"
+        elif 'premiere' in text_lower:
+            product = "Premiere Pro"
+        elif 'illustrator' in text_lower:
+            product = "Illustrator"
+        else:
+            product = "Creative Cloud"
+        
+        # Look for storage amount
+        storage_match = re.search(r'(\d+)\s*(gb|tb)', text_lower)
+        storage_info = ""
+        if storage_match:
+            size = storage_match.group(1)
+            unit = storage_match.group(2).upper()
+            storage_info = f" {size}{unit}"
+        
+        # Extract billing period from invoice date
+        date_match = re.search(r'Invoice Date[:\s]*([A-Za-z]+\s+\d{1,2},\s+\d{4})', receipt_text, re.IGNORECASE)
+        if not date_match:
+            date_match = re.search(r'Date[:\s]*([A-Za-z]+\s+\d{1,2},\s+\d{4})', receipt_text, re.IGNORECASE)
+        
+        billing_period = ""
+        if date_match:
+            try:
+                date_obj = datetime.strptime(date_match.group(1), '%B %d, %Y')
+                billing_period = f" - {date_obj.strftime('%B %Y')}"
+            except:
+                billing_period = ""
+        
+        return f"Office Expenses - Adobe {product}{storage_info} - Professional Creative Software{billing_period}"[:150]
+    
     # Generic order receipts
     elif 'order' in text_lower and 'receipt' in text_lower:
         # Look for order number
@@ -876,8 +918,10 @@ class BankStatementParser:
             return None
     
     def generate_expense_id(self, date: str, amount: str, description: str) -> str:
-        """Generate unique expense ID"""
-        content = f"{self.user_id}:{date}:{amount}:{description}:{self.document_id}"
+        """Generate unique expense ID based on transaction details only"""
+        # Remove document_id to ensure same transaction always gets same ID
+        # This prevents duplicates when reprocessing documents
+        content = f"{self.user_id}:{date}:{amount}:{description}"
         return hashlib.sha256(content.encode()).hexdigest()[:16]
     
     def categorize_expense(self, description: str, amount: Decimal) -> str:
@@ -2195,6 +2239,182 @@ class GmailReceiptParser(BankStatementParser):
         return ' '.join(text_parts)
 
 
+class CreativeCloudReceiptParser(BankStatementParser):
+    """Parser specifically for Adobe Creative Cloud invoices"""
+    
+    def parse_textract_output(self, textract_data: Dict) -> List[Dict]:
+        """Parse Creative Cloud invoices with special handling"""
+        expenses = []
+        
+        # Extract text content
+        text_content = []
+        for block in textract_data.get('Blocks', []):
+            if block['BlockType'] == 'LINE':
+                text = block.get('Text', '').strip()
+                if text:
+                    text_content.append(text)
+        
+        full_text = '\n'.join(text_content)
+        logging.info(f"Processing Creative Cloud invoice with {len(text_content)} lines")
+        
+        # Extract invoice date
+        invoice_date = None
+        date_patterns = [
+            r'Invoice Date[:\s]*([A-Za-z]+\s+\d{1,2},\s+\d{4})',
+            r'Date[:\s]*([A-Za-z]+\s+\d{1,2},\s+\d{4})',
+            r'Invoice Date[:\s]*(\d{1,2}/\d{1,2}/\d{4})',
+            r'Date[:\s]*(\d{1,2}/\d{1,2}/\d{4})',
+            r'(\d{1,2}/\d{1,2}/\d{4})'  # Any date in the document
+        ]
+        
+        for pattern in date_patterns:
+            date_match = re.search(pattern, full_text, re.IGNORECASE)
+            if date_match:
+                invoice_date = self._parse_date_flexible(date_match.group(1))
+                if invoice_date:
+                    logging.info(f"Found invoice date: {invoice_date}")
+                    break
+        
+        # If no date found, use default
+        if not invoice_date:
+            invoice_date = '2024-12-31'
+            logging.warning("No date found, using default: 2024-12-31")
+        
+        # Look for amount - Creative Cloud invoices often have the amount in tables
+        amount = None
+        
+        # First try to find in tables
+        tables = [b for b in textract_data.get('Blocks', []) if b['BlockType'] == 'TABLE']
+        logging.info(f"Found {len(tables)} tables in Creative Cloud invoice")
+        
+        for table in tables:
+            # Process table cells
+            cells = []
+            for relationship in table.get('Relationships', []):
+                if relationship['Type'] == 'CHILD':
+                    for cell_id in relationship['Ids']:
+                        cell_block = self._get_block_by_id(cell_id, textract_data)
+                        if cell_block and cell_block['BlockType'] == 'CELL':
+                            cells.append(cell_block)
+            
+            # Group cells by row
+            rows = {}
+            for cell in cells:
+                row_index = cell.get('RowIndex', 0)
+                if row_index not in rows:
+                    rows[row_index] = []
+                rows[row_index].append(cell)
+            
+            # Look for Creative Cloud product rows
+            for row_index in sorted(rows.keys()):
+                if row_index == 1:  # Skip header
+                    continue
+                
+                row_cells = sorted(rows[row_index], key=lambda x: x.get('ColumnIndex', 0))
+                cell_texts = [self._get_cell_text(cell, textract_data) for cell in row_cells]
+                
+                # Check if this row contains Creative Cloud product
+                row_text = ' '.join(cell_texts).lower()
+                if 'creative cloud' in row_text or 'storage' in row_text:
+                    # Look for amount in this row (usually last few columns)
+                    for text in reversed(cell_texts):
+                        test_amount = self.extract_amount(text)
+                        if test_amount and test_amount > 0:
+                            amount = test_amount
+                            logging.info(f"Found amount in table: ${amount}")
+                            break
+                    
+                    if amount:
+                        break
+        
+        # If no amount in tables, look in text
+        if not amount:
+            amount_patterns = [
+                r'Total[:\s]+\$?(\d+\.\d{2})',
+                r'Amount Due[:\s]+\$?(\d+\.\d{2})',
+                r'Amount[:\s]+\$?(\d+\.\d{2})',
+                r'Subtotal[:\s]+\$?(\d+\.\d{2})',
+                r'\$(\d+\.\d{2})'  # Any dollar amount
+            ]
+            
+            for pattern in amount_patterns:
+                amount_match = re.search(pattern, full_text, re.IGNORECASE)
+                if amount_match:
+                    amount = Decimal(amount_match.group(1))
+                    logging.info(f"Found amount in text: ${amount}")
+                    break
+        
+        # Extract product details
+        product_info = "Creative Cloud"
+        if 'all apps' in full_text.lower():
+            product_info = "Creative Cloud All Apps"
+        elif 'photography' in full_text.lower():
+            product_info = "Photography Plan"
+        elif 'files storage' in full_text.lower():
+            # Look for storage amount
+            storage_match = re.search(r'(\d+)\s*(gb|tb)', full_text.lower())
+            if storage_match:
+                size = storage_match.group(1)
+                unit = storage_match.group(2).upper()
+                product_info = f"Creative Cloud Storage {size}{unit}"
+        
+        # Create expense if we have amount
+        if amount:
+            # Generate AI description
+            ai_description = generate_receipt_description(
+                f"Adobe {product_info} invoice\nInvoice Date: {invoice_date}\nAmount: ${amount}\n{full_text[:500]}",
+                vendor="Adobe",
+                amount=float(amount)
+            )
+            
+            expense = {
+                'expenseId': self.generate_expense_id(invoice_date, str(amount), ai_description),
+                'userId': self.user_id,
+                'documentId': self.document_id,
+                'date': invoice_date,
+                'description': ai_description,
+                'vendor': 'Adobe',
+                'amount': str(amount),
+                'category': 'office_expenses',  # Software for business
+                'bankAccount': 'creative-cloud-receipts',
+                'filename': self.document_id.split('/')[-1] if '/' in self.document_id else self.document_id,
+                'status': 'pending',
+                'confidence': 0.95,
+                'createdAt': datetime.utcnow().isoformat()
+            }
+            expenses.append(expense)
+            logging.info(f"✅ Created Creative Cloud expense: {ai_description} - ${amount} on {invoice_date}")
+        else:
+            logging.error("❌ No amount found in Creative Cloud invoice")
+        
+        return expenses
+    
+    def _parse_date_flexible(self, date_str: str) -> Optional[str]:
+        """Parse date from various formats"""
+        # Use parent class method
+        return super()._parse_date_flexible(date_str)
+    
+    def _get_block_by_id(self, block_id: str, full_data: Dict) -> Optional[Dict]:
+        """Get a block by its ID"""
+        for block in full_data.get('Blocks', []):
+            if block.get('Id') == block_id:
+                return block
+        return None
+    
+    def _get_cell_text(self, cell: Dict, full_data: Dict) -> str:
+        """Get text content from a cell"""
+        text_parts = []
+        
+        for relationship in cell.get('Relationships', []):
+            if relationship['Type'] == 'CHILD':
+                for child_id in relationship['Ids']:
+                    child_block = self._get_block_by_id(child_id, full_data)
+                    if child_block and child_block['BlockType'] in ['WORD', 'LINE']:
+                        text_parts.append(child_block.get('Text', ''))
+        
+        return ' '.join(text_parts)
+
+
 def get_parser(bank_type: str, user_id: str, document_id: str) -> BankStatementParser:
     """Get the appropriate parser for the bank type"""
     parsers = {
@@ -2204,6 +2424,7 @@ def get_parser(bank_type: str, user_id: str, document_id: str) -> BankStatementP
         'bilt': BiltStatementParser,
         'amazon-receipts': AmazonReceiptParser,
         'gmail-receipts': GmailReceiptParser,
+        'creative-cloud-receipts': CreativeCloudReceiptParser,
         # Add more parsers as needed
     }
     

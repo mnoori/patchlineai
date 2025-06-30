@@ -88,7 +88,7 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
   const [customCategories, setCustomCategories] = useState<string[]>([])
   const [newCategory, setNewCategory] = useState("")
   const [showNewCategory, setShowNewCategory] = useState(false)
-  const [activeTab, setActiveTab] = useState<"expenses" | "receipts">("expenses")
+  const [activeTab, setActiveTab] = useState<"expenses" | "receipts" | "test-samples">("expenses")
   
   // Advanced filters
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
@@ -129,17 +129,38 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
     }
   }
 
+  // Test sample document IDs from our recent processing
+  const testSampleIds = [
+    'doc_1751294478444_w504pg', 'doc_1751294493081_5s7q9j', 'doc_1751294504977_yya5ob',
+    'doc_1751294522252_s2b5a9', 'doc_1751294537829_9qx', 'doc_1751294557384_0s40ks',
+    'doc_1751294591664_y3r4dv', 'doc_1751294626921_81tpo', 'doc_1751294637554_vsso2q',
+    'doc_1751294647721_14ph5l', 'doc_1751294667587_idwpv', 'doc_1751294688228_ydr557',
+    'doc_1751294700613_iel3wr', 'doc_1751294713965_n2xox', 'doc_1751294729161_uahijw',
+    'doc_1751294747645_ehvenb', 'doc_1751294781214_sem5p', 'doc_1751294800153_0qc2do',
+    'doc_1751294829341_8sejy', 'doc_1751294850038_aux4bxe', 'doc_1751294873402_ksy9ok',
+    'doc_1751294889172_1tfx3', 'doc_1751294913090_o1uzfa', 'doc_1751294943177_5tw0e',
+    'doc_1751294957287_51094', 'doc_1751294980571_385jgq', 'doc_1751295004547_60cuml',
+    'doc_1751295016344_wktxzb', 'doc_1751295034847_y8qykn', 'doc_1751295050095_omxloe',
+    'doc_1751295065605_dt2z8', 'doc_1751295075953_abh1is', 'doc_1751295093654_mvqhwa',
+    'doc_1751295111760_9ggp5g'
+  ]
+
   // Separate expenses and receipts
   const bankExpenses = expenses.filter(exp => 
-    exp.bankAccount && !exp.bankAccount.includes('receipt')
+    exp.bankAccount && !exp.bankAccount.includes('receipt') && !testSampleIds.includes(exp.documentId)
   )
   
   const receipts = expenses.filter(exp => 
-    exp.bankAccount?.includes('receipt') || exp.documentType?.includes('receipt')
+    (exp.bankAccount?.includes('receipt') || exp.documentType?.includes('receipt')) && !testSampleIds.includes(exp.documentId)
+  )
+  
+  const testSamples = expenses.filter(exp => 
+    testSampleIds.includes(exp.documentId)
   )
 
   // Use the appropriate list based on active tab
-  const currentExpenses = activeTab === "expenses" ? bankExpenses : receipts
+  const currentExpenses = activeTab === "expenses" ? bankExpenses : 
+                         activeTab === "receipts" ? receipts : testSamples
 
   // Filter expenses
   const filteredExpenses = currentExpenses.filter(expense => {
@@ -424,8 +445,8 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
       </div>
 
       {/* Main Tabs for Expenses and Receipts */}
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "expenses" | "receipts")} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-slate-900/50 border border-slate-800">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "expenses" | "receipts" | "test-samples")} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 bg-slate-900/50 border border-slate-800">
           <TabsTrigger value="expenses" className="text-lg">
             Bank Expenses
             <span className="ml-2 text-sm text-muted-foreground">({bankExpenses.length})</span>
@@ -433,6 +454,10 @@ export function ExpenseReviewTable({ userId, irsReadyView = false }: ExpenseRevi
           <TabsTrigger value="receipts" className="text-lg">
             Receipts
             <span className="ml-2 text-sm text-muted-foreground">({receipts.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="test-samples" className="text-lg">
+            Test Samples
+            <span className="ml-2 text-sm text-muted-foreground">({testSamples.length})</span>
           </TabsTrigger>
         </TabsList>
 

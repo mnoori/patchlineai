@@ -1,0 +1,39 @@
+{
+  "with_ai_descriptions": [],
+  "without_ai_descriptions": [
+    "Chase-Freedom-Nov.pdf",
+    "Chase-Freedom-June.pdf",
+    "Chase-Freedom-Dec.pdf"
+  ],
+  "zero_expenses": [
+    "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_11.pdf",
+    "equipment12.pdf",
+    "Gmail - Mehdi, Here is your order receipt_2.pdf",
+    "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf",
+    "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf",
+    "Gmail - [Personal] Your Friday evening trip with Uber.pdf",
+    "Disco_Ball.pdf",
+    "Gmail - Your Amazon.com order of _Airloons 9.5in Standard..._ and 3 more items_.pdf",
+    "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf",
+    "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_5.pdf",
+    "equipment6.pdf",
+    "Gmail - Your Amazon.com order of _Airloons 9.5in Standard..._ and 3 more items_.pdf",
+    "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_5.pdf",
+    "equipment4.pdf",
+    "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_3.pdf",
+    "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_4.pdf",
+    "Gmail - Your Amazon.com order of _Airloons 9.5in Standard..._ and 3 more items_.pdf",
+    "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_9.pdf",
+    "Gmail - Mehdi, Here is your order receipt_2.pdf",
+    "Gmail - Your Amazon.com order of _Airloons 9.5in Standard..._ and 3 more items_.pdf",
+    "Disco_Ball.pdf"
+  ],
+  "creative_cloud": [],
+  "summary": {
+    "total": 24,
+    "with_ai_desc": 0,
+    "without_ai_desc": 3,
+    "zero_expenses": 21,
+    "creative_cloud": 0
+  }
+}

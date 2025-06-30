@@ -1,0 +1,199 @@
+[
+  {
+    "filename": "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_11.pdf",
+    "uploadDate": "2025-06-29T01:55:35.143Z",
+    "extractedData": {
+      "processingStatus": "pending",
+      "filename": "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_11.pdf"
+    },
+    "documentId": "doc_1751162126399_13tdsk",
+    "updatedAt": "2025-06-29T01:55:35.143Z",
+    "userId": "default-user",
+    "status": "processing",
+    "createdAt": "2025-06-29T01:55:35.143Z",
+    "fileHash": "2828537adf6bfa6a6c930653aa2a5a4a99fce173d61f4011abee2980c7a86026",
+    "tags": [
+      "receipt",
+      "receipt"
+    ],
+    "s3Key": "documents/default-user/gmail-receipts/doc_1751162126399_13tdsk/Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_11.pdf",
+    "type": "receipt"
+  },
+  {
+    "filename": "equipment12.pdf",
+    "uploadDate": "2025-06-28T20:34:47.122Z",
+    "extractedData": {
+      "processingStatus": "pending",
+      "filename": "equipment12.pdf"
+    },
+    "documentId": "doc_1751142878646_xhtc8l",
+    "updatedAt": "2025-06-28T20:34:47.122Z",
+    "userId": "default-user",
+    "status": "processing",
+    "createdAt": "2025-06-28T20:34:47.122Z",
+    "fileHash": "5fdd9ea941511c52df862ef0f770b833ad3ef68ab29d37d3198c3ddab6f716ae",
+    "tags": [
+      "general"
+    ],
+    "s3Key": "documents/default-user/amazon-receipts/doc_1751142878646_xhtc8l/equipment12.pdf",
+    "type": "general"
+  },
+  {
+    "filename": "Gmail - Mehdi, Here is your order receipt_2.pdf",
+    "uploadDate": "2025-06-29T15:30:59.616Z",
+    "extractedData": {
+      "processingStatus": "pending",
+      "filename": "Gmail - Mehdi, Here is your order receipt_2.pdf"
+    },
+    "documentId": "doc_1751211040162_be1pb",
+    "updatedAt": "2025-06-29T15:30:59.616Z",
+    "userId": "default-user",
+    "status": "processing",
+    "createdAt": "2025-06-29T15:30:59.616Z",
+    "fileHash": "4aa4cd13dc89b5aea3036b65082d3d934727b7a66e4f18ea00fadfb8d1817a68",
+    "tags": [
+      "receipt",
+      "receipt"
+    ],
+    "s3Key": "documents/default-user/gmail-receipts/doc_1751211040162_be1pb/Gmail - Mehdi, Here is your order receipt_2.pdf",
+    "type": "receipt"
+  },
+  {
+    "filename": "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf",
+    "uploadDate": "2025-06-29T01:20:30.329Z",
+    "extractedData": {
+      "processingStatus": "pending",
+      "filename": "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf"
+    },
+    "documentId": "doc_1751160022217_zi2328",
+    "updatedAt": "2025-06-29T01:20:30.329Z",
+    "userId": "default-user",
+    "status": "processing",
+    "createdAt": "2025-06-29T01:20:30.329Z",
+    "fileHash": "9fb23672d059441e91659845cf1f4f599935eb4f2a4f12a1bb939c45c08d8a3a",
+    "tags": [
+      "receipt",
+      "receipt"
+    ],
+    "s3Key": "documents/default-user/gmail-receipts/doc_1751160022217_zi2328/Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf",
+    "type": "receipt"
+  },
+  {
+    "filename": "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf",
+    "uploadDate": "2025-06-29T00:47:10.423Z",
+    "extractedData": {
+      "processingStatus": "pending",
+      "filename": "Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf"
+    },
+    "documentId": "doc_1751158016200_dim3hb",
+    "updatedAt": "2025-06-29T00:47:10.423Z",
+    "userId": "default-user",
+    "status": "processing",
+    "createdAt": "2025-06-29T00:47:10.423Z",
+    "fileHash": "9fb23672d059441e91659845cf1f4f599935eb4f2a4f12a1bb939c45c08d8a3a",
+    "tags": [
+      "receipt",
+      "receipt"
+    ],
+    "s3Key": "documents/default-user/gmail-receipts/doc_1751158016200_dim3hb/Gmail - Your Meta ads receipt (Account ID_ 434492877229135)_7.pdf",
+    "type": "receipt"
+  },
+  {
+    "filename": "Chase-Freedom-Nov.pdf",
+    "uploadDate": "2025-06-28T19:33:58.360Z",
+    "extractedData": {
+      "processingStatus": "pending",
+      "filename": "Chase-Freedom-Nov.pdf"
+    },
+    "documentId": "doc_1751139223376_3t2rli",
+    "updatedAt": "2025-06-28T19:33:58.360Z",
+    "userId": "default-user",
+    "status": "processing",
+    "createdAt": "2025-06-28T19:33:58.360Z",
+    "fileHash": "378d7709f8a017851cd25ad16481cbb671f4b8e4f0d829e0811f08f7cd6597ad",
+    "tags": [
+      "general"
+    ],
+    "s3Key": "documents/default-user/chase-freedom/doc_1751139223376_3t2rli/Chase-Freedom-Nov.pdf",
+    "type": "general"
+  },
+  {
+    "filename": "Gmail - [Personal] Your Friday evening trip with Uber.pdf",
+    "uploadDate": "2025-06-29T14:09:50.272Z",
+    "extractedData": {
+      "processingStatus": "pending",
+      "filename": "Gmail - [Personal] Your Friday evening trip with Uber.pdf"
+    },
+    "documentId": "doc_1751206179697_d99cw",
+    "updatedAt": "2025-06-29T14:09:50.272Z",
+    "userId": "default-user",
+    "status": "processing",
+    "createdAt": "2025-06-29T14:09:50.272Z",
+    "fileHash": "d390dccc6d45e2a49cd6682e1595ac406f21c5f9f3f34af1599aeeff4fd43468",
+    "tags": [
+      "general"
+    ],
+    "s3Key": "documents/default-user/gmail-receipts/doc_1751206179697_d99cw/Gmail - [Personal] Your Friday evening trip with Uber.pdf",
+    "type": "general"
+  },
+  {
+    "filename": "Disco_Ball.pdf",
+    "uploadDate": "2025-06-28T20:56:17.516Z",
+    "extractedData": {
+      "processingStatus": "pending",
+      "filename": "Disco_Ball.pdf"
+    },
+    "documentId": "doc_1751144168399_cqtje",
+    "updatedAt": "2025-06-28T20:56:17.516Z",
+    "userId": "default-user",
+    "status": "processing",
+    "createdAt": "2025-06-28T20:56:17.516Z",
+    "fileHash": "bd1df981819f9a48b5e573a99d9f3ee856a5c626e71cd70b0085ade7d09c508d",
+    "tags": [
+      "general"
+    ],
+    "s3Key": "documents/default-user/amazon-receipts/doc_1751144168399_cqtje/Disco_Ball.pdf",
+    "type": "general"
+  },
+  {
+    "filename": "Gmail - Your Amazon.com order of _Airloons 9.5in Standard..._ and 3 more items_.pdf",
+    "uploadDate": "2025-06-29T15:16:16.799Z",
+    "extractedData": {
+      "processingStatus": "pending",
+      "filename": "Gmail - Your Amazon.com order of _Airloons 9.5in Standard..._ and 3 more items_.pdf"
+    },
+    "documentId": "doc_1751210164999_j84to",
+    "updatedAt": "2025-06-29T15:16:16.799Z",
+    "userId": "default-user",
+    "status": "processing",
+    "createdAt": "2025-06-29T15:16:16.799Z",
+    "fileHash": "f74162ead507f963e0baa4d24011a6bf46b9feaa19398d1d800726a701902726",
+    "tags": [
+      "general",
+      "patchline-ai",
+      "infrastructure",
+      "business"
+    ],
+    "s3Key": "documents/default-user/gmail-receipts/doc_1751210164999_j84to/Gmail - Your Amazon.com order of _Airloons 9.5in Standard..._ and 3 more items_.pdf",
+    "type": "general"
+  },
+  {
+    "filename": "Chase-Freedom-June.pdf",
+    "uploadDate": "2025-06-28T19:33:12.830Z",
+    "extractedData": {
+      "processingStatus": "pending",
+      "filename": "Chase-Freedom-June.pdf"
+    },
+    "documentId": "doc_1751139172572_4w0or5",
+    "updatedAt": "2025-06-28T19:33:12.830Z",
+    "userId": "default-user",
+    "status": "processing",
+    "createdAt": "2025-06-28T19:33:12.830Z",
+    "fileHash": "3ab9bbc93702eaa2f3345ee12660be519d9a9ad3492b432f517bd4727906dcc4",
+    "tags": [
+      "general"
+    ],
+    "s3Key": "documents/default-user/chase-freedom/doc_1751139172572_4w0or5/Chase-Freedom-June.pdf",
+    "type": "general"
+  }
+]

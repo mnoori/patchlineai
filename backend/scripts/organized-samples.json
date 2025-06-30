@@ -1,0 +1,210 @@
+{
+  "total_files": 456,
+  "total_folders": 34,
+  "samples": [
+    {
+      "folder": "Bank Statement\\Checking\\BofA",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Bank Statement\\Checking\\BofA\\eStmt_2024-01-05.pdf",
+      "file_count": 12,
+      "document_type": "bofa"
+    },
+    {
+      "folder": "Bank Statement\\Checking\\Chase Checking",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Bank Statement\\Checking\\Chase Checking\\Cashe-Checking-March.pdf",
+      "file_count": 12,
+      "document_type": "chase-checking"
+    },
+    {
+      "folder": "Bank Statement\\Credit Cards\\Bilt",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Bank Statement\\Credit Cards\\Bilt\\Bilt-April.pdf",
+      "file_count": 12,
+      "document_type": "bilt"
+    },
+    {
+      "folder": "Bank Statement\\Credit Cards\\Chase Freedom",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Bank Statement\\Credit Cards\\Chase Freedom\\Chase-Freedom-April.pdf",
+      "file_count": 12,
+      "document_type": "chase-freedom"
+    },
+    {
+      "folder": "Bank Statement\\Credit Cards\\Chase Saphire",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Bank Statement\\Credit Cards\\Chase Saphire\\Chase-Saphire-April.pdf",
+      "file_count": 13,
+      "document_type": "chase-sapphire"
+    },
+    {
+      "folder": "Other\\Rent",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Other\\Rent\\signedDocument32312861.pdf",
+      "file_count": 1,
+      "document_type": "general"
+    },
+    {
+      "folder": "Reciepts\\Advertising",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Advertising\\Gmail - Mehdi, Here is your order receipt_17.pdf",
+      "file_count": 54,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Advertising\\Google Ads",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Advertising\\Google Ads\\8671584413615205_20240531.pdf",
+      "file_count": 6,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Amazon",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Amazon\\Gmail - Your Amazon.com order #114-2330287-2897802 has shipped.pdf",
+      "file_count": 26,
+      "document_type": "amazon-receipts"
+    },
+    {
+      "folder": "Reciepts\\Education",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Education\\Gmail - Invoice TNI-2024-01-0010 from The NODE Institute.pdf",
+      "file_count": 12,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Meals",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Meals\\Gmail - Open House Pay Tab - Dumbo 2_28_24.pdf",
+      "file_count": 1,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Other",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Other\\3633723.pdf",
+      "file_count": 14,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Other\\NEW-UnIdentified",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Other\\NEW-UnIdentified\\doc-08-2s-payments.googleusercontent.com_efe_doc_fa_f1knorvo2qql0mmtj1oujfv5dl7ea2oq_gijndff42gto4qsiqira9vq5rhm5roc1_1751248275000_epd_00l3fmuss015tnrulsk96fub1rbpkr36vacffgkl1jid2bbbrutu419t2a39kdru946uhqgncjep72e5omnqi88rkpt0_ACo329wZVOVQGBAauJLQz5.pdf",
+      "file_count": 8,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\Gmail - Mehdi Noori, here is your receipt for the order VIR241222-7445-21108.pdf",
+      "file_count": 12,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\Appleservices",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\Appleservices\\Gmail - Receipt for Your Payment to Apple Services.pdf",
+      "file_count": 59,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\ElevenLabs",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\ElevenLabs\\Gmail - Your receipt from Eleven Labs Inc. #2158-1126.pdf",
+      "file_count": 8,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\Google Cloud",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\Google Cloud\\Gmail - Your Google Play Order Receipt from Apr 17, 2024.pdf",
+      "file_count": 12,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\Loopmasters",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\Loopmasters\\Gmail - [LoopMasters] Order confirmation #lm-17943186.pdf",
+      "file_count": 2,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\Midjourney",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\Midjourney\\Gmail - Your receipt from Midjourney Inc #2027-9425-0284.pdf",
+      "file_count": 12,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\Runway",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\Runway\\Gmail - Your receipt from Runway AI, Inc. #2101-3018.pdf",
+      "file_count": 6,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\SoundSwitch",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\SoundSwitch\\Gmail - SoundSwitch Free Trial Purchase Confirmation_9.pdf",
+      "file_count": 9,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\Vocalfy",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\Vocalfy\\Gmail - Your Vocalfy order is now complete.pdf",
+      "file_count": 3,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\Webflow",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\Webflow\\Gmail - Your Webflow receipt.pdf",
+      "file_count": 11,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\applecloud",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\applecloud\\Gmail - Your receipt from Apple_.pdf",
+      "file_count": 13,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\beatport",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\beatport\\Gmail - Mehdi, Here is your order receipt.pdf",
+      "file_count": 37,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\canva",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\canva\\Gmail - Your Canva invoice.pdf",
+      "file_count": 4,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\creativecloud",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\creativecloud\\invoice (1).pdf",
+      "file_count": 25,
+      "document_type": "creative-cloud-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\rekordbox",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\rekordbox\\Gmail - rekordbox_ Delivery information for _Cloud Option_ (MyCommerce order no. 941786760).pdf",
+      "file_count": 5,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\resolume",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\resolume\\Gmail - Order Confirmation.pdf",
+      "file_count": 7,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\soundcloud",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\soundcloud\\Stream ALGORYX music _ Listen to songs, albums, playlists for free on SoundCloud.pdf",
+      "file_count": 12,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Platforms\\splice",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Platforms\\splice\\splice_invoice_202404201820.pdf",
+      "file_count": 18,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\SohoHouse",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\SohoHouse\\Gmail - Your DUMBO House_ Membership Processing Fee Reminder.pdf",
+      "file_count": 4,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\Travel\\To SohoHouse",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\Travel\\To SohoHouse\\Gmail - Your ride with Muhammad on December 28.pdf",
+      "file_count": 2,
+      "document_type": "gmail-receipts"
+    },
+    {
+      "folder": "Reciepts\\verizon",
+      "sample_file": "C:\\Users\\mehdi\\Dropbox\\2024 Tax Audit\\Expenses - Copy\\Reciepts\\verizon\\Gmail - Your bill is now available online.pdf",
+      "file_count": 12,
+      "document_type": "gmail-receipts"
+    }
+  ]
+}
