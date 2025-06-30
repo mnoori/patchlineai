@@ -36,6 +36,11 @@
   "exclude": [
     "node_modules",
     "scripts/**/*",
-    "__tests__/**/*"
+    "__tests__/**/*",
+    "backend/**/*",
+    "documentation/**/*",
+    ".next/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx"
   ]
 }
