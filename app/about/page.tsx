@@ -50,12 +50,13 @@ export default function AboutPage() {
                   <div className="md:w-1/3 flex flex-col items-center">
                     <div className="w-56 h-56 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-brand-cyan shadow-2xl">
                       <Image
-                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Headshot.jpg-omMnc2assOnpd8GCYZ1kxj2KMiNibK.jpeg"
+                        src="/headshot.jpg"
                         alt="Dr. Mehdi Noori, Founder of Patchline AI"
                         width={256}
                         height={256}
                         className="object-cover w-full h-full"
                         priority
+                        quality={85}
                       />
                     </div>
                     <div className="flex justify-center mt-4 space-x-4">

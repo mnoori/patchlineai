@@ -7,23 +7,17 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Logo } from "@/components/logo"
 import { toast } from "sonner"
-import { signIn, signUp, confirmSignUp, getCurrentUser } from "@aws-amplify/auth"
+import { signIn, getCurrentUser } from "@aws-amplify/auth"
 import { GradientOrbs } from "@/components/brand"
+import { ArrowRight } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-
-  // For Sign In tab
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-
-  // For the Sign Up tab
-  const [signUpEmail, setSignUpEmail] = useState("")
-  const [signUpPassword, setSignUpPassword] = useState("")
 
   // If already authenticated, redirect to dashboard
   useEffect(() => {
@@ -64,13 +58,6 @@ export default function LoginPage() {
           username: user.username,
           email: email.trim()
         }))
-        
-        // Store user info for the app
-        localStorage.setItem("patchline-user", JSON.stringify({
-          userId: user.userId,
-          username: user.username,
-          email: email.trim()
-        }))
 
         toast.success("Login successful!")
         
@@ -91,12 +78,6 @@ export default function LoginPage() {
     }
   }
 
-  // Handle user sign-up (placeholder for now)
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    toast.info("Sign up functionality coming soon!")
-  }
-
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex items-center justify-center p-4">
       <GradientOrbs variant="vibrant" className="opacity-40" />
@@ -107,94 +88,59 @@ export default function LoginPage() {
           <p className="mt-2 text-sm text-muted-foreground">Sign in to your account to continue</p>
         </div>
 
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="signin" className="space-y-4">
-            <form onSubmit={handleSignIn} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Username or Email</Label>
-                <Input
-                  id="email"
-                  type="text"
-                  placeholder="Enter your username or email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full"
-                  suppressHydrationWarning
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full"
-                  suppressHydrationWarning
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
-                disabled={isLoading}
-              >
-                {isLoading ? "Signing in..." : "Sign In"}
-              </Button>
-            </form>
-
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Use your AWS Cognito credentials to sign in
-              </p>
+        <div className="bg-card border border-border rounded-lg p-8 backdrop-blur-sm">
+          <form onSubmit={handleSignIn} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Username or Email</Label>
+              <Input
+                id="email"
+                type="text"
+                placeholder="Enter your username or email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full"
+                suppressHydrationWarning
+              />
             </div>
-          </TabsContent>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full"
+                suppressHydrationWarning
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
 
-          <TabsContent value="signup" className="space-y-4">
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
-                <Input
-                  id="signup-email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={signUpEmail}
-                  onChange={(e) => setSignUpEmail(e.target.value)}
-                  required
-                  className="w-full"
-                  suppressHydrationWarning
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="signup-password">Password</Label>
-                <Input
-                  id="signup-password"
-                  type="password"
-                  placeholder="Create a password"
-                  value={signUpPassword}
-                  onChange={(e) => setSignUpPassword(e.target.value)}
-                  required
-                  className="w-full"
-                  suppressHydrationWarning
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full bg-brand-cyan hover:bg-brand-cyan/90 text-black"
-                disabled={isLoading}
-              >
-                {isLoading ? "Creating account..." : "Sign Up"}
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
+          <div className="mt-6 pt-6 border-t border-border">
+            <p className="text-center text-sm text-muted-foreground mb-4">
+              Don't have an account yet?
+            </p>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full border-brand-cyan/20 hover:bg-brand-cyan/10"
+            >
+              <Link href="/aria" className="inline-flex items-center justify-center">
+                Request a Demo
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
 
         <div className="flex justify-center space-x-4">
           <Link href="#" className="text-sm text-muted-foreground hover:text-brand-cyan">

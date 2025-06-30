@@ -60,6 +60,9 @@ export default function RootLayout({
         {/* DNS prefetch for APIs */}
         <link rel="dns-prefetch" href="https://api.spotify.com" />
         <link rel="dns-prefetch" href="https://www.googleapis.com" />
+        {/* Performance optimizations */}
+        <link rel="preload" href="/logo.png" as="image" />
+        <link rel="preload" href="/headshot.jpg" as="image" />
       </head>
       <body className="font-sans" suppressHydrationWarning>
         <ThemeProvider

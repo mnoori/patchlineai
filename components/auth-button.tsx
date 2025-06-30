@@ -20,6 +20,7 @@ import { signOut, getCurrentUser } from "@aws-amplify/auth"
 export function AuthButton() {
   const router = useRouter()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [userData, setUserData] = useState({ fullName: "", email: "" })
   const { userId } = useCurrentUser()
 
@@ -27,6 +28,7 @@ export function AuthButton() {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
+        setIsLoading(true)
         // Check if user is signed in with Cognito
         const user = await getCurrentUser()
         if (user) {
@@ -42,6 +44,8 @@ export function AuthButton() {
         // User not authenticated
         setIsLoggedIn(false)
         console.log("User not authenticated:", error)
+      } finally {
+        setIsLoading(false)
       }
     }
     
@@ -93,6 +97,15 @@ export function AuthButton() {
   // Handle navigation to settings
   const navigateToSettings = () => {
     router.push("/dashboard/settings")
+  }
+
+  // Show nothing while loading to prevent flash
+  if (isLoading) {
+    return (
+      <div className="flex items-center space-x-4">
+        <div className="h-8 w-16 bg-muted/20 rounded animate-pulse" />
+      </div>
+    )
   }
 
   if (isLoggedIn) {
