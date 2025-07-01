@@ -8,7 +8,7 @@ export const BRAND = {
   name: 'Patchline',
   fullName: 'Patchline AI',
   tagline: 'AI-powered music platform',
-  domain: 'patchline.ai',
+  domain: 'www.patchline.ai',
   copyright: `© ${new Date().getFullYear()} Patchline AI. All rights reserved.`,
 } as const
 

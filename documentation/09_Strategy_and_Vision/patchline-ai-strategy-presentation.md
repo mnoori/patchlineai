@@ -187,7 +187,7 @@ The music industry is at an inflection point. Either it embraces AI and thrives,
 
 Join us in building that future.
 
-**Contact**: mehdi@patchline.ai | [Schedule a Demo](https://patchline.ai/demo)
+**Contact**: mehdi@patchline.ai | [Schedule a Demo](https://www.patchline.ai/demo)
 
 ---
 

@@ -416,7 +416,7 @@ export class PatchlineMCPClient {
         return {
           content: [{
             type: 'text',
-            text: `Electronic Press Kit created for ${toolCall.arguments.artistName}. Includes bio, photos, music samples, and contact info. Available at: https://patchline.ai/epk/${toolCall.arguments.artistName.toLowerCase()}`
+            text: `Electronic Press Kit created for ${toolCall.arguments.artistName}. Includes bio, photos, music samples, and contact info. Available at: https://www.patchline.ai/epk/${toolCall.arguments.artistName.toLowerCase()}`
           }]
         }
       

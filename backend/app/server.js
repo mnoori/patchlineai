@@ -207,7 +207,7 @@ fastify.post('/auth/login', async (request, reply) => {
         fullName: 'Mehdi (Test User)',
         email: username.includes('@') ? username : `${username}@patchline.ai`,
         company: 'Patchline AI',
-        website: 'https://patchline.ai'
+                  website: 'https://www.patchline.ai'
       }
     }
   }
