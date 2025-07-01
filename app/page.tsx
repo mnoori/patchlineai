@@ -84,15 +84,12 @@ export default function Home() {
                   to create autonomous label operations. From talent discovery to revenue distribution,{" "}
                   <span className="text-brand-cyan font-bold">{ariaAgent.displayName}</span> handles the complex workflows while you maintain creative control.
                 </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <div className="flex justify-center">
                   <Button asChild variant="gradient" size="lg" className="group">
                     <Link href="/aria" className="flex items-center">
                       <span>Explore <span className="font-bold">{ariaAgent.displayName}</span></span>
                       <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg">
-                    <Link href="/dashboard">Try Free</Link>
                   </Button>
                 </div>
               </Card>

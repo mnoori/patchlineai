@@ -7,7 +7,6 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { PersistentShell } from '@/components/persistent-shell'
 import { RoutePrewarmer } from '@/components/route-prewarmer'
 import { PerformanceDashboard } from '@/components/performance-dashboard'
-import { FaviconManager } from '@/components/favicon-manager'
 import dynamic from 'next/dynamic'
 
 
@@ -40,9 +39,9 @@ export const metadata: Metadata = {
   title: 'Patchline AI - Orchestrate Your Music Business',
   description: 'AI-powered platform for music professionals. Automate workflows, manage releases, and grow your music business.',
   icons: {
-    icon: '/Brandmark/Brandmark Dark.svg', // Default to dark logo, will be updated by FaviconManager
-    shortcut: '/Brandmark/Brandmark Dark.svg',
-    apple: '/Brandmark/Brandmark Dark.png',
+    icon: '/Brandmark/favicon.svg',
+    shortcut: '/Brandmark/favicon.svg',
+    apple: '/Brandmark/Brandmark Light.png', // Apple touch icons don't support SVG media queries, so we default to the light one for better visibility on dark backgrounds.
   },
 }
 
@@ -75,8 +74,6 @@ export default function RootLayout({
         >
           {/* Initialise Amplify client-side only */}
           <AmplifyBootstrap />
-          {/* Smart favicon management */}
-          <FaviconManager />
           <Web3Provider>
             <TierPersistence />
             <RoutePrewarmer />

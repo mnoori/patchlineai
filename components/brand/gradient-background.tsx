@@ -200,30 +200,15 @@ export function GradientOrbs({
   if (variant === 'edge-left') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* From LEFT EDGE - cyan only gradient, constrained vertically */}
+        {/* Minimal cyan-only glow on left edge */}
         <div 
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 120% 60% at -20% 50%, 
-              rgba(0, 230, 228, 0.7) 0%, 
-              rgba(0, 230, 228, 0.6) 15%, 
-              rgba(0, 230, 228, 0.45) 30%,
-              rgba(0, 230, 228, 0.3) 45%, 
-              rgba(0, 230, 228, 0.15) 60%,
-              transparent 80%)`,
-            opacity: 0.6,
-          }}
-        />
-        {/* Secondary cyan glow for depth, also constrained vertically */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(ellipse 80% 40% at -10% 50%, 
-              rgba(0, 230, 228, 0.5) 0%, 
-              rgba(0, 230, 228, 0.35) 25%, 
-              rgba(0, 230, 228, 0.2) 45%, 
-              transparent 65%)`,
-            opacity: 0.5,
+            background: `radial-gradient(ellipse 35% 30% at -5% 50%, 
+              rgba(0, 230, 228, 0.6) 0%, 
+              rgba(0, 230, 228, 0.4) 20%, 
+              rgba(0, 230, 228, 0.2) 30%,
+              #010102 45%)`
           }}
         />
       </div>
@@ -233,30 +218,15 @@ export function GradientOrbs({
   if (variant === 'edge-right') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* From RIGHT EDGE - cyan only gradient, constrained vertically */}
+        {/* Minimal cyan-only glow on right edge */}
         <div 
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 120% 60% at 120% 50%, 
-              rgba(0, 230, 228, 0.7) 0%, 
-              rgba(0, 230, 228, 0.6) 15%, 
-              rgba(0, 230, 228, 0.45) 30%,
-              rgba(0, 230, 228, 0.3) 45%, 
-              rgba(0, 230, 228, 0.15) 60%,
-              transparent 80%)`,
-            opacity: 0.6,
-          }}
-        />
-        {/* Secondary cyan glow for depth, also constrained vertically */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(ellipse 80% 40% at 110% 50%, 
-              rgba(0, 230, 228, 0.5) 0%, 
-              rgba(0, 230, 228, 0.35) 25%, 
-              rgba(0, 230, 228, 0.2) 45%, 
-              transparent 65%)`,
-            opacity: 0.5,
+            background: `radial-gradient(ellipse 35% 30% at 105% 50%, 
+              rgba(0, 230, 228, 0.6) 0%, 
+              rgba(0, 230, 228, 0.4) 20%, 
+              rgba(0, 230, 228, 0.2) 30%,
+              #010102 45%)`
           }}
         />
       </div>
@@ -270,11 +240,11 @@ export function GradientOrbs({
         <div 
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 120% 40% at 50% 50%, 
+            background: `radial-gradient(ellipse 120% 30% at 50% 50%, 
               rgba(0, 230, 228, 0.18) 0%, 
               rgba(0, 230, 228, 0.12) 25%,
-              rgba(0, 230, 228, 0.06) 50%,
-              transparent 70%)`,
+              rgba(0, 230, 228, 0.06) 45%,
+              transparent 60%)`,
             opacity: 0.75,
           }}
         />
@@ -283,10 +253,10 @@ export function GradientOrbs({
           className="absolute inset-0"
           style={{
             background: `
-              radial-gradient(ellipse 90% 40% at 0% 50%, 
+              radial-gradient(ellipse 90% 30% at 0% 50%, 
                 rgba(0, 230, 228, 0.1) 0%, 
                 transparent 40%),
-              radial-gradient(ellipse 90% 40% at 100% 50%, 
+              radial-gradient(ellipse 90% 30% at 100% 50%, 
                 rgba(0, 230, 228, 0.1) 0%, 
                 transparent 40%)
             `,

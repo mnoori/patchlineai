@@ -286,4 +286,9 @@ html, body {
   }
 }
 
+/* Smooth section transitions */
+section {
+  position: relative;
+}
+
 
