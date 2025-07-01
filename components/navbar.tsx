@@ -32,8 +32,8 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <nav className="container flex items-center justify-between py-4">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border h-16">
+      <nav className="container flex items-center justify-between h-full px-4">
         <div className="flex items-center">
           <Link href="/" className="mr-8">
             <Logo className="h-8 w-auto" />
@@ -76,7 +76,7 @@ export function Navbar() {
         </div>
       </nav>
       {mobileMenuOpen && (
-        <div className="md:hidden py-4 px-4 space-y-4 border-t border-border">
+        <div className="md:hidden py-4 px-4 space-y-4 border-t border-border absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-md">
           {navItems.map((item) => (
             <Link
               key={item.name}

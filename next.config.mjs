@@ -165,6 +165,7 @@ const nextConfig = {
   // Add aggressive caching headers for static assets
   async headers() {
     return [
+      // Cache static assets aggressively – MUST appear before the catch-all so it can override it
       {
         source: '/_next/static/(.*)',
         headers: [
@@ -189,6 +190,16 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, must-revalidate',
+          },
+        ],
+      },
+      // Catch-all for everything else (HTML/doc requests) – lightweight no-cache
+      {
+        source: '/((?!_next/static|fonts|images).*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
           },
         ],
       },

@@ -103,7 +103,8 @@ export function AuthButton() {
   if (isLoading) {
     return (
       <div className="flex items-center space-x-4">
-        <div className="h-8 w-16 bg-muted/20 rounded animate-pulse" />
+        {/* Avatar-sized placeholder to keep navbar height consistent */}
+        <div className="h-8 w-8 rounded-full bg-muted/20 animate-pulse" />
       </div>
     )
   }
