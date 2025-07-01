@@ -56,35 +56,45 @@ function WelcomeContent() {
 
   useEffect(() => {
     // Parse Calendly event details from URL parameters
-    // Based on Calendly v2 API, they pass: invitee_full_name, invitee_email, event_type_name, scheduled_event_uuid, etc.
+    // Updated based on actual Calendly URL structure
     
     const inviteeName = searchParams.get("invitee_full_name") || searchParams.get("invitee_name") || ""
     const inviteeEmail = searchParams.get("invitee_email") || ""
     const eventTypeName = searchParams.get("event_type_name") || ""
-    const eventUuid = searchParams.get("scheduled_event_uuid") || ""
+    const eventUuid = searchParams.get("invitee_uuid") || ""
     const eventTime = searchParams.get("event_start_time") || ""
+    const assignedTo = searchParams.get("assigned_to") || ""
     
-    // Parse answers from questions_and_answers parameter (if using screening questions)
-    const answersParam = searchParams.get("questions_and_answers") || ""
+    // Parse answer_1, answer_2, etc. from Calendly screening questions
     let answers = {}
     let detectedRole = "music professional"
     
+    // Collect all answers (answer_1, answer_2, etc.)
+    const answerKeys = Array.from(searchParams.keys()).filter(key => key.startsWith("answer_"))
+    answerKeys.forEach(key => {
+      const value = searchParams.get(key)
+      if (value) {
+        answers[key] = decodeURIComponent(value.replace(/\+/g, ' '))
+      }
+    })
+    
+    // Get first answer for role detection
+    const firstAnswer = searchParams.get("answer_1") || ""
+    
     try {
-      // Calendly passes answers as URL-encoded JSON or query string
-      if (answersParam) {
-        // Try to detect role from answers
-        const answersLower = answersParam.toLowerCase()
-        if (answersLower.includes("engineer") || answersLower.includes("developer")) {
-          detectedRole = "engineer"
-        } else if (answersLower.includes("artist") || answersLower.includes("musician")) {
-          detectedRole = "artist"
-        } else if (answersLower.includes("label") || answersLower.includes("a&r")) {
-          detectedRole = "label executive"
-        } else if (answersLower.includes("manager")) {
-          detectedRole = "artist manager"
-        } else if (answersLower.includes("investor")) {
-          detectedRole = "investor"
-        }
+      // Detect role from answer_1 or any answer content
+      const allAnswersText = Object.values(answers).join(' ').toLowerCase()
+      
+      if (allAnswersText.includes("engineer") || allAnswersText.includes("developer")) {
+        detectedRole = "engineer"
+      } else if (allAnswersText.includes("artist") || allAnswersText.includes("musician")) {
+        detectedRole = "artist"
+      } else if (allAnswersText.includes("label") || allAnswersText.includes("a&r")) {
+        detectedRole = "label executive"
+      } else if (allAnswersText.includes("manager")) {
+        detectedRole = "artist manager"
+      } else if (allAnswersText.includes("investor")) {
+        detectedRole = "investor"
       }
     } catch (e) {
       console.error("Error parsing answers:", e)
@@ -105,7 +115,7 @@ function WelcomeContent() {
       setIsProcessingEvent(true)
       // Here you could make an API call to store the event details
       // and trigger any agentic workflows
-      processCalendlyEvent(eventUuid, inviteeName, inviteeEmail, eventTypeName)
+      processCalendlyEvent(eventUuid, inviteeName, inviteeEmail, eventTypeName, answers, assignedTo)
     }
 
     // Removed confetti animation
@@ -117,7 +127,7 @@ function WelcomeContent() {
   }, [searchParams])
 
   // Process Calendly event and trigger workflows
-  const processCalendlyEvent = async (eventId: string, name: string, email: string, eventType: string) => {
+  const processCalendlyEvent = async (eventId: string, name: string, email: string, eventType: string, answers: any, assignedTo: string) => {
     try {
       // Call your API to process the event
       const response = await fetch('/api/calendly/process-event', {
@@ -128,6 +138,8 @@ function WelcomeContent() {
           inviteeName: name,
           inviteeEmail: email,
           eventType,
+          answers,
+          assignedTo,
           timestamp: new Date().toISOString()
         })
       })
@@ -145,16 +157,29 @@ function WelcomeContent() {
   // Generate personalized agent message
   useEffect(() => {
     if (showAgent && personData.name) {
-      const messages = {
-        engineer: `Hi ${personData.name}! I've analyzed your technical background. Our agent architecture would be perfect for someone with your skills. I can show you how we're using Claude 3.5 and multi-agent orchestration to revolutionize music tech...`,
-        artist: `Welcome ${personData.name}! I see you're an artist. I've already found 23 playlist opportunities for artists in your genre. Our agents handle everything from metadata optimization to royalty tracking...`,
-        "label executive": `Welcome ${personData.name}! Based on your role, you'll love how our agents automate A&R workflows. We're already managing catalogs worth $4.2M in rights...`,
-        "artist manager": `Great to meet you ${personData.name}! Our agents can save you 32+ hours weekly on routine tasks. From tour planning to social media, we've got you covered...`,
-        investor: `Welcome ${personData.name}! I've prepared some key metrics for you: 284% average revenue increase, $31.2B addressable market, and we're growing at 42% MoM...`,
-        "music professional": `Welcome to the future of music business, ${personData.name}! Our AI agents are transforming how professionals like you work. Let me show you some possibilities...`
-      }
+      // Check if this is a job inquiry
+      const isJobInquiry = personData.answers && Object.values(personData.answers).some((answer: any) => 
+        answer.toLowerCase().includes('job') || 
+        answer.toLowerCase().includes('work') || 
+        answer.toLowerCase().includes('hiring') ||
+        answer.toLowerCase().includes('position') ||
+        answer.toLowerCase().includes('career')
+      )
       
-      setAgentMessage(messages[personData.role] || messages["music professional"])
+      if (isJobInquiry) {
+        setAgentMessage(`Thank you for your interest in joining our team, ${personData.name}! I've notified our hiring team about your inquiry. Someone from our team will reach out to you shortly to discuss potential opportunities. In the meantime, feel free to explore our platform to see what we're building!`)
+      } else {
+        const messages = {
+          engineer: `Welcome ${personData.name}! I see you're interested in the technical side of things. Rest assured, we'll address your questions during our call. Our team is excited to show you how we're revolutionizing the music industry with AI.`,
+          artist: `Great to meet you, ${personData.name}! Your inquiry has been received and we'll make sure to cover everything you need during our scheduled call. Our team can't wait to show you how we can help transform your music career.`,
+          "label executive": `Welcome ${personData.name}! Thank you for scheduling time with us. We'll make sure to address all your questions about how our platform can streamline your operations. Looking forward to our conversation!`,
+          "artist manager": `Hi ${personData.name}! We've received your information and are preparing for our call. Rest assured, we'll show you exactly how our tools can save you time and grow your artists' careers.`,
+          investor: `Welcome ${personData.name}! Thank you for your interest. Our team is preparing comprehensive information for our discussion. We look forward to sharing our vision and metrics with you.`,
+          "music professional": `Welcome ${personData.name}! Thanks for scheduling time with us. Rest assured, we'll address all your questions and show you how Patchline AI can transform your work in the music industry.`
+        }
+        
+        setAgentMessage(messages[personData.role] || messages["music professional"])
+      }
     }
   }, [showAgent, personData])
 
