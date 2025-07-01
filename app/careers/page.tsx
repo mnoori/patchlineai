@@ -4,6 +4,7 @@ import { ArrowRight, MapPin, DollarSign, Percent, Calendar, Code2, Brain, Zap, U
 import { GradientOrbs, PageGradient, Card, Button } from "@/components/brand"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
+import { getActiveJobs } from "@/config/jobs"
 
 export const metadata: Metadata = {
   title: "Careers | Patchline AI",
@@ -11,6 +12,9 @@ export const metadata: Metadata = {
 }
 
 export default function CareersPage() {
+  const activeJobs = getActiveJobs()
+  const featuredJob = activeJobs[0] // Use the first active job as featured
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
@@ -37,22 +41,21 @@ export default function CareersPage() {
             <div className="max-w-7xl mx-auto">
               <Card variant="gradient" className="p-8 md:p-12">
                 <h2 className="text-2xl md:text-3xl font-bold mb-6 text-brand-cyan">Our Mission</h2>
-                <p className="text-lg text-muted-foreground mb-4">
-                  We're building an Agentic AI Platform for the Business of Music.
-                </p>
-                <p className="text-lg text-muted-foreground">
-                  Our mission is simple: <span className="text-white font-semibold">give music professionals their time back.</span>
-                </p>
-                <p className="text-muted-foreground mt-4">
-                  Label operations today are weighed down by repetitive workflows—metadata tagging, rights management, 
-                  royalty mapping, catalogue QA, content creation and release planning. We're using disruptive AI systems 
-                  to handle the grunt work, so teams across A&R, publishing ops, and catalogue strategy can focus on 
-                  higher-leverage work.
-                </p>
-                <p className="text-muted-foreground mt-4">
-                  The recorded music industry surpassed $29.6B in 2024. We have a clear plan to go after it. 
-                  Strategy's done. Design's live. First deals in motion. <span className="text-white font-semibold">Now we need you.</span>
-                </p>
+                {featuredJob?.description.mission.map((paragraph, index) => (
+                  <p key={index} className={`text-muted-foreground ${index === 0 ? 'text-lg mb-4' : index === 1 ? 'text-lg' : 'mt-4'}`}>
+                    {paragraph.includes('give music professionals their time back') ? (
+                      <>
+                        Our mission is simple: <span className="text-white font-semibold">give music professionals their time back.</span>
+                      </>
+                    ) : paragraph.includes('Now we need you') ? (
+                      <>
+                        {paragraph.replace('Now we need you.', '')} <span className="text-white font-semibold">Now we need you.</span>
+                      </>
+                    ) : (
+                      paragraph
+                    )}
+                  </p>
+                ))}
               </Card>
             </div>
           </div>
@@ -72,20 +75,20 @@ export default function CareersPage() {
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
                     <div>
                       <h3 className="text-2xl md:text-3xl font-bold text-brand-cyan mb-2">
-                        Lead/Founding AI Engineer
+                        {featuredJob?.title}
                       </h3>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-4 w-4" />
-                          <span>$60k – $70k</span>
+                          <span>{featuredJob?.salary}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Percent className="h-4 w-4" />
-                          <span>0.5% – 1.5%</span>
+                          <span>{featuredJob?.equity}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
-                          <span>Remote / Brooklyn</span>
+                          <span>{featuredJob?.location}</span>
                         </div>
                       </div>
                     </div>
@@ -95,7 +98,7 @@ export default function CareersPage() {
                       </span>
                       <div className="flex items-center text-muted-foreground text-sm">
                         <Calendar className="h-3.5 w-3.5 mr-1" />
-                        <span>Posted Today</span>
+                        <span>{featuredJob?.postedDate}</span>
                       </div>
                     </div>
                   </div>
@@ -107,26 +110,14 @@ export default function CareersPage() {
                       What You'll Do
                     </h4>
                     <ul className="space-y-3 text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span><strong className="text-white">Architect and ship.</strong> You'll design and build full-stack AI-powered tools using AWS (Bedrock, Amplify, Lambda, Step Functions), vector databases, and a React + Next.js frontend.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span><strong className="text-white">Train our proprietary model.</strong> You'll lead the fine-tuning of a domain-specific LLM built for music metadata, rights intelligence, and royalty workflows.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span><strong className="text-white">Integrate deeply.</strong> You'll connect our platform into the messy world of music business APIs, spreadsheets, and legacy software.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span><strong className="text-white">Move fast.</strong> We ship every 2 weeks and demo live. Expect autonomy, trust, and accountability.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span><strong className="text-white">Collaborate closely.</strong> You'll co-design the roadmap with the founder, mentor junior contributors, and help shape the culture and bar of the engineering team.</span>
-                      </li>
+                      {featuredJob?.description.responsibilities.map((responsibility, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="text-brand-cyan mt-1">•</span>
+                          <span>
+                            <strong className="text-white">{responsibility.title}</strong> {responsibility.description}
+                          </span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
 
@@ -137,34 +128,12 @@ export default function CareersPage() {
                       What You Bring (Preferred)
                     </h4>
                     <ul className="space-y-2 text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span>5+ years experience in full-stack engineering, with at least 2 years in production-grade ML/LLM systems</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span>Strong TypeScript and Python fundamentals</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span>Deep AWS or equivalent cloud expertise, including serverless, CI/CD, and infra-as-code</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span>Experience integrating LLMs, vector DBs, and multi-agent orchestration (LangGraph, Autogen, etc.)</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span>Experience with AI content creation tools</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span>Experience with workflow automation tools such as Zapier</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-cyan mt-1">•</span>
-                        <span>A strong curiosity for music-tech and how the industry actually works</span>
-                      </li>
+                      {featuredJob?.description.requirements.map((requirement, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="text-brand-cyan mt-1">•</span>
+                          <span>{requirement}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
 
@@ -225,7 +194,7 @@ export default function CareersPage() {
                     <div className="flex flex-col sm:flex-row gap-4">
                       <Button asChild variant="gradient" size="lg">
                         <a 
-                          href="https://wellfound.com/jobs/3329710-lead-founding-ai-engineer?utm_campaign=startup_share&utm_content=startup_share_module&utm_medium=social&utm_term=patchline-ai"
+                          href={featuredJob?.applicationUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center"

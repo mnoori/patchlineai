@@ -5,10 +5,10 @@ import { HeroSection, GradientOrbs, PageGradient, Card, Button } from "@/compone
 import { Badge } from "@/components/ui/badge"
 
 import { Zap, Shield, Globe, ArrowRight, Music, Users, BarChart3, Clock } from "lucide-react"
-import { AGENTS } from "@/config/agents"
+import { ARIA_CONFIG } from "@/config/aria"
 
 export default function AriaPage() {
-  const aria = AGENTS.aria
+  const aria = ARIA_CONFIG
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -18,12 +18,14 @@ export default function AriaPage() {
         <section className="relative -mt-16 min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-background overflow-hidden">
           <GradientOrbs variant="dispersed" />
           <div className="container relative z-10 text-center space-y-10 pt-40">
-            <Badge className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 px-4 py-1">Agentic Label</Badge>
+            <Badge className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 px-4 py-1">
+              <span className="text-brand-cyan font-bold">{aria.name}</span>
+            </Badge>
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white leading-tight max-w-4xl mx-auto">
               Our Flagship Agentic Record Label
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              {aria.displayName} orchestrates a specialised team of AI agents to run a modern label.
+              <span className="text-brand-cyan font-bold">{aria.name}</span> orchestrates a specialised team of AI agents to run a modern label.
             </p>
             <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto pt-10">
               {[
@@ -52,10 +54,7 @@ export default function AriaPage() {
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
               <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
-                <Link href="/dashboard">Start Free Trial</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="min-w-[200px]">
-                <Link href="#demo">Watch Demo</Link>
+                <Link href="/contact">{aria.cta.primary}</Link>
               </Button>
             </div>
           </div>
@@ -66,7 +65,7 @@ export default function AriaPage() {
           <GradientOrbs variant="edge-left" className="opacity-25" />
           <div className="container relative z-10">
             <div className="max-w-5xl mx-auto text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold">How {aria.displayName} Works</h2>
+              <h2 className="text-3xl md:text-4xl font-bold">How <span className="text-brand-cyan font-bold">{aria.name}</span> Works</h2>
             </div>
             {/* simplified steps */}
             <div className="grid md:grid-cols-2 gap-8">
@@ -102,16 +101,13 @@ export default function AriaPage() {
           <PageGradient variant="vibrant" className="opacity-30" />
           <GradientOrbs variant="subtle-bottom" />
           <div className="container relative z-10 text-center">
-            <h2 className="text-3xl md:text-4xl font-semibold mb-6">Ready to Launch Your Agentic Label?</h2>
+            <h2 className="text-3xl md:text-4xl font-semibold mb-6">Ready to Launch Your Music Business?</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Let <span className="text-brand-cyan font-semibold">{aria.displayName}</span> handle the operations while you shape the vision.
+              Let <span className="text-brand-cyan font-bold">{aria.name}</span> handle the operations while you shape the vision.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
-                <Link href="/dashboard">Start 14-Day Free Trial</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="min-w-[200px]">
-                <Link href="/pricing">View Pricing</Link>
+                <Link href="/pricing">{aria.cta.secondary}</Link>
               </Button>
             </div>
           </div>

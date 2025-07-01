@@ -15,88 +15,7 @@ import { GradientOrbs, Card } from "@/components/brand"
 import { Mail, MapPin, CheckCircle, Sparkles, ArrowRight, Heart, Music } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
-// Animated dot pattern background - tunnel/corridor effect
-function DotPatternBackground() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* Center gradient fade - static */}
-      <div 
-        className="absolute inset-0 z-10"
-        style={{
-          background: `radial-gradient(circle at center, 
-            rgba(1, 1, 2, 1) 0%, 
-            rgba(1, 1, 2, 0.9) 20%, 
-            rgba(1, 1, 2, 0.7) 40%, 
-            rgba(1, 1, 2, 0.3) 60%, 
-            transparent 80%)`
-        }}
-      />
-      
-      {/* Static dot pattern - no animation for stability */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 50% 50%, rgba(0, 230, 228, 0.3) 1px, transparent 1px),
-            radial-gradient(circle at 50% 50%, rgba(0, 230, 228, 0.25) 1px, transparent 1px),
-            radial-gradient(circle at 50% 50%, rgba(0, 230, 228, 0.2) 1px, transparent 1px),
-            radial-gradient(circle at 50% 50%, rgba(0, 230, 228, 0.15) 1px, transparent 1px)
-          `,
-          backgroundSize: '30px 30px, 45px 45px, 60px 60px, 75px 75px',
-          backgroundPosition: 'center',
-        }}
-      />
-      
-      {/* Single animated ring for subtle movement */}
-      <motion.div
-        className="absolute inset-0"
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity: [0, 0.3, 0],
-          scale: [0.8, 1.3],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeOut",
-        }}
-      >
-        <div 
-          className="absolute inset-0"
-          style={{
-            border: '1px solid rgba(0, 230, 228, 0.3)',
-            borderRadius: '50%',
-            width: '200px',
-            height: '200px',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-          }}
-        />
-      </motion.div>
-      
-      {/* Perspective lines - static */}
-      <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
-        {[...Array(8)].map((_, i) => {
-          const angle = (i * 45) * Math.PI / 180
-          const x = 50 + Math.cos(angle) * 50
-          const y = 50 + Math.sin(angle) * 50
-          return (
-            <line
-              key={i}
-              x1="50"
-              y1="50"
-              x2={x}
-              y2={y}
-              stroke="rgba(0, 230, 228, 0.3)"
-              strokeWidth="0.5"
-            />
-          )
-        })}
-      </svg>
-    </div>
-  )
-}
+
 
 export default function ContactPage() {
   const [stage, setStage] = useState<'greeting' | 'form' | 'submitted'>('greeting')
@@ -145,8 +64,6 @@ export default function ContactPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main className="flex-1 pt-16 relative">
-        {/* Brand-compliant animated background */}
-        <DotPatternBackground />
         <GradientOrbs variant="dispersed" className="opacity-50" />
         
         <section className="relative py-20 min-h-[calc(100vh-4rem)]">

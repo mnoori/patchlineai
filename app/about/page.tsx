@@ -170,7 +170,7 @@ export default function AboutPage() {
                 <Link href="/contact">Request a Demo</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="min-w-[200px]">
-                <Link href="/contact">Join Our Team</Link>
+                <Link href="/careers">Join Our Team</Link>
               </Button>
             </div>
           </div>

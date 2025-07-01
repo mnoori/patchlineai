@@ -136,7 +136,7 @@ export default function FeaturesPage() {
                       </div>
                       <div className="pt-4">
                         <Button asChild variant="gradient" className="whitespace-nowrap">
-                          <Link href="/dashboard" className="inline-flex items-center">
+                          <Link href="/contact" className="inline-flex items-center">
                             Try {agent.name}
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Link>
@@ -241,7 +241,7 @@ export default function FeaturesPage() {
                 <Link href="/contact">Request a Demo</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="min-w-[200px]">
-                <Link href="/dashboard">Try for Free</Link>
+                <Link href="/contact">Contact Sales</Link>
               </Button>
             </div>
           </div>

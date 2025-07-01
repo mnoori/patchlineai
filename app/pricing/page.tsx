@@ -92,15 +92,25 @@ export default function PricingPage() {
                     ))}
                   </ul>
                   
-                  <Button
-                    asChild
-                    variant={plan.highlighted ? "gradient" : "outline"}
-                    className="w-full mb-6"
-                  >
-                    <Link href={plan.id === UserTier.ULTRA ? "/contact" : "/dashboard"}>
-                      {plan.ctaText}
-                    </Link>
-                  </Button>
+                  <div className="space-y-3 mb-6">
+                    <Button
+                      asChild
+                      variant={plan.highlighted ? "gradient" : "outline"}
+                      className="w-full"
+                    >
+                      <Link href="/contact">
+                        {plan.ctaText}
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      variant="ghost"
+                      size="sm"
+                      className="w-full text-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/10"
+                    >
+                      <Link href="/contact">Contact Sales</Link>
+                    </Button>
+                  </div>
 
                   {/* Target Personas */}
                   <div>
@@ -119,44 +129,7 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Add-ons - LEFT EDGE */}
-        <section className="relative py-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
-          <GradientOrbs variant="edge-left" className="opacity-25" />
-          <div className="container relative z-10">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Optional Add-ons</h2>
-              <div className="grid md:grid-cols-3 gap-6">
-                {addOns.map((addon, index) => (
-                  <Card
-                    key={index}
-                    variant="outlined"
-                    hover="glow"
-                    className="p-6 backdrop-blur-sm bg-black/20 relative"
-                  >
-                    {addon.comingSoon && (
-                      <div className="absolute top-3 right-3">
-                        <Badge variant="secondary" className="text-xs">
-                          Coming Soon
-                        </Badge>
-                      </div>
-                    )}
-                    <h3 className="text-xl font-bold mb-2">{addon.name}</h3>
-                    <p className="text-brand-cyan font-medium mb-3">{addon.price}</p>
-                    <p className="text-muted-foreground text-sm mb-4">{addon.description}</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      disabled={addon.comingSoon}
-                    >
-                      {addon.comingSoon ? "Coming Soon" : "Add to Plan"}
-                    </Button>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+
 
         {/* Enterprise Section - RIGHT EDGE */}
         <section className="relative py-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
@@ -197,25 +170,7 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* CTA Section - SUBTLE BOTTOM */}
-        <section className="relative py-20 bg-gradient-to-b from-background via-background to-background overflow-hidden">
-          <PageGradient variant="vibrant" className="opacity-30" />
-          <GradientOrbs variant="subtle-bottom" />
-          <div className="container relative z-10 text-center">
-            <h2 className="text-3xl md:text-4xl font-semibold mb-6">Ready to Get Started?</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Join the music professionals already using Patchline AI.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button asChild size="lg" variant="gradient" className="min-w-[200px]">
-                <Link href="/dashboard">Start Free Trial</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="min-w-[200px]">
-                <Link href="/contact">Contact Sales</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
+
       </main>
       <Footer />
     </div>

@@ -7,6 +7,20 @@ export function Footer() {
     <footer className="relative border-t border-white/5 bg-gradient-to-b from-background/50 to-background backdrop-blur-sm overflow-hidden">
       {/* Very subtle gradient continuation */}
       <GradientOrbs variant="subtle-bottom" className="opacity-10" />
+      
+      {/* Subtle dot pattern background - COMMENTED OUT FOR NOW
+      <div 
+        className="absolute inset-0 opacity-5"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 50% 50%, rgba(0, 230, 228, 0.4) 1px, transparent 1px),
+            radial-gradient(circle at 50% 50%, rgba(0, 230, 228, 0.3) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px, 60px 60px',
+          backgroundPosition: '0 0, 20px 20px',
+        }}
+      />
+      */}
       <div className="container py-12 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
@@ -115,7 +129,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-sm text-muted-foreground hover:text-brand-cyan transition-colors">
+                <Link href="/careers" className="text-sm text-muted-foreground hover:text-brand-cyan transition-colors">
                   Careers
                 </Link>
               </li>

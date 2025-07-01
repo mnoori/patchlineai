@@ -10,14 +10,20 @@ import { cn } from "@/lib/utils"
 import { Logo } from "@/components/logo"
 import { AuthButton } from "@/components/auth-button"
 
-import { AGENTS } from "@/config/agents"
+import { ARIA_CONFIG } from "@/config/aria"
 
-const navItems = [
+const navItems: Array<{
+  name: string
+  href: string
+  badge?: string
+  badgeClass?: string
+}> = [
   { name: "Home", href: "/" },
-  { name: AGENTS.aria.displayName, href: "/aria", badge: "NEW" },
+  { name: ARIA_CONFIG.displayName, href: "/aria", badge: ARIA_CONFIG.badge.text, badgeClass: ARIA_CONFIG.badge.className },
   { name: "Features", href: "/features" },
   { name: "Pricing", href: "/pricing" },
   { name: "About", href: "/about" },
+  { name: "Careers", href: "/careers" },
   { name: "Blog", href: "/blog" },
 ]
 
@@ -45,7 +51,7 @@ export function Navbar() {
                 <span className="flex items-center gap-2">
                   {item.name}
                   {item.badge && (
-                    <Badge className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 text-xs">
+                    <Badge className={`text-xs ${item.badgeClass || "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30"}`}>
                       {item.badge}
                     </Badge>
                   )}
@@ -84,7 +90,7 @@ export function Navbar() {
               <span className="flex items-center gap-2">
                 {item.name}
                 {item.badge && (
-                  <Badge className="bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 text-xs">
+                  <Badge className={`text-xs ${item.badgeClass || "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30"}`}>
                     {item.badge}
                   </Badge>
                 )}

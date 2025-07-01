@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { PersistentShell } from '@/components/persistent-shell'
 import { RoutePrewarmer } from '@/components/route-prewarmer'
 import { PerformanceDashboard } from '@/components/performance-dashboard'
+import { FaviconManager } from '@/components/favicon-manager'
 import dynamic from 'next/dynamic'
 
 
@@ -39,9 +40,9 @@ export const metadata: Metadata = {
   title: 'Patchline AI - Orchestrate Your Music Business',
   description: 'AI-powered platform for music professionals. Automate workflows, manage releases, and grow your music business.',
   icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    icon: '/Brandmark/Brandmark Dark.svg', // Default to dark logo, will be updated by FaviconManager
+    shortcut: '/Brandmark/Brandmark Dark.svg',
+    apple: '/Brandmark/Brandmark Dark.png',
   },
 }
 
@@ -61,7 +62,8 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://api.spotify.com" />
         <link rel="dns-prefetch" href="https://www.googleapis.com" />
         {/* Performance optimizations */}
-        <link rel="preload" href="/logo.png" as="image" />
+        <link rel="preload" href="/Brandmark/Brandmark Dark.svg" as="image" />
+        <link rel="preload" href="/Brandmark/Brandmark Light.svg" as="image" />
         <link rel="preload" href="/headshot.jpg" as="image" />
       </head>
       <body className="font-sans" suppressHydrationWarning>
@@ -73,6 +75,8 @@ export default function RootLayout({
         >
           {/* Initialise Amplify client-side only */}
           <AmplifyBootstrap />
+          {/* Smart favicon management */}
+          <FaviconManager />
           <Web3Provider>
             <TierPersistence />
             <RoutePrewarmer />
