@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge"
 import { motion, AnimatePresence } from "framer-motion"
 import { DEMO_MODE } from "@/lib/config"
 import { usePermissions, FeatureId, FEATURE_CATALOG } from "@/lib/permissions"
+import { ARIA_CONFIG } from "@/config/aria"
 
 // Define types for sidebar items
 interface SidebarItem {
@@ -102,11 +103,11 @@ const pulseGlowStyle = `
     pointer-events: all;
   }
 
-      /* Aria's activity card - Clean slide animation */
+      /* ARIA's activity card - Clean slide animation */
   .activity-card {
     position: fixed;
     top: 100px;
-    left: calc(256px + 400px + ((100vw - 256px - 400px) / 2));
+    left: calc(256px + 600px + ((100vw - 256px - 600px) / 2));
     width: 380px;
     max-width: 90%;
     background: rgba(13, 13, 30, 0.3);
@@ -665,7 +666,7 @@ export function SidebarWithChat() {
     }
   }, [DEMO_MODE, isAgentWorking])
 
-          // Aria's suggestions (when not working)
+          // ARIA's suggestions (when not working)
   const suggestions = [
     "Analyzing your catalog for optimization opportunities...",
     "Scanning streaming platforms for playlist placements...",
@@ -868,7 +869,7 @@ export function SidebarWithChat() {
                   <>
                     <div className="dot" />
                     <span style={{ color: 'brand-cyan', fontSize: '14px', fontWeight: 500 }}>
-                      Aria's Suggestions
+                      {ARIA_CONFIG.displayName}'s Suggestions
                     </span>
                   </>
                 )}
@@ -985,7 +986,7 @@ export function SidebarWithChat() {
             </nav>
           </div>
 
-          {/* Aria Chat Button */}
+          {/* ARIA Chat Button */}
           <div className="sticky bottom-0 p-2 border-t border-border bg-background/95 backdrop-blur-sm">
             <button
               onClick={toggleChat}
@@ -1014,7 +1015,7 @@ export function SidebarWithChat() {
                     isChatExpanded ? "text-brand-cyan" : "text-brand-cyan/80",
                   )}
                 >
-                  Aria
+                  {ARIA_CONFIG.displayName}
                 </span>
               </div>
               {!isChatExpanded && (
@@ -1031,7 +1032,7 @@ export function SidebarWithChat() {
           {isChatExpanded && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 400, opacity: 1 }}
+              animate={{ width: 600, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{
                 type: "spring",

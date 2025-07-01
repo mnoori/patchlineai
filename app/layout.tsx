@@ -35,6 +35,9 @@ const ReceiveCryptoModal = isWeb3Enabled
 // Lazy Amplify bootstrap (client-side only)
 const AmplifyBootstrap = dynamic(() => import('@/components/amplify-bootstrap').then(m => m.AmplifyBootstrap), { ssr: false })
 
+// Cache buster to ensure fresh content
+const CacheBuster = dynamic(() => import('@/components/cache-buster').then(m => m.CacheBuster), { ssr: false })
+
 export const metadata: Metadata = {
   title: 'Patchline AI - Orchestrate Your Music Business',
   description: 'AI-powered platform for music professionals. Automate workflows, manage releases, and grow your music business.',
@@ -53,6 +56,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Force no-cache for HTML documents */}
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
+        
         {/* Preconnect to external domains for faster resource loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://imagedelivery.net" />
@@ -74,6 +82,8 @@ export default function RootLayout({
         >
           {/* Initialise Amplify client-side only */}
           <AmplifyBootstrap />
+          {/* Cache buster for version management */}
+          <CacheBuster />
           <Web3Provider>
             <TierPersistence />
             <RoutePrewarmer />

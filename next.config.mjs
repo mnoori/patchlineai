@@ -14,6 +14,12 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Generate unique build ID for each deployment to force cache invalidation
+  generateBuildId: async () => {
+    // Use timestamp + random string for uniqueness
+    return `${Date.now()}-${Math.random().toString(36).substring(7)}`
+  },
+  
   // Performance optimizations
   swcMinify: true,
   reactStrictMode: true,
@@ -165,7 +171,42 @@ const nextConfig = {
   // Add aggressive caching headers for static assets
   async headers() {
     return [
-      // Cache static assets aggressively – MUST appear before the catch-all so it can override it
+      // AGGRESSIVE NO-CACHE for all HTML pages to prevent stale content
+      {
+        source: '/',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+        ],
+      },
+      {
+        source: '/((?!api|_next/static|_next/image|favicon.ico).*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+        ],
+      },
+      // Cache static assets with fingerprinting
       {
         source: '/_next/static/(.*)',
         headers: [
@@ -189,17 +230,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, must-revalidate',
-          },
-        ],
-      },
-      // Catch-all for everything else (HTML/doc requests) – lightweight no-cache
-      {
-        source: '/((?!_next/static|fonts|images).*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
+            value: 'public, max-age=3600, must-revalidate',
           },
         ],
       },

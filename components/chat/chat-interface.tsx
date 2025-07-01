@@ -32,6 +32,7 @@ import { DEMO_MODE } from "@/lib/config"
 import { SupervisorTraces } from '@/components/supervisor-traces'
 import { type AgentTrace } from "@/lib/supervisor-agent"
 import { agentName, agentGradient } from "@/lib/agent-utils"
+import { ARIA_CONFIG } from "@/config/aria"
 // Removed wallet imports to prevent flickering - wallet operations handled in blockchain agent
 
 type Message = {
@@ -643,7 +644,7 @@ export function ChatInterface() {
       <div className="flex items-center justify-between p-4 border-b border-border/50 bg-background/80 backdrop-blur-sm">
         <div className="flex items-center space-x-2">
           <TRSCableLogo className="h-5 w-5 text-brand-cyan" />
-                                <span className={agentGradient()}>{agentName()}</span>
+                                <span className={agentGradient()}>{ARIA_CONFIG.displayName}</span>
           {DEMO_MODE && (
             <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-500 border-purple-500/30">
               Demo Mode
@@ -664,7 +665,7 @@ export function ChatInterface() {
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-cyan/20 to-gradient-middle/20 flex items-center justify-center mb-4">
               <TRSCableLogo className="h-6 w-6 text-brand-cyan" />
             </div>
-                          <p className="text-sm text-muted-foreground max-w-[280px]">Start a conversation with {agentName()}</p>
+                          <p className="text-sm text-muted-foreground max-w-[280px]">Start a conversation with {ARIA_CONFIG.displayName}</p>
           </div>
         ) : (
           <>
