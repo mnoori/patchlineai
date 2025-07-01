@@ -134,7 +134,7 @@ export default function LoginPage() {
               variant="outline"
               className="w-full border-brand-cyan/20 hover:bg-brand-cyan/10"
             >
-              <Link href="/aria" className="inline-flex items-center justify-center">
+              <Link href="/contact" className="inline-flex items-center justify-center">
                 Request a Demo
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
