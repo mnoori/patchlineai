@@ -52,4 +52,10 @@ ENABLE_NOVA_CANVAS=false
 ENABLE_S3_UPLOAD=false
 S3_IMAGE_BUCKET=patchline-content-images
 # Optional: CloudFront CDN URL for faster image delivery
-CLOUDFRONT_URL= 
+CLOUDFRONT_URL=
+
+# Figma Integration
+FIGMA_ACCESS_TOKEN=your_figma_personal_access_token
+FIGMA_FILE_ID=your_figma_file_id
+FIGMA_CLIENT_ID=your_figma_app_client_id
+FIGMA_CLIENT_SECRET=your_figma_app_client_secret 

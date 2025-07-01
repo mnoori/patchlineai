@@ -13,7 +13,10 @@ import {
   GradientBackground,
   GradientOrbs,
   FeatureCard,
-  HeroSection
+  HeroSection,
+  FigmaShowcase,
+  FigmaSection,
+  FigmaCard
 } from '@/components/brand'
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, BRAND } from '@/lib/brand'
 import { createGradient } from '@/lib/brand/utils'
@@ -54,6 +57,54 @@ export default function BrandShowcasePage() {
             Comprehensive brand implementation showcase
           </p>
         </div>
+
+        {/* Figma Integration */}
+        <section className="space-y-6 p-8">
+          <GradientText className="text-3xl font-medium">Figma Integration</GradientText>
+          <FigmaShowcase />
+        </section>
+
+        {/* Figma Background Demo */}
+        <section className="space-y-6 p-8">
+          <GradientText className="text-3xl font-medium">Live Figma Background</GradientText>
+          <p className="text-muted-foreground">
+            Background extracted from layer: PatchlineAI_Brand Guide_Simple (#121212)
+          </p>
+          
+          <div className="space-y-4">
+            {/* Demo section with Figma background */}
+            <FigmaSection>
+              <div className="text-center space-y-4">
+                <h3 className="text-2xl font-bold">This uses your Figma background!</h3>
+                <p className="text-gray-300">
+                  Background color #121212 extracted directly from your 
+                  "PatchlineAI_Brand Guide_Simple" layer in Figma
+                </p>
+                <div className="flex gap-4 justify-center">
+                  <FigmaCard>
+                    <h4 className="font-semibold mb-2">Figma Card</h4>
+                    <p className="text-sm text-gray-300">
+                      Same background in card format
+                    </p>
+                  </FigmaCard>
+                  <FigmaCard>
+                    <h4 className="font-semibold mb-2">Another Card</h4>
+                    <p className="text-sm text-gray-300">
+                      Perfect for content sections
+                    </p>
+                  </FigmaCard>
+                </div>
+              </div>
+            </FigmaSection>
+            
+            <div className="bg-card p-4 rounded-lg">
+              <h4 className="font-semibold mb-2">CSS Generated from Figma:</h4>
+              <code className="text-sm bg-muted p-2 rounded block">
+                background: #121212;
+              </code>
+            </div>
+          </div>
+        </section>
 
         {/* Logo Variations */}
         <section className="space-y-6 p-8 pt-12">

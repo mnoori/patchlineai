@@ -18,7 +18,8 @@ import {
   Award,
   Clock,
   Mail,
-  Phone
+  Phone,
+  Briefcase
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -53,6 +54,29 @@ function WelcomeContent() {
   const [showAgent, setShowAgent] = useState(false)
   const [agentMessage, setAgentMessage] = useState("")
   const [isProcessingEvent, setIsProcessingEvent] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [ariaMessage, setAriaMessage] = useState("")
+
+  // Parse Calendly parameters
+  const name = searchParams.get('invitee_full_name') || 'there';
+  const firstName = name.split(' ')[0];
+  const email = searchParams.get('invitee_email');
+  const eventType = searchParams.get('event_type_name');
+  
+  // Check screening answers for role detection
+  const answers = [];
+  for (let i = 1; i <= 10; i++) {
+    const answer = searchParams.get(`answer_${i}`);
+    if (answer) answers.push(answer.toLowerCase());
+  }
+  
+  const isJobInquiry = answers.some(answer => 
+    answer.includes('job') || 
+    answer.includes('career') || 
+    answer.includes('position') ||
+    answer.includes('hiring') ||
+    answer.includes('employment')
+  );
 
   useEffect(() => {
     // Parse Calendly event details from URL parameters
@@ -66,24 +90,11 @@ function WelcomeContent() {
     const assignedTo = searchParams.get("assigned_to") || ""
     
     // Parse answer_1, answer_2, etc. from Calendly screening questions
-    let answers = {}
     let detectedRole = "music professional"
-    
-    // Collect all answers (answer_1, answer_2, etc.)
-    const answerKeys = Array.from(searchParams.keys()).filter(key => key.startsWith("answer_"))
-    answerKeys.forEach(key => {
-      const value = searchParams.get(key)
-      if (value) {
-        answers[key] = decodeURIComponent(value.replace(/\+/g, ' '))
-      }
-    })
-    
-    // Get first answer for role detection
-    const firstAnswer = searchParams.get("answer_1") || ""
     
     try {
       // Detect role from answer_1 or any answer content
-      const allAnswersText = Object.values(answers).join(' ').toLowerCase()
+      const allAnswersText = answers.join(' ').toLowerCase()
       
       if (allAnswersText.includes("engineer") || allAnswersText.includes("developer")) {
         detectedRole = "engineer"
@@ -124,7 +135,42 @@ function WelcomeContent() {
 
     // Show agent after 3 seconds
     setTimeout(() => setShowAgent(true), 3000)
-  }, [searchParams])
+
+    setMounted(true)
+
+    // Send event data to our API
+    if (inviteeEmail) {
+      fetch('/api/calendly/process-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: inviteeName,
+          email: inviteeEmail,
+          eventType: eventTypeName,
+          eventStartTime: eventTime,
+          inviteeUuid: eventUuid,
+          assignedTo: assignedTo,
+          answers: answers
+        })
+      }).catch(console.error)
+    }
+
+    // Set appropriate ARIA message based on inquiry type
+    if (isJobInquiry) {
+      setAriaMessage("Thank you for your interest in joining our team! Someone from our team will reach out to you shortly to discuss potential opportunities at Patchline AI.")
+    } else {
+      const messages = {
+        engineer: `Welcome ${inviteeName}! I see you're interested in the technical side of things. Rest assured, we'll address your questions during our call. Our team is excited to show you how we're revolutionizing the music industry with AI.`,
+        artist: `Great to meet you, ${inviteeName}! Your inquiry has been received and we'll make sure to cover everything you need during our scheduled call. Our team can't wait to show you how we can help transform your music career.`,
+        "label executive": `Welcome ${inviteeName}! Thank you for scheduling time with us. We'll make sure to address all your questions about how our platform can streamline your operations. Looking forward to our conversation!`,
+        "artist manager": `Hi ${inviteeName}! We've received your information and are preparing for our call. Rest assured, we'll show you exactly how our tools can save you time and grow your artists' careers.`,
+        investor: `Welcome ${inviteeName}! Thank you for your interest. Our team is preparing comprehensive information for our discussion. We look forward to sharing our vision and metrics with you.`,
+        "music professional": `Welcome ${inviteeName}! Thanks for scheduling time with us. Rest assured, we'll address all your questions and show you how Patchline AI can transform your work in the music industry.`
+      }
+      
+      setAriaMessage(messages[detectedRole] || messages["music professional"])
+    }
+  }, [searchParams, answers])
 
   // Process Calendly event and trigger workflows
   const processCalendlyEvent = async (eventId: string, name: string, email: string, eventType: string, answers: any, assignedTo: string) => {
@@ -154,47 +200,7 @@ function WelcomeContent() {
     }
   }
 
-  // Generate personalized agent message
-  useEffect(() => {
-    if (showAgent && personData.name) {
-      // Check if this is a job inquiry
-      const isJobInquiry = personData.answers && Object.values(personData.answers).some((answer: any) => 
-        answer.toLowerCase().includes('job') || 
-        answer.toLowerCase().includes('work') || 
-        answer.toLowerCase().includes('hiring') ||
-        answer.toLowerCase().includes('position') ||
-        answer.toLowerCase().includes('career')
-      )
-      
-      if (isJobInquiry) {
-        setAgentMessage(`Thank you for your interest in joining our team, ${personData.name}! I've notified our hiring team about your inquiry. Someone from our team will reach out to you shortly to discuss potential opportunities. In the meantime, feel free to explore our platform to see what we're building!`)
-      } else {
-        const messages = {
-          engineer: `Welcome ${personData.name}! I see you're interested in the technical side of things. Rest assured, we'll address your questions during our call. Our team is excited to show you how we're revolutionizing the music industry with AI.`,
-          artist: `Great to meet you, ${personData.name}! Your inquiry has been received and we'll make sure to cover everything you need during our scheduled call. Our team can't wait to show you how we can help transform your music career.`,
-          "label executive": `Welcome ${personData.name}! Thank you for scheduling time with us. We'll make sure to address all your questions about how our platform can streamline your operations. Looking forward to our conversation!`,
-          "artist manager": `Hi ${personData.name}! We've received your information and are preparing for our call. Rest assured, we'll show you exactly how our tools can save you time and grow your artists' careers.`,
-          investor: `Welcome ${personData.name}! Thank you for your interest. Our team is preparing comprehensive information for our discussion. We look forward to sharing our vision and metrics with you.`,
-          "music professional": `Welcome ${personData.name}! Thanks for scheduling time with us. Rest assured, we'll address all your questions and show you how Patchline AI can transform your work in the music industry.`
-        }
-        
-        setAgentMessage(messages[personData.role] || messages["music professional"])
-      }
-    }
-  }, [showAgent, personData])
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        >
-          <Zap className="h-8 w-8 text-brand-cyan" />
-        </motion.div>
-      </div>
-    )
-  }
+  if (!mounted) return null
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -232,9 +238,9 @@ function WelcomeContent() {
                 {personData.name !== "there" ? `Personalized for ${personData.name}` : "Welcome to Patchline AI"}
               </Badge>
               
-              <h1 className="text-5xl md:text-7xl font-bold mb-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
                 <span className="bg-gradient-to-r from-brand-cyan via-brand-bright-blue to-brand-cyan bg-clip-text text-transparent">
-                  Welcome to the Future of Label Ops{personData.name !== "there" ? `, ${personData.name}` : ""}!
+                  Welcome to the Future of Label Ops{personData.name !== "there" ? `, ${personData.name.split(' ')[0]}` : ""}!
                 </span>
               </h1>
               
@@ -248,16 +254,6 @@ function WelcomeContent() {
                   <Badge variant="secondary" className="px-4 py-2">
                     <Calendar className="h-4 w-4 mr-2" />
                     {personData.eventType}
-                  </Badge>
-                )}
-                <Badge variant="secondary" className="px-4 py-2">
-                  <Users className="h-4 w-4 mr-2" />
-                  {personData.role}
-                </Badge>
-                {personData.email && (
-                  <Badge variant="secondary" className="px-4 py-2">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Confirmation sent
                   </Badge>
                 )}
               </div>
@@ -296,7 +292,7 @@ function WelcomeContent() {
                     transition={{ delay: 0.5 }}
                     className="bg-background/50 rounded-lg p-4"
                   >
-                    <p className="text-sm leading-relaxed">{agentMessage}</p>
+                    <p className="text-sm leading-relaxed">{ariaMessage}</p>
                   </motion.div>
 
                   <motion.div
@@ -367,9 +363,11 @@ function WelcomeContent() {
                 {personData.email && " Check your email for calendar details."}
               </p>
               <div className="flex items-center justify-center gap-4">
-                <Button size="lg" className="bg-brand-cyan hover:bg-brand-cyan/90 text-black">
-                  <Calendar className="h-5 w-5 mr-2" />
-                  Add to Calendar
+                <Button size="lg" className="bg-brand-cyan hover:bg-brand-cyan/90 text-black" asChild>
+                  <Link href="/careers">
+                    <Briefcase className="h-5 w-5 mr-2" />
+                    Explore Our Job Openings
+                  </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
                   <Link href="/aria">

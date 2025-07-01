@@ -1,0 +1,1208 @@
+{
+  "exportableAssets": [
+    {
+      "id": "2001:378",
+      "name": "Logo Light"
+    },
+    {
+      "id": "2001:427",
+      "name": "Brandmark Dark"
+    },
+    {
+      "id": "2005:2",
+      "name": "Brandmark Blue"
+    },
+    {
+      "id": "113:16",
+      "name": "PatchlineAI_Brand Guide"
+    }
+  ],
+  "gradientsFound": [
+    {
+      "id": "18:126",
+      "name": "Rectangle 34624822",
+      "type": "RECTANGLE",
+      "path": "Logo Design > Patchline V1",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "18:127",
+      "name": "Rectangle 34624820",
+      "type": "RECTANGLE",
+      "path": "Logo Design > Patchline V1",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:11950",
+      "name": "Rectangle 2",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Lights",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:11953",
+      "name": "On-Cloud",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12003",
+      "name": "Light greyish",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12008",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon > Bg > Group 217",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12012",
+      "name": "Icon",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12039",
+      "name": "Rectangle 2",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Lights",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12042",
+      "name": "On-Cloud",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12092",
+      "name": "Light greyish",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12097",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon > Bg > Group 217",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12101",
+      "name": "Icon",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12165",
+      "name": "Rectangle 2",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Lights",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12168",
+      "name": "On-Cloud",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12218",
+      "name": "Light greyish",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12223",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon > Bg > Group 217",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12227",
+      "name": "Icon",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12228",
+      "name": "Brandmark Clearspace",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12355",
+      "name": "Rectangle 2",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Lights",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12358",
+      "name": "On-Cloud",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12408",
+      "name": "Light greyish",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12413",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon > Bg > Group 217",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12417",
+      "name": "Icon",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12418",
+      "name": "Brandmark Usage",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12444",
+      "name": "Rectangle 2",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Lights",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12447",
+      "name": "On-Cloud",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12497",
+      "name": "Light greyish",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12502",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon > Bg > Group 217",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12506",
+      "name": "Icon",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12507",
+      "name": "Mark Restrictions",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12517",
+      "name": "Rectangle 1470",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Group 3828 > Group 3573 > Group 3286 > Group 3549",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12526",
+      "name": "Rectangle 1470",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Group 3828 > Group 3572 > Group 3549 > Group 3549",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12535",
+      "name": "Rectangle 1470",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Group 3828 > Group 3571 > Group 3550 > Group 3549",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12544",
+      "name": "Rectangle 1470",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Group 3828 > Group 3570 > Group 3551 > Group 3549",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12553",
+      "name": "Rectangle 1470",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Group 3828 > Group 3569 > Group 3552 > Group 3549",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12562",
+      "name": "Rectangle 1470",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Group 3828 > Group 3568 > Group 3553 > Group 3549",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12696",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12700",
+      "name": "Rectangle 2",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Lights",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12703",
+      "name": "On-Cloud",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12753",
+      "name": "Light greyish",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12758",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon > Bg > Group 217",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12762",
+      "name": "Icon",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12763",
+      "name": "Brandmark Lockup",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12824",
+      "name": "Rectangle 2",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Lights",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12827",
+      "name": "On-Cloud",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12877",
+      "name": "Light greyish",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12882",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon > Bg > Group 217",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12886",
+      "name": "Icon",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12887",
+      "name": "Brand Typography",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12915",
+      "name": "Rectangle 2",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Lights",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12918",
+      "name": "On-Cloud",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12968",
+      "name": "Light greyish",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:12973",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon > Bg > Group 217",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12977",
+      "name": "Icon",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:12978",
+      "name": "Brand Typography",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:13006",
+      "name": "Rectangle 2",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Lights",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:13009",
+      "name": "On-Cloud",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:13059",
+      "name": "Light greyish",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:13064",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon > Bg > Group 217",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:13068",
+      "name": "Icon",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:13069",
+      "name": "Brand Color Theory",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:13075",
+      "name": "Rectangle 34624884",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:13112",
+      "name": "Rectangle 2",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Lights",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:13115",
+      "name": "On-Cloud",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:13165",
+      "name": "Light greyish",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Bg elements",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:13170",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon > Bg > Group 217",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:13174",
+      "name": "Icon",
+      "type": "VECTOR",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card > Icon",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:13175",
+      "name": "Image Treatment: Signalcore",
+      "type": "TEXT",
+      "path": "Brand Guide > PatchlineAI_Visual Design > On-cloud > Card",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 3
+        }
+      ]
+    },
+    {
+      "id": "113:13177",
+      "name": "Rectangle 34624899",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "113:13178",
+      "name": "Rectangle 34624900",
+      "type": "RECTANGLE",
+      "path": "Brand Guide > PatchlineAI_Visual Design",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:67",
+      "name": "866_frame",
+      "type": "FRAME",
+      "path": "Social Media > P_SocialMediaBanner_Light 3 > 865_frame",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:70",
+      "name": "Vector",
+      "type": "VECTOR",
+      "path": "Social Media > P_SocialMediaBanner_Dark 001",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:95",
+      "name": "The Future of Record Label Operations is Here.",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_001",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:155",
+      "name": "74",
+      "type": "RECTANGLE",
+      "path": "Social Media > SocialMediaTemplate_009",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:177",
+      "name": "More Releases. More Artists. Same Team.",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_009",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:522",
+      "name": "image (11) 1",
+      "type": "RECTANGLE",
+      "path": "Social Media > SocialMediaTemplate_008",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:228",
+      "name": "Your First AI Hire",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_008",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:229",
+      "name": "Aria handles the grind 24/7. So you focus on the creative.",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_008",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:266",
+      "name": "Behind every great label, there’s Aria.",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_002",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:317",
+      "name": "What does Patchline actually do?",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_004",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:355",
+      "name": "74",
+      "type": "RECTANGLE",
+      "path": "Social Media > SocialMediaTemplate_007",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:377",
+      "name": "Meet Your New Ops Team: AI Agents.",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_007",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:381",
+      "name": "74",
+      "type": "RECTANGLE",
+      "path": "Social Media > P_SocialMediaTemplate_001",
+      "gradients": [
+        {
+          "type": "GRADIENT_RADIAL",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:423",
+      "name": "Are you in?",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_006",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:461",
+      "name": "Agentic. Elegant. Inevitable.",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_003",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:512",
+      "name": "What if one AI agent handled it all for your label?",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_005",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    },
+    {
+      "id": "2004:516",
+      "name": "Emails. Royalties. Metadata updates.",
+      "type": "TEXT",
+      "path": "Social Media > SocialMediaTemplate_005 > Group 3809",
+      "gradients": [
+        {
+          "type": "GRADIENT_LINEAR",
+          "stops": 2
+        }
+      ]
+    }
+  ],
+  "styles": [
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "strokes"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "stroke"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "strokes"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "stroke"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "strokes"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "stroke"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "strokes"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "stroke"
+    },
+    {
+      "id": "113:4",
+      "name": "Rectangle 1470",
+      "type": "fill"
+    },
+    {
+      "id": "113:4",
+      "name": "Rectangle 1470",
+      "type": "fill"
+    },
+    {
+      "id": "113:4",
+      "name": "Rectangle 1470",
+      "type": "fill"
+    },
+    {
+      "id": "113:4",
+      "name": "Rectangle 1470",
+      "type": "fill"
+    },
+    {
+      "id": "113:4",
+      "name": "Rectangle 1470",
+      "type": "fill"
+    },
+    {
+      "id": "113:4",
+      "name": "Rectangle 1470",
+      "type": "fill"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "strokes"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "stroke"
+    },
+    {
+      "id": "113:5",
+      "name": "Rectangle 1",
+      "type": "effect"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "strokes"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "stroke"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "strokes"
+    },
+    {
+      "id": "113:3",
+      "name": "On-cloud",
+      "type": "stroke"
+    },
+    {
+      "id": "113:7",
+      "name": "Card",
+      "type": "strokes"
+    },
+    {
+      "id": "113:7",
+      "name": "Card",
+      "type": "stroke"
+    },
+    {
+      "id": "113:7",
+      "name": "Card",
+      "type": "strokes"
+    },
+    {
+      "id": "113:7",
+      "name": "Card",
+      "type": "stroke"
+    },
+    {
+      "id": "113:7",
+      "name": "Rectangle 34624899",
+      "type": "stroke"
+    },
+    {
+      "id": "113:7",
+      "name": "Rectangle 34624900",
+      "type": "stroke"
+    },
+    {
+      "id": "2001:3",
+      "name": "What does Patchline actually do?",
+      "type": "fill"
+    }
+  ]
+}

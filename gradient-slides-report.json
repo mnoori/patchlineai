@@ -1,0 +1,48 @@
+[
+  {
+    "id": "2004:67",
+    "name": "866_frame",
+    "path": "Social Media > P_SocialMediaBanner_Light 3 > 865_frame",
+    "dimensions": "1710x1460",
+    "gradient": {
+      "opacity": 0.20000000298023224,
+      "blendMode": "NORMAL",
+      "type": "GRADIENT_LINEAR",
+      "gradientHandlePositions": [
+        {
+          "x": 0.5000000000000001,
+          "y": -3.061613071820855e-17
+        },
+        {
+          "x": 0.5000000000000004,
+          "y": 0.2455479367447855
+        },
+        {
+          "x": 0.3772260316276073,
+          "y": -6.764582048905029e-16
+        }
+      ],
+      "gradientStops": [
+        {
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          },
+          "position": 0
+        },
+        {
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 1
+          },
+          "position": 1
+        }
+      ]
+    },
+    "exportSettings": false
+  }
+]

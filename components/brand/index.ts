@@ -16,4 +16,7 @@ export * from './page-gradient'
 
 // Export specific components that might not be auto-exported
 export { GradientOrbs, GradientBackground } from './gradient-background'
-export { MeshGradient, PageGradient, AnimatedGradientOrbs } from './page-gradient' 
+export { MeshGradient, PageGradient, AnimatedGradientOrbs } from './page-gradient'
+export { FigmaShowcase } from './figma-showcase'
+export { FigmaBackground, FigmaSection, FigmaCard } from './figma-background'
+export { FigmaAssetPreview } from './figma-asset-preview' 

@@ -176,3 +176,10 @@ amplifytools.xcconfig
 
 # Zip files
 *.zip
+
+# Figma Integration
+figma-sync-report.json
+figma-tokens-example.json
+figma-assets-example.json
+components/generated-example/
+figma-exploration/
