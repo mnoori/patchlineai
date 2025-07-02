@@ -18,6 +18,7 @@ import {
   FigmaSection,
   FigmaCard
 } from '@/components/brand'
+import { FigmaLayerShowcase } from '@/components/brand/figma-layer-showcase'
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, BRAND } from '@/lib/brand'
 import { createGradient } from '@/lib/brand/utils'
 
@@ -62,6 +63,15 @@ export default function BrandShowcasePage() {
         <section className="space-y-6 p-8">
           <GradientText className="text-3xl font-medium">Figma Integration</GradientText>
           <FigmaShowcase />
+        </section>
+
+        {/* NEW: Figma Layer Explorer */}
+        <section className="space-y-6 p-8">
+          <GradientText className="text-3xl font-medium">Figma Layer Explorer</GradientText>
+          <p className="text-muted-foreground">
+            Explore individual layers, export assets, and generate React components from any Figma page
+          </p>
+          <FigmaLayerShowcase fileId="PbzhWQIGJF68IPYo8Bheck" />
         </section>
 
         {/* Figma Background Demo */}
