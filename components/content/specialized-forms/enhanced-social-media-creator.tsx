@@ -33,7 +33,8 @@ import {
   Calendar,
   Camera,
   ArrowLeft,
-  Edit2
+  Edit2,
+  FileImage
 } from "lucide-react"
 import type { EnhancedContentPrompt } from "@/lib/content-types"
 import { toast } from "sonner"
@@ -46,6 +47,8 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { PRE_GENERATED_CONTENT } from "@/lib/social-media-templates-system"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from "@/components/ui/drawer"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
+import { PersonalizedContentWorkflow } from '@/components/content/personalized-content-workflow'
+import { useRouter } from 'next/navigation'
 
 interface EnhancedSocialMediaCreatorProps {
   onContentGenerated?: (content: {
@@ -187,6 +190,7 @@ export function EnhancedSocialMediaCreator({
   currentStep = 1,
   onStepChange = () => {},
 }: EnhancedSocialMediaCreatorProps) {
+  const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingText, setIsGeneratingText] = useState(false)
@@ -203,6 +207,7 @@ export function EnhancedSocialMediaCreator({
   const [captionEditPrompt, setCaptionEditPrompt] = useState('')
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
   const [isLivePreviewReady, setIsLivePreviewReady] = useState(false)
+  const [selectedContent, setSelectedContent] = useState<any>(null)
   
   const [formState, setFormState] = useState<FormState>({
     platform: 'instagram-post',
@@ -495,8 +500,16 @@ export function EnhancedSocialMediaCreator({
     }
   }
 
+  useEffect(() => {
+    if (generatedImages.length > 0 && selectedImageIndex !== null) {
+      setIsLivePreviewReady(true)
+    } else {
+      setIsLivePreviewReady(false)
+    }
+  }, [generatedImages, selectedImageIndex])
+
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4">
+    <div className="space-y-6">
       {/* Grid layout: main content + live preview */}
       <div className="lg:grid lg:grid-cols-[1fr_24rem] lg:gap-4">
         {/* Main Content */}
@@ -508,7 +521,7 @@ export function EnhancedSocialMediaCreator({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => window.history.back()}
+                    onClick={() => router.push('/dashboard/content')}
                     className="gap-2"
                   >
                     <ArrowLeft className="h-4 w-4" />
@@ -1174,6 +1187,27 @@ export function EnhancedSocialMediaCreator({
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Personalized Release Content Section */}
+      <Card className="border-brand-cyan/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileImage className="h-5 w-5 text-brand-cyan" />
+            Personalized Release Content
+          </CardTitle>
+          <CardDescription>
+            Create unique content from your own photos with AI background removal and themed environments
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PersonalizedContentWorkflow
+            releaseTitle="Summer Vibes"
+            releaseGenre="Electronic"
+            artistName="Your Artist Name"
+            releaseDate={new Date().toISOString()}
+          />
+        </CardContent>
+      </Card>
     </div>
   )
 } 

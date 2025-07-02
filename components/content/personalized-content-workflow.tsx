@@ -1,36 +1,54 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
-  Sparkles, 
   Upload, 
+  Wand2, 
+  Download, 
+  Loader2, 
+  Check, 
+  X,
+  Image as ImageIcon,
   FolderOpen,
-  Download,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  ImageIcon,
+  Sparkles,
   ArrowRight,
-  Wand2
+  Palette,
+  ChevronRight
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
-import { listDriveFiles, getDriveFile, getStoredGoogleAuth } from '@/lib/google-auth'
-import { resizeImageForNovaCanvas, cleanBase64 } from '@/lib/image-utils'
+import { cleanBase64, resizeImageForNovaCanvas } from '@/lib/image-utils'
 import { compositeImagesClient } from '@/lib/client-composite'
+import { getStoredGoogleAuth, getDriveFile } from '@/lib/google-auth'
+import { cn } from '@/lib/utils'
 
 interface WorkflowStep {
   id: string
   title: string
   description: string
   status: 'pending' | 'active' | 'completed' | 'error'
-  result?: any
+  progress?: number
 }
+
+// Extended theme options
+const CONTENT_THEMES = [
+  { id: 'vibrant', name: 'Vibrant', description: 'Colorful and energetic', icon: '🎨' },
+  { id: 'cinematic', name: 'Cinematic', description: 'Dramatic and moody', icon: '🎬' },
+  { id: 'minimalist', name: 'Minimalist', description: 'Clean and elegant', icon: '⚪' },
+  { id: 'futuristic', name: 'Futuristic', description: 'Sci-fi and tech-inspired', icon: '🚀' },
+  { id: 'nature', name: 'Nature', description: 'Organic and earthy', icon: '🌿' },
+  { id: 'cyberpunk', name: 'Cyberpunk', description: 'Neon and dystopian', icon: '🌃' },
+  { id: 'vintage', name: 'Vintage', description: 'Retro and nostalgic', icon: '📻' },
+  { id: 'abstract', name: 'Abstract', description: 'Artistic and conceptual', icon: '🎭' },
+  { id: 'festival', name: 'Festival', description: 'Party and celebration', icon: '🎪' }
+]
 
 interface PersonalizedContentWorkflowProps {
   releaseId?: string
@@ -53,7 +71,8 @@ export function PersonalizedContentWorkflow({
   const [driveFiles, setDriveFiles] = useState<any[]>([])
   const [loadingDrive, setLoadingDrive] = useState(false)
   const [generatedContent, setGeneratedContent] = useState<any[]>([])
-  const [compositeMethod, setCompositeMethod] = useState('client')
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([])
+  const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [steps, setSteps] = useState<WorkflowStep[]>([
     {
       id: 'select',
@@ -62,21 +81,21 @@ export function PersonalizedContentWorkflow({
       status: 'active'
     },
     {
-      id: 'process',
-      title: 'Remove Background',
-      description: 'AI removes background from your image',
+      id: 'theme',
+      title: 'Choose Themes',
+      description: 'Select up to 3 themes for your content',
       status: 'pending'
     },
     {
-      id: 'generate',
-      title: 'Generate Environments',
-      description: 'Create personalized backgrounds',
+      id: 'process',
+      title: 'Processing',
+      description: 'AI removes background and generates content',
       status: 'pending'
     },
     {
       id: 'finalize',
-      title: 'Export Content',
-      description: 'Download ready-to-post content',
+      title: 'Export',
+      description: 'Download your content',
       status: 'pending'
     }
   ])
@@ -92,54 +111,62 @@ export function PersonalizedContentWorkflow({
     try {
       const auth = await getStoredGoogleAuth()
       if (!auth) {
-        toast.error('Please connect Google Drive in Settings')
+        toast.error('Please connect Google Drive first')
         return
       }
 
-      const files = await listDriveFiles(auth.access_token, "mimeType contains 'image/'")
-      const imageFiles = files.filter((file: any) => 
-        file.mimeType?.startsWith('image/')
-      )
-      setDriveFiles(imageFiles)
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=mimeType contains 'image/'&pageSize=20&fields=files(id,name,mimeType,thumbnailLink)`, {
+        headers: {
+          'Authorization': `Bearer ${auth.access_token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setDriveFiles(data.files || [])
+      } else {
+        throw new Error('Failed to load files')
+      }
     } catch (error) {
-      console.error('Failed to load Drive files:', error)
+      console.error('Error loading Drive files:', error)
       toast.error('Failed to load Google Drive files')
     } finally {
       setLoadingDrive(false)
     }
   }
 
-  const updateStep = (stepId: string, status: WorkflowStep['status'], result?: any) => {
+  const updateStep = (stepId: string, status: WorkflowStep['status'], data?: any) => {
     setSteps(prev => prev.map(step => 
-      step.id === stepId ? { ...step, status, result } : step
+      step.id === stepId ? { ...step, status, ...data } : step
     ))
   }
 
-  const handleImageSelect = async (file: any) => {
-    setSelectedImage(file)
-    updateStep('select', 'completed', { file })
-    updateStep('process', 'active')
+  const handleImageSelect = (image: any) => {
+    setSelectedImage(image)
+    updateStep('select', 'completed')
+    updateStep('theme', 'active')
+    setCurrentStepIndex(1)
   }
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        handleImageSelect({
-          name: file.name,
-          mimeType: file.type,
-          base64: reader.result as string,
-          source: 'upload'
-        })
-      }
-      reader.readAsDataURL(file)
+  const proceedToGenerate = () => {
+    if (selectedThemes.length === 0) {
+      toast.error('Please select at least one theme')
+      return
     }
+    
+    updateStep('theme', 'completed')
+    setCurrentStepIndex(2)
+    generateContent()
   }
 
   const generateContent = async () => {
     if (!selectedImage) {
       toast.error('Please select an image first')
+      return
+    }
+
+    if (selectedThemes.length === 0) {
+      toast.error('Please select at least one theme')
       return
     }
 
@@ -166,28 +193,25 @@ export function PersonalizedContentWorkflow({
       const cleanedBase64 = cleanBase64(imageBase64)
       const resizedBase64 = await resizeImageForNovaCanvas(cleanedBase64)
 
-      updateStep('process', 'completed')
-      updateStep('generate', 'active')
-
-      // Generate multiple content variations
-      const styles = ['vibrant', 'cinematic', 'minimalist']
-      const contentPromises = styles.map(style => 
-        generateSingleContent(resizedBase64, style)
+      // Generate content for selected themes
+      const contentPromises = selectedThemes.map(theme => 
+        generateSingleContent(resizedBase64, theme)
       )
 
       const results = await Promise.all(contentPromises)
       const validResults = results.filter(r => r !== null)
       setGeneratedContent(validResults)
 
-      updateStep('generate', 'completed', { count: validResults.length })
+      updateStep('process', 'completed')
       updateStep('finalize', 'active')
+      setCurrentStepIndex(3)
 
       toast.success('Content generated successfully!')
 
     } catch (error: any) {
       console.error('Generation error:', error)
       toast.error(error.message || 'Failed to generate content')
-      updateStep(steps.find(s => s.status === 'active')?.id || 'process', 'error')
+      updateStep('process', 'error')
     } finally {
       setIsProcessing(false)
     }
@@ -195,12 +219,28 @@ export function PersonalizedContentWorkflow({
 
   const generateSingleContent = async (imageData: string, style: string) => {
     try {
+      // Get theme details
+      const theme = CONTENT_THEMES.find(t => t.id === style)
+      
+      // Create theme-specific prompts
+      const themePrompts = {
+        vibrant: 'vibrant colors, dynamic energy, abstract shapes, modern design, bright and colorful',
+        cinematic: 'cinematic lighting, dramatic atmosphere, depth of field, professional photography, moody',
+        minimalist: 'minimalist design, clean lines, white space, elegant, sophisticated',
+        futuristic: 'futuristic sci-fi environment, neon lights, holographic elements, technology, cybernetic, space age',
+        nature: 'natural environment, organic elements, forest, mountains, water, earthy tones, peaceful',
+        cyberpunk: 'cyberpunk cityscape, neon signs, rain, dystopian, dark atmosphere, purple and pink lights',
+        vintage: 'vintage aesthetic, retro style, film grain, nostalgic, warm tones, classic design',
+        abstract: 'abstract art, geometric shapes, surreal, creative patterns, artistic expression',
+        festival: 'music festival atmosphere, crowds, stage lights, outdoor concert, summer vibes, energetic'
+      }
+      
       const response = await fetch('/api/nova-canvas/generate-with-subject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           subjectImageData: imageData,
-          prompt: `Professional background for ${releaseTitle || 'music'} release marketing`,
+          prompt: `${themePrompts[style as keyof typeof themePrompts]} background for ${releaseTitle || 'music'} release marketing`,
           style,
           removeBackground: true,
           releaseContext: {
@@ -209,7 +249,7 @@ export function PersonalizedContentWorkflow({
             artist: artistName,
             description: 'Professional music release marketing content'
           },
-          compositeMethod: compositeMethod
+          compositeMethod: 'client'
         })
       })
 
@@ -221,13 +261,12 @@ export function PersonalizedContentWorkflow({
       
       // Determine which method was actually used
       let finalImage: string
-      let methodUsed = compositeMethod
       
       // If we have a mock result or the server couldn't composite,
       // do client-side compositing
       if (result.imageUrl) {
         // Check if we have the processed subject (background removed)
-        if (compositeMethod === 'client' && result.processedSubject && result.backgroundImage) {
+        if (result.processedSubject && result.backgroundImage) {
           // Use the transparent subject for compositing
           const transparentSubject = result.processedSubject
           const backgroundBase64 = result.backgroundImage
@@ -244,27 +283,20 @@ export function PersonalizedContentWorkflow({
               }
             )
             finalImage = `data:image/png;base64,${compositeBase64}`
-            methodUsed = 'client'
           } catch (error) {
             console.error('Client-side compositing failed:', error)
             // Fall back to server result
             finalImage = result.imageUrl
-            methodUsed = 'fallback'
           }
         } else {
-          // Server handled the compositing (inpainting/outpainting)
+          // Server handled the compositing
           finalImage = result.imageUrl
-          // Check if it actually used the requested method or fell back
-          if (compositeMethod !== 'client' && result.processedSubject) {
-            // If we still got processedSubject back, it means server compositing failed
-            methodUsed = 'fallback'
-          }
         }
         
         return {
           url: finalImage,
           style,
-          methodUsed,
+          theme: theme?.name || style,
           s3Url: result.s3Url
         }
       }
@@ -276,20 +308,36 @@ export function PersonalizedContentWorkflow({
     }
   }
 
-  const downloadImage = (dataUrl: string, filename: string) => {
-    const link = document.createElement('a')
-    link.href = dataUrl
-    link.download = filename
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string
+      handleImageSelect({
+        name: file.name,
+        base64,
+        source: 'upload'
+      })
+    }
+    reader.readAsDataURL(file)
   }
 
-  const downloadContent = (content: any, style?: string) => {
+  const selectDriveFile = (file: any) => {
+    handleImageSelect({
+      id: file.id,
+      name: file.name,
+      source: 'google-drive',
+      thumbnailLink: file.thumbnailLink
+    })
+  }
+
+  const downloadContent = (content: any) => {
     const imageUrl = typeof content === 'string' ? content : content.url
     const link = document.createElement('a')
     link.href = imageUrl
-    link.download = `${releaseTitle}-${style || content.style || 'content'}-${Date.now()}.png`
+    link.download = `${releaseTitle}-${content.style || 'content'}-${Date.now()}.png`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -304,120 +352,134 @@ export function PersonalizedContentWorkflow({
     })
   }
 
+  const resetWorkflow = () => {
+    setCurrentStepIndex(0)
+    setSelectedImage(null)
+    setSelectedThemes([])
+    setGeneratedContent([])
+    setSteps(prev => prev.map((step, index) => ({
+      ...step,
+      status: index === 0 ? 'active' : 'pending'
+    })))
+  }
+
   return (
     <div className="space-y-6">
-      {/* Progress Steps */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            {steps.map((step, index) => (
-              <div key={step.id} className="flex items-center">
-                <div className="flex flex-col items-center">
-                  <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
-                    step.status === 'completed' && "bg-green-500 text-white",
-                    step.status === 'active' && "bg-brand-cyan text-white animate-pulse",
-                    step.status === 'pending' && "bg-muted text-muted-foreground",
-                    step.status === 'error' && "bg-red-500 text-white"
-                  )}>
-                    {step.status === 'completed' ? (
-                      <CheckCircle2 className="h-5 w-5" />
-                    ) : step.status === 'error' ? (
-                      <AlertCircle className="h-5 w-5" />
-                    ) : (
-                      <span className="text-sm font-semibold">{index + 1}</span>
-                    )}
-                  </div>
-                  <div className="mt-2 text-center">
-                    <p className="text-sm font-medium">{step.title}</p>
-                    <p className="text-xs text-muted-foreground max-w-[120px]">
-                      {step.description}
-                    </p>
-                  </div>
-                </div>
-                {index < steps.length - 1 && (
-                  <ArrowRight className={cn(
-                    "h-4 w-4 mx-4 mt-[-20px]",
-                    steps[index + 1].status !== 'pending' 
-                      ? "text-brand-cyan" 
-                      : "text-muted-foreground"
-                  )} />
-                )}
+      {/* Progress Bar */}
+      <div className="relative">
+        <Progress value={(currentStepIndex + 1) / steps.length * 100} className="h-2" />
+        <div className="flex justify-between mt-2">
+          {steps.map((step, index) => (
+            <div 
+              key={step.id} 
+              className={cn(
+                "flex flex-col items-center",
+                index <= currentStepIndex ? "opacity-100" : "opacity-50"
+              )}
+            >
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
+                step.status === 'completed' ? "bg-green-500 text-white" : 
+                step.status === 'active' ? "bg-primary text-primary-foreground" :
+                step.status === 'error' ? "bg-red-500 text-white" :
+                "bg-muted text-muted-foreground"
+              )}>
+                {step.status === 'completed' ? <Check className="h-4 w-4" /> : 
+                 step.status === 'error' ? <X className="h-4 w-4" /> : 
+                 index + 1}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <span className="text-xs mt-1 text-center max-w-[80px]">{step.title}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
-      {/* Image Selection */}
-      {steps[0].status === 'active' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Select Your Image</CardTitle>
+      {/* Step 1: Image Selection */}
+      {currentStepIndex === 0 && (
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-xl">Select Your Image</CardTitle>
             <CardDescription>
-              Choose an artist photo from Google Drive or upload a new one
+              Choose an image from Google Drive or upload from your device
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="google-drive">
-                  <FolderOpen className="h-4 w-4 mr-2" />
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="google-drive" className="gap-2">
+                  <FolderOpen className="h-4 w-4" />
                   Google Drive
                 </TabsTrigger>
-                <TabsTrigger value="upload">
-                  <Upload className="h-4 w-4 mr-2" />
+                <TabsTrigger value="upload" className="gap-2">
+                  <Upload className="h-4 w-4" />
                   Upload
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="google-drive" className="space-y-4">
+              <TabsContent value="google-drive" className="mt-0">
                 {loadingDrive ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin" />
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
                 ) : driveFiles.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {driveFiles.map((file) => (
                       <Card
                         key={file.id}
-                        className="cursor-pointer hover:border-brand-cyan transition-colors"
-                        onClick={() => handleImageSelect(file)}
+                        className="cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden group"
+                        onClick={() => selectDriveFile(file)}
                       >
-                        <CardContent className="p-4">
-                          <ImageIcon className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                          <p className="text-xs text-center truncate">{file.name}</p>
-                        </CardContent>
+                        <div className="aspect-square relative">
+                          {file.thumbnailLink ? (
+                            <img 
+                              src={file.thumbnailLink}
+                              alt={file.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-muted flex items-center justify-center">
+                              <ImageIcon className="h-12 w-12 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Check className="h-8 w-8 text-white" />
+                          </div>
+                        </div>
+                        <div className="p-3">
+                          <p className="text-sm font-medium truncate">{file.name}</p>
+                        </div>
                       </Card>
                     ))}
                   </div>
                 ) : (
-                  <Alert>
-                    <AlertDescription>
-                      No images found in Google Drive. Upload some photos first!
-                    </AlertDescription>
-                  </Alert>
+                  <div className="text-center py-12">
+                    <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No images found in Google Drive</p>
+                    <Button variant="outline" className="mt-4" onClick={loadGoogleDriveFiles}>
+                      Retry
+                    </Button>
+                  </div>
                 )}
               </TabsContent>
 
-              <TabsContent value="upload" className="space-y-4">
-                <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center">
-                  <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <TabsContent value="upload" className="mt-0">
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-12 text-center hover:border-muted-foreground/50 transition-colors">
+                  <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-sm text-muted-foreground mb-4">
-                    Upload an artist photo to create personalized content
+                    Drag and drop an image here, or click to select
                   </p>
-                  <label htmlFor="file-upload" className="cursor-pointer">
-                    <input
-                      id="file-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                    <Button variant="outline" asChild>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <Label htmlFor="file-upload">
+                    <Button variant="secondary" className="cursor-pointer" asChild>
                       <span>Choose File</span>
                     </Button>
-                  </label>
+                  </Label>
                 </div>
               </TabsContent>
             </Tabs>
@@ -425,149 +487,171 @@ export function PersonalizedContentWorkflow({
         </Card>
       )}
 
-      {/* Selected Image Preview */}
-      {selectedImage && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Selected Image</CardTitle>
+      {/* Step 2: Theme Selection */}
+      {currentStepIndex === 1 && selectedImage && (
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Palette className="h-5 w-5" />
+              Choose Your Themes
+            </CardTitle>
+            <CardDescription>
+              Select up to 3 themes for your content variations
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <ImageIcon className="h-16 w-16 text-muted-foreground" />
-              <div className="flex-1">
-                <p className="font-medium">{selectedImage.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  Ready for background removal
-                </p>
-              </div>
-              {steps[0].status === 'completed' && steps[3].status !== 'active' && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Compositing Method</label>
-                    <div className="grid grid-cols-1 gap-2">
-                      <Button
-                        variant={compositeMethod === 'client' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setCompositeMethod('client')}
-                        className="justify-start"
-                      >
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        Quick Preview (Client-side)
-                      </Button>
-                      <Button
-                        variant={compositeMethod === 'inpainting' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setCompositeMethod('inpainting')}
-                        className="justify-start"
-                      >
-                        <Wand2 className="h-4 w-4 mr-2" />
-                        Natural Blend (AI Inpainting)
-                      </Button>
-                      <Button
-                        variant={compositeMethod === 'variation' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setCompositeMethod('variation')}
-                        className="justify-start"
-                      >
-                        <ImageIcon className="h-4 w-4 mr-2" />
-                        Transform Style (AI Variation)
-                      </Button>
-                      <Button
-                        variant={compositeMethod === 'outpainting' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setCompositeMethod('outpainting')}
-                        className="justify-start"
-                      >
-                        <ArrowRight className="h-4 w-4 mr-2" />
-                        Environment Extension (AI Outpainting)
-                      </Button>
+          <CardContent className="space-y-6">
+            {/* Selected Image Preview */}
+            <div className="bg-muted/50 rounded-lg p-4">
+              <div className="flex items-center gap-4">
+                <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-background">
+                  {selectedImage.thumbnailLink ? (
+                    <img 
+                      src={selectedImage.thumbnailLink}
+                      alt={selectedImage.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : selectedImage.base64 ? (
+                    <img 
+                      src={selectedImage.base64}
+                      alt={selectedImage.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {compositeMethod === 'client' && 'Fast preview by placing your image on generated backgrounds'}
-                      {compositeMethod === 'inpainting' && 'AI blends your subject naturally into new backgrounds'}
-                      {compositeMethod === 'variation' && 'AI transforms your entire image into a new style'}
-                      {compositeMethod === 'outpainting' && 'AI extends the environment around your subject'}
-                    </p>
-                  </div>
-                  
-                  <Button
-                    onClick={generateContent}
-                    disabled={isProcessing}
-                    className="w-full"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="mr-2 h-4 w-4" />
-                        Generate Content
-                      </>
-                    )}
-                  </Button>
+                  )}
                 </div>
-              )}
+                <div className="flex-1">
+                  <p className="font-medium">{selectedImage.name}</p>
+                  <p className="text-sm text-muted-foreground">Ready for processing</p>
+                </div>
+                <Button variant="ghost" size="sm" onClick={resetWorkflow}>
+                  Change Image
+                </Button>
+              </div>
+            </div>
+
+            {/* Theme Grid */}
+            <div className="grid grid-cols-3 gap-3">
+              {CONTENT_THEMES.map((theme) => (
+                <Button
+                  key={theme.id}
+                  variant={selectedThemes.includes(theme.id) ? 'default' : 'outline'}
+                  onClick={() => {
+                    if (selectedThemes.includes(theme.id)) {
+                      setSelectedThemes(selectedThemes.filter(t => t !== theme.id))
+                    } else if (selectedThemes.length < 3) {
+                      setSelectedThemes([...selectedThemes, theme.id])
+                    } else {
+                      toast.error('You can select up to 3 themes')
+                    }
+                  }}
+                  className={cn(
+                    "h-auto flex-col py-4 transition-all",
+                    selectedThemes.includes(theme.id) && "ring-2 ring-primary ring-offset-2"
+                  )}
+                >
+                  <span className="text-2xl mb-2">{theme.icon}</span>
+                  <span className="text-sm font-medium">{theme.name}</span>
+                  <span className="text-xs text-muted-foreground">{theme.description}</span>
+                </Button>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between pt-4">
+              <p className="text-sm text-muted-foreground">
+                {selectedThemes.length === 0 
+                  ? "Select at least one theme to continue" 
+                  : `${selectedThemes.length} theme${selectedThemes.length > 1 ? 's' : ''} selected`}
+              </p>
+              <Button
+                onClick={proceedToGenerate}
+                disabled={selectedThemes.length === 0}
+                size="lg"
+                className="gap-2"
+              >
+                Continue
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Generated Content */}
-      {generatedContent.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Content</CardTitle>
-            <CardDescription>
-              Your personalized marketing content is ready!
-            </CardDescription>
+      {/* Step 3: Processing */}
+      {currentStepIndex === 2 && isProcessing && (
+        <Card className="border-0 shadow-lg">
+          <CardContent className="py-12">
+            <div className="text-center space-y-4">
+              <div className="relative inline-flex">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Creating Your Content</h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  AI is removing the background and generating {selectedThemes.length} themed variations
+                </p>
+              </div>
+              <Progress value={50} className="w-32 mx-auto" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 4: Results */}
+      {currentStepIndex === 3 && generatedContent.length > 0 && (
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl">Your Content is Ready!</CardTitle>
+                <CardDescription>
+                  {generatedContent.length} variations generated successfully
+                </CardDescription>
+              </div>
+              <Button onClick={resetWorkflow} variant="outline" size="sm">
+                Start Over
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               {generatedContent.map((content, index) => (
-                <Card key={index} className="overflow-hidden">
+                <Card key={index} className="overflow-hidden group">
                   <div className="aspect-square relative">
                     <img 
                       src={content.url} 
                       alt={`${content.style} style`}
                       className="w-full h-full object-cover"
                     />
-                    {content.methodUsed && content.methodUsed !== compositeMethod && (
-                      <div className="absolute top-2 right-2 bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs">
-                        Fallback: {content.methodUsed}
-                      </div>
-                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform">
+                      <p className="text-white font-medium">{content.theme}</p>
+                    </div>
                   </div>
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium capitalize">{content.style} Style</p>
-                        <p className="text-xs text-muted-foreground">
-                          Method: {content.methodUsed === 'client' ? 'Client Composite' : 
-                                  content.methodUsed === 'inpainting' ? 'AI Inpainting' :
-                                  content.methodUsed === 'variation' ? 'AI Variation' :
-                                  content.methodUsed === 'outpainting' ? 'AI Outpainting' :
-                                  'Fallback'}
-                        </p>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => downloadImage(content.url, `${releaseTitle}-${content.style}-${Date.now()}.png`)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() => downloadContent(content)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
             
-            <div className="flex justify-end">
-              <Button onClick={downloadAll} variant="outline">
-                <Download className="h-4 w-4 mr-2" />
-                Download All
+            <div className="flex justify-center">
+              <Button onClick={downloadAll} size="lg" className="gap-2">
+                <Download className="h-4 w-4" />
+                Download All ({generatedContent.length} images)
               </Button>
             </div>
           </CardContent>

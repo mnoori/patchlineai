@@ -193,11 +193,17 @@ async function removeImageBackground(imageBase64: string): Promise<string> {
 
 async function generateBackground(prompt: string, style: string, options: any): Promise<string> {
   try {
+    // Enhanced theme-specific prompts with better details
     const stylePrompts = {
-      vibrant: 'vibrant colors, dynamic energy, abstract shapes, modern design, bright and colorful, music promotional background',
-      cinematic: 'cinematic lighting, dramatic atmosphere, depth of field, professional photography, moody, artist portrait background',
-      minimalist: 'minimalist design, clean lines, white space, elegant, sophisticated, professional music release background',
-      festival: 'festival atmosphere, bright colors, summer vibes, outdoor concert, energetic crowd, music festival background'
+      vibrant: 'vibrant colors, dynamic energy, abstract shapes, modern design, bright neon gradients, music festival atmosphere, energetic composition',
+      cinematic: 'cinematic lighting, dramatic atmosphere, depth of field, professional photography, moody shadows, film noir aesthetic, volumetric fog',
+      minimalist: 'minimalist design, clean lines, negative space, elegant simplicity, sophisticated monochrome, zen aesthetic, geometric precision',
+      futuristic: 'futuristic sci-fi environment, holographic displays, neon circuits, cybernetic patterns, space station interior, advanced technology, metallic surfaces',
+      nature: 'natural outdoor environment, organic elements, lush vegetation, mountain vistas, water reflections, golden hour lighting, peaceful wilderness',
+      cyberpunk: 'cyberpunk cityscape at night, neon signs in rain, dystopian megacity, purple and pink lighting, blade runner aesthetic, urban decay',
+      vintage: 'vintage retro aesthetic, film grain texture, nostalgic warm tones, art deco patterns, 1970s color palette, analog photography feel',
+      abstract: 'abstract art composition, flowing liquid shapes, surreal geometry, creative color patterns, artistic expression, contemporary art gallery',
+      festival: 'music festival main stage, concert lighting rigs, outdoor summer festival, crowd energy, pyrotechnics, festival decorations, vibrant atmosphere'
     }
 
     // Create a more specific prompt based on release context
@@ -209,34 +215,42 @@ async function generateBackground(prompt: string, style: string, options: any): 
     // Build a contextual prompt that creates backgrounds suitable for the artist
     let contextualPrompt = ''
     
-    if (style === 'vibrant') {
-      contextualPrompt = `Colorful abstract background for ${genre} music promotion, vibrant gradient, dynamic geometric shapes, no people, suitable for ${artist} promotional content`
-    } else if (style === 'cinematic') {
-      contextualPrompt = `Dramatic atmospheric background for ${genre} artist photoshoot, moody lighting, blurred city lights or nature, no people, professional music industry aesthetic`
-    } else if (style === 'minimalist') {
-      contextualPrompt = `Clean minimal background for ${genre} music release, soft gradients, simple geometric elements, lots of negative space, no people, elegant professional look`
-    } else {
-      contextualPrompt = `Professional background for ${genre} music artist ${artist}, ${stylePrompts[style as keyof typeof stylePrompts] || ''}, no people in background`
+    // Get the base style prompt
+    const baseStylePrompt = stylePrompts[style as keyof typeof stylePrompts] || stylePrompts.vibrant
+    
+    // Add genre-specific elements
+    const genreElements = {
+      'Electronic': 'synthesizer waves, digital patterns, LED displays',
+      'Rock': 'amplifiers, stage lighting, concert venue',
+      'Hip-Hop': 'urban landscape, graffiti art, street culture',
+      'Pop': 'colorful backdrops, glamorous settings, studio lights',
+      'Jazz': 'intimate club atmosphere, warm spotlights, vintage instruments',
+      'Classical': 'concert hall, elegant architecture, refined atmosphere'
     }
-
-    // Add the original prompt details if they add value
-    const enhancedPrompt = prompt.toLowerCase().includes('background') 
-      ? contextualPrompt 
-      : `${contextualPrompt}, ${prompt}`
+    
+    const genreElement = genreElements[genre as keyof typeof genreElements] || ''
+    
+    // Combine all elements into a comprehensive prompt
+    contextualPrompt = `${baseStylePrompt}, ${genreElement}, professional music industry promotional background, no people or faces, high quality 8k render, perfect for ${genre} artist marketing`
+    
+    // Add any additional prompt details if they don't conflict
+    if (prompt && !prompt.toLowerCase().includes('background')) {
+      contextualPrompt = `${contextualPrompt}, ${prompt}`
+    }
 
     const command = new InvokeModelCommand({
       modelId: 'amazon.nova-canvas-v1:0',
       body: JSON.stringify({
         taskType: 'TEXT_IMAGE',
         textToImageParams: {
-          text: enhancedPrompt,
-          negativeText: 'people, faces, text, watermark, low quality, blurry, distorted, crowded, busy',
+          text: contextualPrompt,
+          negativeText: 'people, faces, text, watermark, low quality, blurry, distorted, crowded, busy, amateur, ugly, deformed',
         },
         imageGenerationConfig: {
           numberOfImages: 1,
           height: options?.size?.height || 1024,
           width: options?.size?.width || 1024,
-          cfgScale: 8.0,
+          cfgScale: 8.5, // Slightly higher for better prompt adherence
           seed: Math.floor(Math.random() * 1000000)
         }
       }),
@@ -253,6 +267,7 @@ async function generateBackground(prompt: string, style: string, options: any): 
       throw new Error('No images returned from background generation')
     }
     
+    console.log(`Generated ${style} background successfully`)
     return responseBody.images[0]
   } catch (error) {
     console.error('Background generation error:', error)
@@ -267,56 +282,115 @@ async function createAdvancedComposite(
   releaseContext?: any
 ): Promise<string> {
   try {
-    console.log('Attempting inpainting composite method...')
+    console.log('Attempting advanced composite method...')
     
-    // Ensure base64 strings are clean (no data URL prefix)
+    // Clean base64 strings
     const cleanSubject = subjectImage.replace(/^data:image\/\w+;base64,/, '')
     const cleanBackground = backgroundImage.replace(/^data:image\/\w+;base64,/, '')
     
-    // IMPORTANT: For proper inpainting with a subject, we need to:
-    // 1. Create a mask that shows where to place the subject
-    // 2. Use the subject image as reference
-    // However, Nova Canvas inpainting doesn't directly support compositing two images
+    // IMPORTANT: Nova Canvas doesn't support direct compositing of two images
+    // We need to use a different approach:
     
-    // Alternative approach: Use COLOR_GUIDED_GENERATION if available
-    // For now, let's try a different approach with better prompting
-    const command = new InvokeModelCommand({
-      modelId: 'amazon.nova-canvas-v1:0',
-      body: JSON.stringify({
-        taskType: 'INPAINTING',
-        inPaintingParams: {
-          image: cleanBackground,
-          text: `${releaseContext?.genre || 'music'} artist performing, natural integration with scene lighting and atmosphere, professional promotional photo`,
-          negativeText: 'floating, unnatural placement, bad lighting, incorrect shadows, distorted, multiple people',
-          maskPrompt: 'the center foreground area, about 40% of the image height from bottom, where the main subject should be placed'
-        },
-        imageGenerationConfig: {
-          numberOfImages: 1,
-          cfgScale: 7.5,
-          seed: Math.floor(Math.random() * 1000000)
-        }
-      }),
-      contentType: 'application/json',
-      accept: 'application/json'
-    })
-
-    const response = await client.send(command)
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body))
-    
-    if (responseBody.images && responseBody.images.length > 0) {
-      console.log('Inpainting successful')
-      return responseBody.images[0]
+    // Option 1: Try using Sharp for server-side compositing (if available)
+    try {
+      // Check if Sharp is available
+      const sharp = await import('sharp').catch(() => null)
+      
+      if (sharp) {
+        console.log('Using Sharp for server-side compositing')
+        
+        // Convert base64 to buffers
+        const backgroundBuffer = Buffer.from(cleanBackground, 'base64')
+        const subjectBuffer = Buffer.from(cleanSubject, 'base64')
+        
+        // Get background dimensions
+        const bgMetadata = await sharp.default(backgroundBuffer).metadata()
+        const bgWidth = bgMetadata.width || 1024
+        const bgHeight = bgMetadata.height || 1024
+        
+        // Resize subject to fit nicely (about 60% of background size)
+        const subjectResized = await sharp.default(subjectBuffer)
+          .resize({
+            width: Math.round(bgWidth * 0.6),
+            height: Math.round(bgHeight * 0.6),
+            fit: 'inside',
+            position: 'center',
+            background: { r: 0, g: 0, b: 0, alpha: 0 }
+          })
+          .toBuffer()
+        
+        // Calculate position (center-bottom for artist placement)
+        const left = Math.round((bgWidth - Math.round(bgWidth * 0.6)) / 2)
+        const top = Math.round(bgHeight * 0.3) // Place in lower 70% of image
+        
+        // Composite the images
+        const composite = await sharp.default(backgroundBuffer)
+          .composite([
+            {
+              input: subjectResized,
+              top,
+              left,
+              blend: 'over'
+            }
+          ])
+          .toBuffer()
+        
+        // Convert back to base64
+        const compositeBase64 = composite.toString('base64')
+        console.log('Sharp compositing successful')
+        return compositeBase64
+      }
+    } catch (sharpError) {
+      console.log('Sharp not available or compositing failed:', sharpError)
     }
     
-    // If inpainting fails, fall back to simple composition
-    console.warn('Inpainting failed, falling back to client-side composition')
+    // Option 2: Use IMAGE_VARIATION with the original image for style transformation
+    // This creates a more cohesive result by transforming the entire scene
+    try {
+      console.log('Falling back to IMAGE_VARIATION for advanced styling')
+      
+      const stylePrompt = `Professional ${releaseContext?.genre || 'music'} artist promotional photo, ${prompt}, high quality photography, perfect lighting`
+      
+      const command = new InvokeModelCommand({
+        modelId: 'amazon.nova-canvas-v1:0',
+        body: JSON.stringify({
+          taskType: 'IMAGE_VARIATION',
+          imageVariationParams: {
+            text: stylePrompt,
+            negativeText: 'amateur, low quality, distorted, multiple people',
+            images: [cleanBackground], // Use the generated background
+            similarityStrength: 0.3  // Low similarity to allow more creative freedom
+          },
+          imageGenerationConfig: {
+            numberOfImages: 1,
+            height: 1024,
+            width: 1024,
+            cfgScale: 8.0,
+            seed: Math.floor(Math.random() * 1000000)
+          }
+        }),
+        contentType: 'application/json',
+        accept: 'application/json'
+      })
+
+      const response = await client.send(command)
+      const responseBody = JSON.parse(new TextDecoder().decode(response.body))
+      
+      if (responseBody.images && responseBody.images.length > 0) {
+        console.log('Image variation successful for styling')
+        return responseBody.images[0]
+      }
+    } catch (variationError) {
+      console.error('Image variation failed:', variationError)
+    }
+    
+    // Final fallback: Return the background for client-side compositing
+    console.warn('All server-side compositing methods failed, returning background for client-side composition')
     return cleanBackground
     
   } catch (error) {
-    console.error('Inpainting composite error:', error)
-    // Fall back to returning just the background
+    console.error('Advanced composite error:', error)
     const cleanBackground = backgroundImage.replace(/^data:image\/\w+;base64,/, '')
-    console.warn('Inpainting failed with error, returning background for client-side composition')
     return cleanBackground
   }
 }
