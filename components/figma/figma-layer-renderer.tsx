@@ -26,14 +26,17 @@ interface FigmaLayerRendererProps {
   layer: FigmaLayer
   parentBounds?: { x: number; y: number; width: number; height: number }
   scale?: number
+  hiddenLayers?: Set<string>
 }
 
 export function FigmaLayerRenderer({ 
   layer, 
   parentBounds,
-  scale = 1 
+  scale = 1,
+  hiddenLayers = new Set()
 }: FigmaLayerRendererProps) {
-  if (!layer.visible) return null
+  // Check if layer should be hidden
+  if (!layer.visible || hiddenLayers.has(layer.id)) return null
 
   const bounds = layer.absoluteBoundingBox
   if (!bounds) return null
@@ -125,6 +128,7 @@ export function FigmaLayerRenderer({
           layer={child}
           parentBounds={bounds}
           scale={scale}
+          hiddenLayers={hiddenLayers}
         />
       ))}
     </div>
@@ -136,12 +140,14 @@ interface FigmaFrameRendererProps {
   frameData: FigmaLayer
   width?: number
   className?: string
+  hiddenLayers?: Set<string>
 }
 
 export function FigmaFrameRenderer({ 
   frameData, 
   width,
-  className = ''
+  className = '',
+  hiddenLayers = new Set()
 }: FigmaFrameRendererProps) {
   const bounds = frameData.absoluteBoundingBox
   if (!bounds) return null
@@ -161,6 +167,7 @@ export function FigmaFrameRenderer({
       <FigmaLayerRenderer 
         layer={frameData} 
         scale={scale}
+        hiddenLayers={hiddenLayers}
       />
     </div>
   )
