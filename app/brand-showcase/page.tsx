@@ -19,6 +19,7 @@ import {
   FigmaCard
 } from '@/components/brand'
 import { FigmaLayerShowcase } from '@/components/brand/figma-layer-showcase'
+import { FigmaPreviewDemo } from '@/components/brand/figma-preview-demo'
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, BRAND } from '@/lib/brand'
 import { createGradient } from '@/lib/brand/utils'
 
@@ -63,6 +64,15 @@ export default function BrandShowcasePage() {
         <section className="space-y-6 p-8">
           <GradientText className="text-3xl font-medium">Figma Integration</GradientText>
           <FigmaShowcase />
+        </section>
+
+        {/* NEW: Figma Page Preview */}
+        <section className="space-y-6 p-8">
+          <GradientText className="text-3xl font-medium">Live Figma Page Preview</GradientText>
+          <p className="text-muted-foreground">
+            See your Figma designs converted to React components in real-time
+          </p>
+          <FigmaPreviewDemo />
         </section>
 
         {/* NEW: Figma Layer Explorer */}

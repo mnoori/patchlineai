@@ -20,4 +20,5 @@ export { MeshGradient, PageGradient, AnimatedGradientOrbs } from './page-gradien
 export { FigmaShowcase } from './figma-showcase'
 export { FigmaBackground, FigmaSection, FigmaCard } from './figma-background'
 export { FigmaAssetPreview } from './figma-asset-preview'
-export { FigmaLayerShowcase } from './figma-layer-showcase' 
+export { FigmaLayerShowcase } from './figma-layer-showcase'
+export { FigmaPreviewDemo } from './figma-preview-demo' 

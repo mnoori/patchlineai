@@ -67,39 +67,41 @@ https://www.figma.com/file/XXXXXXXXXXXXXXXXXX/Your-Design-System
 
 ## Usage
 
-### Manual Token Sync
+### Generate React Components from Figma Pages
 
-Run the sync script to update design tokens:
+Run the conversion script to transform Figma designs into React components:
 
 ```bash
-# One-time sync
-pnpm tsx scripts/sync-figma-tokens.ts
+# Convert pages to React components
+pnpm tsx scripts/demo-figma-page-conversion.ts
 
-# With specific file
-FIGMA_FILE_ID=abc123 pnpm tsx scripts/sync-figma-tokens.ts
+# This will:
+# 1. Extract brand system (colors, gradients, typography)
+# 2. Generate React components from pages
+# 3. Export all assets (images, vectors)
+# 4. Create TypeScript components in /components/generated-from-figma/
 ```
 
-### Programmatic Usage
+### Using Generated Components
 
 ```typescript
-import { createFigmaIntegration } from '@/lib/figma'
+// Import the generated component
+import { BrandGuidePage } from '@/components/generated-from-figma/BrandGuidePage'
 
-const figma = createFigmaIntegration()
+// Use it anywhere in your app
+export default function HomePage() {
+  return (
+    <div>
+      <BrandGuidePage width={1200} />
+    </div>
+  )
+}
 
-// Sync design tokens
-const { brandConstants } = await figma.syncDesignTokens('your-file-id')
-
-// Generate components
-const components = await figma.generateComponents('your-file-id', [
-  'component-id-1',
-  'component-id-2'
-])
-
-// Export assets
-const assets = await figma.exportAssets('your-file-id', [
-  'icon-node-id-1',
-  'icon-node-id-2'
-], 'svg')
+// The component is fully responsive and TypeScript-ready
+<BrandGuidePage 
+  width={800}  // Optional: control the width
+  className="my-custom-class" // Optional: add custom styles
+/>
 ```
 
 ### API Endpoints

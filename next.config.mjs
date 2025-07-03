@@ -38,7 +38,7 @@ const nextConfig = {
   // Optimize images - Re-enable Next.js image optimization for performance
   images: {
     unoptimized: false, // Enable optimization for automatic AVIF/WebP conversion
-    domains: ['imagedelivery.net', 'soundcharts.com', 'figma-alpha-api.s3.us-west-2.amazonaws.com', 's3-alpha.figma.com'],
+    domains: ['imagedelivery.net', 'soundcharts.com', 'figma-alpha-api.s3.us-west-2.amazonaws.com', 's3-alpha.figma.com', 'api.figma.com'],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],

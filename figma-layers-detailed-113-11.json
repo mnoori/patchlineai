@@ -1,0 +1,175 @@
+{
+  "id": "113:11",
+  "name": "PatchlineAI_Brand Guide_Simple",
+  "type": "FRAME",
+  "visible": true,
+  "blendMode": "PASS_THROUGH",
+  "fills": [
+    {
+      "blendMode": "NORMAL",
+      "type": "SOLID",
+      "color": {
+        "r": 0.07083333283662796,
+        "g": 0.07083333283662796,
+        "b": 0.07083333283662796,
+        "a": 1
+      }
+    }
+  ],
+  "effects": [],
+  "absoluteBoundingBox": {
+    "x": 0,
+    "y": 5232,
+    "width": 1703.78173828125,
+    "height": 958.377197265625
+  },
+  "constraints": {
+    "vertical": "TOP",
+    "horizontal": "LEFT"
+  },
+  "exportSettings": [
+    {
+      "suffix": "",
+      "format": "PNG",
+      "constraint": {
+        "type": "SCALE",
+        "value": 1
+      }
+    }
+  ],
+  "strokeWeight": 1.1831817626953125,
+  "strokes": [],
+  "children": [
+    {
+      "id": "113:12",
+      "name": "74",
+      "type": "RECTANGLE",
+      "visible": true,
+      "blendMode": "PASS_THROUGH",
+      "fills": [
+        {
+          "blendMode": "NORMAL",
+          "type": "IMAGE",
+          "scaleMode": "FILL",
+          "imageRef": "eedbd9a7aa6411741ae6493014b0d885a491d097"
+        }
+      ],
+      "effects": [],
+      "absoluteBoundingBox": {
+        "x": -348,
+        "y": 5045,
+        "width": 2612,
+        "height": 1469
+      },
+      "constraints": {
+        "vertical": "SCALE",
+        "horizontal": "SCALE"
+      },
+      "strokeWeight": 1,
+      "strokes": []
+    },
+    {
+      "id": "113:13",
+      "name": "Group 3795",
+      "type": "GROUP",
+      "visible": true,
+      "blendMode": "PASS_THROUGH",
+      "fills": [],
+      "effects": [],
+      "absoluteBoundingBox": {
+        "x": 756,
+        "y": 5644.2919921875,
+        "width": 192,
+        "height": 134.39999389648438
+      },
+      "constraints": {
+        "vertical": "CENTER",
+        "horizontal": "CENTER"
+      },
+      "strokeWeight": 1,
+      "strokes": [],
+      "children": [
+        {
+          "id": "113:14",
+          "name": "Vector",
+          "type": "VECTOR",
+          "visible": true,
+          "blendMode": "PASS_THROUGH",
+          "fills": [
+            {
+              "blendMode": "NORMAL",
+              "type": "SOLID",
+              "color": {
+                "r": 1,
+                "g": 1,
+                "b": 1,
+                "a": 1
+              }
+            }
+          ],
+          "effects": [],
+          "absoluteBoundingBox": {
+            "x": 756,
+            "y": 5644.2919921875,
+            "width": 192,
+            "height": 134.39999389648438
+          },
+          "constraints": {
+            "vertical": "SCALE",
+            "horizontal": "SCALE"
+          },
+          "strokeWeight": 1,
+          "strokes": []
+        }
+      ]
+    },
+    {
+      "id": "113:15",
+      "name": "www.patchline.ai",
+      "type": "TEXT",
+      "visible": true,
+      "blendMode": "PASS_THROUGH",
+      "fills": [
+        {
+          "blendMode": "NORMAL",
+          "type": "SOLID",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1,
+            "a": 1
+          }
+        }
+      ],
+      "effects": [],
+      "absoluteBoundingBox": {
+        "x": 706,
+        "y": 6061.4921875,
+        "width": 292,
+        "height": 30
+      },
+      "constraints": {
+        "vertical": "TOP",
+        "horizontal": "CENTER"
+      },
+      "strokeWeight": 0.1047651469707489,
+      "strokes": [],
+      "characters": "www.patchline.ai",
+      "style": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontPostScriptName": "PlusJakartaSans-SemiBold",
+        "fontStyle": "SemiBold",
+        "fontWeight": 600,
+        "textAutoResize": "WIDTH_AND_HEIGHT",
+        "fontSize": 20,
+        "textAlignHorizontal": "LEFT",
+        "textAlignVertical": "TOP",
+        "letterSpacing": 8,
+        "lineHeightPx": 30,
+        "lineHeightPercent": 119.04761505126953,
+        "lineHeightPercentFontSize": 150,
+        "lineHeightUnit": "PIXELS"
+      }
+    }
+  ]
+}
