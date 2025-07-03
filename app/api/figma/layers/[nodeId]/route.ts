@@ -10,6 +10,7 @@ export async function GET(
     const { searchParams } = new URL(request.url)
     const fileId = searchParams.get('fileId')
     const nodeId = params.nodeId
+    const deep = searchParams.get('deep') === 'true' // Only fetch deep if explicitly requested
     
     if (!fileId) {
       return NextResponse.json({ error: 'File ID is required' }, { status: 400 })
@@ -23,8 +24,8 @@ export async function GET(
     const client = new FigmaClient(config.accessToken)
     const extractor = new LayerExtractor(client)
     
-    // Get detailed layer information
-    const layer = await extractor.getLayerDetails(fileId, nodeId)
+    // Get layer information with shallow fetch by default
+    const layer = await extractor.getLayerDetails(fileId, nodeId, { shallow: !deep })
     
     if (!layer) {
       return NextResponse.json({ error: 'Layer not found' }, { status: 404 })

@@ -3,13 +3,12 @@
  * Main entry point for all Figma-related functionality
  */
 
-export * from './types'
-export * from './client'
-export * from './token-transformer'
-export * from './component-generator'
-export * from './layer-extractor'
 export * from './page-to-component'
 export * from './brand-extractor'
+export { LayerExtractor } from './layer-extractor'
+export { ReactGenerator } from './react-generator'
+export * from './types'
+export * from './utils'
 
 import { FigmaClient } from './client'
 import { TokenTransformer } from './token-transformer'
@@ -154,4 +153,6 @@ export function getFigmaConfig() {
     clientId: process.env.FIGMA_Client_ID || process.env.FIGMA_CLIENT_ID,
     clientSecret: process.env.FIGMA_Client_Secret || process.env.FIGMA_CLIENT_SECRET,
   }
-} 
+}
+
+export { FigmaClient } from './client' 

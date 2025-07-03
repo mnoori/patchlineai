@@ -21,13 +21,16 @@ import {
   Sparkles,
   ArrowRight,
   Palette,
-  ChevronRight
+  ChevronRight,
+  ArrowLeft,
+  MapPin
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cleanBase64, resizeImageForNovaCanvas } from '@/lib/image-utils'
 import { compositeImagesClient } from '@/lib/client-composite'
 import { getStoredGoogleAuth, getDriveFile } from '@/lib/google-auth'
 import { cn } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
 
 interface WorkflowStep {
   id: string
@@ -65,6 +68,7 @@ export function PersonalizedContentWorkflow({
   releaseDate,
   artistName = "Artist"
 }: PersonalizedContentWorkflowProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('google-drive')
   const [isProcessing, setIsProcessing] = useState(false)
   const [selectedImage, setSelectedImage] = useState<any>(null)
@@ -72,6 +76,7 @@ export function PersonalizedContentWorkflow({
   const [loadingDrive, setLoadingDrive] = useState(false)
   const [generatedContent, setGeneratedContent] = useState<any[]>([])
   const [selectedThemes, setSelectedThemes] = useState<string[]>([])
+  const [environmentMethod, setEnvironmentMethod] = useState<'client' | 'variation' | 'outpainting'>('client')
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [steps, setSteps] = useState<WorkflowStep[]>([
     {
@@ -84,6 +89,12 @@ export function PersonalizedContentWorkflow({
       id: 'theme',
       title: 'Choose Themes',
       description: 'Select up to 3 themes for your content',
+      status: 'pending'
+    },
+    {
+      id: 'environment',
+      title: 'Environment',
+      description: 'Choose how to place your subject',
       status: 'pending'
     },
     {
@@ -148,14 +159,20 @@ export function PersonalizedContentWorkflow({
     setCurrentStepIndex(1)
   }
 
-  const proceedToGenerate = () => {
+  const proceedToEnvironment = () => {
     if (selectedThemes.length === 0) {
       toast.error('Please select at least one theme')
       return
     }
     
     updateStep('theme', 'completed')
+    updateStep('environment', 'active')
     setCurrentStepIndex(2)
+  }
+
+  const proceedToGenerate = () => {
+    updateStep('environment', 'completed')
+    setCurrentStepIndex(3)
     generateContent()
   }
 
@@ -204,7 +221,7 @@ export function PersonalizedContentWorkflow({
 
       updateStep('process', 'completed')
       updateStep('finalize', 'active')
-      setCurrentStepIndex(3)
+      setCurrentStepIndex(4)
 
       toast.success('Content generated successfully!')
 
@@ -242,14 +259,14 @@ export function PersonalizedContentWorkflow({
           subjectImageData: imageData,
           prompt: `${themePrompts[style as keyof typeof themePrompts]} background for ${releaseTitle || 'music'} release marketing`,
           style,
-          removeBackground: true,
+          removeBackground: environmentMethod !== 'variation',
           releaseContext: {
             title: releaseTitle,
             genre: releaseGenre,
             artist: artistName,
             description: 'Professional music release marketing content'
           },
-          compositeMethod: 'client'
+          compositeMethod: environmentMethod === 'variation' ? 'outpainting' : environmentMethod
         })
       })
 
@@ -265,8 +282,8 @@ export function PersonalizedContentWorkflow({
       // If we have a mock result or the server couldn't composite,
       // do client-side compositing
       if (result.imageUrl) {
-        // Check if we have the processed subject (background removed)
-        if (result.processedSubject && result.backgroundImage) {
+        // Check if we have the processed subject (background removed) and we're using client method
+        if (environmentMethod === 'client' && result.processedSubject && result.backgroundImage) {
           // Use the transparent subject for compositing
           const transparentSubject = result.processedSubject
           const backgroundBase64 = result.backgroundImage
@@ -289,7 +306,7 @@ export function PersonalizedContentWorkflow({
             finalImage = result.imageUrl
           }
         } else {
-          // Server handled the compositing
+          // Server handled the compositing or we're using other methods
           finalImage = result.imageUrl
         }
         
@@ -365,6 +382,17 @@ export function PersonalizedContentWorkflow({
 
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => router.push('/dashboard/content')}
+        className="gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Content
+      </Button>
+
       {/* Progress Bar */}
       <div className="relative">
         <Progress value={(currentStepIndex + 1) / steps.length * 100} className="h-2" />
@@ -566,7 +594,7 @@ export function PersonalizedContentWorkflow({
                   : `${selectedThemes.length} theme${selectedThemes.length > 1 ? 's' : ''} selected`}
               </p>
               <Button
-                onClick={proceedToGenerate}
+                onClick={proceedToEnvironment}
                 disabled={selectedThemes.length === 0}
                 size="lg"
                 className="gap-2"
@@ -579,8 +607,125 @@ export function PersonalizedContentWorkflow({
         </Card>
       )}
 
-      {/* Step 3: Processing */}
-      {currentStepIndex === 2 && isProcessing && (
+      {/* Step 3: Environment Selection */}
+      {currentStepIndex === 2 && !isProcessing && (
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-xl flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Choose Environment Method
+            </CardTitle>
+            <CardDescription>
+              Select how you want to place your subject in the environment
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid gap-4">
+              <Card 
+                className={cn(
+                  "cursor-pointer transition-all p-4",
+                  environmentMethod === 'client' && "ring-2 ring-primary"
+                )}
+                onClick={() => setEnvironmentMethod('client')}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="mt-1">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <Wand2 className="h-5 w-5 text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">Quick Placement</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Fast placement of your subject on the generated backgrounds. Perfect for quick social media posts.
+                    </p>
+                    <Badge variant="secondary" className="mt-2">Fastest</Badge>
+                  </div>
+                </div>
+              </Card>
+
+              <Card 
+                className={cn(
+                  "cursor-pointer transition-all p-4",
+                  environmentMethod === 'outpainting' && "ring-2 ring-primary"
+                )}
+                onClick={() => setEnvironmentMethod('outpainting')}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="mt-1">
+                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                      <Sparkles className="h-5 w-5 text-purple-600" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">Environment Extension</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      AI extends the environment around your subject, creating a natural scene. More realistic results.
+                    </p>
+                    <Badge variant="secondary" className="mt-2">Recommended</Badge>
+                  </div>
+                </div>
+              </Card>
+
+              <Card 
+                className={cn(
+                  "cursor-pointer transition-all p-4",
+                  environmentMethod === 'variation' && "ring-2 ring-primary"
+                )}
+                onClick={() => setEnvironmentMethod('variation')}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="mt-1">
+                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                      <ImageIcon className="h-5 w-5 text-green-600" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">Style Transformation</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Transform your entire image into different artistic styles while keeping your subject recognizable.
+                    </p>
+                    <Badge variant="secondary" className="mt-2">Most Creative</Badge>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <div className="bg-muted/50 rounded-lg p-4">
+              <p className="text-sm">
+                <strong>Tip:</strong> For best results with Environment Extension, make sure your subject is well-lit and clearly visible.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between pt-4">
+              <Button
+                onClick={() => {
+                  setCurrentStepIndex(1)
+                  updateStep('environment', 'pending')
+                  updateStep('theme', 'active')
+                }}
+                variant="outline"
+                size="lg"
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <Button
+                onClick={proceedToGenerate}
+                size="lg"
+                className="gap-2"
+              >
+                Generate Content
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 4: Processing */}
+      {currentStepIndex === 3 && isProcessing && (
         <Card className="border-0 shadow-lg">
           <CardContent className="py-12">
             <div className="text-center space-y-4">
@@ -602,8 +747,8 @@ export function PersonalizedContentWorkflow({
         </Card>
       )}
 
-      {/* Step 4: Results */}
-      {currentStepIndex === 3 && generatedContent.length > 0 && (
+      {/* Step 5: Results */}
+      {currentStepIndex === 4 && generatedContent.length > 0 && (
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
