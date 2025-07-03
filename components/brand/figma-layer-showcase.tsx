@@ -16,6 +16,7 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Slider } from '@/components/ui/slider'
 import { toast } from 'sonner'
+import { FigmaAssetPreview } from './figma-asset-preview'
 
 interface FigmaLayer {
   id: string
@@ -70,8 +71,8 @@ export function FigmaLayerShowcase({ fileId, pageName = "Brand Guide" }: FigmaLa
   // New state for enhanced features
   const [previewWidth, setPreviewWidth] = useState(1200)
   const [zoom, setZoom] = useState(100)
-  const [hiddenLayers, setHiddenLayers] = useState<Set<string>>(new Set())
   const [selectedLayers, setSelectedLayers] = useState<Set<string>>(new Set())
+  const [generatedComponents, setGeneratedComponents] = useState<Array<{ id: string; name: string; code: string; timestamp: Date }>>([])
 
   // Function to fetch pages
   const fetchPages = async () => {
@@ -217,15 +218,13 @@ export function FigmaLayerShowcase({ fileId, pageName = "Brand Guide" }: FigmaLa
     const isExpanded = expandedLayers.has(layer.id)
     const hasChildren = layer.hasChildren || (layer.children && layer.children.length > 0)
     const childCount = layer.childrenCount || layer.children?.length || 0
-    const isHidden = hiddenLayers.has(layer.id)
     
     return (
       <div key={layer.id} style={{ marginLeft: `${depth * 20}px` }}>
         <div
           className={cn(
             "flex items-center gap-2 py-1 px-2 hover:bg-accent rounded cursor-pointer",
-            selectedLayer?.id === layer.id && "bg-accent",
-            isHidden && "opacity-50"
+            selectedLayer?.id === layer.id && "bg-accent"
           )}
           onClick={() => {
             setSelectedLayer(layer)
@@ -247,29 +246,6 @@ export function FigmaLayerShowcase({ fileId, pageName = "Brand Guide" }: FigmaLa
           <span className="text-sm font-medium flex-1">
             {layer.name || 'Unnamed Layer'}
           </span>
-          
-          {/* Visibility Toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
-            onClick={(e) => {
-              e.stopPropagation()
-              const newHidden = new Set(hiddenLayers)
-              if (isHidden) {
-                newHidden.delete(layer.id)
-              } else {
-                newHidden.add(layer.id)
-              }
-              setHiddenLayers(newHidden)
-            }}
-          >
-            {isHidden ? (
-              <EyeOff className="h-3 w-3" />
-            ) : (
-              <Eye className="h-3 w-3" />
-            )}
-          </Button>
           
           <span className="text-xs text-muted-foreground">
             {layer.type}
@@ -451,476 +427,493 @@ ${layer.exportUrl ? `/* Export URL: ${layer.exportUrl} */` : ''}`
   }
 
   return (
-    <Card className="w-full h-[800px] overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Layers className="h-5 w-5" />
-              Unified Figma Layer Explorer
-            </CardTitle>
-            <CardDescription>
-              Explore, preview, and convert Figma designs to React components
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Select value={selectedPage || ''} onValueChange={setSelectedPage}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder={pagesLoading ? "Loading..." : "Select page"} />
-              </SelectTrigger>
-              <SelectContent>
-                {pages.map(page => (
-                  <SelectItem key={page.id} value={page.id}>
-                    {page.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchPages}
-              disabled={pagesLoading}
-            >
-              <RefreshCw className={cn("h-4 w-4", pagesLoading && "animate-spin")} />
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="p-0 h-[calc(100%-80px)]">
-        <div className="flex h-full">
-          {/* Layer Tree Panel - 30% */}
-          <div className="w-[30%] border-r h-full flex flex-col">
-            <div className="p-4 border-b">
-              <h3 className="font-semibold text-sm">Layers</h3>
-              {pageData && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {pageData.childrenCount || 0} items
-                </p>
-              )}
+    <div className="w-full">
+      <Card className="w-full min-h-[900px] overflow-hidden">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <Layers className="h-5 w-5" />
+                Unified Figma Layer Explorer
+              </CardTitle>
+              <CardDescription>
+                Explore, preview, and convert Figma designs to React components
+              </CardDescription>
             </div>
-            <ScrollArea className="flex-1">
-              <div className="p-2">
-                {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : pageData ? (
-                  renderLayerTree(pageData)
-                ) : selectedPage ? (
-                  <p className="text-muted-foreground text-center py-8 text-sm">
-                    No layer data available
-                  </p>
-                ) : (
-                  <p className="text-muted-foreground text-center py-8 text-sm">
-                    Select a page to view layers
+            <div className="flex items-center gap-2">
+              <Select value={selectedPage || ''} onValueChange={setSelectedPage}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder={pagesLoading ? "Loading..." : "Select page"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {pages.map(page => (
+                    <SelectItem key={page.id} value={page.id}>
+                      {page.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchPages}
+                disabled={pagesLoading}
+              >
+                <RefreshCw className={cn("h-4 w-4", pagesLoading && "animate-spin")} />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0 h-[700px]">
+          <div className="flex h-full">
+            {/* Layer Tree Panel - 25% */}
+            <div className="w-[25%] border-r h-full flex flex-col">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold text-sm">Layers</h3>
+                {pageData && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {pageData.childrenCount || 0} items
                   </p>
                 )}
               </div>
-            </ScrollArea>
-          </div>
-
-          {/* Preview Panel - 50% */}
-          <div className="w-[50%] border-r h-full flex flex-col bg-muted/10">
-            <div className="p-4 border-b flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Preview</h3>
-              <div className="flex items-center gap-2">
-                {/* Width Controls */}
-                <div className="flex items-center gap-1">
-                  {[800, 1200, 1600].map(width => (
-                    <Button
-                      key={width}
-                      variant={previewWidth === width ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setPreviewWidth(width)}
-                      className="h-7 px-2 text-xs"
-                    >
-                      {width}
-                    </Button>
-                  ))}
-                </div>
-                <Separator orientation="vertical" className="h-6" />
-                {/* Zoom Controls */}
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setZoom(Math.max(25, zoom - 25))}
-                    className="h-7 w-7 p-0"
-                  >
-                    <ZoomOut className="h-3 w-3" />
-                  </Button>
-                  <span className="text-xs w-12 text-center">{zoom}%</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setZoom(Math.min(200, zoom + 25))}
-                    className="h-7 w-7 p-0"
-                  >
-                    <ZoomIn className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setZoom(100)}
-                    className="h-7 w-7 p-0"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-            <div className="flex-1 overflow-auto p-4">
-              {selectedLayer || selectedPage ? (
-                <div 
-                  className="flex items-center justify-center min-h-full"
-                  style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'center' }}
-                >
-                  {selectedLayer && selectedLayer.absoluteBoundingBox ? (
-                    <div className="border rounded-lg shadow-lg bg-background">
-                      <FigmaFrameRenderer
-                        frameData={selectedLayer}
-                        width={previewWidth}
-                        className="rounded-lg"
-                        hiddenLayers={hiddenLayers}
-                      />
+              <ScrollArea className="flex-1">
+                <div className="p-2">
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
-                  ) : pageData && selectedPage ? (
-                    <div className="border rounded-lg shadow-lg bg-background">
-                      <FigmaFrameRenderer
-                        frameData={pageData}
-                        width={previewWidth}
-                        className="rounded-lg"
-                        hiddenLayers={hiddenLayers}
-                      />
-                    </div>
+                  ) : pageData ? (
+                    renderLayerTree(pageData)
+                  ) : selectedPage ? (
+                    <p className="text-muted-foreground text-center py-8 text-sm">
+                      No layer data available
+                    </p>
                   ) : (
-                    <div className="text-center text-muted-foreground">
-                      <Image className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p className="text-sm">Select a layer to preview</p>
-                    </div>
+                    <p className="text-muted-foreground text-center py-8 text-sm">
+                      Select a page to view layers
+                    </p>
                   )}
                 </div>
-              ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground">
-                  <div className="text-center">
-                    <Layers className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-sm">Select a page or layer to preview</p>
+              </ScrollArea>
+            </div>
+
+            {/* Preview Panel - 55% */}
+            <div className="w-[55%] border-r h-full flex flex-col bg-muted/10">
+              <div className="p-4 border-b flex items-center justify-between">
+                <h3 className="font-semibold text-sm">Preview</h3>
+                <div className="flex items-center gap-2">
+                  {/* Width Controls */}
+                  <div className="flex items-center gap-1">
+                    {[800, 1200, 1600].map(width => (
+                      <Button
+                        key={width}
+                        variant={previewWidth === width ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPreviewWidth(width)}
+                        className="h-7 px-2 text-xs"
+                      >
+                        {width}
+                      </Button>
+                    ))}
+                  </div>
+                  <Separator orientation="vertical" className="h-6" />
+                  {/* Zoom Controls */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setZoom(Math.max(25, zoom - 25))}
+                      className="h-7 w-7 p-0"
+                    >
+                      <ZoomOut className="h-3 w-3" />
+                    </Button>
+                    <span className="text-xs w-12 text-center">{zoom}%</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setZoom(Math.min(200, zoom + 25))}
+                      className="h-7 w-7 p-0"
+                    >
+                      <ZoomIn className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setZoom(100)}
+                      className="h-7 w-7 p-0"
+                    >
+                      <Maximize2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
-              )}
+              </div>
+              <div className="flex-1 overflow-auto p-4">
+                {selectedLayer || selectedPage ? (
+                  <div 
+                    className="flex items-center justify-center min-h-full"
+                    style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'center' }}
+                  >
+                    {selectedLayer && selectedLayer.absoluteBoundingBox ? (
+                      <div className="border rounded-lg shadow-lg bg-background">
+                        <FigmaFrameRenderer
+                          frameData={selectedLayer}
+                          width={previewWidth}
+                          className="rounded-lg"
+                        />
+                      </div>
+                    ) : pageData && selectedPage ? (
+                      <div className="border rounded-lg shadow-lg bg-background">
+                        <FigmaFrameRenderer
+                          frameData={pageData}
+                          width={previewWidth}
+                          className="rounded-lg"
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-center text-muted-foreground">
+                        <Image className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p className="text-sm">Select a layer to preview</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <div className="text-center">
+                      <Layers className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-sm">Select a page or layer to preview</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Inspector Panel - 20% */}
-          <div className="w-[20%] h-full flex flex-col">
-            <div className="p-4 border-b">
-              <h3 className="font-semibold text-sm">Inspector</h3>
-            </div>
-            <ScrollArea className="flex-1">
-              {selectedLayer ? (
-                <Tabs defaultValue="properties" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4 mx-4 mt-4" style={{ width: 'calc(100% - 2rem)' }}>
-                    <TabsTrigger value="properties" className="text-xs">Props</TabsTrigger>
-                    <TabsTrigger value="colors" className="text-xs">Colors</TabsTrigger>
-                    <TabsTrigger value="brand" className="text-xs">Brand</TabsTrigger>
-                    <TabsTrigger value="export" className="text-xs">Export</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="properties" className="p-4">
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Name</Label>
-                        <p className="text-sm font-medium">{selectedLayer.name || 'Unnamed'}</p>
-                      </div>
-                      
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Type</Label>
-                        <Badge variant="secondary" className="text-xs">
-                          {selectedLayer.type}
-                        </Badge>
-                      </div>
-                      
-                      {selectedLayer.absoluteBoundingBox && (
+            {/* Inspector Panel - 20% */}
+            <div className="w-[20%] h-full flex flex-col">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold text-sm">Inspector</h3>
+              </div>
+              <ScrollArea className="flex-1">
+                {selectedLayer ? (
+                  <Tabs defaultValue="properties" className="w-full">
+                    <TabsList className="grid w-full grid-cols-4 mx-4 mt-4" style={{ width: 'calc(100% - 2rem)' }}>
+                      <TabsTrigger value="properties" className="text-xs">Props</TabsTrigger>
+                      <TabsTrigger value="colors" className="text-xs">Colors</TabsTrigger>
+                      <TabsTrigger value="brand" className="text-xs">Brand</TabsTrigger>
+                      <TabsTrigger value="export" className="text-xs">Export</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="properties" className="p-4">
+                      <div className="space-y-4">
                         <div>
-                          <Label className="text-xs text-muted-foreground">Dimensions</Label>
-                          <p className="text-xs font-mono">
-                            {Math.round(selectedLayer.absoluteBoundingBox.width)} × {Math.round(selectedLayer.absoluteBoundingBox.height)}
-                          </p>
+                          <Label className="text-xs text-muted-foreground">Name</Label>
+                          <p className="text-sm font-medium">{selectedLayer.name || 'Unnamed'}</p>
                         </div>
-                      )}
-                      
-                      {selectedLayer.visible !== undefined && (
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Visibility</Label>
-                          <div className="flex items-center gap-2 mt-1">
-                            {selectedLayer.visible ? (
-                              <Eye className="h-3 w-3 text-green-600" />
-                            ) : (
-                              <EyeOff className="h-3 w-3 text-muted-foreground" />
-                            )}
-                            <span className="text-xs">
-                              {selectedLayer.visible ? 'Visible' : 'Hidden'}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Typography info for text layers */}
-                      {selectedLayer.type === 'TEXT' && (
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Typography</Label>
-                          <div className="mt-2 space-y-1">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-muted-foreground">Font</span>
-                              <span className="font-mono">Inter</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-muted-foreground">Size</span>
-                              <span className="font-mono">16px</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-muted-foreground">Weight</span>
-                              <span className="font-mono">400</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="colors" className="p-4">
-                    <div className="space-y-3">
-                      {extractColors(selectedLayer).length > 0 ? (
-                        extractColors(selectedLayer).map((color, index) => (
-                          <div key={index} className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <Label className="text-xs">{color.name}</Label>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0"
-                                onClick={() => copyToClipboard(color.value, color.name)}
-                              >
-                                <Copy className="h-3 w-3" />
-                              </Button>
-                            </div>
-                            {color.type === 'solid' ? (
-                              <div className="flex items-center gap-2">
-                                <div 
-                                  className="w-8 h-8 rounded border"
-                                  style={{ backgroundColor: color.value }}
-                                />
-                                <code className="text-xs bg-muted px-2 py-1 rounded flex-1">
-                                  {color.value}
-                                </code>
-                              </div>
-                            ) : (
-                              <div className="space-y-1">
-                                <div 
-                                  className="w-full h-8 rounded border"
-                                  style={{ background: color.value }}
-                                />
-                                <code className="text-xs bg-muted px-2 py-1 rounded block overflow-x-auto">
-                                  {color.value}
-                                </code>
-                              </div>
-                            )}
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-xs text-muted-foreground text-center py-4">
-                          No colors found in this layer
-                        </p>
-                      )}
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="brand" className="p-4">
-                    <div className="space-y-4">
-                      {(() => {
-                        const brandElements = selectedLayer ? extractBrandElements(selectedLayer) : null
-                        if (!brandElements) return null
                         
-                        return (
-                          <>
-                            {/* Colors Summary */}
-                            {brandElements.colors.length > 0 && (
-                              <div>
-                                <Label className="text-xs text-muted-foreground mb-2 block">
-                                  Colors ({brandElements.colors.length})
-                                </Label>
-                                <div className="space-y-2">
-                                  {brandElements.colors.slice(0, 5).map((color, i) => (
-                                    <div key={i} className="flex items-center gap-2">
-                                      <div 
-                                        className="w-4 h-4 rounded border"
-                                        style={{ 
-                                          background: color.type === 'gradient' ? color.value : color.value,
-                                          backgroundColor: color.type !== 'gradient' ? color.value : undefined
-                                        }}
-                                      />
-                                      <code className="text-xs flex-1 truncate">{color.value}</code>
-                                    </div>
-                                  ))}
-                                  {brandElements.colors.length > 5 && (
-                                    <p className="text-xs text-muted-foreground">
-                                      +{brandElements.colors.length - 5} more colors
-                                    </p>
-                                  )}
-                                </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Type</Label>
+                          <Badge variant="secondary" className="text-xs">
+                            {selectedLayer.type}
+                          </Badge>
+                        </div>
+                        
+                        {selectedLayer.absoluteBoundingBox && (
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Dimensions</Label>
+                            <p className="text-xs font-mono">
+                              {Math.round(selectedLayer.absoluteBoundingBox.width)} × {Math.round(selectedLayer.absoluteBoundingBox.height)}
+                            </p>
+                          </div>
+                        )}
+                        
+                        {selectedLayer.visible !== undefined && (
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Visibility</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                              {selectedLayer.visible ? (
+                                <Eye className="h-3 w-3 text-green-600" />
+                              ) : (
+                                <EyeOff className="h-3 w-3 text-muted-foreground" />
+                              )}
+                              <span className="text-xs">
+                                {selectedLayer.visible ? 'Visible' : 'Hidden'}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Typography info for text layers */}
+                        {selectedLayer.type === 'TEXT' && (
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Typography</Label>
+                            <div className="mt-2 space-y-1">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground">Font</span>
+                                <span className="font-mono">Inter</span>
                               </div>
-                            )}
-                            
-                            {/* Typography Summary */}
-                            {brandElements.typography.length > 0 && (
-                              <div>
-                                <Label className="text-xs text-muted-foreground mb-2 block">
-                                  Typography ({brandElements.typography.length})
-                                </Label>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground">Size</span>
+                                <span className="font-mono">16px</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground">Weight</span>
+                                <span className="font-mono">400</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="colors" className="p-4">
+                      <div className="space-y-3">
+                        {extractColors(selectedLayer).length > 0 ? (
+                          extractColors(selectedLayer).map((color, index) => (
+                            <div key={index} className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <Label className="text-xs">{color.name}</Label>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => copyToClipboard(color.value, color.name)}
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              {color.type === 'solid' ? (
+                                <div className="flex items-center gap-2">
+                                  <div 
+                                    className="w-8 h-8 rounded border"
+                                    style={{ backgroundColor: color.value }}
+                                  />
+                                  <code className="text-xs bg-muted px-2 py-1 rounded flex-1">
+                                    {color.value}
+                                  </code>
+                                </div>
+                              ) : (
                                 <div className="space-y-1">
-                                  {brandElements.typography.slice(0, 3).map((typo, i) => (
-                                    <div key={i} className="text-xs">
-                                      <span className="font-medium">{typo.name}:</span> {typo.fontFamily} {typo.fontSize}
-                                    </div>
-                                  ))}
+                                  <div 
+                                    className="w-full h-8 rounded border"
+                                    style={{ background: color.value }}
+                                  />
+                                  <code className="text-xs bg-muted px-2 py-1 rounded block overflow-x-auto">
+                                    {color.value}
+                                  </code>
                                 </div>
-                              </div>
-                            )}
-                            
-                            {/* Spacing Summary */}
-                            {brandElements.spacing.length > 0 && (
-                              <div>
-                                <Label className="text-xs text-muted-foreground mb-2 block">
-                                  Spacing ({brandElements.spacing.length})
-                                </Label>
-                                <div className="space-y-1">
-                                  {brandElements.spacing.map((space, i) => (
-                                    <div key={i} className="text-xs">
-                                      <span className="font-medium">{space.name}:</span> {space.value}
-                                    </div>
-                                  ))}
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground text-center py-4">
+                            No colors found in this layer
+                          </p>
+                        )}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="brand" className="p-4">
+                      <div className="space-y-4">
+                        {(() => {
+                          const brandElements = selectedLayer ? extractBrandElements(selectedLayer) : null
+                          if (!brandElements) return null
+                          
+                          return (
+                            <>
+                              {/* Colors Summary */}
+                              {brandElements.colors.length > 0 && (
+                                <div>
+                                  <Label className="text-xs text-muted-foreground mb-2 block">
+                                    Colors ({brandElements.colors.length})
+                                  </Label>
+                                  <div className="space-y-2">
+                                    {brandElements.colors.slice(0, 5).map((color, i) => (
+                                      <div key={i} className="flex items-center gap-2">
+                                        <div 
+                                          className="w-4 h-4 rounded border"
+                                          style={{ 
+                                            background: color.type === 'gradient' ? color.value : color.value,
+                                            backgroundColor: color.type !== 'gradient' ? color.value : undefined
+                                          }}
+                                        />
+                                        <code className="text-xs flex-1 truncate">{color.value}</code>
+                                      </div>
+                                    ))}
+                                    {brandElements.colors.length > 5 && (
+                                      <p className="text-xs text-muted-foreground">
+                                        +{brandElements.colors.length - 5} more colors
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                            
+                              )}
+                              
+                              {/* Typography Summary */}
+                              {brandElements.typography.length > 0 && (
+                                <div>
+                                  <Label className="text-xs text-muted-foreground mb-2 block">
+                                    Typography ({brandElements.typography.length})
+                                  </Label>
+                                  <div className="space-y-1">
+                                    {brandElements.typography.slice(0, 3).map((typo, i) => (
+                                      <div key={i} className="text-xs">
+                                        <span className="font-medium">{typo.name}:</span> {typo.fontFamily} {typo.fontSize}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Spacing Summary */}
+                              {brandElements.spacing.length > 0 && (
+                                <div>
+                                  <Label className="text-xs text-muted-foreground mb-2 block">
+                                    Spacing ({brandElements.spacing.length})
+                                  </Label>
+                                  <div className="space-y-1">
+                                    {brandElements.spacing.map((space, i) => (
+                                      <div key={i} className="text-xs">
+                                        <span className="font-medium">{space.name}:</span> {space.value}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <Separator />
+                              
+                              <Button 
+                                variant="default" 
+                                size="sm" 
+                                className="w-full"
+                                onClick={() => {
+                                  // TODO: Export brand elements to brand constants
+                                  toast.success("Exporting brand elements to constants file...")
+                                }}
+                              >
+                                <Download className="h-3 w-3 mr-2" />
+                                Export to Brand Constants
+                              </Button>
+                            </>
+                          )
+                        })()}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="export" className="p-4">
+                      <div className="space-y-3">
+                        {/* Asset Preview for image layers */}
+                        {(selectedLayer.fills?.some(f => f.type === 'IMAGE') || 
+                          selectedLayer.type === 'COMPONENT' || 
+                          selectedLayer.type === 'INSTANCE') && (
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">Asset Preview</Label>
+                            <div className="border rounded-lg p-3 bg-muted/20">
+                              <FigmaAssetPreview
+                                assetId={selectedLayer.id}
+                                assetName={selectedLayer.name || 'Unnamed Layer'}
+                                fileId={fileId}
+                                hasExportSettings={true}
+                              />
+                            </div>
                             <Separator />
-                            
-                            <Button 
-                              variant="default" 
-                              size="sm" 
-                              className="w-full"
-                              onClick={() => {
-                                // TODO: Export brand elements to brand constants
-                                toast.success("Exporting brand elements to constants file...")
-                              }}
-                            >
-                              <Download className="h-3 w-3 mr-2" />
-                              Export to Brand Constants
-                            </Button>
-                          </>
-                        )
-                      })()}
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="export" className="p-4">
-                    <div className="space-y-3">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => {
-                          // TODO: Implement PNG export
-                          toast.info("Exporting layer as PNG...")
-                        }}
-                      >
-                        <Download className="h-3 w-3 mr-2" />
-                        Export as PNG
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => {
-                          // TODO: Implement SVG export
-                          toast.info("Exporting layer as SVG...")
-                        }}
-                      >
-                        <Download className="h-3 w-3 mr-2" />
-                        Export as SVG
-                      </Button>
-                      
-                      <Separator />
-                      
-                      <Button 
-                        variant="default" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => setShowCode(true)}
-                      >
-                        <Code className="h-3 w-3 mr-2" />
-                        Generate React
-                      </Button>
-                      
-                      <p className="text-xs text-muted-foreground text-center">
-                        Generate production-ready React component
-                      </p>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              ) : (
-                <div className="p-4 text-center text-muted-foreground">
-                  <p className="text-sm">Select a layer to inspect</p>
-                </div>
-              )}
-            </ScrollArea>
+                          </div>
+                        )}
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => {
+                            // TODO: Implement PNG export
+                            toast.info("Exporting layer as PNG...")
+                          }}
+                        >
+                          <Download className="h-3 w-3 mr-2" />
+                          Export as PNG
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => {
+                            // TODO: Implement SVG export
+                            toast.info("Exporting layer as SVG...")
+                          }}
+                        >
+                          <Download className="h-3 w-3 mr-2" />
+                          Export as SVG
+                        </Button>
+                        
+                        <Separator />
+                        
+                        <Button 
+                          variant="default" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => setShowCode(true)}
+                        >
+                          <Code className="h-3 w-3 mr-2" />
+                          Generate React
+                        </Button>
+                        
+                        <p className="text-xs text-muted-foreground text-center">
+                          Generate production-ready React component
+                        </p>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <p className="text-sm">Select a layer to inspect</p>
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
           </div>
-        </div>
-      </CardContent>
+        </CardContent>
 
-      {/* Code Generation Dialog */}
-      <Dialog open={showCode} onOpenChange={setShowCode}>
-        <DialogContent className="max-w-4xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>Generated React Component</DialogTitle>
-            <DialogDescription>
-              Production-ready component for {selectedLayer?.name}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Alert>
-              <Code className="h-4 w-4" />
-              <AlertDescription>
-                Component generated with TypeScript, Tailwind CSS, and proper accessibility attributes.
-              </AlertDescription>
-            </Alert>
-            
-            <Tabs defaultValue="component" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="component">Component</TabsTrigger>
-                <TabsTrigger value="styles">Styles</TabsTrigger>
-                <TabsTrigger value="usage">Usage</TabsTrigger>
-              </TabsList>
+        {/* Code Generation Dialog */}
+        <Dialog open={showCode} onOpenChange={setShowCode}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Generated React Component</DialogTitle>
+              <DialogDescription>
+                Production-ready component for {selectedLayer?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Alert>
+                <Code className="h-4 w-4" />
+                <AlertDescription>
+                  Component generated with TypeScript, Tailwind CSS, and proper accessibility attributes.
+                </AlertDescription>
+              </Alert>
               
-              <TabsContent value="component" className="relative">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="absolute top-2 right-2"
-                  onClick={() => {
-                    if (selectedLayer) {
-                      copyToClipboard(generateLayerCode(selectedLayer), 'Component code')
-                    }
-                  }}
-                >
-                  <Copy className="h-3 w-3 mr-1" />
-                  Copy
-                </Button>
-                <pre className="rounded-lg bg-muted p-4 overflow-x-auto">
-                  <code className="text-sm">
+              <Tabs defaultValue="component" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="component">Component</TabsTrigger>
+                  <TabsTrigger value="styles">Styles</TabsTrigger>
+                  <TabsTrigger value="usage">Usage</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="component" className="relative">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={() => {
+                      if (selectedLayer) {
+                        copyToClipboard(generateLayerCode(selectedLayer), 'Component code')
+                      }
+                    }}
+                  >
+                    <Copy className="h-3 w-3 mr-1" />
+                    Copy
+                  </Button>
+                  <pre className="rounded-lg bg-muted p-4 overflow-x-auto">
+                    <code className="text-sm">
 {`import React from 'react'
 import { cn } from '@/lib/utils'
 
@@ -989,5 +982,56 @@ export default function MyPage() {
         </DialogContent>
       </Dialog>
     </Card>
-  )
-} 
+
+    {/* Generated Components Section */}
+    {generatedComponents.length > 0 && (
+      <Card className="w-full mt-6">
+        <CardHeader>
+          <CardTitle className="text-xl">Generated React Components</CardTitle>
+          <CardDescription>
+            Components generated from your Figma designs
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {generatedComponents.map((component) => (
+              <Card key={component.id} className="overflow-hidden">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold text-sm">{component.name}</h4>
+                    <Badge variant="secondary" className="text-xs">
+                      {new Date(component.timestamp).toLocaleTimeString()}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-2">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        copyToClipboard(component.code, `${component.name} component`)
+                      }}
+                    >
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copy
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      Preview
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )}
+  </div>
+) 
