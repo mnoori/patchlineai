@@ -60,9 +60,9 @@ export default function AriaPage() {
           </div>
         </section>
 
-        {/* How it Works – LEFT EDGE */}
+        {/* How it Works – Transition Background */}
         <section className="relative py-20 overflow-hidden bg-gradient-to-b from-background via-background to-background">
-          <GradientOrbs variant="edge-left" className="opacity-25" />
+          <GradientOrbs variant="transition" className="opacity-25" />
           <div className="container relative z-10">
             <div className="max-w-5xl mx-auto text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold">How <span className="text-brand-cyan font-bold">{aria.name}</span> Works</h2>

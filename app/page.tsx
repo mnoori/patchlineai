@@ -166,7 +166,7 @@ export default function Home() {
                   description: "Generate tailored outreach for different fan segments",
                 },
                 {
-                  icon: <Zap className="h-10 w-10 text-brand-bright-blue" />,
+                  icon: <Zap className="h-10 w-10" style={{ color: '#002772' }} />,
                   title: "Build Your Own",
                   description: "Create custom agents for your specific workflow needs",
                 },

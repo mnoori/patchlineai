@@ -232,33 +232,12 @@ export function GradientOrbs({
   if (variant === 'transition') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* Fixed transition: pure black background with brighter cyan */}
+        {/* Fully black transition - no cyan colors */}
         <div 
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 120% 30% at 50% 50%, 
-              rgba(0, 230, 228, 0.25) 0%, 
-              rgba(0, 230, 228, 0.18) 25%,
-              rgba(0, 230, 228, 0.12) 45%,
-              rgba(0, 184, 181, 0.08) 60%,
-              #010102 75%)`,
-            opacity: 0.85,
-          }}
-        />
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: `
-              radial-gradient(ellipse 90% 30% at 0% 50%, 
-                rgba(0, 230, 228, 0.2) 0%, 
-                rgba(0, 230, 228, 0.1) 20%,
-                #010102 45%),
-              radial-gradient(ellipse 90% 30% at 100% 50%, 
-                rgba(0, 230, 228, 0.2) 0%, 
-                rgba(0, 230, 228, 0.1) 20%,
-                #010102 45%)
-            `,
-            opacity: 0.7,
+            background: '#010102',
+            opacity: 1,
           }}
         />
       </div>

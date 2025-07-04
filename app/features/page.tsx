@@ -111,7 +111,7 @@ export default function FeaturesPage() {
 
         {/* Agents Section */}
         <section className="relative pt-4 pb-8 bg-gradient-to-b from-background via-background to-background overflow-hidden">
-          <GradientOrbs variant="edge-right" className="opacity-25" />
+          <GradientOrbs variant="transition" className="opacity-25" />
           <div className="container relative z-10">
             <div className="space-y-16">
               {agents.map((agent, index) => (
@@ -161,7 +161,7 @@ export default function FeaturesPage() {
 
         {/* Coming Soon Section */}
         <section className="relative py-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
-          <GradientOrbs variant="edge-left" className="opacity-25" />
+          <GradientOrbs variant="transition" className="opacity-25" />
           <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold">The Agent Ecosystem is Growing</h2>
@@ -186,7 +186,7 @@ export default function FeaturesPage() {
 
         {/* Technical Architecture Section */}
         <section className="relative py-16 bg-gradient-to-b from-background via-background to-background overflow-hidden">
-          <GradientOrbs variant="edge-right" className="opacity-25" />
+          <GradientOrbs variant="transition" className="opacity-25" />
           <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold">Built for the Real World</h2>

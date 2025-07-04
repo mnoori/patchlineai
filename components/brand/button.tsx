@@ -12,7 +12,7 @@ const buttonVariants = cva(
         secondary: 'bg-brand-deep-blue text-white hover:opacity-90 focus-visible:ring-brand-deep-blue',
         outline: 'border border-border bg-transparent hover:bg-accent hover:text-accent-foreground',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
-        gradient: 'bg-gradient-to-r from-brand-cyan to-brand-bright-blue text-white hover:opacity-90',
+        gradient: 'bg-gradient-to-r from-brand-cyan to-brand-deep-blue text-white hover:opacity-90',
         glow: 'bg-brand-bright-blue text-white hover:opacity-90 brand-button-glow',
       },
       size: {

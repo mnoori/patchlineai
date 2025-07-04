@@ -19,7 +19,6 @@ const navItems: Array<{
   badgeClass?: string
 }> = [
   { name: "Home", href: "/" },
-  { name: "Home2", href: "/home2", badge: "NEW", badgeClass: "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30" },
   { name: ARIA_CONFIG.displayName, href: "/aria", badge: ARIA_CONFIG.badge.text, badgeClass: ARIA_CONFIG.badge.className },
   { name: "Features", href: "/features" },
   { name: "Pricing", href: "/pricing" },
