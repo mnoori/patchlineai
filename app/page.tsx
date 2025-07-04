@@ -67,9 +67,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ARIA Introduction Section - RIGHT EDGE */}
-        <section className="relative py-20 bg-gradient-to-b from-background via-background to-background overflow-hidden">
-          <GradientOrbs variant="edge-right" className="opacity-25" />
+        {/* ARIA Introduction Section */}
+        <section className="relative py-20 bg-background overflow-hidden">
           <div className="container relative z-10">
             <div className="max-w-4xl mx-auto">
               <Card variant="gradient" className="p-10 text-center backdrop-blur-xl">
@@ -80,7 +79,7 @@ export default function Home() {
                   Meet <span className="text-brand-cyan font-bold">{ariaAgent.displayName}</span> — Your Agentic Record Label
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                  <span className="text-brand-cyan font-bold">{ariaAgent.displayName}</span> is our most advanced offering - an AI-first infrastructure that orchestrates all your agents 
+                  <span className="text-brand-cyan font-bold">{ariaAgent.displayName}</span> is our most advanced offering - an AI-first infrastructure that orchestrates all your agents
                   to create autonomous label operations. From talent discovery to revenue distribution,{" "}
                   <span className="text-brand-cyan font-bold">{ariaAgent.displayName}</span> handles the complex workflows while you maintain creative control.
                 </p>
@@ -135,7 +134,6 @@ export default function Home() {
 
         {/* Solution Overview - LEFT EDGE */}
         <section className="relative py-20 overflow-hidden bg-gradient-to-b from-background via-background to-background">
-          <GradientOrbs variant="edge-left" className="opacity-25" />
           <div className="container relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-semibold mb-6">
@@ -232,7 +230,6 @@ export default function Home() {
 
         {/* Founder Quote - LEFT EDGE */}
         <section className="relative py-20 overflow-hidden bg-gradient-to-b from-background via-background to-background">
-          <GradientOrbs variant="edge-left" className="opacity-25" />
           <div className="container relative z-10">
             <div className="max-w-4xl mx-auto">
               <Card variant="glass" className="p-10 text-center backdrop-blur-xl border-white/5">

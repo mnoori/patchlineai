@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 
@@ -9,102 +9,101 @@ interface BrandGuidePageProps {
 }
 
 export function BrandGuidePage({ className, width }: BrandGuidePageProps) {
-  const originalWidth = 1704
-  const originalHeight = 958
-  const scale = width ? width / originalWidth : 1
-  const height = originalHeight * scale
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+  const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 })
 
-  useEffect(() => {
-    const fetchLogo = async () => {
-      try {
-        const res = await fetch('/api/figma/export', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fileId: 'PbzhWQIGJF68IPYo8Bheck',
-            nodeIds: ['113:14'],
-            format: 'png',
-            scale: 2
-          })
+  React.useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        setDimensions({
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight
         })
-        if (!res.ok) return
-        const data = await res.json()
-        const url = data.images?.['113:14']
-        if (url) setLogoUrl(url)
-      } catch (e) {
-        console.error('Failed to fetch logo export', e)
       }
     }
-    fetchLogo()
+
+    updateDimensions()
+    window.addEventListener('resize', updateDimensions)
+    return () => window.removeEventListener('resize', updateDimensions)
   }, [])
+
+  const actualWidth = width || dimensions.width
+  const actualHeight = dimensions.height
+
+  // Brighter Figma-accurate gradient - more cyan visibility
+  const figmaGradient = `
+    linear-gradient(
+      135deg,
+      #010102 0%,
+      #003A45 20%,
+      #00E6E4 40%,
+      #00B8B5 60%,
+      #002A35 80%,
+      #010102 100%
+    )
+  `
 
   return (
     <div 
+      ref={containerRef}
       className={cn(
-        "figma-page-container relative overflow-hidden rounded-lg",
+        "figma-page-container relative overflow-hidden",
         className
       )}
       style={{
-        width: width || originalWidth,
-        height: height,
-        backgroundColor: '#121212'
+        width: actualWidth || '100%',
+        height: actualHeight || '100%',
+        backgroundColor: '#010102'
       }}
     >
-      {/* Background Image Layer (Layer 74) */}
+      {/* Brighter CSS Gradient Background */}
       <div 
-        className="absolute"
+        className="absolute inset-0"
         style={{
-          left: `${(-348 / originalWidth) * 100}%`,
-          top: `${(-187 / originalHeight) * 100}%`,
-          width: `${(2612 / originalWidth) * 100}%`,
-          height: `${(1469 / originalHeight) * 100}%`,
+          background: figmaGradient,
+          opacity: 1
         }}
-      >
-        <Image 
-          src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/859b6797-d87c-4a9b-8acd-7beeb6c02464"
-          alt="Brand Guide Background"
-          fill
-          style={{ objectFit: 'cover' }}
-          className="opacity-80"
-        />
-      </div>
+      />
 
-      {/* Logo/Vector Group - Let's try to export the actual vector */}
+      {/* Logo - Centered */}
       <div 
         className="absolute flex items-center justify-center"
         style={{
-          left: `${(756 / originalWidth) * 100}%`,
-          top: `${(412 / originalHeight) * 100}%`,
-          width: `${(192 / originalWidth) * 100}%`,
-          height: `${(134 / originalHeight) * 100}%`,
+          left: '50%',
+          top: '45%',
+          transform: 'translate(-50%, -50%)',
+          width: '200px',
+          height: '140px',
         }}
       >
-        {/* Try to show the actual vector as an image export */}
-        {logoUrl ? (
-          <Image src={logoUrl} alt="Patchline Logo" fill style={{objectFit:'contain'}} />
-        ) : (
-          <div className="flex items-center justify-center h-full text-white font-bold">PATCHLINE</div>
-        )}
+        <Image 
+          src="/Brandmark/Brandmark Light.svg" 
+          alt="Patchline Logo" 
+          width={200}
+          height={140}
+          style={{objectFit:'contain'}} 
+          priority
+        />
       </div>
 
       {/* Website Text */}
       <div 
         className="absolute flex items-center justify-center"
         style={{
-          left: `${(706 / originalWidth) * 100}%`,
-          top: `${(829 / originalHeight) * 100}%`,
-          width: `${(292 / originalWidth) * 100}%`,
-          height: `${(30 / originalHeight) * 100}%`,
+          left: '50%',
+          bottom: '15%',
+          transform: 'translateX(-50%)',
+          width: '300px',
+          height: '40px',
         }}
       >
-        <div className="text-white font-medium text-sm">
+        <div className="text-white font-medium text-lg tracking-[0.2em]">
           www.patchline.ai
         </div>
       </div>
 
-      {/* Overlay for better text visibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 pointer-events-none" />
+      {/* Subtle overlay for better contrast */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5 pointer-events-none" />
     </div>
   )
 }

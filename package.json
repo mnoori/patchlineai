@@ -23,6 +23,8 @@
     "figma:convert": "tsx scripts/figma-to-react.ts convert",
     "figma:watch": "tsx scripts/figma-to-react.ts watch",
     "figma:sync": "tsx scripts/figma-to-react.ts sync",
+    "figma:export-assets": "tsx scripts/export-figma-assets.ts",
+    "figma:extract-gradients": "tsx scripts/extract-figma-gradients.ts",
     "figma:list": "tsx scripts/figma-to-react.ts list",
     "figma:test": "tsx scripts/test-layer-api.ts"
   },

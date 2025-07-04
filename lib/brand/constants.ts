@@ -53,14 +53,14 @@ export const COLORS = {
     brightBlue: '#0068FF', // Bright blue
     cyan: '#00E6E4',       // Cyan accent (more vibrant)
   },
-  // Gradient colors - Enhanced for more vibrant appearance
+  // Gradient colors - Figma-accurate (mostly black with cyan accents)
   gradient: {
-    start: '#00E6E4',      // Vibrant cyan
-    middle: '#0068FF',     // Bright blue
-    end: '#002772',        // Deep blue
-    darkStart: '#002772',  // Dark purple for backgrounds
-    darkMiddle: '#2A09CC', // Deep blue middle
-    darkEnd: '#010102',    // Very dark blue
+    start: '#00E6E4',      // Vibrant cyan (primary accent)
+    middle: '#004B5C',     // Dark teal (minimal)
+    end: '#010102',        // Pure black (dominant)
+    darkStart: '#010102',  // Pure black for backgrounds
+    darkMiddle: '#004B5C', // Dark teal middle
+    darkEnd: '#00E6E4',    // Cyan accent
   },
   // UI colors (maintaining existing dark theme)
   ui: {

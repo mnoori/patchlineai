@@ -21,7 +21,7 @@ interface DashboardSectionProps {
 export function DashboardSection({ children, className, background = 'default' }: DashboardSectionProps) {
   const backgroundClasses = {
     default: 'bg-background',
-    gradient: 'bg-gradient-to-br from-brand-black to-brand-deep-blue/20',
+    gradient: 'bg-gradient-to-br from-brand-black to-brand-cyan/10',
     glass: 'bg-background/50 backdrop-blur-xl border border-white/10'
   }
 
@@ -67,8 +67,8 @@ export function DashboardTabs({
   }
 
   const triggerVariants = {
-    default: 'data-[state=active]:bg-brand-bright-blue data-[state=active]:text-white',
-    pills: 'data-[state=active]:bg-brand-bright-blue data-[state=active]:text-white rounded-full',
+    default: 'data-[state=active]:bg-brand-cyan data-[state=active]:text-black',
+    pills: 'data-[state=active]:bg-brand-cyan data-[state=active]:text-black rounded-full',
     underline: 'data-[state=active]:border-b-2 data-[state=active]:border-brand-cyan data-[state=active]:text-brand-cyan rounded-none'
   }
 
@@ -107,7 +107,7 @@ export function DashboardTabs({
         {/* Animated indicator for underline variant */}
         {variant === 'underline' && (
           <motion.div
-            className="absolute bottom-0 h-0.5 bg-gradient-to-r from-brand-cyan to-brand-bright-blue"
+            className="absolute bottom-0 h-0.5 bg-gradient-to-r from-brand-cyan to-brand-cyan"
             layoutId="tab-indicator"
             transition={{
               type: "spring",
@@ -154,7 +154,7 @@ export function DashboardCard({
   const cardVariants = {
     default: 'bg-card border border-border',
     glass: 'bg-background/30 backdrop-blur-xl border border-white/10',
-    gradient: 'bg-gradient-to-br from-brand-bright-blue/5 to-brand-cyan/5 border border-brand-cyan/20',
+    gradient: 'bg-gradient-to-br from-brand-cyan/5 to-brand-cyan/10 border border-brand-cyan/20',
     glow: 'bg-card border border-brand-cyan/30 shadow-lg shadow-brand-cyan/10'
   }
 
@@ -278,7 +278,7 @@ export function DashboardStat({ title, value, change, icon, className }: Dashboa
           )}
         </div>
         {icon && (
-          <div className="p-3 bg-brand-bright-blue/10 rounded-lg text-brand-bright-blue">
+          <div className="p-3 bg-brand-cyan/10 rounded-lg text-brand-cyan">
             {icon}
           </div>
         )}
@@ -298,7 +298,7 @@ interface DashboardAlertProps {
 
 export function DashboardAlert({ title, description, variant = 'info', className, children }: DashboardAlertProps) {
   const variantClasses = {
-    info: 'border-brand-bright-blue/30 bg-brand-bright-blue/5 text-brand-bright-blue',
+    info: 'border-brand-cyan/30 bg-brand-cyan/5 text-brand-cyan',
     success: 'border-green-500/30 bg-green-500/5 text-green-400',
     warning: 'border-yellow-500/30 bg-yellow-500/5 text-yellow-400',
     error: 'border-red-500/30 bg-red-500/5 text-red-400'

@@ -17,7 +17,7 @@ export function GradientBackground({
   const gradients = {
     hero: `linear-gradient(180deg, #010102 0%, #010102 100%)`, // Pure black base for hero, orbs will handle the gradient
     section: `linear-gradient(180deg, #010102 0%, #010102 100%)`, // Pure black, orbs add color
-    card: `linear-gradient(180deg, rgba(0, 230, 228, 0.02) 0%, rgba(0, 39, 114, 0.1) 30%, #010102 100%)`,
+    card: `linear-gradient(180deg, rgba(0, 230, 228, 0.02) 0%, rgba(0, 230, 228, 0.05) 30%, #010102 100%)`,
     subtle: `linear-gradient(180deg, rgba(0, 230, 228, 0.01) 0%, #010102 50%)`
   }
 
@@ -41,7 +41,7 @@ export function GradientBackground({
   )
 }
 
-// Animated gradient orbs for background effects
+// Animated gradient orbs for background effects - Much brighter to match the image
 export function GradientOrbs({ 
   className,
   variant = 'default'
@@ -52,17 +52,17 @@ export function GradientOrbs({
   if (variant === 'subtle') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* From TOP-RIGHT CORNER */}
+        {/* Much brighter subtle variant */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 100% 100% at 90% 10%, 
               rgba(0, 230, 228, 0.6) 0%, 
-              rgba(0, 230, 228, 0.55) 20%, 
-              rgba(0, 104, 255, 0.5) 35%,
-              rgba(0, 39, 114, 0.4) 50%, 
-              #010102 75%)`,
-            opacity: 0.72,
+              rgba(0, 230, 228, 0.4) 20%, 
+              rgba(0, 184, 181, 0.25) 35%,
+              rgba(0, 75, 85, 0.15) 50%,
+              #010102 65%)`,
+            opacity: 0.9,
           }}
         />
       </div>
@@ -72,19 +72,18 @@ export function GradientOrbs({
   if (variant === 'vibrant') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* Strong vibrant glow from top center - matching the screenshot */}
+        {/* Even brighter vibrant: strong cyan glow with maximum visibility */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 80% 130% at 50% -30%, 
-              rgba(0, 230, 228, 0.75) 0%, 
-              rgba(0, 230, 228, 0.7) 18%, 
-              rgba(0, 230, 228, 0.6) 28%, 
-              rgba(0, 104, 255, 0.5) 38%,
-              rgba(0, 39, 114, 0.4) 48%, 
-              rgba(0, 20, 60, 0.6) 58%, 
-              #010102 68%)`,
-            opacity: 0.9,
+              rgba(0, 230, 228, 0.9) 0%, 
+              rgba(0, 230, 228, 0.75) 18%, 
+              rgba(0, 230, 228, 0.55) 28%, 
+              rgba(0, 184, 181, 0.35) 38%,
+              rgba(0, 75, 85, 0.2) 48%, 
+              #010102 58%)`,
+            opacity: 0.95,
           }}
         />
       </div>
@@ -94,40 +93,38 @@ export function GradientOrbs({
   if (variant === 'dispersed') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* From TOP-LEFT corner - MORE CYAN and BRIGHTER */}
+        {/* Much brighter dispersed */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 95% 95% at 10% -10%, 
               rgba(0, 230, 228, 0.7) 0%, 
-              rgba(0, 230, 228, 0.65) 18%, 
-              rgba(0, 104, 255, 0.45) 32%,
-              rgba(0, 39, 114, 0.35) 45%, 
+              rgba(0, 230, 228, 0.5) 18%, 
+              rgba(0, 184, 181, 0.3) 32%,
+              rgba(0, 75, 85, 0.15) 45%,
               #010102 60%)`,
-            opacity: 0.8,
+            opacity: 0.9,
           }}
         />
-        {/* From TOP-RIGHT corner - MORE CYAN and BRIGHTER */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 75% 75% at 85% -5%, 
-              rgba(0, 230, 228, 0.65) 0%, 
-              rgba(0, 230, 228, 0.55) 22%, 
-              rgba(0, 39, 114, 0.35) 40%, 
-              transparent 65%)`,
-            opacity: 0.7,
+              rgba(0, 230, 228, 0.6) 0%, 
+              rgba(0, 230, 228, 0.4) 22%, 
+              rgba(0, 184, 181, 0.2) 40%, 
+              transparent 60%)`,
+            opacity: 0.8,
           }}
         />
-        {/* From TOP center accent - MORE CYAN and BRIGHTER */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 65% 85% at 50% -15%, 
-              rgba(0, 230, 228, 0.55) 0%, 
-              rgba(0, 230, 228, 0.45) 8%, 
-              transparent 35%)`,
-            opacity: 0.6,
+              rgba(0, 230, 228, 0.5) 0%, 
+              rgba(0, 230, 228, 0.3) 8%, 
+              transparent 30%)`,
+            opacity: 0.7,
           }}
         />
       </div>
@@ -137,17 +134,17 @@ export function GradientOrbs({
   if (variant === 'subtle-bottom') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* From BOTTOM-RIGHT CORNER - flipped version of subtle */}
+        {/* Brighter bottom glow */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 100% 100% at 90% 110%, 
               rgba(0, 230, 228, 0.6) 0%, 
-              rgba(0, 230, 228, 0.55) 20%, 
-              rgba(0, 104, 255, 0.5) 35%,
-              rgba(0, 39, 114, 0.4) 50%, 
-              #010102 75%)`,
-            opacity: 0.6,
+              rgba(0, 230, 228, 0.4) 20%, 
+              rgba(0, 184, 181, 0.25) 35%,
+              rgba(0, 75, 85, 0.15) 50%,
+              #010102 65%)`,
+            opacity: 0.8,
           }}
         />
       </div>
@@ -157,40 +154,38 @@ export function GradientOrbs({
   if (variant === 'dispersed-bottom') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* From BOTTOM-LEFT corner */}
+        {/* Brighter bottom dispersed */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 90% 90% at 10% 110%, 
-              rgba(0, 230, 228, 0.55) 0%, 
-              rgba(0, 230, 228, 0.5) 18%, 
-              rgba(0, 104, 255, 0.4) 32%,
-              rgba(0, 39, 114, 0.3) 45%, 
+              rgba(0, 230, 228, 0.6) 0%, 
+              rgba(0, 230, 228, 0.4) 18%, 
+              rgba(0, 184, 181, 0.25) 32%,
+              rgba(0, 75, 85, 0.15) 45%,
               #010102 60%)`,
-            opacity: 0.5,
+            opacity: 0.7,
           }}
         />
-        {/* From BOTTOM-RIGHT corner */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 70% 70% at 85% 105%, 
               rgba(0, 230, 228, 0.5) 0%, 
-              rgba(0, 230, 228, 0.45) 22%, 
-              rgba(0, 39, 114, 0.3) 40%, 
-              transparent 65%)`,
-            opacity: 0.4,
+              rgba(0, 230, 228, 0.3) 22%, 
+              rgba(0, 184, 181, 0.15) 40%, 
+              transparent 60%)`,
+            opacity: 0.6,
           }}
         />
-        {/* From BOTTOM center accent */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 60% 80% at 50% 115%, 
               rgba(0, 230, 228, 0.4) 0%, 
-              rgba(0, 230, 228, 0.35) 8%, 
-              transparent 35%)`,
-            opacity: 0.3,
+              rgba(0, 230, 228, 0.25) 8%, 
+              transparent 30%)`,
+            opacity: 0.5,
           }}
         />
       </div>
@@ -200,15 +195,16 @@ export function GradientOrbs({
   if (variant === 'edge-left') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* Minimal cyan-only glow on left edge */}
+        {/* Brighter cyan edge glow */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 35% 30% at -5% 50%, 
-              rgba(0, 230, 228, 0.6) 0%, 
-              rgba(0, 230, 228, 0.4) 20%, 
-              rgba(0, 230, 228, 0.2) 30%,
-              #010102 45%)`
+              rgba(0, 230, 228, 0.7) 0%, 
+              rgba(0, 230, 228, 0.5) 20%, 
+              rgba(0, 230, 228, 0.3) 30%,
+              rgba(0, 184, 181, 0.15) 40%,
+              #010102 50%)`
           }}
         />
       </div>
@@ -218,15 +214,15 @@ export function GradientOrbs({
   if (variant === 'edge-right') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* Minimal cyan-only glow on right edge */}
-        <div 
+        {/* Corrected: Forcing a fade to pure black to avoid color blending */}
+        <div
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 35% 30% at 105% 50%, 
-              rgba(0, 230, 228, 0.6) 0%, 
-              rgba(0, 230, 228, 0.4) 20%, 
-              rgba(0, 230, 228, 0.2) 30%,
-              #010102 45%)`
+            background: `radial-gradient(ellipse 40% 60% at 105% 50%,
+              rgba(0, 230, 228, 0.25) 0%,
+              rgba(0, 230, 228, 0.1) 40%,
+              rgba(1, 1, 2, 0) 70%,
+              #010102 75%)`
           }}
         />
       </div>
@@ -236,53 +232,54 @@ export function GradientOrbs({
   if (variant === 'transition') {
     return (
       <div className={cn('absolute inset-0 overflow-hidden', className)}>
-        {/* Soft dispersed glow for seamless transitions */}
+        {/* Fixed transition: pure black background with brighter cyan */}
         <div 
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 120% 30% at 50% 50%, 
-              rgba(0, 230, 228, 0.18) 0%, 
-              rgba(0, 230, 228, 0.12) 25%,
-              rgba(0, 230, 228, 0.06) 45%,
-              transparent 60%)`,
-            opacity: 0.75,
+              rgba(0, 230, 228, 0.25) 0%, 
+              rgba(0, 230, 228, 0.18) 25%,
+              rgba(0, 230, 228, 0.12) 45%,
+              rgba(0, 184, 181, 0.08) 60%,
+              #010102 75%)`,
+            opacity: 0.85,
           }}
         />
-        {/* Subtle side glows */}
         <div 
           className="absolute inset-0"
           style={{
             background: `
               radial-gradient(ellipse 90% 30% at 0% 50%, 
-                rgba(0, 230, 228, 0.1) 0%, 
-                transparent 40%),
+                rgba(0, 230, 228, 0.2) 0%, 
+                rgba(0, 230, 228, 0.1) 20%,
+                #010102 45%),
               radial-gradient(ellipse 90% 30% at 100% 50%, 
-                rgba(0, 230, 228, 0.1) 0%, 
-                transparent 40%)
+                rgba(0, 230, 228, 0.2) 0%, 
+                rgba(0, 230, 228, 0.1) 20%,
+                #010102 45%)
             `,
-            opacity: 0.55,
+            opacity: 0.7,
           }}
         />
       </div>
     )
   }
 
-  // Default variant - from TOP CENTER (like vibrant orbs example)
+  // Default variant - Even brighter with more cyan visibility
   return (
     <div className={cn('absolute inset-0 overflow-hidden', className)}>
       <div 
         className="absolute inset-0"
-                  style={{
-            background: `radial-gradient(ellipse 80% 120% at 50% -20%, 
-              rgba(0, 230, 228, 0.7) 0%, 
-              rgba(0, 230, 228, 0.65) 15%, 
-              rgba(0, 230, 228, 0.5) 25%, 
-              rgba(0, 104, 255, 0.4) 35%,
-              rgba(0, 39, 114, 0.5) 45%, 
-              rgba(0, 20, 60, 0.7) 55%,
-              #010102 70%)`,
-            opacity: 0.8,
-          }}
+        style={{
+          background: `radial-gradient(ellipse 80% 120% at 50% -20%, 
+            rgba(0, 230, 228, 0.8) 0%, 
+            rgba(0, 230, 228, 0.65) 15%, 
+            rgba(0, 230, 228, 0.45) 25%, 
+            rgba(0, 184, 181, 0.25) 35%,
+            rgba(0, 75, 85, 0.15) 45%, 
+            #010102 55%)`,
+          opacity: 0.9,
+        }}
       />
     </div>
   )
